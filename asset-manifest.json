@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/erebrus-frontend/static/css/main.00cca60e.css",
-    "main.js": "/erebrus-frontend/static/js/main.971ed737.js",
-    "static/js/787.d2db4926.chunk.js": "/erebrus-frontend/static/js/787.d2db4926.chunk.js",
-    "index.html": "/erebrus-frontend/index.html",
-    "main.00cca60e.css.map": "/erebrus-frontend/static/css/main.00cca60e.css.map",
-    "main.971ed737.js.map": "/erebrus-frontend/static/js/main.971ed737.js.map",
-    "787.d2db4926.chunk.js.map": "/erebrus-frontend/static/js/787.d2db4926.chunk.js.map"
+    "main.css": "https://thelazarusnetwork.github.io/erebrus-frontend/static/css/main.00cca60e.css",
+    "main.js": "https://thelazarusnetwork.github.io/erebrus-frontend/static/js/main.dabf1c33.js",
+    "static/js/787.d2db4926.chunk.js": "https://thelazarusnetwork.github.io/erebrus-frontend/static/js/787.d2db4926.chunk.js",
+    "index.html": "https://thelazarusnetwork.github.io/erebrus-frontend/index.html",
+    "main.00cca60e.css.map": "https://thelazarusnetwork.github.io/erebrus-frontend/static/css/main.00cca60e.css.map",
+    "main.dabf1c33.js.map": "https://thelazarusnetwork.github.io/erebrus-frontend/static/js/main.dabf1c33.js.map",
+    "787.d2db4926.chunk.js.map": "https://thelazarusnetwork.github.io/erebrus-frontend/static/js/787.d2db4926.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.00cca60e.css",
-    "static/js/main.971ed737.js"
+    "static/js/main.dabf1c33.js"
   ]
 }
