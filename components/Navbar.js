@@ -22,6 +22,8 @@ import SingleSignerTransaction from "../components/transactionFlow/SingleSigner"
 const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
 const mynetwork = process.env.NEXT_PUBLIC_NETWORK;
 
+
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 const variants = {
   open: { opacity: 1, x: 0, y: 0 },
   closed: { opacity: 0, y: 0 },
@@ -38,7 +40,7 @@ const WalletSelectorAntDesign = dynamic(
 const isSendableNetwork = (connected, network) => {
   return (
     connected &&
-    ( network?.toLowerCase() === mynetwork.toLowerCase())
+    (network?.toLowerCase() === mynetwork.toLowerCase())
   );
 };
 
@@ -49,11 +51,11 @@ const Navbar = ({ isHome }) => {
   const [challengeId, setChallengeId] = useState("");
   const [showsignbutton, setshowsignbutton] = useState(false)
   const [link, setlink] = useState("");
-  const { isSignedIn, setIsSignedIn } = useContext(AuthContext);
+  // const { isSignedIn, setIsSignedIn } = useContext(AuthContext);
   const [avatarUrl, setAvatarUrl] = useState("");
-  const sdk = useSDK();
+  // const sdk = useSDK();
 
-  const { account, connected, network, wallet , signMessage} = useWallet();
+  const { account, connected, network, wallet, signMessage } = useWallet();
 
   let sendable = isSendableNetwork(connected, network?.name);
 
@@ -69,60 +71,60 @@ const Navbar = ({ isHome }) => {
     if (account && account.address) {
       // Update the cookie with the new address
       Cookies.set("erebrus_wallet", account.address);
-      // onSignMessage();
+      onSignMessage();
     }
   }, [account?.address]);
 
 
   // const [, switchNetwork] = useNetwork();
-  const isMismatched = useNetworkMismatch();
+  // const isMismatched = useNetworkMismatch();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
 
-  useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    if (storedToken) {
-      setIsSignedIn(true);
-    }
+  // useEffect(() => {
+  //   const storedToken = localStorage.getItem("token");
+  //   if (storedToken) {
+  //     setIsSignedIn(true);
+  //   }
 
-    let timeoutId = null;
+  //   let timeoutId = null;
 
-    const getSignMessage = async () => {
-      if (!address || address !== sessionStorage.getItem("address")) {
-        if (timeoutId !== null) {
-          clearTimeout(timeoutId);
-        }
+  //   const getSignMessage = async () => {
+  //     if (!address || address !== sessionStorage.getItem("address")) {
+  //       if (timeoutId !== null) {
+  //         clearTimeout(timeoutId);
+  //       }
 
-        timeoutId = setTimeout(() => {
-          signOut();
-        }, 500);
-      } else {
-        if (timeoutId !== null) {
-          clearTimeout(timeoutId);
-        }
+  //       timeoutId = setTimeout(() => {
+  //         signOut();
+  //       }, 500);
+  //     } else {
+  //       if (timeoutId !== null) {
+  //         clearTimeout(timeoutId);
+  //       }
 
-        const response = await axios.get("api/getChallengeId", {
-          params: { walletAddress: address },
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+  //       const response = await axios.get("api/getChallengeId", {
+  //         params: { walletAddress: address },
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //       });
 
-        setMessage(response.data.eula + response.data.challangeId);
-        setChallengeId(response.data.challangeId);
-      }
-    };
+  //       setMessage(response.data.eula + response.data.challangeId);
+  //       setChallengeId(response.data.challangeId);
+  //     }
+  //   };
 
-    getSignMessage();
+  //   getSignMessage();
 
-    return () => {
-      if (timeoutId !== null) {
-        clearTimeout(timeoutId);
-      }
-    };
-  }, [address, isSignedIn]);
+  //   return () => {
+  //     if (timeoutId !== null) {
+  //       clearTimeout(timeoutId);
+  //     }
+  //   };
+  // }, [address, isSignedIn]);
 
   // const signMessage = async () => {
   //   setIsSignedIn(false);
@@ -203,62 +205,61 @@ const Navbar = ({ isHome }) => {
       // Check if the connected network is Mainnet
       if (networkwallet === mynetwork) {
 
-      const { data } = await axios.get(`${REACT_APP_GATEWAY_URL}api/v1.0/flowid?walletAddress=${account.address}`);
-      console.log(data);
+        const { data } = await axios.get(`${REACT_APP_GATEWAY_URL}api/v1.0/flowid?walletAddress=${account.address}`);
+        console.log(data);
 
-      const message = data.payload.eula;
-      const nonce = data.payload.flowId;
-      const publicKey = account.publicKey;
+        const message = data.payload.eula;
+        const nonce = data.payload.flowId;
+        const publicKey = account.publicKey;
 
-      const { signature, fullMessage } = await wallet.signMessage({
-        message,
-        nonce,
-      });
-      console.log("sign", signature, "full message", fullMessage);
+        const { signature, fullMessage } = await wallet.signMessage({
+          message,
+          nonce,
+        });
+        console.log("sign", signature, "full message", fullMessage);
 
-      let signaturewallet = signature;
+        let signaturewallet = signature;
 
-      if(signaturewallet.length === 128)
-      {
-        signaturewallet = `0x${signaturewallet}`;
+        if (signaturewallet.length === 128) {
+          signaturewallet = `0x${signaturewallet}`;
+        }
+
+        const authenticationData = {
+          flowId: nonce,
+          signature: `${signaturewallet}`,
+          pubKey: publicKey,
+        };
+
+        const authenticateApiUrl = `${REACT_APP_GATEWAY_URL}api/v1.0/authenticate`;
+
+        const config = {
+          url: authenticateApiUrl,
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          data: authenticationData,
+        };
+
+        try {
+          const response = await axios(config);
+          console.log("auth data", response.data);
+          const token = await response?.data?.payload?.token;
+          const userId = await response?.data?.payload?.userId;
+          // localStorage.setItem("platform_token", token);
+          Cookies.set("erebrus_token", token, { expires: 7 });
+          Cookies.set("erebrus_wallet", account.address, { expires: 7 });
+          Cookies.set("erebrus_userid", userId, { expires: 7 });
+
+          // setUserWallet(account.address);
+          window.location.reload();
+        } catch (error) {
+          console.error(error);
+        }
       }
-
-      const authenticationData = {
-        flowId: nonce,
-        signature: `${signaturewallet}`,
-        pubKey: publicKey,
-      };
-
-      const authenticateApiUrl = `${REACT_APP_GATEWAY_URL}api/v1.0/authenticate`;
-
-      const config = {
-        url: authenticateApiUrl,
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        data: authenticationData,
-      };
-
-      try {
-        const response = await axios(config);
-        console.log("auth data", response.data);
-        const token = await response?.data?.payload?.token;
-        const userId = await response?.data?.payload?.userId;
-        // localStorage.setItem("platform_token", token);
-        Cookies.set("erebrus_token", token, { expires: 7 });
-        Cookies.set("erebrus_wallet", account.address, { expires: 7 });
-        Cookies.set("erebrus_userid", userId, { expires: 7 });
-
-        // setUserWallet(account.address);
-        window.location.reload();
-      } catch (error) {
-        console.error(error);
+      else {
+        alert(`Switch to ${mynetwork} in your wallet`)
       }
-      }
-    else{
-      alert(`Switch to ${mynetwork} in your wallet`)
-    }
 
     } catch (err) {
       console.log(err);
@@ -269,14 +270,14 @@ const Navbar = ({ isHome }) => {
     if (sendable) {
       try {
         const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
-      
+
         const { data } = await axios.get(`${REACT_APP_GATEWAY_URL}api/v1.0/flowid?walletAddress=${account?.address}`);
         console.log(data);
-  
+
         const message = data.payload.eula;
         const nonce = data.payload.flowId;
         const publicKey = account?.publicKey;
-  
+
         const payload = {
           message: message,
           nonce: nonce,
@@ -286,19 +287,18 @@ const Navbar = ({ isHome }) => {
 
         let signaturewallet = response.signature;
 
-      if(signaturewallet.length === 128)
-      {
-        signaturewallet = `0x${signaturewallet}`;
-      }
-  
-      const authenticationData = {
-        "flowId": nonce,
-        "signature": `${signaturewallet}`,
-        "pubKey": publicKey,
-      };
-  
+        if (signaturewallet.length === 128) {
+          signaturewallet = `0x${signaturewallet}`;
+        }
+
+        const authenticationData = {
+          "flowId": nonce,
+          "signature": `${signaturewallet}`,
+          "pubKey": publicKey,
+        };
+
         const authenticateApiUrl = `${REACT_APP_GATEWAY_URL}api/v1.0/authenticate`;
-  
+
         const config = {
           url: authenticateApiUrl,
           method: "POST",
@@ -307,17 +307,17 @@ const Navbar = ({ isHome }) => {
           },
           data: authenticationData,
         };
-  
+
         const authResponse = await axios(config);
         console.log("auth data", authResponse.data);
-  
+
         const token = await authResponse?.data?.payload?.token;
         const userId = await authResponse?.data?.payload?.userId;
-  
+
         Cookies.set("erebrus_token", token, { expires: 7 });
         Cookies.set("erebrus_wallet", account?.address ?? '', { expires: 7 });
         Cookies.set("erebrus_userid", userId, { expires: 7 });
-  
+
         window.location.reload();
       } catch (error) {
         console.error(error);
@@ -327,7 +327,7 @@ const Navbar = ({ isHome }) => {
       alert(`Switch to ${mynetwork} in your wallet`);
     }
   };
-  
+
 
   const handleDeleteCookie = () => {
     Cookies.remove("erebrus_wallet");
@@ -338,9 +338,8 @@ const Navbar = ({ isHome }) => {
   return (
     <nav className="bg-transparent py-4">
       <div
-        className={`container mx-auto px-10 flex items-center justify-between lg:mb-0 ${
-          isHome && !isOpen ? "mb-24" : ""
-        }`}
+        className={`container mx-auto px-10 flex items-center justify-between lg:mb-0 ${isHome && !isOpen ? "mb-24" : ""
+          }`}
       >
         <div className="flex items-center">
           <Link href="/" scroll={false}>
@@ -354,32 +353,72 @@ const Navbar = ({ isHome }) => {
         </div>
         <div className="hidden lg:flex items-center">
 
-        { link !== "explorer" ?(
-          <Link
-            href="/explorer"
-            className="text-gray-300 mr-8"
-            scroll={false}
-            onClick={()=> {setlink("explorer")}}
-            style={{ textDecoration: "none", position: "relative",
-            borderBottom: router.pathname.includes('explorer') ? '2px solid white' : '', }}
-  onMouseOver={(e) => (e.currentTarget.style.borderBottom = "1px solid #fff")}
-  onMouseOut={(e) => (e.currentTarget.style.borderBottom = "none")}
-          >
-            Explorer
-          </Link>):
-          (
-<Link
-            href="/explorer"
-            className="text-gray-300 mr-8"
-            scroll={false}
-            style={{ textDecoration: "none", position: "relative",
-            borderBottom:'2px solid white'}}
-          >
-            Explorer
-          </Link>
-          )}
 
-        { link !== "mint" ?(
+        {link !== "subscription" ? (
+            <Link
+              href="/mint"
+              className="text-gray-300 mr-8"
+              scroll={false}
+              onClick={() => { setlink("subscription") }}
+              style={{
+                textDecoration: "none", position: "relative",
+                borderBottom: router.pathname.includes('subscription') ? '2px solid white' : '',
+              }}
+              onMouseOver={(e) => (e.currentTarget.style.borderBottom = "1px solid #fff")}
+              onMouseOut={(e) => (e.currentTarget.style.borderBottom = "none")}
+            >
+              Mint
+            </Link>) :
+            (
+              <Link
+                href="/mint"
+                className="text-gray-300 mr-8"
+                scroll={false}
+                style={{
+                  textDecoration: "none", position: "relative",
+                  borderBottom: '2px solid white'
+                }}
+              >
+                Mint
+              </Link>
+            )}
+
+
+
+
+
+
+          {link !== "explorer" ? (
+            <Link
+              href="/explorer"
+              className="text-gray-300 mr-8"
+              scroll={false}
+              onClick={() => { setlink("explorer") }}
+              style={{
+                textDecoration: "none", position: "relative",
+                borderBottom: router.pathname.includes('explorer') ? '2px solid white' : '',
+              }}
+              onMouseOver={(e) => (e.currentTarget.style.borderBottom = "1px solid #fff")}
+              onMouseOut={(e) => (e.currentTarget.style.borderBottom = "none")}
+            >
+              Explorer
+            </Link>) :
+            (
+              <Link
+                href="/explorer"
+                className="text-gray-300 mr-8"
+                scroll={false}
+                style={{
+                  textDecoration: "none", position: "relative",
+                  borderBottom: '2px solid white'
+                }}
+              >
+                Explorer
+              </Link>
+            )}
+
+
+          {/* { link !== "mint" ?(
           <Link
             href="/mint"
             className="text-gray-300 mr-8"
@@ -402,108 +441,74 @@ const Navbar = ({ isHome }) => {
           >
             Mint NFT
           </Link>
-          )}
+          )} */}
 
-          { link !== "subscription" ?(
-          <Link
-            href="/subscription"
-            className="text-gray-300 mr-8"
-            scroll={false}
-            onClick={()=> {setlink("subscription")}}
-            style={{ textDecoration: "none", position: "relative",
-            borderBottom: router.pathname.includes('subscription') ? '2px solid white' : '', }}
-  onMouseOver={(e) => (e.currentTarget.style.borderBottom = "1px solid #fff")}
-  onMouseOut={(e) => (e.currentTarget.style.borderBottom = "none")}
-          >
-            Subscription
-          </Link>):
-          (
-<Link
-            href="/subscription"
-            className="text-gray-300 mr-8"
-            scroll={false}
-            style={{ textDecoration: "none", position: "relative",
-            borderBottom:'2px solid white'}}
-          >
-            Subscription
-          </Link>
-          )}
+          {link !== "subscription" ? (
+            <Link
+              href="/subscription"
+              className="text-gray-300 mr-8"
+              scroll={false}
+              onClick={() => { setlink("subscription") }}
+              style={{
+                textDecoration: "none", position: "relative",
+                borderBottom: router.pathname.includes('subscription') ? '2px solid white' : '',
+              }}
+              onMouseOver={(e) => (e.currentTarget.style.borderBottom = "1px solid #fff")}
+              onMouseOut={(e) => (e.currentTarget.style.borderBottom = "none")}
+            >
+              Subscription
+            </Link>) :
+            (
+              <Link
+                href="/subscription"
+                className="text-gray-300 mr-8"
+                scroll={false}
+                style={{
+                  textDecoration: "none", position: "relative",
+                  borderBottom: '2px solid white'
+                }}
+              >
+                Subscription
+              </Link>
+            )}
 
           <Link href="https://docs.netsepio.com/erebrus/" target="_blank" className="text-gray-300 mr-8"
             onMouseOver={(e) => (e.currentTarget.style.borderBottom = "1px solid #fff")}
             onMouseOut={(e) => (e.currentTarget.style.borderBottom = "none")}
-            >
-          Docs
+          >
+            Docs
           </Link>
 
-          {/* {isMismatched && (
-            <button
-              className="text-purple-400 mr-12"
-              onClick={() => switchNetwork(ChainId.Mumbai)}
-            >
-              Switch To Mumbai
-            </button>
-          )} */}
-          {/* {address && !isSignedIn && (
-            <button
-              className="bg-blue-500 text-white lg:mr-20 font-bold py-2 px-4 rounded-lg"
-              onClick={signMessage}
-            >
-              Sign In
-            </button>
-          )} */}
-          {/* {address && isSignedIn && (
-            <div className="lg:mt-0 mt-4 lg:mr-20 z-50 rounded-xl">
-              <button onClick={connectWallet}>Connect</button>
-            </div>
-          )} */}
-
-{/* {account?.address && (
-            <div className="lg:mt-0 mt-4 lg:mr-4 z-50 rounded-xl text-white">
-              <div>
-                {account?.address.slice(0, 4)}...{account?.address.slice(-4)}
-              </div>
-              {
-                token && (
-                  <button onClick={handleDeleteCookie} 
-                  onMouseOver={(e) => (e.currentTarget.style.borderBottom = "1px solid #fff")}
-            onMouseOut={(e) => (e.currentTarget.style.borderBottom = "none")}>Logout</button>
-                )
-              }  
-            </div>
-          )} */}
-          
           {!token ? (
             <div className="lg:mt-0 mt-4 z-50 rounded-xl text-white">
-             
-             {!connected && ( <button 
+
+              {!connected && (<button
               // onClick={connectWallet}
               >
-              <WalletSelectorAntDesign/>
+                <WalletMultiButton />
               </button>
-             )}
-              {connected && (
-            // <SingleSignerTransaction isSendableNetwork={isSendableNetwork} />
-            <Button
-          color={"blue"}
-          onClick={onSignMessage}
-          disabled={false}
-          message={"Authenticate"}
-        />
-          )} 
+              )}
+              {connected && showsignbutton && (
+                <Button
+                  color={"blue"}
+                  onClick={onSignMessage}
+                  disabled={false}
+                  message={"Authenticate"}
+                />
+              )}
             </div>
-          ):
-          (
-<div className="lg:mt-0 mt-4 z-50 rounded-xl flex gap-4" style={{color:'#0162FF'}}>
-              {/* <div>
+          ) :
+            (
+              <div className="lg:mt-0 mt-4 z-50 rounded-xl flex gap-4" style={{ color: '#0162FF' }}>
+                {/* <div>
                 {address?.slice(0, 4)}...{address?.slice(-4)}
               </div> */}
-              <button onClick={handleDeleteCookie} 
-              onMouseOver={(e) => (e.currentTarget.style.borderBottom = "1px solid #0162FF")}
-            onMouseOut={(e) => (e.currentTarget.style.borderBottom = "none")}>Log out</button>
-            {avatarUrl && <img src={avatarUrl} alt="Avatar" className="w-10 ml-auto"/>}
-            </div>
-          )}
+                <button onClick={handleDeleteCookie}
+                  onMouseOver={(e) => (e.currentTarget.style.borderBottom = "1px solid #0162FF")}
+                  onMouseOut={(e) => (e.currentTarget.style.borderBottom = "none")}>Log out</button>
+                {avatarUrl && <img src={avatarUrl} alt="Avatar" className="w-10 ml-auto" />}
+              </div>
+            )}
 
         </div>
         <div className="block lg:hidden">
@@ -535,20 +540,14 @@ const Navbar = ({ isHome }) => {
           <div className="bg-transparent py-4">
             <div className="container mx-auto px-6 flex flex-col lg:flex-row items-center lg:justify-between">
               <div className="flex flex-col lg:flex-row items-center">
-                {/* <Link
-                  href="/demo"
-                  className="text-white font-bold block lg:inline-block mb-4 lg:mr-0 lg:mb-0"
-                  scroll={false}
-                >
-                  Demo
-                </Link> */}
+
                 <Link
-                  href="/mint"
-                  className="text-white font-bold block lg:inline-block lg:mr-0 mb-4 lg:mb-0"
-                  scroll={false}
+                  href="/explorer"
+                  className="text-white font-bold block lg:inline-block mb-4 lg:mr-0 lg:mb-0"
                 >
-                  Mint NFT
+                  Explorer
                 </Link>
+
                 <Link
                   href="/subscription"
                   className="text-white font-bold block lg:inline-block mb-4 lg:mr-0 lg:mb-0"
@@ -556,76 +555,56 @@ const Navbar = ({ isHome }) => {
                   Subscription
                 </Link>
 
+                <Link
+                  href="https://docs.netsepio.com/erebrus/" target="_blank"
+                  className="text-white font-bold block lg:inline-block mb-4 lg:mr-0 lg:mb-0"
+                >
+                  Docs
+                </Link>
+
                 {account?.address && (
-            <div className="lg:mt-0 mt-4 lg:mr-4 z-50 rounded-xl flex gap-4" style={{color:'#0162FF'}}>
-              {/* <div>
+                  <div className="lg:mt-0 mt-4 lg:mr-4 z-50 rounded-xl flex gap-4" style={{ color: '#0162FF' }}>
+                    {/* <div>
                 {account?.address.slice(0, 4)}...{account?.address.slice(-4)}
               </div> */}
-              {
-                address && (
-                  <button onClick={handleDeleteCookie} 
-                  onMouseOver={(e) => (e.currentTarget.style.borderBottom = "1px solid #0162FF")}
-                  onMouseOut={(e) => (e.currentTarget.style.borderBottom = "none")}>Log out</button>
-                )
-              } 
-              {avatarUrl && <img src={avatarUrl} alt="Avatar" className="w-10 ml-auto"/>} 
-            </div>
-          )}
-          
-          {!address && (
-            <div className="lg:mt-0 mt-4 z-50 rounded-xl text-white">
-             
-             {!connected && ( <button 
-              // onClick={connectWallet}
-              >
-              <WalletSelectorAntDesign/>
-              </button>
-             )}
-              {connected && (
-            <SingleSignerTransaction isSendableNetwork={isSendableNetwork} />
-          )} 
-            </div>
-          )}
+                    {
+                      address && (
+                        <button onClick={handleDeleteCookie}
+                          onMouseOver={(e) => (e.currentTarget.style.borderBottom = "1px solid #0162FF")}
+                          onMouseOut={(e) => (e.currentTarget.style.borderBottom = "none")}>Log out</button>
+                      )
+                    }
+                    {avatarUrl && <img src={avatarUrl} alt="Avatar" className="w-10 ml-auto" />}
+                  </div>
+                )}
 
-{address && (
-            <div className="lg:mt-0 mt-4 lg:mr-20 z-50 rounded-xl flex gap-4" style={{color:'#0162FF'}}>
-              {/* <div>
+                {!address && (
+                  <div className="lg:mt-0 mt-4 z-50 rounded-xl text-white">
+
+                    {!connected && (<button
+                    // onClick={connectWallet}
+                    >
+                      <WalletMultiButton />
+                    </button>
+                    )}
+                    {connected && (
+                      <SingleSignerTransaction isSendableNetwork={isSendableNetwork} />
+                    )}
+                  </div>
+                )}
+
+                {address && (
+                  <div className="lg:mt-0 mt-4 lg:mr-20 z-50 rounded-xl flex gap-4" style={{ color: '#0162FF' }}>
+                    {/* <div>
                 {address.slice(0, 4)}...{address.slice(-4)}
               </div> */}
-              <button onClick={handleDeleteCookie}
-              onMouseOver={(e) => (e.currentTarget.style.borderBottom = "1px solid #0162FF")}
-              onMouseOut={(e) => (e.currentTarget.style.borderBottom = "none")}>Log out</button>
-              {avatarUrl && <img src={avatarUrl} alt="Avatar" className="w-10 ml-auto"/>}
-            </div>
-          )}
-
-                {/* {isMismatched && (
-                  <button
-                    className="text-purple-400"
-                    onClick={() => switchNetwork(ChainId.Mumbai)}
-                  >
-                    Switch To Mumbai
-                  </button>
-                )} */}
-
-                {/* {address && !isSignedIn && (
-                  <button
-                    className="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg"
-                    onClick={signMessage}
-                  >
-                    Sign In
-                  </button>
-                )}
-                {address && isSignedIn && (
-                  <div className="lg:mt-0 mt-4 lg:mr-20 z-50 rounded-xl">
-                    <ConnectWallet />
+                    <button onClick={handleDeleteCookie}
+                      onMouseOver={(e) => (e.currentTarget.style.borderBottom = "1px solid #0162FF")}
+                      onMouseOut={(e) => (e.currentTarget.style.borderBottom = "none")}>Log out</button>
+                    {avatarUrl && <img src={avatarUrl} alt="Avatar" className="w-10 ml-auto" />}
                   </div>
                 )}
-                {!address && (
-                  <div className="lg:mt-0 mt-4 lg:mr-20 z-50 rounded-xl">
-                    <ConnectWallet />
-                  </div>
-                )} */}
+
               </div>
             </div>
           </div>
