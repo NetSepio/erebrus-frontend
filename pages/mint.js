@@ -82,8 +82,8 @@ const Mint = () => {
 
   let sendable = isSendableNetwork(connected, network?.name);
 
-  useEffect( () => {
-    
+  useEffect(() => {
+
     mint();
 
   }, [connected])
@@ -137,18 +137,18 @@ const Mint = () => {
 
     vpnnft();
   }, []);
-  
 
-  const getAptosWallet = () => {
-    if ("aptos" in window) {
-      return window.aptos;
+
+  const getPhantomWallet = () => {
+    if ("solana" in window) {
+      return window.solana;
     } else {
-      window.open("https://petra.app/", "_blank");
+      window.open("https://phantom.app/", "_blank");
     }
   };
 
   const connectWallet = async () => {
-    const wallet = getAptosWallet();
+    const wallet = getPhantomWallet();
     try {
       const response = await wallet.connect();
 
@@ -156,7 +156,7 @@ const Mint = () => {
       console.log("account", account);
 
       // Get the current network after connecting (optional)
-      const networkwallet = await window.aptos.network();
+      const networkwallet = await window.solana.network();
 
       // Check if the connected network is Mainnet
       if (networkwallet === mynetwork) {
@@ -271,8 +271,7 @@ const Mint = () => {
         transactionHash: pendingTransaction.hash,
       });
       console.log("mint transaction", pendingTransaction.hash);
-      if(pendingTransaction.hash)
-      {
+      if (pendingTransaction.hash) {
         setmintpage("page3");
         setLoadingTx(false);
         setshowconnectbutton(false);
@@ -435,56 +434,56 @@ const Mint = () => {
         <title>Erebrus | Clients</title>
       </Head>
 
-      { mintpage === "page1" &&
+      {mintpage === "page1" &&
         (
           <>
-          <div className="p-20">
-          <div className="text-white text-5xl uppercase leading-normal" style={{marginLeft:'25vh', marginRight:'10vh', fontFamily:"Times New Roman"}}>
-            Step into the Future of Internet Safety with <span style={{color:"#0162FF"}}>111 NFT VPN</span>
-          </div>
-<div class="flex justify-center gap-20">
-<div className="text-white w-1/3 p-10" style={{marginLeft:'20vh'}}>
-          <img src="/111nft_gif.gif" style={{border:'1px solid #0162FF'}} className="rounded-lg"/>
-        </div>
-        <div className="w-1/2 mt-10">
-          <div className="text-white text-xl mt-10 mx-auto flex gap-2">
-            <img src="/uis_calender.png" className="w-6 h-6 mt-1"/>
-            <div>3-Month Coverage</div>
-          </div>
-          <div className="text-white text-xl mt-4 mx-auto flex gap-2">
-          <img src="/mdi_users.png" className="w-6 h-6 mt-1"/>
-            <div>Unlimited Devices</div>
-          </div>
-          <div className="text-white text-xl mt-4 mx-auto flex gap-2">
-          <img src="/icomoon-free_price-tags.png" className="w-6 h-6 mt-1"/>
-            <div>Only at 1.11 APT</div>
-          </div>
-          <div className="text-white text-xl mt-4 mx-auto flex gap-2">
-          <img src="/wpf_security-checked.png" className="w-6 h-6 mt-1"/>
-            <div>Exceptional Value for Unmatched Security</div>
-          </div>
+            <div className="p-20">
+              <div className="text-white text-5xl uppercase leading-normal" style={{ marginLeft: '25vh', marginRight: '10vh', fontFamily: "Times New Roman" }}>
+                Step into the Future of Internet Safety with <span style={{ color: "#0162FF" }}>111 NFT VPN</span>
+              </div>
+              <div class="flex justify-center gap-20">
+                <div className="text-white w-1/3 p-10" style={{ marginLeft: '20vh' }}>
+                  <img src="/111nft_gif.gif" style={{ border: '1px solid #0162FF' }} className="rounded-lg" />
+                </div>
+                <div className="w-1/2 mt-10">
+                  <div className="text-white text-xl mt-10 mx-auto flex gap-2">
+                    <img src="/uis_calender.png" className="w-6 h-6 mt-1" />
+                    <div>12-Month Coverage</div>
+                  </div>
+                  <div className="text-white text-xl mt-4 mx-auto flex gap-2">
+                    <img src="/mdi_users.png" className="w-6 h-6 mt-1" />
+                    <div>Unlimited Devices</div>
+                  </div>
+                  <div className="text-white text-xl mt-4 mx-auto flex gap-2">
+                    <img src="/icomoon-free_price-tags.png" className="w-6 h-6 mt-1" />
+                    <div>Only at 1.11 SOL</div>
+                  </div>
+                  <div className="text-white text-xl mt-4 mx-auto flex gap-2">
+                    <img src="/wpf_security-checked.png" className="w-6 h-6 mt-1" />
+                    <div>Exceptional Value for Unmatched Security</div>
+                  </div>
 
-          <div className="flex gap-10 mt-10">
-          <div className="text-white text-md rounded-full py-3 px-10" style={{border: "1px solid #0162FF"}}>
-            <span className="font-bold text-2xl mr-4">{totalNFTMinted ? totalNFTMinted.length: ""}</span> Minted NFTs
-          </div>
-          <div className="text-white text-md rounded-full py-3 px-14" style={{border: "1px solid #0162FF"}}>
-            <span className="font-bold text-2xl mr-4">{totalNFTMinted ? `${111 - totalNFTMinted.length}`: ""}</span> NFTs Left
-          </div>
-          </div>
-  
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={transition}
-            >
-              <div className="mt-10 text-white flex flex-col justify-center items-center">
-                {isLoadingTx ? (
-                  <div className="animate-spin text-white text-7xl">⛏</div>
-                ) : (
-                  <>
-                    {/* {!isSignedIn || !isauthenticate ? (
+                  <div className="flex gap-10 mt-10">
+                    <div className="text-white text-md rounded-full py-3 px-10" style={{ border: "1px solid #0162FF" }}>
+                      <span className="font-bold text-2xl mr-4">{totalNFTMinted ? totalNFTMinted.length : ""}</span> Minted NFTs
+                    </div>
+                    <div className="text-white text-md rounded-full py-3 px-14" style={{ border: "1px solid #0162FF" }}>
+                      <span className="font-bold text-2xl mr-4">{totalNFTMinted ? `${111 - totalNFTMinted.length}` : ""}</span> NFTs Left
+                    </div>
+                  </div>
+
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={transition}
+                  >
+                    <div className="mt-10 text-white flex flex-col justify-center items-center">
+                      {isLoadingTx ? (
+                        <div className="animate-spin text-white text-7xl">⛏</div>
+                      ) : (
+                        <>
+                          {/* {!isSignedIn || !isauthenticate ? (
                       <div className="text-white font-bold py-4 px-10 rounded-lg mr-auto ml-10 -mt-10">
                         {!connected && (
                           <button className="">
@@ -502,119 +501,121 @@ const Mint = () => {
                         )}
                       </div>
                     ) : ( */}
-                      <div className="mr-auto">
-                        <div className="text-orange-300 text-sm mb-2">
-                          (one wallet address can only mint one)
-                        </div>
-                        {buttonblur ? (
-                          <div
-                            className={`text-white font-bold py-4 px-10 rounded-full mr-auto bg-blue-300`}
-                          >
-                            Mint Erebrus NFT
+                          <div className="mr-auto">
+                            <div className="text-orange-300 text-sm mb-2">
+                              (one wallet address can only mint one)
+                            </div>
+                            {buttonblur ? (
+                              <div
+                                className={`text-white font-bold py-4 px-10 rounded-full mr-auto bg-blue-300`}
+                              >
+                                Mint Erebrus NFT
+                              </div>
+                            ) : (
+                              <button
+                                className={`text-white font-bold py-4 px-10 rounded-full mr-auto `}
+                                onClick={() => { setmintpage("page2") }}
+                                style={{ backgroundColor: '#0162FF' }}
+                              >
+                                Mint Erebrus NFT
+                              </button>
+                            )}
                           </div>
-                        ) : (
-                          <button
-                            className={`text-white font-bold py-4 px-10 rounded-full mr-auto `}
-                            onClick={()=>{setmintpage("page2")}}
-                            style={{backgroundColor:'#0162FF'}}
-                          >
-                            Mint Erebrus NFT
-                          </button>
-                        )}
-                      </div>
-                    {/* )} */}
+                          {/* )} */}
 
-                    {error && <div className="text-red-500 mt-4">{error}</div>}
-                  </>
-                )}
+                          {error && <div className="text-red-500 mt-4">{error}</div>}
+                        </>
+                      )}
+                    </div>
+                  </motion.div>
+                </div>
               </div>
-            </motion.div>
-        </div>
-      </div>
-      </div>
-      </>
+            </div>
+          </>
         )
       }
-      
+
 
       {mintpage === "page2" && (
-                      <div
-                        style={{ backgroundImage: `url('/bgmint.png')`, 
-                        backgroundColor:"black", 
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                        backgroundRepeat: "no-repeat"}}
-                        className="flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full"
-                        id="popupmodal"
-                      >
-                        <div className="relative p-4 w-full max-w-xl max-h-full">
-                        <img src="/coin1.png" className="w-60 -mt-10 absolute -top-10 -left-20"/>
-                          <div
-                            className="relative rounded-3xl shadow dark:bg-gray-700 bgcolor pb-20"
-                            style={{
-                              border: "1px solid #0162FF",
-                              boxShadow: 'inset -10px -10px 60px 0 rgba(255, 255, 255, 0.4)',
-                            }}
-                          >
-                            <div className="flex items-center justify-end px-4 py-6 rounded-t" style={{borderBottom: "1px solid #FFFFFF80"}}>
-                              <div className="text-2xl text-white">Choose the payment option</div>
-                              <button
-                                onClick={() => setmintpage("page1")}
-                                type="button"
-                                className="text-white bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                              >
-                                <svg
-                                  className="w-3 h-3"
-                                  aria-hidden="true"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  fill="none"
-                                  viewBox="0 0 14 14"
-                                >
-                                  <path
-                                    stroke="currentColor"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
-                                  />
-                                </svg>
-                                <span className="sr-only">Close modal</span>
-                              </button>
-                            </div>
+        <div
+          style={{
+            backgroundImage: `url('/bgmint.png')`,
+            backgroundColor: "black",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat"
+          }}
+          className="flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full"
+          id="popupmodal"
+        >
+          <div className="relative p-4 w-full max-w-xl max-h-full">
+            <img src="/coin1.png" className="w-60 -mt-10 absolute -top-10 -left-20" />
+            <div
+              className="relative rounded-3xl shadow dark:bg-gray-700 bgcolor pb-20"
+              style={{
+                border: "1px solid #0162FF",
+                boxShadow: 'inset -10px -10px 60px 0 rgba(255, 255, 255, 0.4)',
+              }}
+            >
+              <div className="flex items-center justify-end px-4 py-6 rounded-t" style={{ borderBottom: "1px solid #FFFFFF80" }}>
+                <div className="text-2xl text-white">Choose the payment option</div>
+                <button
+                  onClick={() => setmintpage("page1")}
+                  type="button"
+                  className="text-white bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                >
+                  <svg
+                    className="w-3 h-3"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 14 14"
+                  >
+                    <path
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+                    />
+                  </svg>
+                  <span className="sr-only">Close modal</span>
+                </button>
+              </div>
 
-                            <div className="items-center pt-20 rounded-b w-1/2 mx-auto">
-                            {!connected ? (
-                              <>
-                              <button
-                               onClick={()=>{setshowconnectbutton(true)}}
-                              style={{ border: "1px solid #0162FF" }}
-                              type="button"
-                              className="flex w-full text-white font-bold focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-md text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                            >
-                              <img src="/mint2.png" className="w-12"/>
-                              <div className="px-5 py-2.5 ">Pay in APT</div>
-                            </button>
-                          { showconnectbutton && 
-                            (<button className="mx-auto justify-center mt-10 items-center flex">
-                            <WalletSelectorAntDesign />
-                          </button>)
-                            }
-                          </>
-                        ):(
-                          <button
-                                onClick={mint}
-                                style={{ border: "1px solid #0162FF" }}
-                                type="button"
-                                className="flex w-full text-white font-bold focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-md text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                              >
-                                <img src="/mint2.png" className="w-12"/>
-                                <div className="px-5 py-2.5 ">Pay in APT</div>
-                              </button>
-                        )}
-                              
-                            </div>
+              <div className="items-center pt-20 rounded-b w-1/2 mx-auto">
+                {!connected ? (
+                  <>
+                    <button
+                      onClick={() => { setshowconnectbutton(true) }}
+                      style={{ border: "1px solid #0162FF" }}
+                      type="button"
+                      className="flex w-full text-white font-bold focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-md text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                    >
+                      <img src="/mint2.png" className="w-12" />
+                      <div className="px-5 py-2.5 ">Pay in APT</div>
+                    </button>
+                    {showconnectbutton &&
+                      (<button className="mx-auto justify-center mt-10 items-center flex">
+                        <WalletSelectorAntDesign />
+                      </button>)
+                    }
+                  </>
+                ) : (
+                  <button
+                    onClick={mint}
+                    style={{ border: "1px solid #0162FF" }}
+                    type="button"
+                    className="flex w-full text-white font-bold focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-md text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                  >
+                    <img src="/mint2.png" className="w-12" />
+                    <div className="px-5 py-2.5 ">Pay in APT</div>
+                  </button>
+                )}
 
-                            {/* { !showconnectbutton && (<div className="flex items-center pb-20 pt-10 rounded-b w-1/2 mx-auto">
+              </div>
+
+              {/* { !showconnectbutton && (<div className="flex items-center pb-20 pt-10 rounded-b w-1/2 mx-auto">
                               <button
                                 onClick={stripe}
                                 style={{ border: "1px solid #0162FF" }}
@@ -625,92 +626,92 @@ const Mint = () => {
                                 <div className="px-5 py-2.5 ">Pay in USD</div>
                               </button>
                             </div>)} */}
-                          </div>
-                          <img src="/coin2.png" className="w-60 -mt-10 absolute -bottom-24 -right-24" style={{ zIndex: -1 }}/>
-                        </div>
-                      </div>
-                    )}
+            </div>
+            <img src="/coin2.png" className="w-60 -mt-10 absolute -bottom-24 -right-24" style={{ zIndex: -1 }} />
+          </div>
+        </div>
+      )}
 
 
-{clientSecret && (
-                      <div
-                        style={{ backgroundColor: "#222944E5" }}
-                        className="flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full p-30"
-                        id="popupmodal"
-                      >
-                        <div className="p-10 w-2/5 flex flex-col" style={{backgroundColor:'white'}}>
-                          <Elements options={options} stripe={stripePromise}>
-                            <CheckoutForm />
-                          </Elements>
-                        </div>
-                      </div>
-                    )}
+      {clientSecret && (
+        <div
+          style={{ backgroundColor: "#222944E5" }}
+          className="flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full p-30"
+          id="popupmodal"
+        >
+          <div className="p-10 w-2/5 flex flex-col" style={{ backgroundColor: 'white' }}>
+            <Elements options={options} stripe={stripePromise}>
+              <CheckoutForm />
+            </Elements>
+          </div>
+        </div>
+      )}
 
 
 
 
-{mintpage === "page3" && (
-                      <div
-                        style={{ backgroundColor: "black" }}
-                        className="flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full"
-                        id="popupmodal"
-                      >
-                        <div className="relative p-4 w-1/3 max-w-2xl max-h-full">
-                          <div
-                            className="relative rounded-3xl shadow dark:bg-gray-700"
-                            style={{ backgroundColor: "#202333", border: "1px solid #0162FF"}}
-                          >
-                            <div className="flex items-center justify-end p-4 md:p-5 rounded-t dark:border-gray-600">
-                              <button
-                                onClick={() => setmintpage("page1")}
-                                type="button"
-                                className="text-white bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                              >
-                                <svg
-                                  className="w-3 h-3"
-                                  aria-hidden="true"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  fill="none"
-                                  viewBox="0 0 14 14"
-                                >
-                                  <path
-                                    stroke="currentColor"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
-                                  />
-                                </svg>
-                                <span className="sr-only">Close modal</span>
-                              </button>
-                            </div>
+      {mintpage === "page3" && (
+        <div
+          style={{ backgroundColor: "black" }}
+          className="flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full"
+          id="popupmodal"
+        >
+          <div className="relative p-4 w-1/3 max-w-2xl max-h-full">
+            <div
+              className="relative rounded-3xl shadow dark:bg-gray-700"
+              style={{ backgroundColor: "#202333", border: "1px solid #0162FF" }}
+            >
+              <div className="flex items-center justify-end p-4 md:p-5 rounded-t dark:border-gray-600">
+                <button
+                  onClick={() => setmintpage("page1")}
+                  type="button"
+                  className="text-white bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                >
+                  <svg
+                    className="w-3 h-3"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 14 14"
+                  >
+                    <path
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+                    />
+                  </svg>
+                  <span className="sr-only">Close modal</span>
+                </button>
+              </div>
 
-                            <img src="/mint.png" className="mx-auto"/>
+              <img src="/mint.png" className="mx-auto" />
 
-                            <div className="p-4 md:p-5 space-y-4">
-                              <p className="text-2xl text-center font-semibold text-white">
-                              Congratulations
-                              </p>
-                              <p className="text-md text-center w-full mx-auto text-white">
-                                You have minted your Erebrus NFT, welcome to an exclusive journey of innovation and community.
-                                To set clients, click button to go to subscription page.
-                              </p>
-                            </div>
+              <div className="p-4 md:p-5 space-y-4">
+                <p className="text-2xl text-center font-semibold text-white">
+                  Congratulations
+                </p>
+                <p className="text-md text-center w-full mx-auto text-white">
+                  You have minted your Erebrus NFT, welcome to an exclusive journey of innovation and community.
+                  To set clients, click button to go to subscription page.
+                </p>
+              </div>
 
-                            <div className="flex items-center pb-10 pt-4 rounded-b w-1/3 mx-auto">
-                              <Link
-                                href="/subscription"
-                                style={{ backgroundColor: "#0162FF" }}
-                                type="button"
-                                className="w-full text-white focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-sm px-2 py-3 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                              >
-                                View Subscription
-                              </Link>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
+              <div className="flex items-center pb-10 pt-4 rounded-b w-1/3 mx-auto">
+                <Link
+                  href="/subscription"
+                  style={{ backgroundColor: "#0162FF" }}
+                  type="button"
+                  className="w-full text-white focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-sm px-2 py-3 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                >
+                  View Subscription
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

@@ -7,16 +7,16 @@ const mynetwork = process.env.NEXT_PUBLIC_NETWORK;
 
 const connectWallet = async () => {
 
-    const getAptosWallet = () => {
-    if ("aptos" in window) {
-      return (window as any).aptos;
+    const getPhantomWallet = () => {
+    if ("Solana" in window) {
+      return (window as any).phantom;
     } else {
-      window.open("https://petra.app/", "_blank");
+      window.open("https://phantom.app/", "_blank");
     }
   };
 
   const connectWallet = async () => {
-    const wallet = getAptosWallet();
+    const wallet = getPhantomWallet();
     try {
       const response = await wallet.connect();
 

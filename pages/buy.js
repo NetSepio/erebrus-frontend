@@ -96,16 +96,16 @@ const Buy = () => {
   }, []);
   
 
-  const getAptosWallet = () => {
-    if ("aptos" in window) {
-      return window.aptos;
+  const getPhantomWallet = () => {
+    if ("solana" in window) {
+      return window.solana;
     } else {
-      window.open("https://petra.app/", "_blank");
+      window.open("https://phantom.app/", "_blank");
     }
   };
 
   const connectWallet = async () => {
-    const wallet = getAptosWallet();
+    const wallet = getPhantomWallet();
     try {
       const response = await wallet.connect();
 
@@ -113,7 +113,7 @@ const Buy = () => {
       console.log("account", account);
 
       // Get the current network after connecting (optional)
-      const networkwallet = await window.aptos.network();
+      const networkwallet = await window.phantom.network();
 
       // Check if the connected network is Mainnet
       if (networkwallet === mynetwork) {

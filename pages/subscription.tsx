@@ -40,15 +40,8 @@ const transition = {
   duration: 0.5,
 };
 
-const WalletSelectorAntDesign = dynamic(
-  () => import("../components/WalletSelectorAntDesign"),
-  {
-    suspense: false,
-    ssr: false,
-  }
-);
 
-const isSendableNetwork = (connected, network) => {
+const isSendableNetwork = (connected: any, network: string) => {
   return connected && network?.toLowerCase() === mynetwork.toLowerCase();
 };
 
@@ -365,16 +358,16 @@ const Subscription = () => {
   const loggedin = Cookies.get("erebrus_token");
   const wallet = Cookies.get("erebrus_wallet");
 
-  const getAptosWallet = () => {
-    if ("aptos" in window) {
-      return (window as any).aptos;
+  const getPhantomWallet = () => {
+    if ("solana" in window) {
+      return (window as any).solana;
     } else {
-      window.open("https://petra.app/", "_blank");
+      window.open("https://phantom.app/", "_blank");
     }
   };
 
   const connectWallet = async () => {
-    const wallet = getAptosWallet();
+    const wallet = getPhantomWallet();
     try {
       const response = await wallet.connect();
 
@@ -382,7 +375,7 @@ const Subscription = () => {
       console.log("account", account);
 
       // Get the current network after connecting (optional)
-      const networkwallet = await (window as any).aptos.network();
+      const networkwallet = await (window as any).solana.network();
 
       // Check if the connected network is Mainnet
       if (networkwallet === mynetwork) {
@@ -517,9 +510,9 @@ const Subscription = () => {
   };
 
   const handleCollectionClick = (
-    collection,
-    collectionName,
-    collectionImage
+    collection: React.SetStateAction<string>,
+    collectionName: React.SetStateAction<string>,
+    collectionImage: React.SetStateAction<string>
   ) => {
     setcollectionId(collection);
     setcollectionName(collectionName);
@@ -528,7 +521,7 @@ const Subscription = () => {
     setcollectionsPage(false);
   };
 
-  const handleTrialClick = () =>{
+  const handleTrialClick = () => {
     setvpnPage(true);
     setcollectionsPage(false);
   }
@@ -577,7 +570,7 @@ const Subscription = () => {
           const payload = response.data.payload;
           setNodesData(payload);
           const filteredNodes = payload.filter(
-            (node) => node.status === "active"
+            (node: { status: string; }) => node.status === "active"
           );
           setActiveNodesData(filteredNodes);
           console.log("erebrus nodes", payload);
@@ -597,7 +590,7 @@ const Subscription = () => {
   // -------------------------------------------------- check for trial subscription ------------------------------------------------
 
   useEffect(() => {
-    const trialbuycheck = async() =>{
+    const trialbuycheck = async () => {
       const auth = Cookies.get("erebrus_token");
       try {
         const response = await fetch(
@@ -611,24 +604,24 @@ const Subscription = () => {
             },
           }
         );
-  
+
         if (response.status === 200) {
-              const responseData = await response.json();
-              settrialsubscriptiondata(responseData);
-              console.log("trial subsc response", responseData);
+          const responseData = await response.json();
+          settrialsubscriptiondata(responseData);
+          console.log("trial subsc response", responseData);
         }
-  
+
       } catch (error) {
         console.error("Error:", error);
       } finally {
       }
-  }
-  
+    }
+
     trialbuycheck();
   }, [])
 
   // Extracting day, year, and time from the dateTime string
-  const formatDateTime = (dateTime) => {
+  const formatDateTime = (dateTime: string | number | Date) => {
     const dateObj = new Date(dateTime);
     const day = dateObj.getDate();
     const month = dateObj.toLocaleString('default', { month: 'long' });
@@ -637,7 +630,7 @@ const Subscription = () => {
     return `${day} ${month} ${year} ${time}`;
   };
 
-  if (!wallet || !loggedin) {
+  if (!wallet || loggedin) {
     return (
       <>
         <div className="min-h-screen">
@@ -684,60 +677,60 @@ const Subscription = () => {
                 <div className="text-2xl text-white font-semibold text-left ml-4 my-6 border-b border-gray-700 pb-4">
                   Subscription
                 </div>
-                { !nftdata && !trialsubscriptiondata && (
+                {nftdata && !trialsubscriptiondata && (
                   <div
-                  className="mx-auto px-4 min-h-screen">
-                  <div className="w-full text-center py-20">
-                  <h2 className="text-4xl font-bold text-white">No Subscription</h2>
-                  <div className="bg-blue-500 text-white font-bold py-4 px-6 rounded-lg w-1/5 mx-auto my-20">
-                    <Link href="/plans">Try our free trial now</Link>
+                    className="mx-auto px-4 min-h-screen">
+                    <div className="w-full text-center py-20">
+                      <h2 className="text-4xl font-bold text-white">No Subscription</h2>
+                      <div className="bg-blue-500 text-white font-bold py-4 px-6 rounded-lg w-1/5 mx-auto my-20">
+                        <Link href="/plans">Try our free trial now</Link>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                </div>
                 )}
-                {nftdata && (<NftdataContainer
+                {!nftdata && (<NftdataContainer
                   metaDataArray={nftdata}
                   MyReviews={false}
                   selectCollection={handleCollectionClick}
                 />)}
                 {
                   trialsubscriptiondata && (
-                    <div className="w-1/4 rounded-3xl" style={{ backgroundColor:'#202333', border: '1px solid #0162FF'}}>
-      <div className="w-full h-full rounded-lg px-6 pt-6">
-        <button onClick={handleTrialClick}>
-          <div className="flex flex-col">
-            <div className="w-full">
-              <h3 className="leading-12 mb-2 text-white">
-              <div className="text-lg font-semibold mt-4 uppercase">
-                    {trialsubscriptiondata.data.type} Subscription         
-                  </div>  
-                <div className="lg:flex md:flex justify-between">
-                  <div className="text-md font-semibold mt-4">
-                  Status: {trialsubscriptiondata.status}                    
-                  </div>
-                  <div className="text-md font-semibold mt-4">
-                  Valid for 7 days 
-                  </div>
-                </div>  
-              </h3>
+                    <div className="w-1/4 rounded-3xl" style={{ backgroundColor: '#202333', border: '1px solid #0162FF' }}>
+                      <div className="w-full h-full rounded-lg px-6 pt-6">
+                        <button onClick={handleTrialClick}>
+                          <div className="flex flex-col">
+                            <div className="w-full">
+                              <h3 className="leading-12 mb-2 text-white">
+                                <div className="text-lg font-semibold mt-4 uppercase">
+                                  {trialsubscriptiondata.data.type} Subscription
+                                </div>
+                                <div className="lg:flex md:flex justify-between">
+                                  <div className="text-md font-semibold mt-4">
+                                    Status: {trialsubscriptiondata.status}
+                                  </div>
+                                  <div className="text-md font-semibold mt-4">
+                                    Valid for 7 days
+                                  </div>
+                                </div>
+                              </h3>
 
-              <div className="rounded-xl">
-                <div className="text-sm text-white text-start mt-2">
-                  <div className="mb-3">
-                  <span className="text-green-500 ">Start time :</span> {trialsubscriptiondata.data.startTime ? formatDateTime(trialsubscriptiondata.data.startTime) : 'Loading...'}
-                  </div>
-                  <div className="">                 
-                  <span className="text-red-500 ">End time :</span> {trialsubscriptiondata.data.endTime ? formatDateTime(trialsubscriptiondata.data.endTime) : 'Loading...'}
-                  </div>
-                </div>
-              </div>
+                              <div className="rounded-xl">
+                                <div className="text-sm text-white text-start mt-2">
+                                  <div className="mb-3">
+                                    <span className="text-green-500 ">Start time :</span> {trialsubscriptiondata.data.startTime ? formatDateTime(trialsubscriptiondata.data.startTime) : 'Loading...'}
+                                  </div>
+                                  <div className="">
+                                    <span className="text-red-500 ">End time :</span> {trialsubscriptiondata.data.endTime ? formatDateTime(trialsubscriptiondata.data.endTime) : 'Loading...'}
+                                  </div>
+                                </div>
+                              </div>
 
-              <div className="rounded-full px-10 py-2 mt-32 mb-10 text-white" style={{backgroundColor:'#0162FF'}}>Create Clients</div>
-            </div>
-          </div>
-        </button>
-      </div>
-    </div>
+                              <div className="rounded-full px-10 py-2 mt-32 mb-10 text-white" style={{ backgroundColor: '#0162FF' }}>Create Clients</div>
+                            </div>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
                   )
                 }
               </>

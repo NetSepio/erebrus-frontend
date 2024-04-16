@@ -2,7 +2,7 @@ import { parseTypeTag, AccountAddress, U64 } from "@aptos-labs/ts-sdk";
 import {
   useWallet,
   InputTransactionData,
-} from "@aptos-labs/wallet-adapter-react";
+} from "@solana/wallet-adapter-react";
 import Cookies from 'js-cookie';
 import { aptosClient } from "../../module";
 import { useAlert } from "../AlertProvider";
