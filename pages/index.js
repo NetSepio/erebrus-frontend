@@ -6,11 +6,11 @@ import Howto from "../components/Howto";
 import DepinCarousel from "../components/DepinCarousel";
 import Pricing from "../components/Pricing";
 import { motion } from "framer-motion";
-import { useAddress } from "@thirdweb-dev/react";
+
 import Link from 'next/link';
 
 export default function Home() {
-  const address = useAddress();
+  // const address = useAddress();
 
   return (
     <div>

@@ -4,19 +4,24 @@ import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
 import MyVpnContainer from "../components/Myvpncontainer";
 import NftdataContainer from "../components/NftDataContainer";
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import dynamic from "next/dynamic";
 import crypto from "crypto";
 import { lib, enc } from "crypto-js";
 import { generateKeyPair } from "curve25519-js";
-import { Network } from "@aptos-labs/ts-sdk";
+// import { Network } from "@aptos-labs/ts-sdk";
 import Button from "../components/Button";
+import { 
+  ConnectButton, 
+  useWallet, 
+  addressEllipsis,
+} from "@suiet/wallet-kit";
 import SingleSignerTransaction from "../components/transactionFlow/SingleSigner";
 const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
 const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_BASE_URL;
 const mynetwork = process.env.NEXT_PUBLIC_NETWORK;
 import QRCode from "qrcode.react";
 import { saveAs } from "file-saver";
+import * as tweetnacl from 'tweetnacl'
 const envcollectionid = process.env.NEXT_PUBLIC_COLLECTIONID;
 const graphqlaptos = process.env.NEXT_PUBLIC_GRAPHQL_APTOS;
 
@@ -39,13 +44,13 @@ const transition = {
   duration: 0.5,
 };
 
-const WalletSelectorAntDesign = dynamic(
-  () => import("../components/WalletSelectorAntDesign"),
-  {
-    suspense: false,
-    ssr: false,
-  }
-);
+// const WalletSelectorAntDesign = dynamic(
+//   () => import("../components/WalletSelectorAntDesign"),
+//   {
+//     suspense: false,
+//     ssr: false,
+//   }
+// );
 
 const isSendableNetwork = (connected, network) => {
   return connected && network?.toLowerCase() === mynetwork.toLowerCase();
@@ -68,7 +73,7 @@ const Subscription = () => {
   const [note, setnote] = useState<boolean>(true);
   const [trialsubscriptiondata, settrialsubscriptiondata] = useState<any>(null);
 
-  const { account, connected, network, signMessage } = useWallet();
+  const {status, connected, connecting , account , network} = useWallet();
 
   let sendable = isSendableNetwork(connected, network?.name);
 
@@ -656,7 +661,8 @@ const Subscription = () => {
           <div className="text-white font-bold py-4 px-10 rounded-lg mx-auto flex justify-center mt-10">
             {!connected && (
               <button className="">
-                <WalletSelectorAntDesign />
+                {/* <WalletSelectorAntDesign /> */}
+                <ConnectButton/>
               </button>
             )}
             {connected && (

@@ -66,7 +66,7 @@ const Plans = () => {
                                   </h1>
                                   <h1 className="w-3/4 mx-auto text-4xl font-semibold leading-none tracking-normal text-gray-100 md:text-3xl md:tracking-tight">
                                     <span className="text-white">
-                                    1.11 APT/ 3 month
+                                    11.11 SUI/ 3 month
                                     </span>
                                   </h1>
 
@@ -127,7 +127,7 @@ const Plans = () => {
                                   </h1>
                                   <h1 className="w-3/4 mx-auto text-4xl font-semibold leading-none tracking-normal text-gray-100 md:text-3xl md:tracking-tight">
                                     <span className="text-white">
-                                    $9.99/month 
+                                    11.11 SUI/ 3 month
                                     </span>
                                   </h1>
 
@@ -141,7 +141,7 @@ const Plans = () => {
 
                                   <div className="text-left text-white mt-10 w-2/3 mx-auto">
                                   &#x2022; Free trial for 7 days<br></br>
-                                  &#x2022; Pay by APT, crytocurrency or Fiat<br></br>
+                                  &#x2022; Pay by SUI<br></br>
                                   &#x2022; Up to 5 options, more to come.<br></br>
                                   &#x2022; Multiple tiers
                                   </div>
