@@ -24,7 +24,7 @@ const variants = {
 };
 
 const isSendableNetwork = (connected, network) => {
-  return connected && network?.toLowerCase() === mynetwork.toLowerCase();
+  return connected ;
 };
 
 const Navbar = ({ isHome }) => {
