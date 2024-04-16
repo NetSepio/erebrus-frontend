@@ -1,5 +1,3 @@
-import { parseTypeTag, AccountAddress, U64 } from "@aptos-labs/ts-sdk";
-
 import Cookies from "js-cookie";
 
 import { useAlert } from "../AlertProvider";

@@ -8,7 +8,7 @@ import { AuthProvider } from "../AuthContext";
 import { AppContext } from "../components/AppContext";
 import Cookies from 'js-cookie';
 import { useState } from "react";
-import '@aptos-labs/wallet-adapter-ant-design/dist/index.css'
+
 
 const activeChainId = ChainId.Mumbai;
 
