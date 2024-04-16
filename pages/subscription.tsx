@@ -11,7 +11,6 @@ import { lib, enc } from "crypto-js";
 import { generateKeyPair } from "curve25519-js";
 import { Network } from "@aptos-labs/ts-sdk";
 import Button from "../components/Button";
-import SingleSignerTransaction from "../components/transactionFlow/SingleSigner";
 const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
 const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_BASE_URL;
 const mynetwork = process.env.NEXT_PUBLIC_NETWORK;
