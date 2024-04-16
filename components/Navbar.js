@@ -12,7 +12,7 @@ import {
 } from "@suiet/wallet-kit";
 // import { WalletConnector } from "@aptos-labs/wallet-adapter-mui-design";
 import dynamic from "next/dynamic";
-import { Network } from "@aptos-labs/ts-sdk";
+
 import Button from "../components/Button";
 import { useRouter } from 'next/router';
 import SingleSignerTransaction from "../components/transactionFlow/SingleSigner";
@@ -44,19 +44,19 @@ const Navbar = ({ isHome }) => {
   const [message, setMessage] = useState("");
   const [signature, setSignature] = useState("");
   const [challengeId, setChallengeId] = useState("");
-  const [showsignbutton, setshowsignbutton] = useState(false)
+  const [showsignbutton, setshowsignbutton] = useState(true)
   const [link, setlink] = useState("");
   const { isSignedIn, setIsSignedIn } = useContext(AuthContext);
   const [avatarUrl, setAvatarUrl] = useState("");
   // const sdk = useSDK();
 
-  const {status, connected, connecting , wallet, account , network} = useWallet();
-  let sendable = isSendableNetwork(connected, network?.name);
+  const {status, connected, connecting , account , network, name} = useWallet();
+  const wallet = useWallet();
+  let sendable = isSendableNetwork(status === "connected", wallet.chain.id);
 
   const router = useRouter();
   console.log("router", router);
 
-  console.log("account details", account);
 
   const address = Cookies.get("erebrus_wallet");
   const token = Cookies.get("erebrus_token");
@@ -68,7 +68,7 @@ const Navbar = ({ isHome }) => {
       onSignMessage();
     }
   },
-   [account?.address]
+   []
 
 );
 
@@ -122,14 +122,12 @@ const Navbar = ({ isHome }) => {
       }
     };
   }, 
-  [address, isSignedIn]
+  []
 );
 
   const signMessage = async () => {
     setIsSignedIn(false);
     console.log("signing message");
-    const signature = await sdk?.wallet.sign(message);
-    setSignature(signature);
     try {
       //make a post request to the erebrus server with the signature and challengeId
       const response = await axios.post(
@@ -190,33 +188,33 @@ const Navbar = ({ isHome }) => {
   //   }
   // };
 
-  
+
+  console.log(wallet)
 
   const onSignMessage = async () => {
     if (sendable) {
       try {
         const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
-      
-        const { data } = await axios.get(`${REACT_APP_GATEWAY_URL}api/v1.0/flowid?walletAddress=${account?.address}`);
+        const { data } = await axios.get(`${REACT_APP_GATEWAY_URL}api/v1.0/flowid/sol?walletAddress=${wallet.address}`);
         console.log(data);
   
         const message = data.payload.eula;
         const nonce = data.payload.flowId;
-        const publicKey = account?.publicKey;
-  
+
         const payload = {
           message: message,
           nonce: nonce,
         };
-        const response = await signMessage(payload);
-        console.log(response);
+      //   const response = await signMessage(payload);
+      //   console.log(response);
 
-        let signaturewallet = response.signature;
+      //   let signaturewallet = response.signature;
 
-      if(signaturewallet.length === 128)
-      {
-        signaturewallet = `0x${signaturewallet}`;
-      }
+      // if(signaturewallet.length === 128)
+      // {
+      //   signaturewallet = `0x${signaturewallet}`;
+      // }
+      
   
       const authenticationData = {
         "flowId": nonce,
@@ -366,9 +364,9 @@ const Navbar = ({ isHome }) => {
           {!token ? (
             <div className="lg:mt-0 mt-4 z-50 rounded-xl text-white">
              
-             {!connected && (  <ConnectButton/>
-             )}
-              {connected && showsignbutton && (
+ <ConnectButton/>
+
+              {status === "connected" && showsignbutton && (
             <Button
           color={"blue"}
           onClick={onSignMessage}
@@ -461,11 +459,11 @@ const Navbar = ({ isHome }) => {
           {!address && (
             <div className="lg:mt-0 mt-4 z-50 rounded-xl text-white">
              
-             {!connected && ( <button 
-              // onClick={connectWallet}
-              >
-              <WalletSelectorAntDesign/>
+             {!connected && ( <button>
+              
+              <ConnectButton/>
               </button>
+             
              )}
               {connected && (
             <SingleSignerTransaction isSendableNetwork={isSendableNetwork} />

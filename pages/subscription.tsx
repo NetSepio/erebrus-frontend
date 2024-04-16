@@ -15,7 +15,7 @@ import {
   useWallet, 
   addressEllipsis,
 } from "@suiet/wallet-kit";
-import SingleSignerTransaction from "../components/transactionFlow/SingleSigner";
+// import SingleSignerTransaction from "../components/transactionFlow/SingleSigner";
 const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
 const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_BASE_URL;
 const mynetwork = process.env.NEXT_PUBLIC_NETWORK;
@@ -73,10 +73,10 @@ const Subscription = () => {
   const [note, setnote] = useState<boolean>(true);
   const [trialsubscriptiondata, settrialsubscriptiondata] = useState<any>(null);
 
-  const {status, connected, connecting , account , network} = useWallet();
-
-  let sendable = isSendableNetwork(connected, network?.name);
-
+  const {status, connected, connecting , account } = useWallet();
+const suiwallet = useWallet()
+  let sendable = isSendableNetwork(connected,suiwallet.chain.id);
+  console.log(suiwallet)
   const bg = {
     backgroundColor: "#202333",
   };
@@ -415,11 +415,10 @@ const Subscription = () => {
 
         const authenticationData = {
           flowId: nonce,
-          signature: `${signaturewallet}`,
-          pubKey: publicKey,
+          "walletAddress": wallet.address,
         };
 
-        const authenticateApiUrl = `${REACT_APP_GATEWAY_URL}api/v1.0/authenticate`;
+        const authenticateApiUrl = `${REACT_APP_GATEWAY_URL}api/v1.0/authenticate/NonSign`;
 
         const config = {
           url: authenticateApiUrl,
@@ -458,7 +457,7 @@ const Subscription = () => {
         const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
 
         const { data } = await axios.get(
-          `${REACT_APP_GATEWAY_URL}api/v1.0/flowid?walletAddress=${account?.address}`
+          `${REACT_APP_GATEWAY_URL}api/v1.0/flowid?walletAddress=${suiwallet.address}`
         );
         console.log(data);
 
@@ -470,22 +469,21 @@ const Subscription = () => {
           message: message,
           nonce: nonce,
         };
-        const response = await signMessage(payload);
-        console.log(response);
+        // const response = await signMessage(payload);
+        // console.log(response);
 
-        let signaturewallet = response.signature;
+        // let signaturewallet = response.signature;
 
-        if (signaturewallet.length === 128) {
-          signaturewallet = `0x${signaturewallet}`;
-        }
+        // if (signaturewallet.length === 128) {
+        //   signaturewallet = `0x${signaturewallet}`;
+        // }
 
         const authenticationData = {
           flowId: nonce,
-          signature: `${signaturewallet}`,
-          pubKey: publicKey,
+          "walletAddress": wallet.address,
         };
 
-        const authenticateApiUrl = `${REACT_APP_GATEWAY_URL}api/v1.0/authenticate`;
+        const authenticateApiUrl = `${REACT_APP_GATEWAY_URL}api/v1.0/authenticate/NonSign`;
 
         const config = {
           url: authenticateApiUrl,
@@ -541,22 +539,22 @@ const Subscription = () => {
 
   const [imageSrc, setImageSrc] = React.useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchMetaData = async () => {
-      console.log("collectionImage", collectionImage);
-      const ipfsCid = collectionImage?.replace("ipfs://", "");
+  // useEffect(() => {
+  //   const fetchMetaData = async () => {
+  //     console.log("collectionImage", collectionImage);
+  //     const ipfsCid = collectionImage?.replace("ipfs://", "");
 
-      // Fetching metadata from IPFS
-      const metadataResponse = await axios.get(
-        `https://ipfs.io/ipfs/${ipfsCid}`
-      );
-      const metadata = metadataResponse.data;
+  //     // Fetching metadata from IPFS
+  //     const metadataResponse = await axios.get(
+  //       `https://ipfs.io/ipfs/${ipfsCid}`
+  //     );
+  //     const metadata = metadataResponse.data;
 
-      console.log("Metadata:", metadata);
-      setImageSrc(metadata?.image.replace("ipfs://", ""));
-    };
-    fetchMetaData();
-  }, [collectionImage]);
+  //     console.log("Metadata:", metadata);
+  //     setImageSrc(metadata?.image.replace("ipfs://", ""));
+  //   };
+  //   fetchMetaData();
+  // }, [collectionImage]);
 
   // -----------------------------------------------to fetch regions from node data-----------------------------------------------
 

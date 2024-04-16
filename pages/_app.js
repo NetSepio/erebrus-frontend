@@ -1,16 +1,16 @@
+
 import "../styles/globals.css";
-
-
+import { ThirdwebProvider } from "@thirdweb-dev/react";
+import { ChainId } from "@thirdweb-dev/sdk";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { AuthProvider } from "../AuthContext";
-// import { AppContext } from "../components/AppContext";
+import { AppContext } from "../components/AppContext";
 import Cookies from 'js-cookie';
 import { useState } from "react";
-import {WalletProvider} from '@suiet/wallet-kit';
-import '@suiet/wallet-kit/style.css';
+import '@aptos-labs/wallet-adapter-ant-design/dist/index.css'
 
-
+const activeChainId = ChainId.Mumbai;
 
 export default function App({ Component, pageProps }) {
 
@@ -18,10 +18,9 @@ export default function App({ Component, pageProps }) {
   const paseto = Cookies.get("erebrus_token");
 
   return (
-
-    
-    <WalletProvider>
-     <AuthProvider>
+    <AppContext>
+    <ThirdwebProvider desiredChainId={activeChainId}>
+      <AuthProvider>
         <div className="bg-black">
           <Navbar />
           <Component {...pageProps} />
@@ -39,9 +38,8 @@ export default function App({ Component, pageProps }) {
           </div>)}
         </div>
         {/* <Footer /> */}
-        </AuthProvider>
-        </WalletProvider>
-
-
+      </AuthProvider>
+    </ThirdwebProvider>
+    </AppContext>
   );
 }

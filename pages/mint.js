@@ -21,7 +21,7 @@ import {
 import dynamic from "next/dynamic";
 import { Network } from "@aptos-labs/ts-sdk";
 import Button from "../components/Button";
-import SingleSignerTransaction from "../components/transactionFlow/SingleSigner";
+// import SingleSignerTransaction from "../components/transactionFlow/SingleSigner";
 import GetStripe from "../utils/stripe.js";
 import { loadStripe } from "@stripe/stripe-js";
 import { redirect } from "next/dist/server/api-utils/index.js";
