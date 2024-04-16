@@ -9,7 +9,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 // import { Connector } from '@web3-react/types'
 // import { WalletConnector } from "@aptos-labs/wallet-adapter-mui-design";
 import Button from "./Button";
-import { useRouter } from 'next/router';
+import { useRouter } from "next/router";
 import SingleSignerTransaction from "./transactionFlow/SingleSigner";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
@@ -23,12 +23,8 @@ const variants = {
   closed: { opacity: 0, y: 0 },
 };
 
-
 const isSendableNetwork = (connected, network) => {
-  return (
-    connected &&
-    (network?.toLowerCase() === mynetwork.toLowerCase())
-  );
+  return connected && network?.toLowerCase() === mynetwork.toLowerCase();
 };
 
 const Navbar = ({ isHome }) => {
@@ -36,26 +32,26 @@ const Navbar = ({ isHome }) => {
   const [message, setMessage] = useState("");
   const [signature, setSignature] = useState("");
   const [challengeId, setChallengeId] = useState("");
-  const [showsignbutton, setshowsignbutton] = useState(false)
+  const [showsignbutton, setshowsignbutton] = useState(false);
   const [link, setlink] = useState("");
   // const { isSignedIn, setIsSignedIn } = useContext(AuthContext);
   const [avatarUrl, setAvatarUrl] = useState("");
   // const sdk = useSDK();
   // const {useSelectedAccount, useSelectedChainId, useSelectedIsActive, useSelectedIsActivating } = hooks
   // const account = useSelectedAccount(Connector)
-  const {wallet, connected, signMessage ,publicKey} = useWallet();
+  const { wallet, connected, signMessage, publicKey } = useWallet();
 
   let sendable = isSendableNetwork(connected, network);
-const account = publicKey;
+  const account = publicKey;
   const router = useRouter();
   // console.log("router", router);
-console.log(connected);
+  console.log(connected);
   console.log("account details", account);
 
   const address = Cookies.get("erebrus_wallet");
   const token = Cookies.get("erebrus_token");
-  console.log(address)
-  console.log(token)
+  console.log(address);
+  console.log(token);
 
   useEffect(() => {
     if (account) {
@@ -76,10 +72,12 @@ console.log(connected);
         const apiUrl = `https://api.multiavatar.com/${getRandomNumber()}`;
 
         const response = await axios.get(apiUrl);
-        const svgDataUri = `data:image/svg+xml,${encodeURIComponent(response.data)}`;
+        const svgDataUri = `data:image/svg+xml,${encodeURIComponent(
+          response.data
+        )}`;
         setAvatarUrl(svgDataUri);
       } catch (error) {
-        console.error('Error fetching avatar:', error.message);
+        console.error("Error fetching avatar:", error.message);
       }
     };
 
@@ -116,8 +114,9 @@ console.log(connected);
 
       // Check if the connected network is Mainnet
       if (networkwallet === mynetwork) {
-
-        const { data } = await axios.get(`${REACT_APP_GATEWAY_URL}api/v1.0/flowid/sol?walletAddress=${address}`);
+        const { data } = await axios.get(
+          `${REACT_APP_GATEWAY_URL}api/v1.0/flowid/sol?walletAddress=${address}`
+        );
         console.log(data);
 
         const message = data.payload.eula;
@@ -169,11 +168,9 @@ console.log(connected);
         } catch (error) {
           console.error(error);
         }
+      } else {
+        alert(`Switch to ${mynetwork} in your wallet`);
       }
-      else {
-        alert(`Switch to ${mynetwork} in your wallet`)
-      }
-
     } catch (err) {
       console.log(err);
     }
@@ -184,7 +181,9 @@ console.log(connected);
       try {
         const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
 
-        const { data } = await axios.get(`${REACT_APP_GATEWAY_URL}api/v1.0/flowid/sol?walletAddress=${address}`);
+        const { data } = await axios.get(
+          `${REACT_APP_GATEWAY_URL}api/v1.0/flowid/sol?walletAddress=${address}`
+        );
         console.log(data);
 
         const message = data.payload.eula;
@@ -205,10 +204,10 @@ console.log(connected);
         // }
 
         const authenticationData = {
-          "flowId": nonce,
+          flowId: nonce,
           // "signature": `${signaturewallet}`,
           // "pubKey": publicKey,
-          "walletAddress" : address,
+          walletAddress: address,
         };
 
         const authenticateApiUrl = `${REACT_APP_GATEWAY_URL}api/v1.0/authenticate/NonSign`;
@@ -242,7 +241,6 @@ console.log(connected);
     }
   };
 
-
   const handleDeleteCookie = () => {
     Cookies.remove("erebrus_wallet");
     Cookies.remove("erebrus_token");
@@ -252,13 +250,18 @@ console.log(connected);
   return (
     <nav className="bg-transparent py-4">
       <div
-        className={`container mx-auto px-10 flex items-center justify-between lg:mb-0 ${isHome && !isOpen ? "mb-24" : ""
-          }`}
+        className={`container mx-auto px-10 flex items-center justify-between lg:mb-0 ${
+          isHome && !isOpen ? "mb-24" : ""
+        }`}
       >
         <div className="flex items-center">
           <Link href="/" scroll={false}>
             <div className="block">
-              <img src="/Erebrus_logo_wordmark.png" alt="Logo" className="w-48" />
+              <img
+                src="/Erebrus_logo_wordmark.png"
+                alt="Logo"
+                className="w-48"
+              />
             </div>
           </Link>
           {/* <Link href="/" scroll={false}>
@@ -266,71 +269,79 @@ console.log(connected);
           </Link> */}
         </div>
         <div className="hidden lg:flex items-center">
-
-
-        {link !== "subscription" ? (
+          {link !== "subscription" ? (
             <Link
               href="/mint"
               className="text-gray-300 mr-8"
               scroll={false}
-              onClick={() => { setlink("subscription") }}
-              style={{
-                textDecoration: "none", position: "relative",
-                borderBottom: router.pathname.includes('subscription') ? '2px solid white' : '',
+              onClick={() => {
+                setlink("subscription");
               }}
-              onMouseOver={(e) => (e.currentTarget.style.borderBottom = "1px solid #fff")}
+              style={{
+                textDecoration: "none",
+                position: "relative",
+                borderBottom: router.pathname.includes("subscription")
+                  ? "2px solid white"
+                  : "",
+              }}
+              onMouseOver={(e) =>
+                (e.currentTarget.style.borderBottom = "1px solid #fff")
+              }
               onMouseOut={(e) => (e.currentTarget.style.borderBottom = "none")}
             >
               Mint
-            </Link>) :
-            (
-              <Link
-                href="/mint"
-                className="text-gray-300 mr-8"
-                scroll={false}
-                style={{
-                  textDecoration: "none", position: "relative",
-                  borderBottom: '2px solid white'
-                }}
-              >
-                Mint
-              </Link>
-            )}
-
-
-
-
-
+            </Link>
+          ) : (
+            <Link
+              href="/mint"
+              className="text-gray-300 mr-8"
+              scroll={false}
+              style={{
+                textDecoration: "none",
+                position: "relative",
+                borderBottom: "2px solid white",
+              }}
+            >
+              Mint
+            </Link>
+          )}
 
           {link !== "explorer" ? (
             <Link
               href="/explorer"
               className="text-gray-300 mr-8"
               scroll={false}
-              onClick={() => { setlink("explorer") }}
-              style={{
-                textDecoration: "none", position: "relative",
-                borderBottom: router.pathname.includes('explorer') ? '2px solid white' : '',
+              onClick={() => {
+                setlink("explorer");
               }}
-              onMouseOver={(e) => (e.currentTarget.style.borderBottom = "1px solid #fff")}
+              style={{
+                textDecoration: "none",
+                position: "relative",
+                borderBottom: router.pathname.includes("explorer")
+                  ? "2px solid white"
+                  : "",
+              }}
+              onMouseOver={(e) =>
+                (e.currentTarget.style.borderBottom = "1px solid #fff")
+              }
               onMouseOut={(e) => (e.currentTarget.style.borderBottom = "none")}
             >
               Explorer
-            </Link>) :
-            (
-              <Link
-                href="/explorer"
-                className="text-gray-300 mr-8"
-                scroll={false}
-                style={{
-                  textDecoration: "none", position: "relative",
-                  borderBottom: '2px solid white'
-                }}
-              >
-                Explorer
-              </Link>
-            )}
-
+            </Link>
+          ) : (
+            <Link
+              href="/explorer"
+              className="text-gray-300 mr-8"
+              scroll={false}
+              style={{
+                textDecoration: "none",
+                position: "relative",
+                borderBottom: "2px solid white",
+              }}
+            >
+              Explorer
+            </Link>
+          )}
 
           {/* { link !== "mint" ?(
           <Link
@@ -362,45 +373,57 @@ console.log(connected);
               href="/subscription"
               className="text-gray-300 mr-8"
               scroll={false}
-              onClick={() => { setlink("subscription") }}
-              style={{
-                textDecoration: "none", position: "relative",
-                borderBottom: router.pathname.includes('subscription') ? '2px solid white' : '',
+              onClick={() => {
+                setlink("subscription");
               }}
-              onMouseOver={(e) => (e.currentTarget.style.borderBottom = "1px solid #fff")}
+              style={{
+                textDecoration: "none",
+                position: "relative",
+                borderBottom: router.pathname.includes("subscription")
+                  ? "2px solid white"
+                  : "",
+              }}
+              onMouseOver={(e) =>
+                (e.currentTarget.style.borderBottom = "1px solid #fff")
+              }
               onMouseOut={(e) => (e.currentTarget.style.borderBottom = "none")}
             >
               Subscription
-            </Link>) :
-            (
-              <Link
-                href="/subscription"
-                className="text-gray-300 mr-8"
-                scroll={false}
-                style={{
-                  textDecoration: "none", position: "relative",
-                  borderBottom: '2px solid white'
-                }}
-              >
-                Subscription
-              </Link>
-            )}
+            </Link>
+          ) : (
+            <Link
+              href="/subscription"
+              className="text-gray-300 mr-8"
+              scroll={false}
+              style={{
+                textDecoration: "none",
+                position: "relative",
+                borderBottom: "2px solid white",
+              }}
+            >
+              Subscription
+            </Link>
+          )}
 
-          <Link href="https://docs.netsepio.com/erebrus/" target="_blank" className="text-gray-300 mr-8"
-            onMouseOver={(e) => (e.currentTarget.style.borderBottom = "1px solid #fff")}
+          <Link
+            href="https://docs.netsepio.com/erebrus/"
+            target="_blank"
+            className="text-gray-300 mr-8"
+            onMouseOver={(e) =>
+              (e.currentTarget.style.borderBottom = "1px solid #fff")
+            }
             onMouseOut={(e) => (e.currentTarget.style.borderBottom = "none")}
           >
             Docs
           </Link>
-
           {!token ? (
             <div className="lg:mt-0 mt-4 z-50 rounded-xl text-white">
-
-              {!connected && (<button
-              // onClick={connectWallet}
-              >
-                <WalletMultiButton />
-              </button>
+              {!connected && (
+                <button
+                // onClick={connectWallet}
+                >
+                  <WalletMultiButton />
+                </button>
               )}
               {connected && showsignbutton && (
                 <Button
@@ -411,19 +434,30 @@ console.log(connected);
                 />
               )}
             </div>
-          ) :
-            (
-              <div className="lg:mt-0 mt-4 z-50 rounded-xl flex gap-4" style={{ color: '#0162FF' }}>
-                {/* <div>
+          ) : (
+            <div
+              className="lg:mt-0 mt-4 z-50 rounded-xl flex gap-4"
+              style={{ color: "#0162FF" }}
+            >
+              {/* <div>
                 {address?.slice(0, 4)}...{address?.slice(-4)}
               </div> */}
-                <button onClick={handleDeleteCookie}
-                  onMouseOver={(e) => (e.currentTarget.style.borderBottom = "1px solid #0162FF")}
-                  onMouseOut={(e) => (e.currentTarget.style.borderBottom = "none")}>Log out</button>
-                {avatarUrl && <img src={avatarUrl} alt="Avatar" className="w-10 ml-auto" />}
-              </div>
-            )}
-
+              <button
+                onClick={handleDeleteCookie}
+                onMouseOver={(e) =>
+                  (e.currentTarget.style.borderBottom = "1px solid #0162FF")
+                }
+                onMouseOut={(e) =>
+                  (e.currentTarget.style.borderBottom = "none")
+                }
+              >
+                Log out
+              </button>
+              {avatarUrl && (
+                <img src={avatarUrl} alt="Avatar" className="w-10 ml-auto" />
+              )}
+            </div>
+          )}
         </div>
         <div className="block lg:hidden">
           <button
@@ -454,7 +488,6 @@ console.log(connected);
           <div className="bg-transparent py-4">
             <div className="container mx-auto px-6 flex flex-col lg:flex-row items-center lg:justify-between">
               <div className="flex flex-col lg:flex-row items-center">
-
                 <Link
                   href="/explorer"
                   className="text-white font-bold block lg:inline-block mb-4 lg:mr-0 lg:mb-0"
@@ -470,55 +503,91 @@ console.log(connected);
                 </Link>
 
                 <Link
-                  href="https://docs.netsepio.com/erebrus/" target="_blank"
+                  href="https://docs.netsepio.com/erebrus/"
+                  target="_blank"
                   className="text-white font-bold block lg:inline-block mb-4 lg:mr-0 lg:mb-0"
                 >
                   Docs
                 </Link>
 
                 {account?.address && (
-                  <div className="lg:mt-0 mt-4 lg:mr-4 z-50 rounded-xl flex gap-4" style={{ color: '#0162FF' }}>
+                  <div
+                    className="lg:mt-0 mt-4 lg:mr-4 z-50 rounded-xl flex gap-4"
+                    style={{ color: "#0162FF" }}
+                  >
                     {/* <div>
                 {account?.address.slice(0, 4)}...{account?.address.slice(-4)}
               </div> */}
-                    {
-                      address && (
-                        <button onClick={handleDeleteCookie}
-                          onMouseOver={(e) => (e.currentTarget.style.borderBottom = "1px solid #0162FF")}
-                          onMouseOut={(e) => (e.currentTarget.style.borderBottom = "none")}>Log out</button>
-                      )
-                    }
-                    {avatarUrl && <img src={avatarUrl} alt="Avatar" className="w-10 ml-auto" />}
+                    {address && (
+                      <button
+                        onClick={handleDeleteCookie}
+                        onMouseOver={(e) =>
+                          (e.currentTarget.style.borderBottom =
+                            "1px solid #0162FF")
+                        }
+                        onMouseOut={(e) =>
+                          (e.currentTarget.style.borderBottom = "none")
+                        }
+                      >
+                        Log out
+                      </button>
+                    )}
+                    {avatarUrl && (
+                      <img
+                        src={avatarUrl}
+                        alt="Avatar"
+                        className="w-10 ml-auto"
+                      />
+                    )}
                   </div>
                 )}
 
                 {!address && (
                   <div className="lg:mt-0 mt-4 z-50 rounded-xl text-white">
-
-                    {!connected && (<button
-                    // onClick={connectWallet}
-                    >
-                      <WalletMultiButton />
-                    </button>
+                    {!connected && (
+                      <button
+                      // onClick={connectWallet}
+                      >
+                        <WalletMultiButton />
+                      </button>
                     )}
                     {connected && (
-                      <SingleSignerTransaction isSendableNetwork={isSendableNetwork} />
+                      <SingleSignerTransaction
+                        isSendableNetwork={isSendableNetwork}
+                      />
                     )}
                   </div>
                 )}
 
                 {address && (
-                  <div className="lg:mt-0 mt-4 lg:mr-20 z-50 rounded-xl flex gap-4" style={{ color: '#0162FF' }}>
+                  <div
+                    className="lg:mt-0 mt-4 lg:mr-20 z-50 rounded-xl flex gap-4"
+                    style={{ color: "#0162FF" }}
+                  >
                     {/* <div>
                 {address.slice(0, 4)}...{address.slice(-4)}
               </div> */}
-                    <button onClick={handleDeleteCookie}
-                      onMouseOver={(e) => (e.currentTarget.style.borderBottom = "1px solid #0162FF")}
-                      onMouseOut={(e) => (e.currentTarget.style.borderBottom = "none")}>Log out</button>
-                    {avatarUrl && <img src={avatarUrl} alt="Avatar" className="w-10 ml-auto" />}
+                    <button
+                      onClick={handleDeleteCookie}
+                      onMouseOver={(e) =>
+                        (e.currentTarget.style.borderBottom =
+                          "1px solid #0162FF")
+                      }
+                      onMouseOut={(e) =>
+                        (e.currentTarget.style.borderBottom = "none")
+                      }
+                    >
+                      Log out
+                    </button>
+                    {avatarUrl && (
+                      <img
+                        src={avatarUrl}
+                        alt="Avatar"
+                        className="w-10 ml-auto"
+                      />
+                    )}
                   </div>
                 )}
-
               </div>
             </div>
           </div>

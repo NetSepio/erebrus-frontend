@@ -29,23 +29,22 @@ Anonymous Virtual Private Network for accessing internet in stealth mode bypassi
                         backgroundSize: "cover",
                         backgroundPosition: "center",
                         backgroundRepeat: "no-repeat"}}>
-      <div className="container mx-auto pt-20 md:w-[80%] lg:w-[80%]">
+      <div className="container mx-auto pt-20 w-[80%]">
         <div className="flex flex-col items-center justify-start lg:h-full md:mt-16 mt-8 mb-36">
           <motion.h1
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1, transition: { duration: 1 } }}
-            className="text-6xl font-smeibold text-white mb-6 mr-auto w-3/5"
+            className="lg:text-6xl text-3xl font-smeibold text-white mb-6 mr-auto w-3/5"
           >
             Building a Resilient Decentralized Network 
           </motion.h1>
           <motion.h1
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1, transition: { duration: 1 } }}
-            className="text-xl text-white mb-8 w-3/5 mr-auto"
+            className="lg:text-xl text-md text-white mb-8 w-3/5 mr-auto"
           >
             <p>
-            Get on board with Erebrus DEPIN for a stable, decentralized internet.
-Earn rewards and enhance your connectivity
+            Try the dVPN and secure your internet activities now
             </p>
           </motion.h1>
           <motion.div
@@ -54,7 +53,7 @@ Earn rewards and enhance your connectivity
             className="text-black font-bold py-3 px-14 rounded-full mr-auto" style={{backgroundColor:'#E3EEFF'}}
             // style={{backgroundImage: 'linear-gradient(#FFFFFF00, #0099FF)'}}
           >
-            <Link href="/plans">
+            <Link href="/subscription">
               Get Started
             </Link>
           </motion.div>
@@ -76,18 +75,27 @@ Earn rewards and enhance your connectivity
           <motion.h1
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1, transition: { duration: 1 } }}
-            className="text-5xl font-bold text-gray-300 mb-16 lg:text-center md:text-center md:w-[80%]"
+            className="lg:text-5xl text-3xl font-semibold text-gray-300 mb-10 lg:text-center md:text-center md:w-[80%]"
           >
             Where Decentralization meets <br></br> VPN for ultimate internet security
           </motion.h1>
+          <motion.p
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1, transition: { duration: 1 } }}
+            className="text-lg text-gray-300 mb-8 text-center w-[30%]"
+          >
+            Join us by running an erebrus node and start 
+contributing to enable safe internet
+          </motion.p>
           <motion.div
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1, transition: { duration: 1 } }}
-            className="text-black font-bold py-4 px-14 rounded-full bg-white" 
+            className="text-black font-semibold py-4 px-10 rounded-full bg-white text-lg" 
             // style={{backgroundImage: 'linear-gradient(#FFFFFF00, #0099FF)'}}
           >
-            <Link href="/plans">
-              Subscribe Now
+            <Link href="https://discord.com/invite/5uaFhNpRF6" target="_blank"
+              rel="noopener noreferrer">
+              Deploy your node
             </Link>
           </motion.div>
         </div>

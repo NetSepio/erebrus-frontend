@@ -5,9 +5,9 @@ const Pricing = () => {
   return (
     <div
       id="pricing"
-      className="flex items-center justify-center w-[80%] gap-20 mx-auto py-40"
+      className="lg:flex items-center justify-center w-[80%] gap-20 mx-auto py-40"
     >
-      <div>
+      <div className="lg:mb-0 mb-10">
       <h1 className="text-4xl font-bold mb-4" style={{color:'#3985FF'}}>
       Erebrus Beta Release
       </h1>
@@ -24,7 +24,7 @@ const Pricing = () => {
           </ul>
         </div>
         <Link
-          href="/mint"
+          href="/plans"
           className="bg-white text-black font-bold py-3 px-6 rounded-full w-full"
           style={{backgroundImage: 'linear-gradient(#FFFFFF00, #0099FF)'}}
         >

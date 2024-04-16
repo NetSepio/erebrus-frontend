@@ -17,7 +17,10 @@ const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_BASE_URL;
 const mynetwork = process.env.NEXT_PUBLIC_NETWORK;
 import QRCode from "qrcode.react";
 import { saveAs } from "file-saver";
-import { WalletConnectButton, WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import {
+  WalletConnectButton,
+  WalletMultiButton,
+} from "@solana/wallet-adapter-react-ui";
 const envcollectionid = process.env.NEXT_PUBLIC_COLLECTIONID;
 const graphqlaptos = process.env.NEXT_PUBLIC_GRAPHQL_APTOS;
 
@@ -39,7 +42,6 @@ const transition = {
   ease: "easeInOut",
   duration: 0.5,
 };
-
 
 const isSendableNetwork = (connected: any, network: string) => {
   return connected && network?.toLowerCase() === mynetwork.toLowerCase();
@@ -335,7 +337,9 @@ const Subscription = () => {
         });
 
         console.log("vpn nft", response.data.data.current_token_ownerships_v2);
-        setnftdata(response.data.data.current_token_ownerships_v2);
+        if (response.data.data.current_token_ownerships_v2.length > 0) {
+          setnftdata(response.data.data.current_token_ownerships_v2);
+        }
       } catch (error) {
         console.error("Error fetching nft data:", error);
       } finally {
@@ -524,7 +528,7 @@ const Subscription = () => {
   const handleTrialClick = () => {
     setvpnPage(true);
     setcollectionsPage(false);
-  }
+  };
 
   const [imageSrc, setImageSrc] = React.useState<string | null>(null);
 
@@ -570,7 +574,7 @@ const Subscription = () => {
           const payload = response.data.payload;
           setNodesData(payload);
           const filteredNodes = payload.filter(
-            (node: { status: string; }) => node.status === "active"
+            (node) => node.status === "active"
           );
           setActiveNodesData(filteredNodes);
           console.log("erebrus nodes", payload);
@@ -585,7 +589,6 @@ const Subscription = () => {
   }, []);
 
   //-----------------------------------------------------------------------------------------------------------------------
-
 
   // -------------------------------------------------- check for trial subscription ------------------------------------------------
 
@@ -605,32 +608,31 @@ const Subscription = () => {
           }
         );
 
-        if (response.status === 200) {
-          const responseData = await response.json();
+        const responseData = await response.json();
+        if (responseData?.subscription) {
           settrialsubscriptiondata(responseData);
           console.log("trial subsc response", responseData);
         }
-
       } catch (error) {
         console.error("Error:", error);
       } finally {
       }
-    }
+    };
 
     trialbuycheck();
-  }, [])
+  }, []);
 
   // Extracting day, year, and time from the dateTime string
-  const formatDateTime = (dateTime: string | number | Date) => {
+  const formatDateTime = (dateTime) => {
     const dateObj = new Date(dateTime);
     const day = dateObj.getDate();
-    const month = dateObj.toLocaleString('default', { month: 'long' });
+    const month = dateObj.toLocaleString("default", { month: "long" });
     const year = dateObj.getFullYear();
     const time = dateObj.toLocaleTimeString();
     return `${day} ${month} ${year} ${time}`;
   };
 
-  if (!wallet || loggedin) {
+  if (!wallet || !loggedin) {
     return (
       <>
         <div className="min-h-screen">
@@ -648,7 +650,7 @@ const Subscription = () => {
           <div className="text-white font-bold py-4 px-10 rounded-lg mx-auto flex justify-center mt-10">
             {!connected && (
               <button className="">
-                <WalletMultiButton/>
+                <WalletMultiButton />
               </button>
             )}
             {connected && (
@@ -677,32 +679,44 @@ const Subscription = () => {
                 <div className="text-2xl text-white font-semibold text-left ml-4 my-6 border-b border-gray-700 pb-4">
                   Subscription
                 </div>
-                {nftdata && !trialsubscriptiondata && (
-                  <div
-                    className="mx-auto px-4 min-h-screen">
+                {!nftdata && !trialsubscriptiondata && (
+                  <div className="mx-auto px-4 min-h-screen">
                     <div className="w-full text-center py-20">
-                      <h2 className="text-4xl font-bold text-white">No Subscription</h2>
+                      <h2 className="text-4xl font-bold text-white">
+                        No Subscription
+                      </h2>
                       <div className="bg-blue-500 text-white font-bold py-4 px-6 rounded-lg w-1/5 mx-auto my-20">
                         <Link href="/plans">Try our free trial now</Link>
                       </div>
                     </div>
                   </div>
                 )}
-                {!nftdata && (<NftdataContainer
-                  metaDataArray={nftdata}
-                  MyReviews={false}
-                  selectCollection={handleCollectionClick}
-                />)}
-                {
-                  trialsubscriptiondata && (
-                    <div className="w-1/4 rounded-3xl" style={{ backgroundColor: '#202333', border: '1px solid #0162FF' }}>
+                <div className="flex gap-10 w-1/2">
+                  <div className="w-1/2">
+                    {nftdata && (
+                      <NftdataContainer
+                        metaDataArray={nftdata}
+                        MyReviews={false}
+                        selectCollection={handleCollectionClick}
+                      />
+                    )}
+                  </div>
+                  {trialsubscriptiondata && (
+                    <div
+                      className="w-1/2 rounded-3xl mt-2 mb-2 relative"
+                      style={{
+                        backgroundColor: "#202333",
+                        border: "1px solid #0162FF",
+                      }}
+                    >
                       <div className="w-full h-full rounded-lg px-6 pt-6">
                         <button onClick={handleTrialClick}>
                           <div className="flex flex-col">
                             <div className="w-full">
                               <h3 className="leading-12 mb-2 text-white">
                                 <div className="text-lg font-semibold mt-4 uppercase">
-                                  {trialsubscriptiondata.data.type} Subscription
+                                  {trialsubscriptiondata.subscription.type}{" "}
+                                  Subscription
                                 </div>
                                 <div className="lg:flex md:flex justify-between">
                                   <div className="text-md font-semibold mt-4">
@@ -717,22 +731,49 @@ const Subscription = () => {
                               <div className="rounded-xl">
                                 <div className="text-sm text-white text-start mt-2">
                                   <div className="mb-3">
-                                    <span className="text-green-500 ">Start time :</span> {trialsubscriptiondata.data.startTime ? formatDateTime(trialsubscriptiondata.data.startTime) : 'Loading...'}
+                                    <span className="text-green-500 ">
+                                      Start time :
+                                    </span>{" "}
+                                    {trialsubscriptiondata.subscription
+                                      .startTime
+                                      ? formatDateTime(
+                                          trialsubscriptiondata.subscription
+                                            .startTime
+                                        )
+                                      : "Loading..."}
                                   </div>
                                   <div className="">
-                                    <span className="text-red-500 ">End time :</span> {trialsubscriptiondata.data.endTime ? formatDateTime(trialsubscriptiondata.data.endTime) : 'Loading...'}
+                                    <span className="text-red-500 ">
+                                      End time :
+                                    </span>{" "}
+                                    {trialsubscriptiondata.subscription.endTime
+                                      ? formatDateTime(
+                                          trialsubscriptiondata.subscription
+                                            .endTime
+                                        )
+                                      : "Loading..."}
                                   </div>
                                 </div>
                               </div>
 
-                              <div className="rounded-full px-10 py-2 mt-32 mb-10 text-white" style={{ backgroundColor: '#0162FF' }}>Create Clients</div>
+                              <div
+                                className="rounded-full px-10 py-2 mb-10 text-white"
+                                style={{
+                                  backgroundColor: "#0162FF",
+                                  position: "absolute",
+                                  bottom: 0,
+                                  left: 80,
+                                }}
+                              >
+                                Create Clients
+                              </div>
                             </div>
                           </div>
                         </button>
                       </div>
                     </div>
-                  )
-                }
+                  )}
+                </div>
               </>
             )}
 
@@ -768,7 +809,6 @@ const Subscription = () => {
 
                   {buttonset && (
                     <>
-
                       <div
                         style={{ backgroundColor: "#222944E5" }}
                         className="flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full"
@@ -867,7 +907,6 @@ const Subscription = () => {
                                       </div>
 
                                       <div className="flex-col gap-4 mr-4">
-
                                         <div className="text-center w-1/2 mt-10 mx-auto">
                                           <div className="mb-4 md:mb-8">
                                             <button
@@ -909,7 +948,6 @@ const Subscription = () => {
                             border: "1px solid #0162FF",
                           }}
                         >
-
                           <div className="py-4 space-y-4 mt-4">
                             <p className="text-3xl text-center font-semibold text-white">
                               Successfully created!

@@ -7,7 +7,7 @@ const Explorer = () => {
 
     return(
         <div className="">
-            <div className="container mx-auto pt-40 w-4/5 min-h-screen" 
+            <div className="container mx-auto py-20 w-4/5" 
             style={{backgroundImage: 'radial-gradient(circle at center, #0162FF80 20%, black)'}}>
         <div className="flex flex-col items-center justify-start lg:h-full mt-10 lg:ml-0 lg:mr-0 md:ml-0 md:mr-0 ml-4 mr-4 mb-36 lg:mb-0 ">
           <motion.h1
@@ -15,7 +15,7 @@ const Explorer = () => {
             animate={{ y: 0, opacity: 1, transition: { duration: 1 } }}
             className="text-5xl font-semibold text-gray-300 mb-4 lg:text-center md:text-center md:w-[80%]"
           >
-            Decentralized Access with Erebrus DEPIN
+            Access Safe Internet over DeWi Networks
           </motion.h1>
           <motion.h1
             initial={{ y: 100, opacity: 0 }}
