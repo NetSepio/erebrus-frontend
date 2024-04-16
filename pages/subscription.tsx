@@ -617,9 +617,9 @@ const Subscription = () => {
             },
           }
         );
-  
-        if (response.status === 200) {
-              const responseData = await response.json();
+        
+        const responseData = await response.json();
+        if (responseData?.subscription) {
               settrialsubscriptiondata(responseData);
               console.log("trial subsc response", responseData);
         }
@@ -682,7 +682,7 @@ const Subscription = () => {
   }
 
   return (
-    <div className="py-0">
+    <div className="py-0 min-h-screen">
       <section className="">
         <div className="px-10 mx-auto">
           <div className="w-full mx-auto text-left md:text-center">
@@ -703,23 +703,27 @@ const Subscription = () => {
                 </div>
                 )}
                 <div className="flex gap-10 w-1/2">
-                  <div className="w-1/2">
-                {nftdata && (<NftdataContainer
+                  
+                {nftdata && (
+                <div className="w-1/2">
+                  <NftdataContainer
                   metaDataArray={nftdata}
                   MyReviews={false}
                   selectCollection={handleCollectionClick}
-                />)}
+                />
                 </div>
+                )}
+            
                 {
                   trialsubscriptiondata && (
-                    <div className="w-1/2 rounded-3xl mt-2 mb-2 relative" style={{ backgroundColor:'#202333', border: '1px solid #0162FF'}}>
+                    <div className="w-1/2 rounded-3xl mt-2 mb-2 relative min-h-96" style={{ backgroundColor:'#202333', border: '1px solid #0162FF'}}>
       <div className="w-full h-full rounded-lg px-6 pt-6">
         <button onClick={handleTrialClick}>
           <div className="flex flex-col">
             <div className="w-full">
               <h3 className="leading-12 mb-2 text-white">
               <div className="text-lg font-semibold mt-4 uppercase">
-                    {trialsubscriptiondata.data.type} Subscription         
+                    {trialsubscriptiondata.subscription.type} Subscription         
                   </div>  
                 <div className="lg:flex md:flex justify-between">
                   <div className="text-md font-semibold mt-4">
@@ -734,10 +738,10 @@ const Subscription = () => {
               <div className="rounded-xl">
                 <div className="text-sm text-white text-start mt-2">
                   <div className="mb-3">
-                  <span className="text-green-500 ">Start time :</span> {trialsubscriptiondata.data.startTime ? formatDateTime(trialsubscriptiondata.data.startTime) : 'Loading...'}
+                  <span className="text-green-500 ">Start time :</span> {trialsubscriptiondata.subscription.startTime ? formatDateTime(trialsubscriptiondata.subscription.startTime) : 'Loading...'}
                   </div>
                   <div className="">                 
-                  <span className="text-red-500 ">End time :</span> {trialsubscriptiondata.data.endTime ? formatDateTime(trialsubscriptiondata.data.endTime) : 'Loading...'}
+                  <span className="text-red-500 ">End time :</span> {trialsubscriptiondata.subscription.endTime ? formatDateTime(trialsubscriptiondata.subscription.endTime) : 'Loading...'}
                   </div>
                 </div>
               </div>
