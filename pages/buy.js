@@ -4,15 +4,15 @@ import axios from "axios";
 import Head from "next/head";
 import { motion } from "framer-motion";
 import Cookies from "js-cookie";
-import {
-  useWallet,
-} from "@aptos-labs/wallet-adapter-react";
+// import {
+//   useWallet,
+// } from "@aptos-labs/wallet-adapter-react";
 import dynamic from "next/dynamic";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import CheckoutForm from "../components/CheckoutForm.tsx";
-import { aptosClient } from "../module";
-export const APTOS_COIN = "0x1::aptos_coin::AptosCoin";
+// import { aptosClient } from "../module";
+// export const APTOS_COIN = "0x1::aptos_coin::AptosCoin";
 
 // Make sure to call `loadStripe` outside of a component’s render to avoid
 // recreating the `Stripe` object on every render.

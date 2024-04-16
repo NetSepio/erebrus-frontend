@@ -21,7 +21,7 @@ const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_BASE_URL;
 const mynetwork = process.env.NEXT_PUBLIC_NETWORK;
 import QRCode from "qrcode.react";
 import { saveAs } from "file-saver";
-import * as tweetnacl from 'tweetnacl'
+
 const envcollectionid = process.env.NEXT_PUBLIC_COLLECTIONID;
 const graphqlaptos = process.env.NEXT_PUBLIC_GRAPHQL_APTOS;
 
