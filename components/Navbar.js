@@ -24,7 +24,7 @@ const variants = {
 };
 
 const isSendableNetwork = (connected, network) => {
-  return connected ;
+  return connected && network;
 };
 
 const Navbar = ({ isHome }) => {
