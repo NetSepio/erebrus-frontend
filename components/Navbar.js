@@ -364,7 +364,7 @@ const Navbar = ({ isHome }) => {
           {!token ? (
             <div className="lg:mt-0 mt-4 z-50 rounded-xl text-white">
              
- <ConnectButton/>
+ <ConnectButton label="connect" />
 
               {status === "connected" && showsignbutton && (
             <Button
@@ -461,7 +461,7 @@ const Navbar = ({ isHome }) => {
              
              {!connected && ( <button>
               
-              <ConnectButton/>
+              <ConnectButton label="connect"/>
               </button>
              
              )}

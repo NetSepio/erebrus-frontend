@@ -660,7 +660,7 @@ const suiwallet = useWallet()
             {!connected && (
               <button className="">
                 {/* <WalletSelectorAntDesign /> */}
-                <ConnectButton/>
+                <ConnectButton label="connect"/>
               </button>
             )}
             {connected && (
