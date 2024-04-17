@@ -34,7 +34,7 @@ const Pricing = () => {
       <div className="flex flex-col justify-start py-16 px-10 rounded-2xl shadow-lg shadow-blue-500" style={{backgroundColor:'#0162FF'}}>
         <h1 className="text-gray-200 text-xl">Pricing</h1>
         <div className="flex items-center mb-4">
-          <h1 className="text-gray-200 mr-2 text-4xl">1.11 APT / 3 months</h1>
+          <h1 className="text-gray-200 mr-2 text-4xl">11.11 SUI / 3 months</h1>
           {/* <p className="text-gray-400">/ 3 months</p> */}
         </div>
       </div>
