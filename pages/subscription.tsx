@@ -4,6 +4,17 @@ import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
 import MyVpnContainer from "../components/Myvpncontainer";
 import NftdataContainer from "../components/NftDataContainer";
+// import emoji from "../../../public/EmojiMessage.png";
+// import connectWallet from "../components/connectwallet";
+import novpn from "../public/novpn2.png";
+import vpn1 from "../public/vpn1.png";
+import vpn2 from "../public/vpn2.png";
+import vpn3 from "../public/vpn3.png";
+import vpn4 from "../public/vpn4.png";
+import vpn5 from "../public/vpn5.png";
+import vpn6 from "../public/vpn6.png";
+import vpn7 from "../public/vpn7.png";
+import Image from "next/image";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import dynamic from "next/dynamic";
 import crypto from "crypto";
@@ -13,9 +24,9 @@ import { Network } from "@aptos-labs/ts-sdk";
 import Button from "../components/Button";
 import SingleSignerTransaction from "../components/transactionFlow/SingleSigner";
 const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
-const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_BASE_URL;
 const mynetwork = process.env.NEXT_PUBLIC_NETWORK;
 import QRCode from "qrcode.react";
+import { FaDownload, FaQrcode } from "react-icons/fa";
 import { saveAs } from "file-saver";
 const envcollectionid = process.env.NEXT_PUBLIC_COLLECTIONID;
 const graphqlaptos = process.env.NEXT_PUBLIC_GRAPHQL_APTOS;
@@ -32,6 +43,8 @@ export interface WalletData {
 interface FormData {
   name: string;
   region: string;
+  // type: "decentralized";
+  // domain: string;
 }
 const transition = {
   type: "tween",
@@ -53,12 +66,20 @@ const isSendableNetwork = (connected, network) => {
 
 const Subscription = () => {
   const [loading, setLoading] = useState<boolean>(false);
+  const [profileset, setprofileset] = useState<boolean>(true);
   const [buttonset, setbuttonset] = useState<boolean>(false);
   const [projectsData, setprojectsData] = useState<any>(null);
+  const [dedicatedVpnData, setdedicatedVpnData] = useState<any>(null);
   const [nftdata, setnftdata] = useState<any>(null);
   const [msg, setMsg] = useState<string>("");
+  const [successmsg, setsuccessMsg] = useState<string>("");
+  const [errormsg, seterrorMsg] = useState<string>("");
   const [region, setregion] = useState<string>("");
   const [verify, setverify] = useState<boolean>(false);
+  const [endpoint, setEndpoint] = useState<string>("");
+  const [vpntype, setvpntype] = useState<string>("decentralized");
+  const [subscription, setSubscription] = useState<string>("option");
+  const [about, setabout] = useState<boolean>(false);
   const [collectionsPage, setcollectionsPage] = useState<boolean>(true);
   const [collectionId, setcollectionId] = useState<string>();
   const [collectionName, setcollectionName] = useState<string>();
@@ -66,11 +87,15 @@ const Subscription = () => {
   const [vpnPage, setvpnPage] = useState<boolean>(false);
   const [valueFromChild2, setValueFromChild2] = useState<string>("");
   const [note, setnote] = useState<boolean>(true);
-  const [trialsubscriptiondata, settrialsubscriptiondata] = useState<any>(null);
+  //const txtvalue = localStorage.getItem("txtvalue");
 
   const { account, connected, network, signMessage } = useWallet();
 
   let sendable = isSendableNetwork(connected, network?.name);
+
+  const bg2 = {
+    backgroundColor: "white",
+  };
 
   const bg = {
     backgroundColor: "#202333",
@@ -89,9 +114,27 @@ const Subscription = () => {
     color: "#788AA3",
   };
 
+  const text2 = {
+    color: "#11D9C5",
+  };
+
+  const successtext = {
+    color: "#141a31",
+  };
+
+  const errortext = {
+    color: "#EE4B2B",
+  };
+
+  const bgverify = {
+    backgroundColor: "#141a31",
+  };
+
   const initialFormData: FormData = {
     name: "",
     region: "",
+    // type: "",
+    // domain: '',
   };
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [ConfigFile, setConfigFile] = useState<string>("");
@@ -137,7 +180,7 @@ const Subscription = () => {
       const formDataObj = new FormData();
       formDataObj.append("name", formData.name);
       // formDataObj.append("region", formData.region);
-      // formDataObj.append("collectionId", collectionId);
+      formDataObj.append("collectionId", collectionId);
       formDataObj.append("presharedKey", keys.preSharedKey);
       formDataObj.append("publicKey", keys.pubKey);
 
@@ -172,7 +215,7 @@ const Subscription = () => {
       // } else
       // if (formData.type === "decentralized") {
       const response = await fetch(
-        `${EREBRUS_GATEWAY_URL}api/v1.0/erebrus/client/${formData.region}`,
+        `${REACT_APP_GATEWAY_URL}api/v1.0/erebrus/client/${formData.region}`,
         {
           method: "POST",
           headers: {
@@ -226,7 +269,7 @@ const Subscription = () => {
         const auth = Cookies.get("erebrus_token");
 
         const response = await axios.get(
-          `${EREBRUS_GATEWAY_URL}api/v1.0/erebrus/clients`,
+          `${REACT_APP_GATEWAY_URL}api/v1.0/erebrus/clients?region=${region}&collection_id=${collectionId}`,
           {
             headers: {
               Accept: "application/json, text/plain, */*",
@@ -341,9 +384,7 @@ const Subscription = () => {
         });
 
         console.log("vpn nft", response.data.data.current_token_ownerships_v2);
-        if(response.data.data.current_token_ownerships_v2.length > 0) {
-          setnftdata(response.data.data.current_token_ownerships_v2);
-        }
+        setnftdata(response.data.data.current_token_ownerships_v2);
       } catch (error) {
         console.error("Error fetching nft data:", error);
       } finally {
@@ -529,11 +570,6 @@ const Subscription = () => {
     setcollectionsPage(false);
   };
 
-  const handleTrialClick = () =>{
-    setvpnPage(true);
-    setcollectionsPage(false);
-  }
-
   const [imageSrc, setImageSrc] = React.useState<string | null>(null);
 
   useEffect(() => {
@@ -552,91 +588,6 @@ const Subscription = () => {
     };
     fetchMetaData();
   }, [collectionImage]);
-
-  // -----------------------------------------------to fetch regions from node data-----------------------------------------------
-
-  const [nodesdata, setNodesData] = useState([]);
-  const [activeNodesData, setActiveNodesData] = useState([]);
-
-  useEffect(() => {
-    const fetchNodesData = async () => {
-      try {
-        const auth = Cookies.get("erebrus_token");
-
-        const response = await axios.get(
-          `${EREBRUS_GATEWAY_URL}api/v1.0/nodes/all`,
-          {
-            headers: {
-              Accept: "application/json, text/plain, */*",
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${auth}`,
-            },
-          }
-        );
-
-        if (response.status === 200) {
-          const payload = response.data.payload;
-          setNodesData(payload);
-          const filteredNodes = payload.filter(
-            (node) => node.status === "active"
-          );
-          setActiveNodesData(filteredNodes);
-          console.log("erebrus nodes", payload);
-        }
-      } catch (error) {
-        console.error("Error fetching nodes data:", error);
-      } finally {
-      }
-    };
-
-    fetchNodesData();
-  }, []);
-
-  //-----------------------------------------------------------------------------------------------------------------------
-
-
-  // -------------------------------------------------- check for trial subscription ------------------------------------------------
-
-  useEffect(() => {
-    const trialbuycheck = async() =>{
-      const auth = Cookies.get("erebrus_token");
-      try {
-        const response = await fetch(
-          `${EREBRUS_GATEWAY_URL}api/v1.0/subscription`,
-          {
-            method: "GET",
-            headers: {
-              Accept: "application/json, text/plain, */*",
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${auth}`,
-            },
-          }
-        );
-        
-        const responseData = await response.json();
-        if (responseData?.subscription) {
-              settrialsubscriptiondata(responseData);
-              console.log("trial subsc response", responseData);
-        }
-  
-      } catch (error) {
-        console.error("Error:", error);
-      } finally {
-      }
-  }
-  
-    trialbuycheck();
-  }, [])
-
-  // Extracting day, year, and time from the dateTime string
-  const formatDateTime = (dateTime) => {
-    const dateObj = new Date(dateTime);
-    const day = dateObj.getDate();
-    const month = dateObj.toLocaleString('default', { month: 'long' });
-    const year = dateObj.getFullYear();
-    const time = dateObj.toLocaleTimeString();
-    return `${day} ${month} ${year} ${time}`;
-  };
 
   if (!wallet || !loggedin) {
     return (
@@ -676,7 +627,7 @@ const Subscription = () => {
   }
 
   return (
-    <div className="py-0 min-h-screen">
+    <div className="py-0">
       <section className="">
         <div className="px-10 mx-auto">
           <div className="w-full mx-auto text-left md:text-center">
@@ -685,72 +636,13 @@ const Subscription = () => {
                 <div className="text-2xl text-white font-semibold text-left ml-4 my-6 border-b border-gray-700 pb-4">
                   Subscription
                 </div>
-                { !nftdata && !trialsubscriptiondata && (
-                  <div
-                  className="mx-auto px-4 min-h-screen">
-                  <div className="w-full text-center py-20">
-                  <h2 className="text-4xl font-bold text-white">No Subscription</h2>
-                  <div className="bg-blue-500 text-white font-bold py-4 px-6 rounded-lg w-1/5 mx-auto my-20">
-                    <Link href="/plans">Try our free trial now</Link>
-                  </div>
-                </div>
-                </div>
-                )}
-                <div className="flex gap-10 w-1/2">
-                  
-                {nftdata && (
-                <div className="w-1/2">
-                  <NftdataContainer
+                <div className="w-1/4">
+                <NftdataContainer
                   metaDataArray={nftdata}
                   MyReviews={false}
                   selectCollection={handleCollectionClick}
                 />
                 </div>
-                )}
-            
-                {
-                  trialsubscriptiondata && (
-                    <div className="w-1/2 rounded-3xl mt-2 mb-2 relative min-h-96" style={{ backgroundColor:'#202333', border: '1px solid #0162FF'}}>
-      <div className="w-full h-full rounded-lg px-6 pt-6">
-        <button onClick={handleTrialClick}>
-          <div className="flex flex-col">
-            <div className="w-full">
-              <h3 className="leading-12 mb-2 text-white">
-              <div className="text-lg font-semibold mt-4 uppercase">
-                    {trialsubscriptiondata.subscription.type} Subscription         
-                  </div>  
-                <div className="lg:flex md:flex justify-between">
-                  <div className="text-md font-semibold mt-4">
-                  Status: {trialsubscriptiondata.status}                    
-                  </div>
-                  <div className="text-md font-semibold mt-4">
-                  Valid for 7 days 
-                  </div>
-                </div>  
-              </h3>
-
-              <div className="rounded-xl">
-                <div className="text-sm text-white text-start mt-2">
-                  <div className="mb-3">
-                  <span className="text-green-500 ">Start time :</span> {trialsubscriptiondata.subscription.startTime ? formatDateTime(trialsubscriptiondata.subscription.startTime) : 'Loading...'}
-                  </div>
-                  <div className="">                 
-                  <span className="text-red-500 ">End time :</span> {trialsubscriptiondata.subscription.endTime ? formatDateTime(trialsubscriptiondata.subscription.endTime) : 'Loading...'}
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-full px-10 py-2 mb-10 text-white" 
-              style={{backgroundColor:'#0162FF', position: 'absolute',bottom: 0, left:80}}>
-                Create Clients</div>
-            </div>
-          </div>
-        </button>
-      </div>
-    </div>
-                  )
-                }
-          </div>
               </>
             )}
 
@@ -768,6 +660,8 @@ const Subscription = () => {
                         className="w-14 rounded-full"
                       />
                       <div className="mt-2">Name - {collectionName}</div>
+                      {/* (collection: {collectionId.slice(0, 4)}...
+                      {collectionId.slice(-4)}) */}
                     </div>
 
                     <div className="text-white mr-40 mt-6">
@@ -784,8 +678,73 @@ const Subscription = () => {
                     </div>
                   </h1>
 
+                  {/* <select
+                              id="region"
+                              style={border}
+                              className="shadow border flex appearance-none rounded lg:w-1/5 md:w-1/3 py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
+                              value={region}
+                              onChange={handleRegionChange}
+                              required
+                            >
+                              <option className="bg-white text-black" value="">
+                                Select Region
+                              </option>
+                              <option
+                                    className="bg-white text-black"
+                                    value="us"
+                                  >
+                                    US
+                                  </option>
+                                  <option
+                                    className="bg-white text-black"
+                                    value="sg"
+                                  >
+                                    Singapore
+                                  </option>
+                                      <option
+                                      className="bg-white text-black"
+                                      value="eu"
+                                    >
+                                      Europe
+                                    </option>
+                                    <option
+                                      className="bg-white text-black"
+                                      value="ca"
+                                    >
+                                      Canada
+                                    </option>
+                                    <option
+                                      className="bg-white text-black"
+                                      value="jp"
+                                    >
+                                      Japan
+                                    </option>
+                                  </select> */}
+
                   {buttonset && (
                     <>
+                      {/* <div className="flex text-xs mb-4">
+                        <button
+                          className="p-4 px-3 rounded-l-lg"
+                          style={{
+                            backgroundColor: buttonset ? "#11D9C5" : "#222944",
+                            color: buttonset ? "black" : "white",
+                          }}
+                          onClick={() => setvpntype("decentralized")}
+                        >
+                          Create VPNs
+                        </button>
+                        <button
+                          className="p-4 px-6 rounded-r-lg"
+                          style={{
+                            backgroundColor: !buttonset ? "#11D9C5" : "#222944",
+                            color: !buttonset ? "black" : "white",
+                          }}
+                          onClick={() => setbuttonset(false)}
+                        >
+                          My Clients
+                        </button>
+                      </div> */}
 
                       <div
                         style={{ backgroundColor: "#222944E5" }}
@@ -870,21 +829,78 @@ const Subscription = () => {
                                             >
                                               Select Region
                                             </option>
-
-                                            {activeNodesData.map((node) => (
-                                              <option
-                                                key={node.id}
-                                                className="bg-white text-black"
-                                                value={node.id}
-                                              >
-                                                {node.region}
-                                              </option>
-                                            ))}
+                                            <option
+                                              className="bg-white text-black"
+                                              value="us"
+                                            >
+                                              US
+                                            </option>
+                                            <option
+                                              className="bg-white text-black"
+                                              value="sg"
+                                            >
+                                              Singapore
+                                            </option>
+                                            {/* {(formData.type === "decentralized") && <> */}
+                                            <option
+                                              className="bg-white text-black"
+                                              value="eu"
+                                            >
+                                              Europe
+                                            </option>
+                                            <option
+                                              className="bg-white text-black"
+                                              value="ca"
+                                            >
+                                              Canada
+                                            </option>
+                                            <option
+                                              className="bg-white text-black"
+                                              value="jp"
+                                            >
+                                              Japan
+                                            </option>
+                                            <option
+                                              className="bg-white text-black"
+                                              value="hk"
+                                            >
+                                              Hong Kong
+                                            </option>
+                                            {/* </>} */}
                                           </select>
                                         </div>
                                       </div>
 
                                       <div className="flex-col gap-4 mr-4">
+                                        {/* <div className="mb-6 w-1/2">
+                                <select
+                                  id="type"
+                                  style={border}
+                                  className="shadow border appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
+                                  value={formData.type}
+                                  onChange={handleInputChange}
+                                  required
+                                >
+                                  <option
+                                    className="bg-white text-black"
+                                    value=""
+                                  >
+                                    Select VPN type
+                                  </option>
+                                  <option
+                                    className="bg-white text-black"
+                                    value="dedicated"
+                                  >
+                                    Dedicated
+                                  </option>
+                                  <option
+                                    className="bg-white text-black"
+                                    value="decentralized"
+                                  >
+                                    Decentralized
+                                  </option>
+                                </select>
+                              </div> */}
 
                                         <div className="text-center w-1/2 mt-10 mx-auto">
                                           <div className="mb-4 md:mb-8">
@@ -900,7 +916,14 @@ const Subscription = () => {
                                             </button>
                                           </div>
                                         </div>
+
+                                        {/* {msg == "success" && (
+                              <p className="text-green-500">Successful</p>
+                            )} */}
+
+                                        {/* {msg == "error" && ( */}
                                         <p className="text-red-500">{msg}</p>
+                                        {/* )} */}
                                       </div>
                                     </div>
                                   </form>
@@ -927,12 +950,45 @@ const Subscription = () => {
                             border: "1px solid #0162FF",
                           }}
                         >
+                          {/* <div className="flex items-center justify-end p-4 md:p-5 rounded-t dark:border-gray-600">
+                                      <button
+                                        onClick={() => {setbuttonset(false); setverify(false); setMsg("")}}
+                                        type="button"
+                                        className="text-white bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                                      >
+                                        <svg
+                                          className="w-3 h-3"
+                                          aria-hidden="true"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          fill="none"
+                                          viewBox="0 0 14 14"
+                                        >
+                                          <path
+                                            stroke="currentColor"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+                                          />
+                                        </svg>
+                                        <span className="sr-only">
+                                          Close modal
+                                        </span>
+                                      </button>
+                                    </div> */}
 
                           <div className="py-4 space-y-4 mt-4">
                             <p className="text-3xl text-center font-semibold text-white">
                               Successfully created!
                             </p>
 
+                            {/* <p
+                                        className="text-sm mx-auto"
+                                        style={{ color: "#5696FF" }}
+                                      >
+                                        Quick Reminder: Backup your WireGuard VPN config now! <br></br>
+                                        Download or scan the QR code to avoid re-setup for Erebrus VPN
+                                      </p> */}
                             <div className="flex w-full flex-col items-center justify-center">
                               <div className="bg-white mx-auto my-4 w-1/2 justify-center flex h-60 rounded-3xl">
                                 <div className="mt-4">
@@ -973,6 +1029,12 @@ const Subscription = () => {
                                     <div style={{ color: "white" }}>
                                       Download
                                     </div>
+                                    {/* <FaDownload
+                                                style={{
+                                                  color: "#11D9C5",
+                                                }}
+                                                className="mt-2"
+                                              /> */}
                                   </div>
                                 </button>
                               </div>
@@ -999,24 +1061,24 @@ const Subscription = () => {
 
                   {loading && (
                     <div
-                      style={{ backgroundColor: "#040819D9" }}
-                      className="flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full"
-                      id="popupmodal"
-                    >
-                      <div className="relative p-4 lg:w-1/5 w-full max-w-2xl max-h-full">
-                        <div className="relative rounded-lg shadow">
-                          <div className="flex justify-center gap-4">
-                            <img
-                              className="w-12 animate-spin duration-[3000] h-12"
-                              src="/Loadingerebrus.png"
-                              alt="Loading icon"
-                            />
-
-                            <span className="text-white mt-2">Loading...</span>
-                          </div>
+                    style={{ backgroundColor: "#040819D9" }}
+                    className='flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full'
+                    id='popupmodal'
+                  >
+                    <div className='relative p-4 lg:w-1/5 w-full max-w-2xl max-h-full'>
+                      <div className='relative rounded-lg shadow'>
+                        <div className='flex justify-center gap-4'>
+                          <img
+                            className='w-12 animate-spin duration-[3000] h-12'
+                            src='/Loadingerebrus.png'
+                            alt='Loading icon'
+                          />
+              
+                          <span className='text-white mt-2'>Loading...</span>
                         </div>
                       </div>
                     </div>
+                  </div>
                   )}
 
                   {!buttonset && (
@@ -1045,24 +1107,16 @@ const Subscription = () => {
                                 </div>
                               </div>
 
+                              {/* {vpntype === "decentralized" && (
+                            <> */}
                               <div
                                 className="w-full h-full rounded-xl mt-10 pb-2"
                                 style={bg}
                               >
-                                <div className="pt-4 pb-4 flex justify-between">
-                                  <div className="ml-8 text-white text-2xl">
-                                    My Clients
-                                  </div>
-                                  <a
-                                    href="https://docs.netsepio.com/erebrus/erebrus/setup"
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="mr-8 underline"
-                                    style={{ color: "#5696FF" }}
-                                  >
-                                    How to Start Using Erebrus VPN
-                                  </a>
-                                </div>
+                              <div className="pt-4 pb-4 flex justify-between">
+                              <div className="ml-8 text-white text-2xl">My Clients</div>
+                              <a href="https://docs.netsepio.com/erebrus/erebrus/setup" target="_blank" rel="noreferrer" className="mr-8 underline" style={{color: "#5696FF"}}>How to Start Using Erebrus VPN</a>
+                              </div>
 
                                 <div className="w-full flex justify-between px-14 p-4">
                                   <h3 className="text-lg leading-12 w-1/4 text-left">
@@ -1189,26 +1243,24 @@ const Subscription = () => {
 
                         {loading && (
                           <div
-                            style={{ backgroundColor: "#040819D9" }}
-                            className="flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full"
-                            id="popupmodal"
-                          >
-                            <div className="relative p-4 lg:w-1/5 w-full max-w-2xl max-h-full">
-                              <div className="relative rounded-lg shadow">
-                                <div className="flex justify-center gap-4">
-                                  <img
-                                    className="w-12 animate-spin duration-[3000] h-12"
-                                    src="/Loadingerebrus.png"
-                                    alt="Loading icon"
-                                  />
-
-                                  <span className="text-white mt-2">
-                                    Loading...
-                                  </span>
-                                </div>
+                          style={{ backgroundColor: "#040819D9" }}
+                          className='flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full'
+                          id='popupmodal'
+                        >
+                          <div className='relative p-4 lg:w-1/5 w-full max-w-2xl max-h-full'>
+                            <div className='relative rounded-lg shadow'>
+                              <div className='flex justify-center gap-4'>
+                                <img
+                                  className='w-12 animate-spin duration-[3000] h-12'
+                                  src='/Loadingerebrus.png'
+                                  alt='Loading icon'
+                                />
+                    
+                                <span className='text-white mt-2'>Loading...</span>
                               </div>
                             </div>
                           </div>
+                        </div>
                         )}
                       </section>
                     </>
