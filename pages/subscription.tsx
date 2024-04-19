@@ -384,7 +384,9 @@ const Subscription = () => {
         });
 
         console.log("vpn nft", response.data.data.current_token_ownerships_v2);
-        setnftdata(response.data.data.current_token_ownerships_v2);
+        if(response.data.data.current_token_ownerships_v2.length > 0) {
+          setnftdata(response.data.data.current_token_ownerships_v2);
+        }
       } catch (error) {
         console.error("Error fetching nft data:", error);
       } finally {
@@ -636,6 +638,17 @@ const Subscription = () => {
                 <div className="text-2xl text-white font-semibold text-left ml-4 my-6 border-b border-gray-700 pb-4">
                   Subscription
                 </div>
+                { !nftdata && (
+                  <div
+                  className="mx-auto px-4 min-h-screen">
+                  <div className="w-full text-center py-20">
+                  <h2 className="text-4xl font-bold text-white">No Subscription</h2>
+                  <div className="bg-blue-500 text-white font-bold py-4 px-6 rounded-lg w-1/5 mx-auto my-20">
+                    <Link href="/plans">Try our free trial now</Link>
+                  </div>
+                </div>
+                </div>
+                )}
                 <div className="w-1/4">
                 <NftdataContainer
                   metaDataArray={nftdata}
