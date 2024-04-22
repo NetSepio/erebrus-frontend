@@ -40,6 +40,7 @@ const Explorer = () => {
         </div>
       </div>
             <NodesData />
+            <img src="/mapRegions.png"/>
         </div>
     )
 }
