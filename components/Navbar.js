@@ -3,17 +3,12 @@ import { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { motion } from "framer-motion";
-// import { AuthContext } from "../AuthContext";
-// import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { useWallet } from "@solana/wallet-adapter-react";
-// import { Connector } from '@web3-react/types'
-// import { WalletConnector } from "@aptos-labs/wallet-adapter-mui-design";
 import Button from "./Button";
 import { useRouter } from "next/router";
 import SingleSignerTransaction from "./transactionFlow/SingleSigner";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
-// import { Web3ReactSelectedHooks } from '@web3-react/core'
 
 const network = WalletAdapterNetwork.Devnet;
 const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
@@ -34,30 +29,26 @@ const Navbar = ({ isHome }) => {
   const [challengeId, setChallengeId] = useState("");
   const [showsignbutton, setshowsignbutton] = useState(false);
   const [link, setlink] = useState("");
-  // const { isSignedIn, setIsSignedIn } = useContext(AuthContext);
+ 
   const [avatarUrl, setAvatarUrl] = useState("");
-  // const sdk = useSDK();
-  // const {useSelectedAccount, useSelectedChainId, useSelectedIsActive, useSelectedIsActivating } = hooks
-  // const account = useSelectedAccount(Connector)
+
   const { wallet, connected, signMessage, publicKey } = useWallet();
 
   let sendable = isSendableNetwork(connected, network);
   const account = publicKey;
   const router = useRouter();
-  // console.log("router", router);
-  // console.log(connected);
-  // console.log("account details", account);
+
 
   const address = Cookies.get("erebrus_wallet");
   const token = Cookies.get("erebrus_token");
-  // console.log(address);
-  // console.log(token);
+
 
   useEffect(() => {
     if (account) {
       // Update the cookie with the new address
       Cookies.set("erebrus_wallet", account);
       onSignMessage();
+
     }
   }, [account]);
 
@@ -94,91 +85,21 @@ const Navbar = ({ isHome }) => {
   };
 
   const getPhantomWallet = () => {
-    if ("solana" in window) {
-      return window.solana;
-    } else {
-      window.open("https://phantom.app/", "_blank");
-    }
-  };
-
-  const connectWallet = async () => {
-    const wallet = getPhantomWallet();
-    try {
-      const response = await wallet.connect();
-
-      const account = await wallet.account();
-      console.log("account", account);
-
-      // Get the current network after connecting (optional)
-      const networkwallet = await window.solana.network();
-
-      // Check if the connected network is Mainnet
-      if (networkwallet === mynetwork) {
-        const { data } = await axios.get(
-          `${REACT_APP_GATEWAY_URL}api/v1.0/flowid?walletAddress=${address}&chain=sol`
-        );
-        console.log(data);
-
-        const message = data.payload.eula;
-        const nonce = data.payload.flowId;
-        const publicKey = account.publicKey;
-
-        const { signature, fullMessage } = await wallet.signMessage({
-          message,
-          nonce,
-        });
-        console.log("sign", signature, "full message", fullMessage);
-
-        let signaturewallet = signature;
-
-        if (signaturewallet.length === 128) {
-          signaturewallet = `0x${signaturewallet}`;
-        }
-
-        const authenticationData = {
-          flowId: nonce,
-          // signature: `${signaturewallet}`,
-          // pubKey: publicKey,
-          walletAddress: address,
-        };
-
-        const authenticateApiUrl = `${REACT_APP_GATEWAY_URL}api/v1.0/authenticate/NonSign`;
-
-        const config = {
-          url: authenticateApiUrl,
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          data: authenticationData,
-        };
-
-        try {
-          const response = await axios(config);
-          console.log("auth data", response.data);
-          const token = await response?.data?.payload?.token;
-          const userId = await response?.data?.payload?.userId;
-          // localStorage.setItem("platform_token", token);
-          Cookies.set("erebrus_token", token, { expires: 7 });
-          Cookies.set("erebrus_wallet", address, { expires: 7 });
-          Cookies.set("erebrus_userid", userId, { expires: 7 });
-
-          // setUserWallet(account.address);
-          window.location.reload();
-        } catch (error) {
-          console.error(error);
-        }
-      } else {
-        alert(`Switch to ${mynetwork} in your wallet`);
+    if ('phantom' in window) {
+      const provider = window.phantom?.solana;
+  
+      if (provider?.isPhantom) {
+        return provider;
       }
-    } catch (err) {
-      console.log(err);
+    } else {
+      window.open('https://phantom.app/', '_blank');
     }
   };
 
   const onSignMessage = async () => {
     if (sendable) {
       try {
+        const wallet = getPhantomWallet();
         const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
 
         const { data } = await axios.get(
@@ -194,9 +115,11 @@ const Navbar = ({ isHome }) => {
           message: message,
           nonce: nonce,
         };
-        // const response = await signMessage(payload);
-        // console.log(response);
 
+
+        const encodedMessage = new TextEncoder().encode(message);
+        const response = await wallet.signMessage(encodedMessage, "utf8");
+        console.log(response);
         // let signaturewallet = response.signature;
 
         // if (signaturewallet.length === 128) {

@@ -40,6 +40,7 @@
     "@web3-react/types": "^8.2.3",
     "@welldone-studio/aptos-wallet-adapter": "^0.1.5",
     "axios": "^1.2.1",
+    "bip322-js": "^1.1.1",
     "blockies": "^0.0.2",
     "crypto": "^1.0.1",
     "crypto-js": "^4.2.0",
