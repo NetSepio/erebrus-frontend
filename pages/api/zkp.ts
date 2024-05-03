@@ -1,19 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextApiRequest, NextApiResponse } from "next";
+
 import { kv } from "@vercel/kv";
-import {
-  LoginResponse,
-  ZKPRequest,
-} from "../../../../components/types/UsefulTypes";
+import { LoginResponse, ZKPRequest } from "../../components/types/UsefulTypes";
 import axios from "axios";
 import jwt_decode from "jwt-decode";
 
-async function GET(request: NextRequest) {
-  console.log("hello");
-
-  const body = await request.json();
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  const body = req.body;
   const zkpRequest = body as ZKPRequest;
   if (!zkpRequest)
-    return NextResponse.json({ code: 422, message: "Wrong Body Format!" });
+    return res.status(422).json({ message: "Wrong Body Format!" });
 
   const decodedJwt: LoginResponse = jwt_decode(
     zkpRequest.zkpPayload?.jwt!
@@ -30,24 +29,24 @@ async function GET(request: NextRequest) {
 
   if (savedProof && !zkpRequest.forceUpdate) {
     console.log("ZK Proof found in database.");
-    return NextResponse.json({ code: 200, zkp: savedProof });
+    return res.status(200).json({ zkp: savedProof });
   } else {
     const proverResponse = await getZKPFromProver(zkpRequest.zkpPayload);
+    console.log("Prover Res", proverResponse);
 
-    if (proverResponse.status !== 200 || !proverResponse.data) {
-      return NextResponse.json({
-        code: proverResponse.status,
-        message: proverResponse.statusText,
-      });
+    if (proverResponse?.status !== 200 || !proverResponse.data) {
+      return res
+        .status(500)
+        .json({ message: proverResponse?.statusText ?? "no prover response" });
     }
 
-    const zkpProof = proverResponse.data;
+    const zkpProof = proverResponse?.data;
     console.log("ZK Proof created from prover ", zkpProof);
 
     //Proof is created for first time. We should store it in database before returning it.
     storeProofInDatabase(zkpProof, decodedJwt.sub);
 
-    return NextResponse.json({ code: 200, zkp: zkpProof });
+    return res.status(200).json({ zkp: zkpProof });
   }
 }
 
@@ -55,7 +54,12 @@ async function getZKPFromProver(zkpPayload: any) {
   console.log("ZK Proof not found in database. Creating proof from prover...");
   const proverURL =
     process.env.NEXT_PUBLIC_PROVER_API || "https://prover.mystenlabs.com/v1";
-  return await axios.post(proverURL, zkpPayload);
+  try {
+    const res = await axios.post(proverURL, zkpPayload);
+    return res;
+  } catch (error: any) {
+    console.log("Error:", error.response.data);
+  }
 }
 
 function storeProofInDatabase(zkpProof: string, subject: string) {
