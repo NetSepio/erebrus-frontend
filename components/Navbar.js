@@ -45,13 +45,13 @@ const Navbar = ({ isHome }) => {
   const account = publicKey;
   const router = useRouter();
   // console.log("router", router);
-  console.log(connected);
-  console.log("account details", account);
+  // console.log(connected);
+  // console.log("account details", account);
 
   const address = Cookies.get("erebrus_wallet");
   const token = Cookies.get("erebrus_token");
-  console.log(address);
-  console.log(token);
+  // console.log(address);
+  // console.log(token);
 
   useEffect(() => {
     if (account) {
@@ -115,7 +115,7 @@ const Navbar = ({ isHome }) => {
       // Check if the connected network is Mainnet
       if (networkwallet === mynetwork) {
         const { data } = await axios.get(
-          `${REACT_APP_GATEWAY_URL}api/v1.0/flowid/sol?walletAddress=${address}`
+          `${REACT_APP_GATEWAY_URL}api/v1.0/flowid?walletAddress=${address}&chain=sol`
         );
         console.log(data);
 
@@ -182,7 +182,7 @@ const Navbar = ({ isHome }) => {
         const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
 
         const { data } = await axios.get(
-          `${REACT_APP_GATEWAY_URL}api/v1.0/flowid/sol?walletAddress=${address}`
+          `${REACT_APP_GATEWAY_URL}api/v1.0/flowid?walletAddress=${address}&chain=sol`
         );
         console.log(data);
 
