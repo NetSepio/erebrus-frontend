@@ -298,7 +298,8 @@ const Navbar = ({ isHome }) => {
     return customRedirectUri;
   }
 
-  useEffect(() => {
+  const redirectlogin = () =>{
+    
     prepareLogin().then((userKeyData) => {
       const REDIRECT_URI = "https://zklogin-dev-redirect.vercel.app/api/auth";
       const customRedirectUri = getRedirectUri();
@@ -317,8 +318,9 @@ const Navbar = ({ isHome }) => {
       });
 
       setLoginUrl(`https://accounts.google.com/o/oauth2/v2/auth?${params}`);
+      window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
     });
-  }, []);
+  }
 
   return (
     <nav className='bg-transparent py-4'>
@@ -454,8 +456,8 @@ const Navbar = ({ isHome }) => {
           </Link>
 
           <div className='flex mt-4 mb-10 space-x-4 justify-center'>
-            <a href={loginUrl} className='hover:text-blue-600' target='_blank'>
-              <button className='bg-white text-gray-700 hover:text-gray-900 font-semibold py-2 px-4 border rounded-lg flex items-center space-x-2'>
+          
+              <button onClick={redirectlogin} className='bg-white text-gray-700 hover:text-gray-900 font-semibold py-2 px-4 border rounded-lg flex items-center space-x-2'>
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
                   x='0px'
@@ -483,7 +485,6 @@ const Navbar = ({ isHome }) => {
                 </svg>
                 <span>Login with Google</span>
               </button>
-            </a>
           </div>
 
           {!token ? (
