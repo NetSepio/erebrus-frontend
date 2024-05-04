@@ -52,6 +52,8 @@ const Navbar = ({ isHome }) => {
   const [loginoptions, setloginoptions] = useState(false);
   // const sdk = useSDK();
 
+  const [userAddress, setUserAddress] = useState(null);
+
   const { status, connected, connecting, account, network, name } = useWallet();
   const wallet = useWallet();
   let sendable = isSendableNetwork(status === "connected", wallet.chain.id);
@@ -191,7 +193,7 @@ const Navbar = ({ isHome }) => {
       try {
         const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
         const { data } = await axios.get(
-          `${REACT_APP_GATEWAY_URL}api/v1.0/flowid/sol?walletAddress=${wallet.address}`
+          `${REACT_APP_GATEWAY_URL}api/v1.0/flowid?walletAddress=${wallet.address}&chain=sui`
         );
         // console.log(data);
 
@@ -254,7 +256,7 @@ const Navbar = ({ isHome }) => {
     window.location.href = "/";
   };
 
-  // --------------------------------------------------- zklogin -----------------------------------------------------------------
+  // --------------------------------------------------- zklogin login button -----------------------------------------------------------------
 
   const { suiClient } = useSui();
 
@@ -321,6 +323,43 @@ const Navbar = ({ isHome }) => {
       setLoginUrl(`https://accounts.google.com/o/oauth2/v2/auth?${params}`);
       window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
     });
+  }
+
+
+  // --------------------------------------------------- zklogin login check ------------------------------------------------------------
+
+  async function loadRequiredData(encodedJwt) {
+    //Decoding JWT to get useful Info
+    const decodedJwt = (await jwt_decode(
+      encodedJwt
+    ));
+
+    setSubjectID(decodedJwt.sub);
+    //Getting Salt
+    // const userSalt = await getSalt(decodedJwt.sub, encodedJwt);
+    const response = await axios.post("/api/salt");
+
+    const userSalt = response.data.salt;
+    if (!userSalt) {
+      createRuntimeError("Error getting userSalt");
+      return;
+    }
+
+    //Generating User Address
+    const address = jwtToAddress(encodedJwt, BigInt(userSalt));
+
+    setUserAddress(address);
+    setUserSalt(userSalt);
+    const hasEnoughBalance = await checkIfAddressHasBalance(address);
+    if (!hasEnoughBalance) {
+      await giveSomeTestCoins(address);
+      toast.success(
+        "We' ve fetched some coins for you, so you can get started with Sui !",
+        { duration: 8000 }
+      );
+    }
+
+    console.log("All required data loaded. ZK Address =", address);
   }
 
   return (
@@ -456,7 +495,7 @@ const Navbar = ({ isHome }) => {
             Docs
           </Link>
 
-          <button className="text-white" onClick={()=>setloginoptions(true)}>Login</button>
+          {!token && (<button className="text-white" onClick={()=>setloginoptions(true)}>Login</button>)}
 
           {/* <div className='flex mt-4 mb-10 space-x-4 justify-center'>
           
