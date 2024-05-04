@@ -19,6 +19,19 @@ import { useLayoutEffect } from "react";
 import { UserKeyData } from "../components/types/UsefulTypes";
 import { Ed25519Keypair } from "@mysten/sui.js/keypairs/ed25519";
 import { Keypair, PublicKey } from "@mysten/sui.js/cryptography";
+import jwt_decode from "jwt-decode";
+import { fromB64 } from "@mysten/bcs";
+import {
+  SerializedSignature,
+  decodeSuiPrivateKey,
+} from "@mysten/sui.js/cryptography";
+import {
+  genAddressSeed,
+  getZkLoginSignature,
+  jwtToAddress,
+  getExtendedEphemeralPublicKey,
+} from "@mysten/zklogin";
+import { TransactionBlock } from "@mysten/sui.js/transactions";
 
 const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
 const mynetwork = process.env.NEXT_PUBLIC_NETWORK;
@@ -53,6 +66,10 @@ const Navbar = ({ isHome }) => {
   // const sdk = useSDK();
 
   const [userAddress, setUserAddress] = useState(null);
+  const [jwtEncoded, setJwtEncoded] = useState(null);
+  const [subjectID, setSubjectID] = useState(null);
+  const [userSalt, setUserSalt] = useState(null);
+  const [userBalance, setUserBalance] = useState(0);
 
   const { status, connected, connecting, account, network, name } = useWallet();
   const wallet = useWallet();
@@ -296,7 +313,7 @@ const Navbar = ({ isHome }) => {
   function getRedirectUri() {
     const protocol = window.location.protocol;
     const host = window.location.host;
-    const customRedirectUri = protocol + "//" + host + "/auth";
+    const customRedirectUri = protocol + "//" + host;
     console.log("customRedirectUri = " + customRedirectUri);
     return customRedirectUri;
   }
@@ -327,6 +344,69 @@ const Navbar = ({ isHome }) => {
 
 
   // --------------------------------------------------- zklogin login check ------------------------------------------------------------
+
+  async function checkIfAddressHasBalance(address){
+    console.log("Checking whether address " + address + " has balance...");
+    const coins = await suiClient.getCoins({
+      owner: address,
+    });
+    //loop over coins
+    let totalBalance = 0;
+    for (const coin of coins.data) {
+      totalBalance += parseInt(coin.balance);
+    }
+    totalBalance = totalBalance / 1000000000; //Converting MIST to SUI
+    setUserBalance(totalBalance);
+    console.log("total balance = ", totalBalance);
+    return enoughBalance(totalBalance);
+  }
+
+  function enoughBalance(userBalance) {
+    return userBalance > 0.003;
+  }
+
+  //** This is just for testing purposes. DO NOT USE IN PRODUCTION */
+  function getTestnetAdminSecretKey() {
+    return process.env.NEXT_PUBLIC_ADMIN_SECRET_KEY;
+  }
+
+  async function giveSomeTestCoins(address) {
+    console.log("Giving some test coins to address " + address);
+    const adminPrivateKey = getTestnetAdminSecretKey();
+    if (!adminPrivateKey) {
+      createRuntimeError(
+        "Admin Secret Key not found. Please set NEXT_PUBLIC_ADMIN_SECRET_KEY environment variable."
+      );
+      return;
+    }
+    let adminPrivateKeyArray = Uint8Array.from(
+      Array.from(fromB64(adminPrivateKey))
+    );
+    // Modified getting private key method using the decodeSuiPrivateKey
+    const keyPair = decodeSuiPrivateKey(adminPrivateKey);
+    const adminKeypair = Ed25519Keypair.fromSecretKey(keyPair.secretKey);
+    const tx = new TransactionBlock();
+    const giftCoin = tx.splitCoins(tx.gas, [tx.pure(30000000)]);
+
+    tx.transferObjects([giftCoin], tx.pure(address));
+
+    const res = await suiClient.signAndExecuteTransactionBlock({
+      transactionBlock: tx,
+      signer: adminKeypair,
+      requestType: "WaitForLocalExecution",
+      options: {
+        showEffects: true,
+      },
+    });
+    const status = res?.effects?.status?.status;
+    if (status === "success") {
+      console.log("Gift Coin transfer executed! status = ", status);
+      checkIfAddressHasBalance(address);
+    }
+    if (status == "failure") {
+      createRuntimeError("Gift Coin transfer Failed. Error = " + res?.effects);
+    }
+  }
 
   async function loadRequiredData(encodedJwt) {
     //Decoding JWT to get useful Info
@@ -361,6 +441,29 @@ const Navbar = ({ isHome }) => {
 
     console.log("All required data loaded. ZK Address =", address);
   }
+
+  useLayoutEffect(() => {
+    const hash = new URLSearchParams(window.location.hash.slice(1));
+    const jwt_token_encoded = hash.get("id_token");
+
+    const userKeyData = JSON.parse(
+      localStorage.getItem("userKeyData")
+    );
+
+    if (!jwt_token_encoded) {
+      createRuntimeError("Could not retrieve a valid JWT Token!");
+      return;
+    }
+
+    if (!userKeyData) {
+      createRuntimeError("user Data is null");
+      return;
+    }
+
+    setJwtEncoded(jwt_token_encoded);
+
+    loadRequiredData(jwt_token_encoded);
+  }, []);
 
   return (
     <nav className='bg-transparent py-4'>
@@ -495,7 +598,7 @@ const Navbar = ({ isHome }) => {
             Docs
           </Link>
 
-          {!token && (<button className="text-white" onClick={()=>setloginoptions(true)}>Login</button>)}
+          {!token && !userAddress && (<button className="text-white" onClick={()=>setloginoptions(true)}>Login</button>)}
 
           {/* <div className='flex mt-4 mb-10 space-x-4 justify-center'>
           
@@ -528,6 +631,48 @@ const Navbar = ({ isHome }) => {
                 <span>Login with Google</span>
               </button>
           </div> */}
+
+{userAddress ? (
+            <div className='px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0'>
+              <dt className='text-sm font-medium leading-6 text-gray-900'>
+                User Address
+              </dt>
+              <dd className='mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0'>
+                <span className='mr-5'>{userAddress}</span>
+                <span className='ml-0'>
+                  <button
+                    type='button'
+                    className='rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50'
+                    onClick={() => {
+                      navigator.clipboard.writeText(userAddress);
+                    }}
+                  >
+                    Copy
+                  </button>
+                </span>
+              </dd>
+            </div>
+          ) : null}
+          {userAddress ? (
+            <div className='px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0'>
+              <dt className='text-sm font-medium leading-6 text-gray-900'>
+                Balance
+              </dt>
+              <dd className='mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0'>
+                <span className='mr-5'>{userBalance.toFixed(4)} SUI</span>
+                <span className='ml-5'>
+                  <button
+                    type='button'
+                    className='rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50'
+                    disabled={!userAddress}
+                    onClick={() => giveSomeTestCoins(userAddress)}
+                  >
+                    Get Testnet Coins
+                  </button>
+                </span>
+              </dd>
+            </div>
+          ) : null}
 
 {token && (
             <div
