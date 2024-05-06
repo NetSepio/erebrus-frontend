@@ -446,6 +446,8 @@ const Navbar = ({ isHome }) => {
     const hash = new URLSearchParams(window.location.hash.slice(1));
     const jwt_token_encoded = hash.get("id_token");
 
+    localStorage.setItem("id_token", jwt_token_encoded);
+
     const userKeyData = JSON.parse(
       localStorage.getItem("userKeyData")
     );

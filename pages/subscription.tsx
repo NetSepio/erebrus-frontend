@@ -21,6 +21,14 @@ const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_BASE_URL;
 const mynetwork = process.env.NEXT_PUBLIC_NETWORK;
 import QRCode from "qrcode.react";
 import { saveAs } from "file-saver";
+import jwt_decode from "jwt-decode";
+import {
+  genAddressSeed,
+  getZkLoginSignature,
+  jwtToAddress,
+  getExtendedEphemeralPublicKey,
+} from "@mysten/zklogin";
+import { useLayoutEffect } from "react";
 
 const envcollectionid = process.env.NEXT_PUBLIC_COLLECTIONID;
 const graphqlaptos = process.env.NEXT_PUBLIC_GRAPHQL_APTOS;
@@ -72,10 +80,12 @@ const Subscription = () => {
   const [valueFromChild2, setValueFromChild2] = useState<string>("");
   const [note, setnote] = useState<boolean>(true);
   const [trialsubscriptiondata, settrialsubscriptiondata] = useState<any>(null);
+  const [jwtEncoded, setJwtEncoded] = useState(null);
+  const [userAddress, setUserAddress] = useState(null);
 
   const {status, connected, connecting , account } = useWallet();
 const suiwallet = useWallet()
-  let sendable = isSendableNetwork(connected,suiwallet.chain.id);
+  let sendable = isSendableNetwork(connected,suiwallet?.chain?.id);
   console.log(suiwallet)
   const bg = {
     backgroundColor: "#202333",
@@ -641,7 +651,38 @@ const suiwallet = useWallet()
     return `${day} ${month} ${year} ${time}`;
   };
 
-  if (!wallet || !loggedin) {
+  //---------------------------------- zklogin check -------------------------------------------------------------
+
+  async function loadRequiredData(encodedJwt) {
+    //Decoding JWT to get useful Info
+    const decodedJwt = (await jwt_decode(
+      encodedJwt
+    ));
+
+    const response = await axios.post("/api/salt");
+
+    const userSalt = response.data.salt;
+    if (!userSalt) {
+      return;
+    }
+    const address = jwtToAddress(encodedJwt, BigInt(userSalt));
+
+    setUserAddress(address);
+
+    console.log("All required data loaded. ZK Address =", address);
+  }
+
+  useEffect(() => {
+    const jwt_token_encoded = localStorage.getItem('id_token');
+    if (!jwt_token_encoded) {
+      return;
+    }
+    console.log("jwt token =", jwt_token_encoded);
+    setJwtEncoded(jwt_token_encoded);
+    loadRequiredData(jwt_token_encoded);
+  }, []);
+
+  if ((!wallet || !loggedin) && !userAddress) {
     return (
       <>
         <div className="min-h-screen">

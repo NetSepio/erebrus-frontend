@@ -29,6 +29,21 @@ import { Elements } from "@stripe/react-stripe-js";
 import CheckoutForm from "../components/CheckoutForm.tsx";
 import { aptosClient } from "../module";
 export const APTOS_COIN = "0x1::aptos_coin::AptosCoin";
+import jwt_decode from "jwt-decode";
+import {
+  SerializedSignature,
+  decodeSuiPrivateKey,
+} from "@mysten/sui.js/cryptography";
+import { Ed25519Keypair } from "@mysten/sui.js/keypairs/ed25519";
+import { TransactionBlock } from "@mysten/sui.js/transactions";
+
+import {
+  genAddressSeed,
+  getZkLoginSignature,
+  jwtToAddress,
+  getExtendedEphemeralPublicKey,
+} from "@mysten/zklogin";
+import { useSui } from "../components/hooks/useSui";
 
 // Make sure to call `loadStripe` outside of a component’s render to avoid
 // recreating the `Stripe` object on every render.
@@ -77,6 +92,13 @@ const Mint = () => {
   const [showconnectbutton, setshowconnectbutton] = useState(false);
   const [mintpage, setmintpage] = useState("page1");
   const [totalNFTMinted, setTotalNFTMinted] = useState(null);
+  const [userAddress, setUserAddress] = useState(null);
+  const [zkProof, setZkProof] = useState(null);
+  const [jwtEncoded, setJwtEncoded] = useState(null);
+  const [userSalt, setUserSalt] = useState(null);
+  const [txDigest, setTxDigest] = useState(null);
+
+  const { suiClient } = useSui();
 
   const { account, connected, network, signMessage, signAndSubmitTransaction } = useWallet();
 
@@ -260,6 +282,171 @@ const Mint = () => {
       functionArguments: [],       // No function arguments in the old format
     },
   };
+
+  async function getZkProof(forceUpdate = false) {
+    const decodedJwt = jwt_decode(jwtEncoded);
+    const { userKeyData, ephemeralKeyPair } = getEphemeralKeyPair();
+
+    // Modifed Key Pair generation and retrieving //
+    const keyPair = getEphemeralKeyPair();
+
+    const zkpPayload = {
+      jwt: jwtEncoded,
+      extendedEphemeralPublicKey: getExtendedEphemeralPublicKey(
+        keyPair.ephemeralKeyPair.getPublicKey()
+      ),
+      jwtRandomness: userKeyData.randomness,
+      maxEpoch: userKeyData.maxEpoch,
+      salt: userSalt,
+      keyClaimName: "sub",
+    };
+    const ZKPRequest = {
+      zkpPayload,
+      forceUpdate,
+    };
+    console.log("about to post zkpPayload = ", ZKPRequest);
+    // setPublicKey(zkpPayload.extendedEphemeralPublicKey);
+
+    //Invoking our custom backend to delagate Proof Request to Mysten backend.
+    // Delegation was done to avoid CORS errors.
+    const proofResponse = await axios.post("/api/zkp", ZKPRequest);
+
+    if (!proofResponse?.data?.zkp) {
+      console.log(
+        "Error getting Zero Knowledge Proof. Please check that Prover Service is running."
+      );
+      return;
+    }
+    console.log("zkp response = ", proofResponse.data.zkp);
+
+    setZkProof(proofResponse.data.zkp);
+  }
+
+  useEffect(() => {
+    executeTransactionWithZKP();
+  }, [zkProof])
+  
+
+  function getEphemeralKeyPair() {
+    const userKeyData = JSON.parse(
+      localStorage.getItem("userKeyData")
+    );
+    // let ephemeralKeyPairArray = Uint8Array.from(
+    //   Array.from(fromB64(userKeyData.ephemeralPrivateKey!))
+    // );
+    let ephemeralKeyPairArray = decodeSuiPrivateKey(
+      userKeyData.ephemeralPrivateKey
+    );
+    const ephemeralKeyPair = Ed25519Keypair.fromSecretKey(
+      ephemeralKeyPairArray.secretKey
+    );
+    return { userKeyData, ephemeralKeyPair };
+  }
+
+  useEffect(() => {
+
+    const jwtEncodedsave = localStorage.getItem('id_token');
+    setJwtEncoded(jwtEncodedsave);
+    loadRequiredData(jwtEncodedsave);
+
+  }, []);
+
+  async function loadRequiredData(encodedJwt) {
+    //Decoding JWT to get useful Info
+    const decodedJwt = (await jwt_decode(
+      encodedJwt
+    ));
+
+    const response = await axios.post("/api/salt");
+
+    const userSalt = response.data.salt;
+    if (!userSalt) {
+      return;
+    }
+    const address = jwtToAddress(encodedJwt, BigInt(userSalt));
+
+    setUserAddress(address);
+    setUserSalt(userSalt);
+
+    console.log("All required data loaded. ZK Address =", address);
+  }
+
+  async function executeTransactionWithZKP() {
+    
+    const decodedJwt = jwt_decode(jwtEncoded);
+    const { userKeyData, ephemeralKeyPair } = getEphemeralKeyPair();
+    const partialZkSignature = zkProof;
+
+    if (!partialZkSignature || !ephemeralKeyPair || !userKeyData) {
+      console.log("Transaction cannot proceed. Missing critical data.");
+      return;
+    }
+
+    const txb = new TransactionBlock();
+
+    //Just a simple Demo call to create a little NFT weapon :p
+    txb.moveCall({
+      target: `${envmintfucn}`, //demo package published on testnet
+      arguments: [
+        // txb.pure("Zero Knowledge Proof Axe 9000"), // weapon name
+        // txb.pure(66), // weapon damage
+      ],
+    });
+    txb.setSender(userAddress);
+
+    const signatureWithBytes = await txb.sign({
+      client: suiClient,
+      signer: ephemeralKeyPair,
+    });
+
+    console.log("Got SignatureWithBytes = ", signatureWithBytes);
+    console.log("maxEpoch = ", userKeyData.maxEpoch);
+    console.log("userSignature = ", signatureWithBytes.signature);
+
+    const addressSeed = genAddressSeed(
+      BigInt(userSalt),
+      "sub",
+      decodedJwt.sub,
+      decodedJwt.aud
+    );
+
+    const zkSignature = getZkLoginSignature({
+      inputs: {
+        ...partialZkSignature,
+        addressSeed: addressSeed.toString(),
+      },
+      maxEpoch: userKeyData.maxEpoch,
+      userSignature: signatureWithBytes.signature,
+    });
+
+    suiClient
+      .executeTransactionBlock({
+        transactionBlock: signatureWithBytes.bytes,
+        signature: zkSignature,
+        options: {
+          showEffects: true,
+        },
+      })
+      .then((response) => {
+        if (response.effects?.status.status == "success") {
+          console.log("Transaction executed! Digest = ", response.digest);
+          setTxDigest(response.digest);
+        } else {
+          console.log(
+            "Transaction failed! reason = ",
+            response.effects?.status
+          );
+        }
+      })
+      .catch((error) => {
+        console.log("Error During Tx Execution. Details: ", error);
+        if (error.toString().includes("Signature is not valid")) {
+          console.log(
+            "Signature is not valid. Please generate a new one by clicking on 'Get new ZK Proof'"
+          );
+        }
+      });
+  }
 
   const mint = async () => {
     setbuttonblur(true);
@@ -583,35 +770,16 @@ const Mint = () => {
                             </div>
 
                             <div className="items-center pt-20 rounded-b w-1/2 mx-auto">
-                            {!connected ? (
-                              <>
-                              <button
-                               onClick={()=>{setshowconnectbutton(true)}}
-                              style={{ border: "1px solid #0162FF" }}
-                              type="button"
-                              className="flex w-full text-white font-bold focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-md text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                            >
-                              <img src="/mint2.png" className="w-12"/>
-                              <div className="px-5 py-2.5 ">Pay in APT</div>
-                            </button>
-                          { showconnectbutton && 
-                            (<button className="mx-auto justify-center mt-10 items-center flex">
-                            <WalletSelectorAntDesign />
-                          </button>)
-                            }
-                          </>
-                        ):(
+                            
                           <button
-                                onClick={mint}
+                                onClick={() => getZkProof(true)}
                                 style={{ border: "1px solid #0162FF" }}
                                 type="button"
                                 className="flex w-full text-white font-bold focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-md text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                               >
                                 <img src="/mint2.png" className="w-12"/>
-                                <div className="px-5 py-2.5 ">Pay in APT</div>
-                              </button>
-                        )}
-                              
+                                <div className="px-5 py-2.5 ">Pay in SUI</div>
+                              </button>   
                             </div>
 
                             {/* { !showconnectbutton && (<div className="flex items-center pb-20 pt-10 rounded-b w-1/2 mx-auto">
