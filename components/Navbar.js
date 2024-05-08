@@ -119,21 +119,20 @@ const Navbar = ({ isHome }) => {
 
         const encodedMessage = new TextEncoder().encode(message);
         const response = await wallet.signMessage(encodedMessage, "utf8");
-        console.log(response);
-        // let signaturewallet = response.signature;
+      
+        let signaturewallet = response.signature;
 
-        // if (signaturewallet.length === 128) {
-        //   signaturewallet = `0x${signaturewallet}`;
-        // }
+        const signatureHex = Array.from(signaturewallet).map(byte => ('0' + byte.toString(16)).slice(-2)).join('');
 
         const authenticationData = {
           flowId: nonce,
-          // "signature": `${signaturewallet}`,
-          // "pubKey": publicKey,
+          signature: `${signatureHex}`,
+          pubKey: publicKey,
           walletAddress: address,
+          message: message,
         };
 
-        const authenticateApiUrl = `${REACT_APP_GATEWAY_URL}api/v1.0/authenticate/NonSign`;
+        const authenticateApiUrl = `${REACT_APP_GATEWAY_URL}api/v1.0/authenticate?walletAddress=${address}&chain=sol`;
 
         const config = {
           url: authenticateApiUrl,
@@ -265,31 +264,6 @@ const Navbar = ({ isHome }) => {
               Explorer
             </Link>
           )}
-
-          {/* { link !== "mint" ?(
-          <Link
-            href="/mint"
-            className="text-gray-300 mr-8"
-            scroll={false}
-            onClick={()=> {setlink("mint")}}
-            style={{ textDecoration: "none", position: "relative",
-            borderBottom: router.pathname.includes('mint') ? '2px solid white' : '', }}
-  onMouseOver={(e) => (e.currentTarget.style.borderBottom = "1px solid #fff")}
-  onMouseOut={(e) => (e.currentTarget.style.borderBottom = "none")}
-          >
-            Mint NFT
-          </Link>):
-          (
-<Link
-            href="/mint"
-            className="text-gray-300 mr-8"
-            scroll={false}
-            style={{ textDecoration: "none", position: "relative",
-            borderBottom:'2px solid white'}}
-          >
-            Mint NFT
-          </Link>
-          )} */}
 
           {link !== "subscription" ? (
             <Link
