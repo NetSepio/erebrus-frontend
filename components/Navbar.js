@@ -444,9 +444,16 @@ const Navbar = ({ isHome }) => {
 
   useLayoutEffect(() => {
     const hash = new URLSearchParams(window.location.hash.slice(1));
-    const jwt_token_encoded = hash.get("id_token");
+    let jwt_token_encoded = hash.get("id_token");
 
-    localStorage.setItem("id_token", jwt_token_encoded);
+    if(jwt_token_encoded)
+    {
+      localStorage.setItem("id_token", jwt_token_encoded);
+    }
+    else
+    {
+      jwt_token_encoded = localStorage.getItem("id_token");
+    }
 
     const userKeyData = JSON.parse(
       localStorage.getItem("userKeyData")
