@@ -85,7 +85,7 @@ const Navbar = ({ isHome }) => {
     if (account && account.address) {
       // Update the cookie with the new address
       Cookies.set("erebrus_wallet", account.address);
-      onSignMessage();
+      handleSignMsg();
     }
   }, []);
 
@@ -138,6 +138,7 @@ const Navbar = ({ isHome }) => {
     };
   }, []);
 
+ 
   const signMessage = async () => {
     setIsSignedIn(false);
     console.log("signing message");
@@ -166,6 +167,7 @@ const Navbar = ({ isHome }) => {
       console.error(error);
     }
   };
+  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -205,22 +207,54 @@ const Navbar = ({ isHome }) => {
 
   // console.log(wallet)
 
-  const onSignMessage = async () => {
-    if (sendable) {
-      try {
-        const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
-        const { data } = await axios.get(
-          `${REACT_APP_GATEWAY_URL}api/v1.0/flowid?walletAddress=${wallet.address}&chain=sui`
-        );
-        // console.log(data);
+  // const onSignMessage = async () => {
+  //   if (sendable) {
+  //     try {
+  //       const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
+  //       const { data } = await axios.get(
+  //         `${REACT_APP_GATEWAY_URL}api/v1.0/flowid?walletAddress=${wallet.address}&chain=sui`
+  //       );
+  //       // console.log(data);
 
-        const message = data.payload.eula;
-        const nonce = data.payload.flowId;
+  //       const message = data.payload.eula;
+  //       const nonce = data.payload.flowId;
 
-        const payload = {
-          message: message,
-          nonce: nonce,
-        };
+  //       const payload = {
+  //         message: message,
+  //         nonce: nonce,
+  //       };
+        async function handleSignMsg() {
+          if(sendable){
+          try {
+            const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
+            const { data } = await axios.get(
+              `${REACT_APP_GATEWAY_URL}api/v1.0/flowid?walletAddress=${wallet.address}&chain=sui`
+            );
+            console.log("address", wallet.address)
+            const msg = data.payload.eula + data.payload.flowId;
+            const nonce = data.payload.flowId;
+            // convert string to Uint8Array 
+            const msgBytes = new TextEncoder().encode(msg)
+      
+            const result = await wallet.signPersonalMessage({
+              message: msgBytes
+            })
+            console.log("signature",result.signature )
+            console.log("publickey", wallet.account?.publicKey)
+                  // verify signature with publicKey and SignedMessage (params are all included in result)
+            const verifyResult = await wallet.verifySignedMessage(result, wallet.account.publicKey)
+            if (!verifyResult) {
+              console.log('signPersonalMessage succeed, but verify signedMessage failed')
+            } else {
+              console.log('signPersonalMessage succeed, and verify signedMessage succeed!')
+            }
+          
+            const payload = {
+                      message: message,
+                      nonce: nonce,
+                    };
+        
+      
         //   const response = await signMessage(payload);
         //   console.log(response);
 
@@ -230,13 +264,17 @@ const Navbar = ({ isHome }) => {
         // {
         //   signaturewallet = `0x${signaturewallet}`;
         // }
+      
 
         const authenticationData = {
           flowId: nonce,
-          walletAddress: wallet.address,
-        };
+          signatureSui:result.signature,
+         
 
-        const authenticateApiUrl = `${REACT_APP_GATEWAY_URL}api/v1.0/authenticate/NonSign`;
+        };
+        console.log("adaddasdasd", result.signature)
+
+        const authenticateApiUrl = `${REACT_APP_GATEWAY_URL}api/v1.0/authenticate?chain=sui`;
 
         const config = {
           url: authenticateApiUrl,
@@ -262,10 +300,10 @@ const Navbar = ({ isHome }) => {
         console.error(error);
         setshowsignbutton(true);
       }
-    } else {
-      alert(`Switch to ${mynetwork} in your wallet`);
+     
     }
-  };
+    } 
+  
 
   const handleDeleteCookie = () => {
     Cookies.remove("erebrus_wallet");
@@ -740,7 +778,7 @@ const Navbar = ({ isHome }) => {
               {status === "connected" && showsignbutton && (
                 <Button
                   color={"blue"}
-                  onClick={onSignMessage}
+                  onClick={handleSignMsg}
                   disabled={false}
                   message={"Authenticate"}
                 />
