@@ -10,16 +10,18 @@ import crypto from "crypto";
 import { lib, enc } from "crypto-js";
 import { generateKeyPair } from "curve25519-js";
 import { Network } from "@aptos-labs/ts-sdk";
+import SingleSignerTransaction from "../components/transactionFlow/SingleSigner";
 import Button from "../components/Button";
-const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
-const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_BASE_URL;
-const mynetwork = process.env.NEXT_PUBLIC_NETWORK;
 import QRCode from "qrcode.react";
 import { saveAs } from "file-saver";
 import {
   WalletConnectButton,
   WalletMultiButton,
 } from "@solana/wallet-adapter-react-ui";
+
+const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
+const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_BASE_URL;
+const mynetwork = process.env.NEXT_PUBLIC_NETWORK;
 const envcollectionid = process.env.NEXT_PUBLIC_COLLECTIONID;
 const graphqlaptos = process.env.NEXT_PUBLIC_GRAPHQL_APTOS;
 
@@ -41,6 +43,14 @@ const transition = {
   ease: "easeInOut",
   duration: 0.5,
 };
+
+const WalletSelectorAntDesign = dynamic(
+  () => import("../components/WalletSelectorAntDesign"),
+  {
+    suspense: false,
+    ssr: false,
+  }
+);
 
 const isSendableNetwork = (connected: any, network: string) => {
   return connected && network?.toLowerCase() === mynetwork.toLowerCase();
