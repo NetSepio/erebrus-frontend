@@ -41,7 +41,7 @@ const WalletContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const wallets = [
     // TODO IdentityConnectWallet and BloctoWallet to use Network enum from @aptos-labs/ts-sdk
     new IdentityConnectWallet("57fa42a9-29c6-4f1e-939c-4eefa36d9ff5", {
-      networkName: NetworkName.Testnet,
+      // networkName: NetworkName.Testnet,
     }),
     // Blocto supports Testnet/Mainnet for now.
     // new BloctoWallet({

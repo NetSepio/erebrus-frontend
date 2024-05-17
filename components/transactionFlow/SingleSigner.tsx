@@ -68,10 +68,10 @@ export default function SingleSignerTransaction({
 
     let signaturewallet = response.signature;
 
-      if(signaturewallet?.length === 128)
-      {
-        signaturewallet = `0x${signaturewallet}`;
-      }
+      // if(signaturewallet.length === 128)
+      // {
+      //   signaturewallet = `0x${signaturewallet}`;
+      // }
   
       const authenticationData = {
         "flowId": nonce,
