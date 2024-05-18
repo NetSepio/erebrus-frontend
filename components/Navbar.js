@@ -501,7 +501,7 @@ alert(`Switch to Sui Testnet in your wallet`);
     console.log("Giving some test coins to address " + address);
     const adminPrivateKey = getTestnetAdminSecretKey();
     if (!adminPrivateKey) {
-      createRuntimeError(
+      console.log(
         "Admin Secret Key not found. Please set NEXT_PUBLIC_ADMIN_SECRET_KEY environment variable."
       );
       return;
@@ -531,7 +531,7 @@ alert(`Switch to Sui Testnet in your wallet`);
       checkIfAddressHasBalance(address);
     }
     if (status == "failure") {
-      createRuntimeError("Gift Coin transfer Failed. Error = " + res?.effects);
+      console.log("Gift Coin transfer Failed. Error = " + res?.effects);
     }
   }
 
@@ -548,7 +548,7 @@ alert(`Switch to Sui Testnet in your wallet`);
 
     const userSalt = response.data.salt;
     if (!userSalt) {
-      createRuntimeError("Error getting userSalt");
+      console.log("Error getting userSalt");
       return;
     }
 
@@ -592,7 +592,7 @@ alert(`Switch to Sui Testnet in your wallet`);
     }
 
     if (!userKeyData) {
-      createRuntimeError("user Data is null");
+      console.log("user Data is null");
       return;
     }
 
@@ -600,6 +600,12 @@ alert(`Switch to Sui Testnet in your wallet`);
 
     loadRequiredData(jwt_token_encoded);
   }, []);
+
+  const logoutzklogin = () => {
+    localStorage.removeItem("userKeyData");
+    localStorage.removeItem("id_token");
+    window.location.href = "/";
+  }
 
   return (
     <nav className='bg-transparent py-4'>
@@ -755,7 +761,7 @@ alert(`Switch to Sui Testnet in your wallet`);
             </div>
           ) : null}
           {userAddress ? (
-            <div className=''>
+            <div className='flex gap-4'>
               <dd className='mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0 text-white'>
                 <div className="justify-end flex">{userBalance.toFixed(4)} SUI</div>
                 <div>
@@ -769,6 +775,7 @@ alert(`Switch to Sui Testnet in your wallet`);
                   </button>
                 </div>
               </dd>
+              <div className="text-red-500 my-auto" onClick={logoutzklogin}>Logout</div>
             </div>
           ) : null}
 
