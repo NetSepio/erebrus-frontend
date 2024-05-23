@@ -1,26 +1,14 @@
 import Link from "next/link";
 import { useState, useEffect, useContext } from "react";
-import {
-  useNetworkMismatch,
-  useNetwork,
-  useAddress,
-  ChainId,
-  ConnectWallet,
-  useSDK,
-} from "@thirdweb-dev/react";
+
 import axios from "axios";
-import aptos from "aptos";
+
 import Head from "next/head";
 import { motion } from "framer-motion";
 import Cookies from "js-cookie";
 import { AuthContext } from "../AuthContext";
-import {
-  useWallet,
-  InputTransactionData,
-} from "@aptos-labs/wallet-adapter-react";
 import dynamic from "next/dynamic";
-import { Network } from "@aptos-labs/ts-sdk";
-import Button from "../components/Button";
+
 // import SingleSignerTransaction from "../components/transactionFlow/SingleSigner";
 import GetStripe from "../utils/stripe.js";
 import { loadStripe } from "@stripe/stripe-js";
@@ -44,6 +32,8 @@ import {
   getExtendedEphemeralPublicKey,
 } from "@mysten/zklogin";
 import { useSui } from "../components/hooks/useSui";
+import {useWallet} from '@suiet/wallet-kit';
+// import {TransactionBlock } from "@mysten/sui.js";
 
 // Make sure to call `loadStripe` outside of a component’s render to avoid
 // recreating the `Stripe` object on every render.
@@ -62,6 +52,7 @@ const transition = {
   ease: "easeInOut",
   duration: 0.5,
 };
+
 
 const WalletSelectorAntDesign = dynamic(
   () => import("../components/WalletSelectorAntDesign"),
@@ -83,7 +74,7 @@ const Mint = () => {
   const isauthenticate = Cookies.get("erebrus_token");
   const [address, setAddress] = useState("");
   const [token, settoken] = useState("");
-  const [wallet, setwallet] = useState("");
+ 
   const [userid, setuserid] = useState("");
   const [buttonblur, setbuttonblur] = useState(false);
   const [showsignbutton, setshowsignbutton] = useState(false);
@@ -101,14 +92,17 @@ const Mint = () => {
   const { suiClient } = useSui();
 
   const { account, connected, network, signMessage, signAndSubmitTransaction } = useWallet();
-
+  const wallet = useWallet();
   let sendable = isSendableNetwork(connected, network?.name);
 
-  useEffect( () => {
-    
-    mint();
+ 
 
-  }, [connected])
+  useEffect(() => {
+    if (!wallet.connected) return;
+    console.log('connected wallet name: ', wallet.name)
+    console.log('account address: ', wallet.account?.address)
+    console.log('account publicKey: ', wallet.account?.publicKey)
+  }, [wallet.connected])
 
   useEffect(() => {
     // Extract URL parameters
@@ -161,90 +155,9 @@ const Mint = () => {
   }, []);
   
 
-  const getAptosWallet = () => {
-    if ("aptos" in window) {
-      return window.aptos;
-    } else {
-      window.open("https://petra.app/", "_blank");
-    }
-  };
+  
 
-  const connectWallet = async () => {
-    const wallet = getAptosWallet();
-    try {
-      const response = await wallet.connect();
-
-      const account = await wallet.account();
-      console.log("account", account);
-
-      // Get the current network after connecting (optional)
-      const networkwallet = await window.aptos.network();
-
-      // Check if the connected network is Mainnet
-      if (networkwallet === mynetwork) {
-        const { data } = await axios.get(
-          `${GATEWAY_URL}api/v1.0/flowid?walletAddress=${account.address}`
-        );
-        console.log(data);
-
-        const message = data.payload.eula;
-        const nonce = data.payload.flowId;
-        const publicKey = account.publicKey;
-
-        const { signature, fullMessage } = await wallet.signMessage({
-          message,
-          nonce,
-        });
-        console.log("sign", signature, "full message", fullMessage);
-
-        // console.log(signature);
-
-        let signaturewallet = signature;
-
-        if (signaturewallet.length === 128) {
-          signaturewallet = `0x${signaturewallet}`;
-        }
-
-        const authenticationData = {
-          flowId: nonce,
-          signature: `${signaturewallet}`,
-          pubKey: publicKey,
-        };
-
-        const authenticateApiUrl = `${GATEWAY_URL}api/v1.0/authenticate`;
-
-        const config = {
-          url: authenticateApiUrl,
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          data: authenticationData,
-        };
-
-        try {
-          const response = await axios(config);
-          console.log("auth data", response.data);
-          const token = await response?.data?.payload?.token;
-          const userId = await response?.data?.payload?.userId;
-
-          settoken(token), setwallet(account.address), setuserid(userId);
-
-          Cookies.set("erebrus_token", token, { expires: 7 });
-          Cookies.set("erebrus_wallet", account.address, { expires: 7 });
-          Cookies.set("erebrus_userid", userId, { expires: 7 });
-
-          // await mint();
-        } catch (error) {
-          console.error(error);
-        }
-      } else {
-        alert(`Switch to ${mynetwork} in your wallet`);
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  
 
   // useEffect(() => {
   //   // Check to see if this is a redirect back from Checkout
@@ -275,13 +188,7 @@ const Mint = () => {
   //   },
   // };
 
-  const transaction = {
-    data: {
-      function: `${envmintfucn}`, // Assuming envmintfucn is the function name in the old format
-      typeArguments: [],           // No type arguments in the old format
-      functionArguments: [],       // No function arguments in the old format
-    },
-  };
+  
 
   async function getZkProof(forceUpdate = false) {
     const decodedJwt = jwt_decode(jwtEncoded);
@@ -448,147 +355,117 @@ const Mint = () => {
       });
   }
 
-  const mint = async () => {
-    setbuttonblur(true);
-    setLoadingTx(true);
-    console.log("connected", connected);
+  // const mint = async () => {
+  //   setbuttonblur(true);
+  //   setLoadingTx(true);
+  //   console.log("connected", connected);
+  //   try {
+  //     const pendingTransaction = await signAndSubmitTransaction(transaction);
+  //     await aptosClient(network?.name.toLowerCase()).waitForTransaction({
+  //       transactionHash: pendingTransaction.hash,
+  //     });
+  //     console.log("mint transaction", pendingTransaction.hash);
+  //     if(pendingTransaction.hash)
+  //     {
+  //       setmintpage("page3");
+  //       setLoadingTx(false);
+  //       setshowconnectbutton(false);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error connecting wallet or minting NFT:", error);
+  //     setbuttonblur(false);
+  //     setLoadingTx(false);
+  //     // setmintpage("page1");
+  //     setshowconnectbutton(false);
+  //   }
+  // };
+
+  // const stripe = async () => {
+  //   // if (!isSignedIn) {
+  //   //   await connectWallet();
+  //   // }
+  //   setbuttonblur(true);
+
+  //   const auth = Cookies.get("erebrus_token");
+  //   const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
+  //   const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_BASE_URL;
+
+  //   try {
+  //     const response = await axios.post(
+  //       `${EREBRUS_GATEWAY_URL}api/v1.0/subscription/erebrus`,
+  //       {},
+  //       {
+  //         headers: {
+  //           Accept: "application/json, text/plain, */*",
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${auth}`,
+  //         },
+  //       }
+  //     );
+
+  //     const responseData = await response;
+  //     console.log("stripe response:", responseData);
+  //     setClientSecret(responseData.data.payload.clientSecret);
+  //     setmintpopup(false);
+  //     try {
+  //       const res = await fetch("/api/checkout", {
+  //         method: "POST",
+  //         headers: {
+  //           "content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({ amount: 111 }),
+  //       });
+
+  //       res.json().then((data) => {
+  //         console.log("stripe data", data);
+  //         // router.push(data.url);
+  //       });
+  //       if (res.statusCode === 500) {
+  //         console.error(data.message);
+  //         return;
+  //       }
+  //       setsuccesspop(true);
+  //     } catch (error) {
+  //       console.log("stripe error payment");
+  //     }
+  //   } catch (error) {
+  //     console.error("stripe error:", error);
+  //   }
+  // };
+
+  // -------------------------------------------------------------------------------------------------------------------------------------------
+
+  
+
+  async function handleSignAndExecuteTxBlock() {
+    if (!wallet.connected) return
+
+    // define a programmable transaction
+    const tx = new TransactionBlock();
+    const packageObjectId = "0x6dd31527aa4fa68f5a6578a7b3c2fb44ed79d019aa1fe8d4c83a262b1bece985";
+    tx.moveCall({
+      target: `${packageObjectId}::erebrus::mint`,
+      arguments: [
+        tx.pure("name"),        // Name argument
+        tx.pure("description"), // Description argument
+        tx.pure("url"),         // URL argument
+      ],
+    });
+
     try {
-      const pendingTransaction = await signAndSubmitTransaction(transaction);
-      await aptosClient(network?.name.toLowerCase()).waitForTransaction({
-        transactionHash: pendingTransaction.hash,
+      // execute the programmable transaction
+      const resData = await wallet.signAndExecuteTransactionBlock({
+        transactionBlock: tx
       });
-      console.log("mint transaction", pendingTransaction.hash);
-      if(pendingTransaction.hash)
-      {
-        setmintpage("page3");
-        setLoadingTx(false);
-        setshowconnectbutton(false);
-      }
-    } catch (error) {
-      console.error("Error connecting wallet or minting NFT:", error);
-      setbuttonblur(false);
-      setLoadingTx(false);
-      // setmintpage("page1");
-      setshowconnectbutton(false);
+      console.log('nft minted successfully!', resData);
+      alert('Congrats! your nft is minted!')
+      window.location.href="/subscription"
+    } catch (e) {
+      console.error('nft mint failed', error);
     }
-  };
+  }
 
-  const stripe = async () => {
-    // if (!isSignedIn) {
-    //   await connectWallet();
-    // }
-    setbuttonblur(true);
-
-    const auth = Cookies.get("erebrus_token");
-    const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
-    const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_BASE_URL;
-
-    try {
-      const response = await axios.post(
-        `${EREBRUS_GATEWAY_URL}api/v1.0/subscription/erebrus`,
-        {},
-        {
-          headers: {
-            Accept: "application/json, text/plain, */*",
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${auth}`,
-          },
-        }
-      );
-
-      const responseData = await response;
-      console.log("stripe response:", responseData);
-      setClientSecret(responseData.data.payload.clientSecret);
-      setmintpopup(false);
-      // try {
-      //   const res = await fetch("/api/checkout", {
-      //     method: "POST",
-      //     headers: {
-      //       "content-Type": "application/json",
-      //     },
-      //     body: JSON.stringify({ amount: 111 }),
-      //   });
-
-      //   res.json().then((data) => {
-      //     console.log("stripe data", data);
-      //     // router.push(data.url);
-      //   });
-      //   if (res.statusCode === 500) {
-      //     console.error(data.message);
-      //     return;
-      //   }
-      //   setsuccesspop(true);
-      // } catch (error) {
-      //   console.log("stripe error payment");
-      // }
-    } catch (error) {
-      console.error("stripe error:", error);
-    }
-  };
-
-  const onSignMessage = async () => {
-    if (sendable) {
-      try {
-        const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
-
-        const { data } = await axios.get(
-          `${REACT_APP_GATEWAY_URL}api/v1.0/flowid?walletAddress=${account?.address}`
-        );
-        console.log(data);
-
-        const message = data.payload.eula;
-        const nonce = data.payload.flowId;
-        const publicKey = account?.publicKey;
-
-        const payload = {
-          message: message,
-          nonce: nonce,
-        };
-        const response = await signMessage(payload);
-        console.log(response);
-
-        let signaturewallet = response.signature;
-
-        if (signaturewallet.length === 128) {
-          signaturewallet = `0x${signaturewallet}`;
-        }
-
-        const authenticationData = {
-          flowId: nonce,
-          signature: `${signaturewallet}`,
-          pubKey: publicKey,
-        };
-
-        const authenticateApiUrl = `${REACT_APP_GATEWAY_URL}api/v1.0/authenticate`;
-
-        const config = {
-          url: authenticateApiUrl,
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          data: authenticationData,
-        };
-
-        const authResponse = await axios(config);
-        console.log("auth data", authResponse.data);
-
-        const token = await authResponse?.data?.payload?.token;
-        const userId = await authResponse?.data?.payload?.userId;
-
-        Cookies.set("erebrus_token", token, { expires: 7 });
-        Cookies.set("erebrus_wallet", account?.address ?? "", { expires: 7 });
-        Cookies.set("erebrus_userid", userId, { expires: 7 });
-
-        window.location.reload();
-      } catch (error) {
-        console.error(error);
-        setshowsignbutton(true);
-      }
-    } else {
-      alert(`Switch to ${mynetwork} in your wallet`);
-    }
-  };
+ 
 
   // if (!isSignedIn) {
   //   return (
@@ -772,7 +649,7 @@ const Mint = () => {
                             <div className="items-center pt-20 rounded-b w-1/2 mx-auto">
                             
                           <button
-                                onClick={() => getZkProof(true)}
+                                onClick={() => handleSignAndExecuteTxBlock()}
                                 style={{ border: "1px solid #0162FF" }}
                                 type="button"
                                 className="flex w-full text-white font-bold focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-md text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"

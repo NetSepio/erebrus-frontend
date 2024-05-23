@@ -29,10 +29,47 @@ import {
   getExtendedEphemeralPublicKey,
 } from "@mysten/zklogin";
 import { useLayoutEffect } from "react";
+import { getFullnodeUrl, SuiClient } from '@mysten/sui.js/client';
+import FetchSuiNft from '../components/fetchSuiNft'
 
 const envcollectionid = process.env.NEXT_PUBLIC_COLLECTIONID;
 const graphqlaptos = process.env.NEXT_PUBLIC_GRAPHQL_APTOS;
 
+export type MoveValue =
+	| number
+	| boolean
+	| string
+	| MoveValue[]
+	| string
+	| {
+			id: string;
+	  }
+	| MoveStruct
+	| null;
+export type MoveStruct =
+	| MoveValue[]
+	| {
+			fields: {
+				[key: string]: MoveValue;
+			};
+			type: string;
+	  }
+	| {
+			[key: string]: MoveValue;
+	  };
+export type SuiParsedData =
+	| {
+			dataType: 'moveObject';
+			fields: MoveStruct;
+			hasPublicTransfer: boolean;
+			type: string;
+	  }
+	| {
+			dataType: 'package';
+			disassembled: {
+				[key: string]: unknown;
+			};
+	  };
 export interface FlowIdResponse {
   eula: string;
   flowId: string;
@@ -233,6 +270,62 @@ const suiwallet = useWallet()
       setLoading(false);
     }
   };
+  
+  
+    // useEffect(() => {
+    //   const nftminting = async () => { // Make sure to define nftminting as an async function
+    //     const SuiNft = await FetchSuiNft(suiwallet.address); // Call FetchSuiNft and await its result
+    //     console.log("suiiii nft", SuiNft);
+    //     console.log("suiwallet",suiwallet)
+    //   }
+  
+    //   nftminting();
+    // }, [account]);
+    useEffect(() => {
+      const getNft = async () => {
+        setLoading(true);
+        try {
+          const suiClient = new SuiClient({ url: getFullnodeUrl("testnet") });
+          const objects = await suiClient.getOwnedObjects({ owner:"0x69ebfcf95db68e2358b39d218bd718cd0f05b8bd390123292c134f45480f376c" });
+          const widgets = [];
+  
+          // Iterate through all objects owned by the address
+          for (let i = 0; i < objects.data.length; i++) {
+            const currentObjectId = objects.data[i].data.objectId;
+  
+            // Get object information
+            const objectInfo = await suiClient.getObject({
+              id: currentObjectId,
+              options: { showContent: true },
+            });
+            console.log("objectinfo", objectInfo)
+  
+            const packageId = '0x6dd31527aa4fa68f5a6578a7b3c2fb44ed79d019aa1fe8d4c83a262b1bece985';
+            const content = objectInfo.data?.content;
+  
+            if (content && 'type' in content && content.type === `${packageId}::erebrus::NFT`) {
+              const widgetObjectId = objectInfo.data;
+              console.log("Widget spotted:", widgetObjectId);
+              widgets.push(widgetObjectId);
+            }
+          }
+  
+          console.log("Widgets:", widgets);
+
+          // setN(widgets);
+        } catch (error) {
+          console.error("Error fetching NFTs:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      getNft();
+    }, [suiwallet]);// Add account as a dependency to useEffect
+  
+
+
+
 
   useEffect(() => {
     const fetchProjectsData = async () => {
@@ -388,78 +481,78 @@ const suiwallet = useWallet()
       window.open("https://petra.app/", "_blank");
     }
   };
+  
+  // const connectWallet = async () => {
+  //   const wallet = getAptosWallet();
+  //   try {
+  //     const response = await wallet.connect();
 
-  const connectWallet = async () => {
-    const wallet = getAptosWallet();
-    try {
-      const response = await wallet.connect();
+  //     const account = await wallet.account();
+  //     console.log("account", account);
 
-      const account = await wallet.account();
-      console.log("account", account);
+  //     // Get the current network after connecting (optional)
+  //     const networkwallet = await (window as any).aptos.network();
 
-      // Get the current network after connecting (optional)
-      const networkwallet = await (window as any).aptos.network();
+  //     // Check if the connected network is Mainnet
+  //     if (networkwallet === mynetwork) {
+  //       const { data } = await axios.get(
+  //         `${REACT_APP_GATEWAY_URL}api/v1.0/flowid?walletAddress=${account.address}`
+  //       );
+  //       console.log(data);
 
-      // Check if the connected network is Mainnet
-      if (networkwallet === mynetwork) {
-        const { data } = await axios.get(
-          `${REACT_APP_GATEWAY_URL}api/v1.0/flowid?walletAddress=${account.address}`
-        );
-        console.log(data);
+  //       const message = data.payload.eula;
+  //       const nonce = data.payload.flowId;
+  //       const publicKey = account.publicKey;
 
-        const message = data.payload.eula;
-        const nonce = data.payload.flowId;
-        const publicKey = account.publicKey;
+  //       const { signature, fullMessage } = await wallet.signMessage({
+  //         message,
+  //         nonce,
+  //       });
+  //       console.log("sign", signature, "full message", fullMessage);
 
-        const { signature, fullMessage } = await wallet.signMessage({
-          message,
-          nonce,
-        });
-        console.log("sign", signature, "full message", fullMessage);
+  //       let signaturewallet = signature;
 
-        let signaturewallet = signature;
+  //       if (signaturewallet.length === 128) {
+  //         signaturewallet = `0x${signaturewallet}`;
+  //       }
 
-        if (signaturewallet.length === 128) {
-          signaturewallet = `0x${signaturewallet}`;
-        }
+  //       const authenticationData = {
+  //         flowId: nonce,
+  //         "walletAddress": wallet.address,
+  //       };
 
-        const authenticationData = {
-          flowId: nonce,
-          "walletAddress": wallet.address,
-        };
+  //       const authenticateApiUrl = `${REACT_APP_GATEWAY_URL}api/v1.0/authenticate/NonSign`;
 
-        const authenticateApiUrl = `${REACT_APP_GATEWAY_URL}api/v1.0/authenticate/NonSign`;
+  //       const config = {
+  //         url: authenticateApiUrl,
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         data: authenticationData,
+  //       };
 
-        const config = {
-          url: authenticateApiUrl,
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          data: authenticationData,
-        };
+  //       try {
+  //         const response = await axios(config);
+  //         console.log("auth data", response.data);
+  //         const token = await response?.data?.payload?.token;
+  //         const userId = await response?.data?.payload?.userId;
 
-        try {
-          const response = await axios(config);
-          console.log("auth data", response.data);
-          const token = await response?.data?.payload?.token;
-          const userId = await response?.data?.payload?.userId;
+  //         Cookies.set("erebrus_token", token, { expires: 7 });
+  //         Cookies.set("erebrus_wallet", account.address, { expires: 7 });
+  //         Cookies.set("erebrus_userid", userId, { expires: 7 });
 
-          Cookies.set("erebrus_token", token, { expires: 7 });
-          Cookies.set("erebrus_wallet", account.address, { expires: 7 });
-          Cookies.set("erebrus_userid", userId, { expires: 7 });
-
-          window.location.reload();
-        } catch (error) {
-          console.error(error);
-        }
-      } else {
-        alert(`Switch to ${mynetwork} in your wallet`);
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  //         window.location.reload();
+  //       } catch (error) {
+  //         console.error(error);
+  //       }
+  //     } else {
+  //       alert(`Switch to ${mynetwork} in your wallet`);
+  //     }
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
 
   const onSignMessage = async () => {
     if (sendable) {
