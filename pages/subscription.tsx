@@ -822,7 +822,7 @@ const Subscription = () => {
                 <div className="text-2xl text-white font-semibold text-left ml-4 my-6 border-b border-gray-700 pb-4">
                   Subscription
                 </div>
-                {!nftdata && !trialsubscriptiondata && widgetData && (
+                {!nftdata && !trialsubscriptiondata && !widgetData && (
                   <div className="mx-auto px-4 min-h-screen">
                     <div className="w-full text-center py-20">
                       <h2 className="text-4xl font-bold text-white">
