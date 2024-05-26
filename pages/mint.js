@@ -118,41 +118,41 @@ const Mint = () => {
   }, []);
 
 
-  useEffect(() => {
-    const vpnnft = async () => {
-      try {
+  // useEffect(() => {
+  //   const vpnnft = async () => {
+  //     try {
 
-        const graphqlbody = {
-          query: `
-          query MyQuery {
-            current_token_datas_v2(
-              where: {collection_id: {_eq: \"${envcollectionid}\"}}
-            ) {
-              token_name
-              description
-            }
-          }
-            `,
-          operationName: "MyQuery",
-        };
+  //       const graphqlbody = {
+  //         query: `
+  //         query MyQuery {
+  //           current_token_datas_v2(
+  //             where: {collection_id: {_eq: \"${envcollectionid}\"}}
+  //           ) {
+  //             token_name
+  //             description
+  //           }
+  //         }
+  //           `,
+  //         operationName: "MyQuery",
+  //       };
 
-        const response = await axios.post(`${graphqlaptos}`, graphqlbody, {
-          headers: {
-            Accept: "application/json, text/plain, */*",
-            "Content-Type": "application/json",
-          },
-        });
+  //       const response = await axios.post(`${graphqlaptos}`, graphqlbody, {
+  //         headers: {
+  //           Accept: "application/json, text/plain, */*",
+  //           "Content-Type": "application/json",
+  //         },
+  //       });
 
-        console.log("vpn nft", response.data.data.current_token_datas_v2);
-        setTotalNFTMinted(response.data.data.current_token_datas_v2);
-      } catch (error) {
-        console.error("Error fetching nft data:", error);
-      } finally {
-      }
-    };
+  //       console.log("vpn nft", response.data.data.current_token_datas_v2);
+  //       setTotalNFTMinted(response.data.data.current_token_datas_v2);
+  //     } catch (error) {
+  //       console.error("Error fetching nft data:", error);
+  //     } finally {
+  //     }
+  //   };
 
-    vpnnft();
-  }, []);
+  //   vpnnft();
+  // }, []);
   
 
   
@@ -463,6 +463,7 @@ const Mint = () => {
     } catch (e) {
       console.error('nft mint failed', error);
     }
+    // window.location.reload()
   }
 
  

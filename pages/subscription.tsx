@@ -10,11 +10,7 @@ import { lib, enc } from "crypto-js";
 import { generateKeyPair } from "curve25519-js";
 // import { Network } from "@aptos-labs/ts-sdk";
 import Button from "../components/Button";
-import { 
-  ConnectButton, 
-  useWallet, 
-  addressEllipsis,
-} from "@suiet/wallet-kit";
+import { ConnectButton, useWallet, addressEllipsis } from "@suiet/wallet-kit";
 // import SingleSignerTransaction from "../components/transactionFlow/SingleSigner";
 const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
 const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_BASE_URL;
@@ -29,47 +25,47 @@ import {
   getExtendedEphemeralPublicKey,
 } from "@mysten/zklogin";
 import { useLayoutEffect } from "react";
-import { getFullnodeUrl, SuiClient } from '@mysten/sui.js/client';
-import FetchSuiNft from '../components/fetchSuiNft'
+import { getFullnodeUrl, SuiClient } from "@mysten/sui.js/client";
+import FetchSuiNft from "../components/fetchSuiNft";
 
 const envcollectionid = process.env.NEXT_PUBLIC_COLLECTIONID;
 const graphqlaptos = process.env.NEXT_PUBLIC_GRAPHQL_APTOS;
 
 export type MoveValue =
-	| number
-	| boolean
-	| string
-	| MoveValue[]
-	| string
-	| {
-			id: string;
-	  }
-	| MoveStruct
-	| null;
+  | number
+  | boolean
+  | string
+  | MoveValue[]
+  | string
+  | {
+      id: string;
+    }
+  | MoveStruct
+  | null;
 export type MoveStruct =
-	| MoveValue[]
-	| {
-			fields: {
-				[key: string]: MoveValue;
-			};
-			type: string;
-	  }
-	| {
-			[key: string]: MoveValue;
-	  };
+  | MoveValue[]
+  | {
+      fields: {
+        [key: string]: MoveValue;
+      };
+      type: string;
+    }
+  | {
+      [key: string]: MoveValue;
+    };
 export type SuiParsedData =
-	| {
-			dataType: 'moveObject';
-			fields: MoveStruct;
-			hasPublicTransfer: boolean;
-			type: string;
-	  }
-	| {
-			dataType: 'package';
-			disassembled: {
-				[key: string]: unknown;
-			};
-	  };
+  | {
+      dataType: "moveObject";
+      fields: MoveStruct;
+      hasPublicTransfer: boolean;
+      type: string;
+    }
+  | {
+      dataType: "package";
+      disassembled: {
+        [key: string]: unknown;
+      };
+    };
 export interface FlowIdResponse {
   eula: string;
   flowId: string;
@@ -119,11 +115,12 @@ const Subscription = () => {
   const [trialsubscriptiondata, settrialsubscriptiondata] = useState<any>(null);
   const [jwtEncoded, setJwtEncoded] = useState(null);
   const [userAddress, setUserAddress] = useState(null);
+  const [widgetData, setwidget] = useState(null);
 
-  const {status, connected, connecting , account } = useWallet();
-const suiwallet = useWallet()
-  let sendable = isSendableNetwork(connected,suiwallet?.chain?.id);
-  console.log(suiwallet)
+  const { status, connected, connecting, account } = useWallet();
+  const suiwallet = useWallet();
+  let sendable = isSendableNetwork(connected, suiwallet?.chain?.id);
+  console.log(suiwallet);
   const bg = {
     backgroundColor: "#202333",
   };
@@ -270,62 +267,67 @@ const suiwallet = useWallet()
       setLoading(false);
     }
   };
-  
-  
-    // useEffect(() => {
-    //   const nftminting = async () => { // Make sure to define nftminting as an async function
-    //     const SuiNft = await FetchSuiNft(suiwallet.address); // Call FetchSuiNft and await its result
-    //     console.log("suiiii nft", SuiNft);
-    //     console.log("suiwallet",suiwallet)
-    //   }
-  
-    //   nftminting();
-    // }, [account]);
-    useEffect(() => {
-      const getNft = async () => {
-        setLoading(true);
-        try {
-          const suiClient = new SuiClient({ url: getFullnodeUrl("testnet") });
-          const objects = await suiClient.getOwnedObjects({ owner:"0x69ebfcf95db68e2358b39d218bd718cd0f05b8bd390123292c134f45480f376c" });
-          const widgets = [];
-  
-          // Iterate through all objects owned by the address
-          for (let i = 0; i < objects.data.length; i++) {
-            const currentObjectId = objects.data[i].data.objectId;
-  
-            // Get object information
-            const objectInfo = await suiClient.getObject({
-              id: currentObjectId,
-              options: { showContent: true },
-            });
-            console.log("objectinfo", objectInfo)
-  
-            const packageId = '0x6dd31527aa4fa68f5a6578a7b3c2fb44ed79d019aa1fe8d4c83a262b1bece985';
-            const content = objectInfo.data?.content;
-  
-            if (content && 'type' in content && content.type === `${packageId}::erebrus::NFT`) {
-              const widgetObjectId = objectInfo.data;
-              console.log("Widget spotted:", widgetObjectId);
-              widgets.push(widgetObjectId);
-            }
+
+  // useEffect(() => {
+  //   const nftminting = async () => { // Make sure to define nftminting as an async function
+  //     const SuiNft = await FetchSuiNft(suiwallet.address); // Call FetchSuiNft and await its result
+  //     console.log("suiiii nft", SuiNft);
+  //     console.log("suiwallet",suiwallet)
+  //   }
+
+  //   nftminting();
+  // }, [account]);
+  useEffect(() => {
+    const getNft = async () => {
+      setLoading(true);
+      try {
+        const suiClient = new SuiClient({ url: getFullnodeUrl("testnet") });
+        const objects = await suiClient.getOwnedObjects({
+          owner:
+            "0x69ebfcf95db68e2358b39d218bd718cd0f05b8bd390123292c134f45480f376c",
+        });
+        const widgets = [];
+        console.log("objects", objects);
+
+        // Iterate through all objects owned by the address
+        for (let i = 0; i < objects.data.length; i++) {
+          const currentObjectId = objects.data[i].data.objectId;
+
+          // Get object information
+          const objectInfo = await suiClient.getObject({
+            id: currentObjectId,
+            options: { showContent: true },
+          });
+          console.log("objectinfo", objectInfo);
+
+          const packageId =
+            "0x6dd31527aa4fa68f5a6578a7b3c2fb44ed79d019aa1fe8d4c83a262b1bece985";
+          const content = objectInfo.data?.content;
+
+          if (
+            content &&
+            "type" in content &&
+            content.type === `${packageId}::erebrus::NFT`
+          ) {
+            const widgetObjectId = objectInfo.data;
+            console.log("Widget spotted:", widgetObjectId);
+            widgets.push(widgetObjectId);
           }
-  
-          console.log("Widgets:", widgets);
-
-          // setN(widgets);
-        } catch (error) {
-          console.error("Error fetching NFTs:", error);
-        } finally {
-          setLoading(false);
         }
-      };
-  
-      getNft();
-    }, [suiwallet]);// Add account as a dependency to useEffect
-  
 
+        console.log("Widgets:", widgets);
+        // console.log("asdasdasd",widgetData)
 
+        setwidget(widgets);
+      } catch (error) {
+        console.error("Error fetching NFTs:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    getNft();
+  }, [suiwallet]); // Add account as a dependency to useEffect
 
   useEffect(() => {
     const fetchProjectsData = async () => {
@@ -449,7 +451,7 @@ const suiwallet = useWallet()
         });
 
         console.log("vpn nft", response.data.data.current_token_ownerships_v2);
-        if(response.data.data.current_token_ownerships_v2.length > 0) {
+        if (response.data.data.current_token_ownerships_v2.length > 0) {
           setnftdata(response.data.data.current_token_ownerships_v2);
         }
       } catch (error) {
@@ -481,7 +483,7 @@ const suiwallet = useWallet()
       window.open("https://petra.app/", "_blank");
     }
   };
-  
+
   // const connectWallet = async () => {
   //   const wallet = getAptosWallet();
   //   try {
@@ -583,7 +585,7 @@ const suiwallet = useWallet()
 
         const authenticationData = {
           flowId: nonce,
-          "walletAddress": wallet.address,
+          walletAddress: wallet.address,
         };
 
         const authenticateApiUrl = `${REACT_APP_GATEWAY_URL}api/v1.0/authenticate/NonSign`;
@@ -635,10 +637,10 @@ const suiwallet = useWallet()
     setcollectionsPage(false);
   };
 
-  const handleTrialClick = () =>{
+  const handleTrialClick = () => {
     setvpnPage(true);
     setcollectionsPage(false);
-  }
+  };
 
   const [imageSrc, setImageSrc] = React.useState<string | null>(null);
 
@@ -700,11 +702,10 @@ const suiwallet = useWallet()
 
   //-----------------------------------------------------------------------------------------------------------------------
 
-
   // -------------------------------------------------- check for trial subscription ------------------------------------------------
 
   useEffect(() => {
-    const trialbuycheck = async() =>{
+    const trialbuycheck = async () => {
       const auth = Cookies.get("erebrus_token");
       try {
         const response = await fetch(
@@ -718,27 +719,26 @@ const suiwallet = useWallet()
             },
           }
         );
-        
+
         const responseData = await response.json();
         if (responseData?.subscription) {
-              settrialsubscriptiondata(responseData);
-              console.log("trial subsc response", responseData);
+          settrialsubscriptiondata(responseData);
+          console.log("trial subsc response", responseData);
         }
-  
       } catch (error) {
         console.error("Error:", error);
       } finally {
       }
-  }
-  
+    };
+
     trialbuycheck();
-  }, [])
+  }, []);
 
   // Extracting day, year, and time from the dateTime string
   const formatDateTime = (dateTime) => {
     const dateObj = new Date(dateTime);
     const day = dateObj.getDate();
-    const month = dateObj.toLocaleString('default', { month: 'long' });
+    const month = dateObj.toLocaleString("default", { month: "long" });
     const year = dateObj.getFullYear();
     const time = dateObj.toLocaleTimeString();
     return `${day} ${month} ${year} ${time}`;
@@ -748,9 +748,7 @@ const suiwallet = useWallet()
 
   async function loadRequiredData(encodedJwt) {
     //Decoding JWT to get useful Info
-    const decodedJwt = (await jwt_decode(
-      encodedJwt
-    ));
+    const decodedJwt = await jwt_decode(encodedJwt);
 
     const response = await axios.post("/api/salt");
 
@@ -766,7 +764,7 @@ const suiwallet = useWallet()
   }
 
   useEffect(() => {
-    const jwt_token_encoded = localStorage.getItem('id_token');
+    const jwt_token_encoded = localStorage.getItem("id_token");
     if (!jwt_token_encoded) {
       return;
     }
@@ -794,7 +792,7 @@ const suiwallet = useWallet()
             {!connected && (
               <button className="">
                 {/* <WalletSelectorAntDesign /> */}
-                <ConnectButton label="connect"/>
+                <ConnectButton label="connect" />
               </button>
             )}
             {connected && (
@@ -812,6 +810,7 @@ const suiwallet = useWallet()
       </>
     );
   }
+  
 
   return (
     <div className="py-0 min-h-screen">
@@ -823,74 +822,161 @@ const suiwallet = useWallet()
                 <div className="text-2xl text-white font-semibold text-left ml-4 my-6 border-b border-gray-700 pb-4">
                   Subscription
                 </div>
-                { !nftdata && !trialsubscriptiondata && (
-                  <div
-                  className="mx-auto px-4 min-h-screen">
-                  <div className="w-full text-center py-20">
-                  <h2 className="text-4xl font-bold text-white">No Subscription</h2>
-                  <div className="bg-blue-500 text-white font-bold py-4 px-6 rounded-lg w-1/5 mx-auto my-20">
-                    <Link href="/plans">Try our free trial now</Link>
+                {!nftdata && !trialsubscriptiondata && widgetData && (
+                  <div className="mx-auto px-4 min-h-screen">
+                    <div className="w-full text-center py-20">
+                      <h2 className="text-4xl font-bold text-white">
+                        No Subscription
+                      </h2>
+                      <div className="bg-blue-500 text-white font-bold py-4 px-6 rounded-lg w-1/5 mx-auto my-20">
+                        <Link href="/plans">Try our free trial now</Link>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                </div>
                 )}
                 <div className="flex gap-10 w-1/2">
+                  {nftdata && (
+                    <div className="w-1/2">
+                      <NftdataContainer
+                        metaDataArray={nftdata}
+                        MyReviews={false}
+                        selectCollection={handleCollectionClick}
+                      />
+                    </div>
+                  )}
+
+                  {trialsubscriptiondata && (
+                    <div
+                      className="w-1/2 rounded-3xl mt-2 mb-2 relative min-h-96"
+                      style={{
+                        backgroundColor: "#202333",
+                        border: "1px solid #0162FF",
+                      }}
+                    >
+                      <div className="w-full h-full rounded-lg px-6 pt-6">
+                        <button onClick={handleTrialClick}>
+                          <div className="flex flex-col">
+                            <div className="w-full">
+                              <h3 className="leading-12 mb-2 text-white">
+                                <div className="text-lg font-semibold mt-4 uppercase">
+                                  {trialsubscriptiondata.subscription.type}{" "}
+                                  Subscription
+                                </div>
+                                <div className="lg:flex md:flex justify-between">
+                                  <div className="text-md font-semibold mt-4">
+                                    Status: {trialsubscriptiondata.status}
+                                  </div>
+                                  <div className="text-md font-semibold mt-4">
+                                    Valid for 7 days
+                                  </div>
+                                </div>
+                              </h3>
+
+                              <div className="rounded-xl">
+                                <div className="text-sm text-white text-start mt-2">
+                                  <div className="mb-3">
+                                    <span className="text-green-500 ">
+                                      Start time :
+                                    </span>{" "}
+                                    {trialsubscriptiondata.subscription
+                                      .startTime
+                                      ? formatDateTime(
+                                          trialsubscriptiondata.subscription
+                                            .startTime
+                                        )
+                                      : "Loading..."}
+                                  </div>
+                                  <div className="">
+                                    <span className="text-red-500 ">
+                                      End time :
+                                    </span>{" "}
+                                    {trialsubscriptiondata.subscription.endTime
+                                      ? formatDateTime(
+                                          trialsubscriptiondata.subscription
+                                            .endTime
+                                        )
+                                      : "Loading..."}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div
+                                className="rounded-full px-10 py-2 mb-10 text-white"
+                                style={{
+                                  backgroundColor: "#0162FF",
+                                  position: "absolute",
+                                  bottom: 0,
+                                  left: 80,
+                                }}
+                              >
+                                Create Clients
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                   
-                {nftdata && (
-                <div className="w-1/2">
-                  <NftdataContainer
-                  metaDataArray={nftdata}
-                  MyReviews={false}
-                  selectCollection={handleCollectionClick}
-                />
                 </div>
-                )}
-            
-                {
-                  trialsubscriptiondata && (
-                    <div className="w-1/2 rounded-3xl mt-2 mb-2 relative min-h-96" style={{ backgroundColor:'#202333', border: '1px solid #0162FF'}}>
-      <div className="w-full h-full rounded-lg px-6 pt-6">
-        <button onClick={handleTrialClick}>
-          <div className="flex flex-col">
-            <div className="w-full">
-              <h3 className="leading-12 mb-2 text-white">
-              <div className="text-lg font-semibold mt-4 uppercase">
-                    {trialsubscriptiondata.subscription.type} Subscription         
-                  </div>  
-                <div className="lg:flex md:flex justify-between">
-                  <div className="text-md font-semibold mt-4">
-                  Status: {trialsubscriptiondata.status}                    
-                  </div>
-                  <div className="text-md font-semibold mt-4">
-                  Valid for 7 days 
-                  </div>
-                </div>  
-              </h3>
+                {widgetData && (
+                    <div
+                      className="w-1/4 rounded-3xl mt-2 mb-2 relative min-h-96"
+                      style={{
+                        backgroundColor: "#202333",
+                        border: "1px solid #0162FF",
+                      }}
+                    >
+                      <div className="w-full h-full rounded-lg px-6 pt-6">
+                        <button onClick={handleTrialClick}>
+                          <div className="flex flex-col">
+                            <div className="w-full">
+                              <h3 className="leading-12 mb-2 text-white">
+                                <div className="text-lg font-semibold mt-4 uppercase">
+                                {/* {widgetData[0].content}{" "} */}
+                                  Subscription
+                                </div>
+                                <div className="lg:flex md:flex justify-between">
+                                  <div className="text-md font-semibold mt-4">
+                                    Status: active 
+                                  </div>
+                                  <div className="text-md font-semibold mt-4 pl-1">
+                                     Valid for 7 days
+                                  </div>
+                                </div>
+                              </h3>
 
-              <div className="rounded-xl">
-                <div className="text-sm text-white text-start mt-2">
-                  <div className="mb-3">
-                  <span className="text-green-500 ">Start time :</span> {trialsubscriptiondata.subscription.startTime ? formatDateTime(trialsubscriptiondata.subscription.startTime) : 'Loading...'}
-                  </div>
-                  <div className="">                 
-                  <span className="text-red-500 ">End time :</span> {trialsubscriptiondata.subscription.endTime ? formatDateTime(trialsubscriptiondata.subscription.endTime) : 'Loading...'}
-                  </div>
-                </div>
-              </div>
+                              <div className="rounded-xl">
+                                <div className="text-sm text-white text-start mt-2">
+                                  <div className="mb-3">
+                                    <p className="text-green-500 ">Start time : <a className=" text-white">26 May 2024 01:30:45</a> </p> 
+                                  </div>
+                                  <div className="">
+                                    <span className="text-red-500 ">End time :<a className=" text-white">02 April 2024 01:30:45</a> </span> 
+                                  </div>
+                                </div>
+                              </div>
 
-              <div className="rounded-full px-10 py-2 mb-10 text-white" 
-              style={{backgroundColor:'#0162FF', position: 'absolute',bottom: 0, left:80}}>
-                Create Clients</div>
-            </div>
-          </div>
-        </button>
-      </div>
-    </div>
-                  )
-                }
-          </div>
+                              <div
+                                className="rounded-full px-10 py-2 mb-10 text-white"
+                                style={{
+                                  backgroundColor: "#0162FF",
+                                  position: "absolute",
+                                  bottom: 0,
+                                  left: 80,
+                                }}
+                              >
+                                Create Clients
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  )}
               </>
             )}
+            
 
             {vpnPage === true && (
               <>
@@ -924,7 +1010,6 @@ const suiwallet = useWallet()
 
                   {buttonset && (
                     <>
-
                       <div
                         style={{ backgroundColor: "#222944E5" }}
                         className="flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full"
@@ -1023,7 +1108,6 @@ const suiwallet = useWallet()
                                       </div>
 
                                       <div className="flex-col gap-4 mr-4">
-
                                         <div className="text-center w-1/2 mt-10 mx-auto">
                                           <div className="mb-4 md:mb-8">
                                             <button
@@ -1065,7 +1149,6 @@ const suiwallet = useWallet()
                             border: "1px solid #0162FF",
                           }}
                         >
-
                           <div className="py-4 space-y-4 mt-4">
                             <p className="text-3xl text-center font-semibold text-white">
                               Successfully created!
