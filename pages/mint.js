@@ -522,7 +522,7 @@ const Mint = () => {
           </div>
           <div className="text-white text-xl mt-4 mx-auto flex gap-2">
           <img src="/icomoon-free_price-tags.png" className="w-6 h-6 mt-1"/>
-            <div>Only at 1.11 APT</div>
+            <div>Only at 1.11 Sui</div>
           </div>
           <div className="text-white text-xl mt-4 mx-auto flex gap-2">
           <img src="/wpf_security-checked.png" className="w-6 h-6 mt-1"/>
