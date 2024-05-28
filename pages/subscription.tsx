@@ -283,11 +283,11 @@ const Subscription = () => {
       try {
         const suiClient = new SuiClient({ url: getFullnodeUrl("testnet") });
         const objects = await suiClient.getOwnedObjects({
-          owner:
-            "0x69ebfcf95db68e2358b39d218bd718cd0f05b8bd390123292c134f45480f376c",
+          owner: suiwallet.address
         });
         const widgets = [];
         console.log("objects", objects);
+        // console.log
 
         // Iterate through all objects owned by the address
         for (let i = 0; i < objects.data.length; i++) {
@@ -318,7 +318,7 @@ const Subscription = () => {
         console.log("Widgets:", widgets);
         // console.log("asdasdasd",widgetData)
 
-        setwidget(widgets);
+        setwidget(widgets[0]);
       } catch (error) {
         console.error("Error fetching NFTs:", error);
       } finally {
@@ -933,15 +933,15 @@ const Subscription = () => {
                             <div className="w-full">
                               <h3 className="leading-12 mb-2 text-white">
                                 <div className="text-lg font-semibold mt-4 uppercase">
-                                {/* {widgetData[0].content}{" "} */}
-                                  Subscription
+                                {widgetData?.content.fields.name}{" "}
+                                 
                                 </div>
                                 <div className="lg:flex md:flex justify-between">
                                   <div className="text-md font-semibold mt-4">
                                     Status: active 
                                   </div>
                                   <div className="text-md font-semibold mt-4 pl-1">
-                                     Valid for 7 days
+                                     Valid for 7t days
                                   </div>
                                 </div>
                               </h3>
