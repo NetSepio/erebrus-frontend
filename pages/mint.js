@@ -446,9 +446,9 @@ const Mint = () => {
     tx.moveCall({
       target: `${packageObjectId}::erebrus::mint`,
       arguments: [
-        tx.pure("name"),        // Name argument
-        tx.pure("description"), // Description argument
-        tx.pure("url"),         // URL argument
+        tx.pure("Sui Subscription"),        // Name argument
+        tx.pure("Subscription Vpn nft"), // Description argument
+        tx.pure("https://www.google.com/imgres?q=sui%20&imgurl=https%3A%2F%2Ffinancefeeds.com%2Fwp-content%2Fuploads%2F2024%2F03%2FSui_Header_1711630769O8YEYEh4cs-1.jpg&imgrefurl=https%3A%2F%2Ffinancefeeds.com%2Fsui-enhances-partnership-with-space-and-time-for-advanced-blockchain-data-integration%2F&docid=lA3jRMlEg3o8dM&tbnid=RI4hBzEf0naH4M&vet=12ahUKEwiq8tTM9a-GAxVk1jgGHbCJDXoQM3oECCUQAA..i&w=1200&h=720&hcb=2&ved=2ahUKEwiq8tTM9a-GAxVk1jgGHbCJDXoQM3oECCUQAA"),         // URL argument
       ],
     });
 
