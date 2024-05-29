@@ -32,7 +32,7 @@ const Howto = () => {
               </div>
             </h2>
             <p className="text-white text-sm mt-4">
-              The team at Erebrus have created an innovative and easy way to
+              The team at Erebrus has created an innovative and easy way to
               purchase a VPN subscription. All you need is a wallet address with
               some APT!
             </p>
