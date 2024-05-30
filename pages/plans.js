@@ -66,10 +66,10 @@ const Plans = () => {
                                   </h1>
                                   <h1 className="w-3/4 mx-auto text-4xl font-semibold leading-none tracking-normal text-gray-100 md:text-3xl md:tracking-tight">
                                     <span className="text-white">
-                                    11.11 SUI/ 3 month
+                                    1.11 SUI/ 3 month
                                     </span>
                                   </h1>
-
+                            
                                   <h1 className="mt-4 w-3/5 ml-10 font-bold leading-none tracking-normal rounded-full py-2 px-4 text-sm text-black" style={{backgroundColor:'#E3EEFF'}}>
                                   Early Node Operator Access
                                   </h1>
@@ -127,7 +127,7 @@ const Plans = () => {
                                   </h1>
                                   <h1 className="w-3/4 mx-auto text-4xl font-semibold leading-none tracking-normal text-gray-100 md:text-3xl md:tracking-tight">
                                     <span className="text-white">
-                                    11.11 SUI/ 3 month
+                                    1.11 SUI/ 3 month
                                     </span>
                                   </h1>
 

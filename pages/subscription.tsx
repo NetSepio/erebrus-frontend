@@ -817,7 +817,9 @@ const Subscription = () => {
       <section className="">
         <div className="px-10 mx-auto">
           <div className="w-full mx-auto text-left md:text-center">
-            {collectionsPage === true && (
+            {
+            collectionsPage === true &&
+             (
               <>
                 <div className="text-2xl text-white font-semibold text-left ml-4 my-6 border-b border-gray-700 pb-4">
                   Subscription
@@ -940,8 +942,9 @@ const Subscription = () => {
                                   <div className="text-md font-semibold mt-4">
                                     Status: active 
                                   </div>
+                                        
                                   <div className="text-md font-semibold mt-4 pl-1">
-                                     Valid for 7t days
+                                     Valid for 3 months
                                   </div>
                                 </div>
                               </h3>
@@ -949,10 +952,10 @@ const Subscription = () => {
                               <div className="rounded-xl">
                                 <div className="text-sm text-white text-start mt-2">
                                   <div className="mb-3">
-                                    <p className="text-green-500 ">Start time : <a className=" text-white">26 May 2024 01:30:45</a> </p> 
+                                    <p className="text-green-500 ">Start time : <a className=" text-white">30 May 2024 01:30:45</a> </p> 
                                   </div>
                                   <div className="">
-                                    <span className="text-red-500 ">End time :<a className=" text-white">02 April 2024 01:30:45</a> </span> 
+                                    <span className="text-red-500 ">End time :<a className=" text-white">30 August 2024 01:30:45</a> </span> 
                                   </div>
                                 </div>
                               </div>
