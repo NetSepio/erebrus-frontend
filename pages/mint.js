@@ -439,16 +439,20 @@ const Mint = () => {
 
   async function handleSignAndExecuteTxBlock() {
     if (!wallet.connected) return
-
+  
     // define a programmable transaction
     const tx = new TransactionBlock();
-    const packageObjectId = "0x6dd31527aa4fa68f5a6578a7b3c2fb44ed79d019aa1fe8d4c83a262b1bece985";
+    const packageObjectId = "0x43260ab5997978f27f797211bf5dda44c6a6121022f9b32a967f795fbf2ed0be";
+    const mintCoin = tx.splitCoins(tx.gas, [tx.pure("1000000000")]);
+    tx.setGasBudget(100000000);
     tx.moveCall({
       target: `${packageObjectId}::erebrus::mint`,
       arguments: [
         tx.pure("Sui Subscription"),        // Name argument
         tx.pure("Subscription Vpn nft"), // Description argument
         tx.pure("https://www.google.com/imgres?q=sui%20&imgurl=https%3A%2F%2Ffinancefeeds.com%2Fwp-content%2Fuploads%2F2024%2F03%2FSui_Header_1711630769O8YEYEh4cs-1.jpg&imgrefurl=https%3A%2F%2Ffinancefeeds.com%2Fsui-enhances-partnership-with-space-and-time-for-advanced-blockchain-data-integration%2F&docid=lA3jRMlEg3o8dM&tbnid=RI4hBzEf0naH4M&vet=12ahUKEwiq8tTM9a-GAxVk1jgGHbCJDXoQM3oECCUQAA..i&w=1200&h=720&hcb=2&ved=2ahUKEwiq8tTM9a-GAxVk1jgGHbCJDXoQM3oECCUQAA"),         // URL argument
+        mintCoin,
+        tx.object("0xa3a22a2da9d2cbf2b48dfa46a169ed2090f2d0eaf5781121934aa5d220c2a146")
       ],
     });
 
@@ -509,7 +513,7 @@ const Mint = () => {
           </div>
 <div class="flex justify-center gap-20">
 <div className="text-white w-1/3 p-10" style={{marginLeft:'20vh'}}>
-          <img src="/111nft_gif.gif" style={{border:'1px solid #0162FF'}} className="rounded-lg"/>
+          <img src="monkey.png" style={{border:'1px solid #0162FF'}} className="rounded-lg"/>
         </div>
         <div className="w-1/2 mt-10">
           <div className="text-white text-xl mt-10 mx-auto flex gap-2">
@@ -522,7 +526,7 @@ const Mint = () => {
           </div>
           <div className="text-white text-xl mt-4 mx-auto flex gap-2">
           <img src="/icomoon-free_price-tags.png" className="w-6 h-6 mt-1"/>
-            <div>Only at 1.11 Sui</div>
+            <div>Only at 1.11 SUI</div>
           </div>
           <div className="text-white text-xl mt-4 mx-auto flex gap-2">
           <img src="/wpf_security-checked.png" className="w-6 h-6 mt-1"/>
