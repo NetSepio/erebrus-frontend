@@ -142,7 +142,7 @@ const Plans = () => {
 
                     <div className="text-left text-white mt-10 w-2/3 mx-auto">
                       &#x2022; Free trial for 7 days<br></br>
-                      &#x2022; Pay by APT, crytocurrency or Fiat<br></br>
+                      &#x2022; Pay by SOL, crytocurrency or Fiat<br></br>
                       &#x2022; Up to 5 options, more to come.<br></br>
                       &#x2022; Multiple tiers
                     </div>
