@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
 import axios from "axios";
 import Cookies from "js-cookie";
+
 const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_BASE_URL;
 
 const NodesData = () => {
@@ -10,60 +10,50 @@ const NodesData = () => {
   const [uniqueRegionsCount, setUniqueRegionsCount] = useState(0);
 
   useEffect(() => {
-    const fetchNodesData = async () => {
-      try {
-        const auth = Cookies.get("erebrus_token");
+  const fetchNodesData = async () => {
+    try {
+      const auth = Cookies.get("erebrus_token");
 
-        const response = await axios.get(
-          `${EREBRUS_GATEWAY_URL}api/v1.0/nodes/all`,
-          {
-            headers: {
-              Accept: "application/json, text/plain, */*",
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (response.status === 200) {
-          const payload = response.data.payload;
-          setNodesData(payload);
-          const filteredNodes = payload.filter(
-            (node) => node.status === "active"
-          );
-          setActiveNodesData(filteredNodes);
-          const uniqueRegions = new Set(payload.map((node) => node.region));
-          setUniqueRegionsCount(uniqueRegions.size);
-          console.log("erebrus nodes", payload);
+      const response = await axios.get(
+        `${EREBRUS_GATEWAY_URL}api/v1.0/nodes/all`,
+        {
+          headers: {
+            Accept: "application/json, text/plain, */*",
+            "Content-Type": "application/json",
+          },
         }
-      } catch (error) {
-        console.error("Error fetching nodes data:", error);
-      } finally {
-      }
-    };
+      );
 
-    fetchNodesData();
-  }, []);
+      if (response.status === 200) {
+        const payload = response.data.payload;
+        const filteredNodes = payload.filter(
+          (node) => node?.status === "active" && (node.region === "FL" || node.region === "AZ")
+        );
+        setNodesData(filteredNodes);
+        setActiveNodesData(filteredNodes);
+        const uniqueRegions = new Set(filteredNodes.map((node) => node.region ));
+        setUniqueRegionsCount(uniqueRegions.size);
+        console.log("erebrus nodes", payload);
+        console.log("filtered nodes", filteredNodes );
+      }
+    } catch (error) {
+      console.error("Error fetching nodes data:", error);
+    }
+  };
+
+  fetchNodesData();
+}, []);
 
   function elapsedTimeSince(timestamp) {
-    // Convert given timestamp to milliseconds
     const givenTimeMilliseconds = timestamp * 1000;
-
-    // Current timestamp in milliseconds
     const currentTimeMilliseconds = new Date().getTime();
-
-    // Calculate the time difference
     const timeDifference = currentTimeMilliseconds - givenTimeMilliseconds;
-
-    // Convert milliseconds to seconds
     const timeDifferenceInSeconds = timeDifference / 1000;
-
-    // Calculate elapsed time components
     const seconds = Math.floor(timeDifferenceInSeconds % 60);
     const minutes = Math.floor((timeDifferenceInSeconds / 60) % 60);
     const hours = Math.floor((timeDifferenceInSeconds / (60 * 60)) % 24);
     const days = Math.floor(timeDifferenceInSeconds / (60 * 60 * 24));
 
-    // Construct the string representation of elapsed time
     let elapsedTimeString = "";
     if (days > 0) {
       elapsedTimeString += `${days} d, `;
@@ -78,6 +68,7 @@ const NodesData = () => {
 
     return elapsedTimeString;
   }
+
   return (
     <div
       id="howto"
@@ -85,9 +76,6 @@ const NodesData = () => {
       style={{ backgroundColor: "#010001" }}
     >
       <div className="font-figtree text-left text-gray-200 w-full p-3">
-        {/* <h1 className="font-bold text-4xl lg:mb-16 mb-12 lg:mt-36 text-left">
-          Erebrus Nodes Data
-        </h1> */}
         <div className="text-white">
           <div className="flex uppercase">
             <div
@@ -109,7 +97,7 @@ const NodesData = () => {
                 <div>No. of Regions</div>
                 <div className="text-3xl">{uniqueRegionsCount}</div>
               </div>
-            </div>
+            </div>  
             <div
               className="flex gap-4 w-1/3 justify-center items-center p-6  mb-10"
               style={{ border: "solid 1px #FFFFFF66" }}
@@ -122,107 +110,117 @@ const NodesData = () => {
             </div>
           </div>
           <table className="w-full text-center">
-            <thead style={{ height: "10px" }}>
-              <tr>
-                <th style={{ border: "solid 1px #FFFFFF66" }}>
-                  <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable4.png" className="w-12 h-12" />
-                    <div>NODE ID</div>
-                  </div>
-                </th>
-                <th style={{ border: "solid 1px #FFFFFF66" }}>
-                  <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable5.png" className="w-10 h-10" />
-                    <div>NODE NAME</div>
-                  </div>
-                </th>
-                <th style={{ border: "solid 1px #FFFFFF66" }}>
-                  <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable6.png" className="w-10 h-10" />
-                    <div>REGION</div>
-                  </div>
-                </th>
-                <th style={{ border: "solid 1px #FFFFFF66" }}>
-                  <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable7.png" className="w-10 h-10" />
-                    <div>NETWORK SPEED</div>
-                  </div>
-                </th>
-                <th style={{ border: "solid 1px #FFFFFF66" }}>
-                  <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable8.png" className="w-10 h-10" />
-                    <div>STATUS</div>
-                  </div>
-                </th>
-                <th style={{ border: "solid 1px #FFFFFF66" }}>
-                  <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable9.png" className="w-10 h-10" />
-                    <div>UPTIME</div>
-                  </div>
-                </th>
-                <th style={{ border: "solid 1px #FFFFFF66" }}>
-                  <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable9.png" className="w-10 h-10" />
-                    <div>LAST PING</div>
-                  </div>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {nodesdata.map((node) => (
-                <tr
-                  key={node.id}
-                  className={
-                    node.status === "inactive"
-                      ? "text-red-300"
-                      : "text-blue-100"
-                  }
-                  style={{ height: "60px" }} // Adjust the height as needed
-                >
-                  <td style={{ border: "solid 1px #FFFFFF66" }}>
-                    <div className="flex gap-4 justify-center items-center py-2 px-4">
-                      {node.id.slice(0, 4)}...{node.id.slice(-4)}
-                    </div>
-                  </td>
-                  <td style={{ border: "solid 1px #FFFFFF66" }}>
-                    <div className="flex gap-4 justify-center items-center py-2 px-4">
-                      {node.name}
-                    </div>
-                  </td>
-                  <td style={{ border: "solid 1px #FFFFFF66" }}>
-                    <div className="flex gap-4 justify-center items-center py-2 px-4">
-                      {node.region}
-                    </div>
-                  </td>
-                  <td style={{ border: "solid 1px #FFFFFF66" }}>
-                    <div className="flex gap-4 justify-center items-center py-2 px-4">
-                      <span>DL:</span>
-                      {node.downloadSpeed}
-                      <span>UL:</span>
-                      {node.uploadSpeed}
-                    </div>
-                  </td>
-                  <td style={{ border: "solid 1px #FFFFFF66" }}>
-                    <div className="flex gap-4 justify-center items-center py-2 px-4">
-                      {node.status}
-                    </div>
-                  </td>
-                  <td style={{ border: "solid 1px #FFFFFF66" }}>
-                    <div className="flex gap-4 justify-center items-center py-2 px-4">
-                      {node.status === "inactive"
-                        ? "---"
-                        : elapsedTimeSince(node.startTimeStamp)}
-                    </div>
-                  </td>
-                  <td style={{ border: "solid 1px #FFFFFF66" }}>
-                    <div className="flex gap-4 justify-center items-center py-2 px-4">
-                      {elapsedTimeSince(node.lastPingedTimeStamp)}
-                    </div>
-                  </td>
-                  {/* <td style={{paddingTop:'20px'}}>{node.lastPinged}</td> */}
-                </tr>
-              ))}
-            </tbody>
+          <thead style={{ height: "10px" }}>
+  <tr>
+    <th style={{ border: "solid 1px #FFFFFF66" }}>
+      <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
+        <img src="/nodetable4.png" className="w-12 h-12" />
+        <div>NODE ID</div>
+      </div>
+    </th>
+    <th style={{ border: "solid 1px #FFFFFF66" }}>
+      <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
+        <img src="/nodetable5.png" className="w-10 h-10" />
+        <div>NODE NAME</div>
+      </div>
+    </th>
+    <th style={{ border: "solid 1px #FFFFFF66" }}>
+      <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
+        <img src="/nodetable9.png" className="w-10 h-10" />
+        <div>SUI ADDRESS</div>
+      </div>
+    </th>
+    <th style={{ border: "solid 1px #FFFFFF66" }}>
+      <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
+        <img src="/nodetable6.png" className="w-10 h-10" />
+        <div>REGION</div>
+      </div>
+    </th>
+    <th style={{ border: "solid 1px #FFFFFF66" }}>
+      <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
+        <img src="/nodetable7.png" className="w-10 h-10" />
+        <div>NETWORK SPEED</div>
+      </div>
+    </th>
+    <th style={{ border: "solid 1px #FFFFFF66" }}>
+      <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
+        <img src="/nodetable8.png" className="w-10 h-10" />
+        <div>STATUS</div>
+      </div>
+    </th>
+    <th style={{ border: "solid 1px #FFFFFF66" }}>
+      <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
+        <img src="/nodetable9.png" className="w-10 h-10" />
+        <div>UPTIME</div>
+      </div>
+    </th>
+    <th style={{ border: "solid 1px #FFFFFF66" }}>
+      <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
+        <img src="/nodetable9.png" className="w-10 h-10" />
+        <div>LAST PING</div>
+      </div>
+    </th>
+  </tr>
+</thead>
+<tbody>
+  {nodesdata.map((node) => (
+    <tr
+      key={node.id}
+      className={
+        node.status === "inactive"
+          ? "text-red-300"
+          : "text-blue-100"
+      }
+      style={{ height: "60px" }}
+    >
+      <td style={{ border: "solid 1px #FFFFFF66" }}>
+        <div className="flex gap-4 justify-center items-center py-2 px-4">
+          {node.id.slice(0, 4)}...{node.id.slice(-4)}
+        </div>
+      </td>
+      <td style={{ border: "solid 1px #FFFFFF66" }}>
+        <div className="flex gap-4 justify-center items-center py-2 px-4">
+          {node.name}
+        </div>
+      </td>
+      <td style={{ border: "solid 1px #FFFFFF66" }}>
+        <div className="flex gap-4 justify-center items-center py-2 px-4 overflow-hidden truncate text-clip text-nowrap max-w-xs">
+          {`${node.walletAddressSol.slice(0, 3)}...${node.walletAddressSol.slice(-3)}`}
+        </div>
+      </td>
+      <td style={{ border: "solid 1px #FFFFFF66" }}>
+        <div className="flex gap-4 justify-center items-center py-2 px-4">
+          {node.region}
+        </div>
+      </td>
+      <td style={{ border: "solid 1px #FFFFFF66" }}>
+        <div className="flex gap-4 justify-center items-center py-2 px-4">
+          <span>DL:</span>
+          {node.downloadSpeed}
+          <span>UL:</span>
+          {node.uploadSpeed}
+        </div>
+      </td>
+      <td style={{ border: "solid 1px #FFFFFF66" }}>
+        <div className="flex gap-4 justify-center items-center py-2 px-4">
+          {node.status}
+        </div>
+      </td>
+      <td style={{ border: "solid 1px #FFFFFF66" }}>
+        <div className="flex gap-4 justify-center items-center py-2 px-4">
+          {node.status === "inactive"
+            ? "---"
+            : elapsedTimeSince(node.startTimeStamp)}
+        </div>
+      </td>
+      <td style={{ border: "solid 1px #FFFFFF66" }}>
+        <div className="flex gap-4 justify-center items-center py-2 px-4">
+          {elapsedTimeSince(node.lastPingedTimeStamp)}
+        </div>
+      </td>
+    </tr>
+  ))}
+</tbody>
           </table>
         </div>
       </div>
