@@ -62,7 +62,7 @@ const Plans = () => {
                       </span>
                     </h1>
                     <h1 className="w-3/4 mx-auto text-4xl font-semibold leading-none tracking-normal text-gray-100 md:text-3xl md:tracking-tight">
-                      <span className="text-white">1.11 APT/ 3 month</span>
+                      <span className="text-white">0.1 SOL/ 3 month</span>
                     </h1>
 
                     <h1
