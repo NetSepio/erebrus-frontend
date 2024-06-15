@@ -253,10 +253,10 @@ const Subscription = () => {
 
         if (response.status === 200) {
           // Filter the data based on the domain ID
-          const wallet = Cookies.get("erebrus_wallet");
+          const wallet = Cookies.get("erebrus_userid");
           const payload: any[] = response.data.payload;
           const filteredData = payload.filter(
-            (item) => item?.walletAddress === wallet
+            (item) => item?.userId === wallet
           );
           filteredData.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
           setprojectsData(filteredData);
