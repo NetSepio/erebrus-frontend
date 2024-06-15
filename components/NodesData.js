@@ -24,19 +24,24 @@ const NodesData = () => {
           }
         );
 
-        if (response.status === 200) {
-          const payload = response.data.payload;
-          setNodesData(payload);
-          const filteredNodes = payload.filter(
-            (node) => node.status === "active"
-          );
-          setActiveNodesData(filteredNodes);
-          const uniqueRegions = new Set(payload.map((node) => node.region));
-          setUniqueRegionsCount(uniqueRegions.size);
-          console.log("erebrus nodes", payload);
+        if (response.status === 200  && response.data) {
+  
+                const payload = response.data.payload;
+                setNodesData(payload);
+                const filteredNodes = payload.filter(
+                  (node) => node.status === "active"
+                );
+                setActiveNodesData(filteredNodes);
+                const uniqueRegions = new Set(payload.map((node) => node.region));
+                setUniqueRegionsCount(uniqueRegions.size);
+                console.log("erebrus nodes", payload);
+          
         }
       } catch (error) {
         console.error("Error fetching nodes data:", error);
+        setNodesData([]);
+        setActiveNodesData([]);
+        setUniqueRegionsCount(0);
       } finally {
       }
     };
