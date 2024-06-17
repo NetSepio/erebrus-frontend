@@ -22,7 +22,7 @@ Our Web3-Powered VPN
           utilizing NFTs for robust privacy and decentralization.</div>
         </div>
         <Link
-          href="https://drive.google.com/file/d/19NdGQ1gI5iA7KUdu8Q5HQO9qURzDfhUJ/view?usp=sharing" target="_blank"
+          href="https://drive.google.com/file/d/11yhREF424PS8d-RIfaNJAAFvSPowmNOa/view?usp=drive_link" target="_blank"
           className="bg-white text-black font-bold py-3 px-6 rounded-full w-full mr-10"
           style={{backgroundImage: 'linear-gradient(#FFFFFF00, #0099FF)'}}
         >
