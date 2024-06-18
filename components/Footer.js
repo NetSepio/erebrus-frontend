@@ -23,11 +23,11 @@ security when using Public VPNs.</div>
           </div>
           </div>
 
-          {/* <div className="text-gray-300">
-          <div>Links</div>
-          <a href="https://netsepio.com" target="_blank" rel="noopener noreferrer" className="underline text-blue-500">netsepio.com</a><br></br>
-          <a href="https://app.netsepio.com" target="_blank" rel="noopener noreferrer" className="underline text-blue-500">app.netsepio.com</a>
-          </div> */}
+          <div className="text-gray-300 flex flex-col">
+          <div className="lg:text-xl text-md font-semibold tracking-wide text-gray-200 mb-4">Company</div>
+          <a href="/terms" target="_blank" rel="noopener noreferrer" className="mb-2">Terms and Conditions</a>
+          <a href="/privacy" target="_blank" rel="noopener noreferrer" className="">Privacy Policy</a>
+          </div>
           <div>
             
 
