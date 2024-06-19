@@ -22,13 +22,20 @@ accordance with our Privacy Policy. We do not sell, track, or share your data
 with third parties.` },
         { id: 6, name: "Privacy Policy", description: `By using Erebrus, you agree to the collection and use of information in 
 accordance with our Privacy Policy. Our Privacy Policy is available on our 
-website [insert link] and is incorporated into this EULA by reference.` },
+website <a href="https://erebrus.io/" target="_blank" rel="noopener noreferrer" style="color: black; text-decoration: underline;"><strong>here</strong></a> and is incorporated into this EULA by reference.` },
         { id: 7, name: "No Warranties", description: `Erebrus is provided "as is" without any warranties of any kind, whether 
 express, implied, or statutory. We do not guarantee that the Service will be 
 uninterrupted, error-free, or free from viruses or other harmful components. 
 We disclaim any warranties of merchantability, fitness for a particular 
 purpose, and non-infringement.` },
-        { id: 8, name: "Limitation of Liability", description: `` },
+        { id: 8, name: "Limitation of Liability", description: `To the maximum extent permitted by law, Erebrus, its affiliates, and its 
+licensors shall not be liable for any indirect, incidental, special, consequential, 
+or punitive damages, or any loss of profits or revenues, whether incurred 
+directly or indirectly, or any loss of data, use, goodwill, or other intangible 
+losses, resulting from: 
+- Your use of or inability to use the Service
+- Any unauthorized access to or use of our servers
+- Any bugs, viruses, or other harmful code that may be transmitted to or  through our Service` },
         { id: 9, name: "Indemnification", description: `You agree to indemnify, defend, and hold harmless Erebrus, its affiliates, and 
 its licensors, and their respective officers, directors, employees, and agents 
 from and against any claims, liabilities, damages, losses, and expenses, 
@@ -91,7 +98,7 @@ agree to be bound by this EULA.` },
 <div className="w-2/3" style={{backgroundColor:'#5696FF'}}>
 {/* {selectedTopic ? ( */}
           <div>
-            <p className='text-white text-lg p-20'>{selectedTopic?.description}</p>
+            <p className='text-white text-lg p-20' style={{ whiteSpace: 'pre-line' }} dangerouslySetInnerHTML={{ __html: selectedTopic?.description }}></p>
           </div>
         {/* ) : (
           <p>Select a topic to see the description</p>
@@ -102,4 +109,4 @@ agree to be bound by this EULA.` },
   )
 }
 
-export default Terms
+export default Terms;
