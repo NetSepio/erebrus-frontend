@@ -824,7 +824,26 @@ const Navbar = ({ isHome }) => {
                 >
                   Docs
                 </Link>
-
+                {paseto && (
+                  <>
+                {copied && (
+                      <p className="text-green-500 pt-2 pl-8">Paseto Copied!</p>
+                    )}
+                      <button
+                        className="block w-full text-left px-4 py-2 text-lg text-white hover:bg-gray-900"
+                        onClick={() => {
+                          navigator.clipboard.writeText(paseto ? paseto : "");
+                          setCopied(true);
+                        }}
+                      >
+                        <div className="flex gap-4" onClick={handlePasetoClick}>
+                          <span>
+                          </span>
+                          <span>Copy Paseto</span>
+                        </div>
+                      </button>
+                      </>
+)}
                 {account?.address && (
                   <div
                     className="lg:mt-0 mt-4 lg:mr-4 z-50 rounded-xl flex gap-4"
