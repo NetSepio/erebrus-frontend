@@ -27,6 +27,8 @@ import { useEthWallet } from "./Login/ethereum";
 import { useSolWallet } from "./Login/solana";
 import { handleLoginClick } from "./Login/googleLogin";
 
+import QRCodeSVG from "qrcode.react";
+
 const networkSol = WalletAdapterNetwork.Devnet;
 
 const variants = {
@@ -51,6 +53,7 @@ const Navbar = ({ isHome }) => {
   const [message, setMessage] = useState("");
   const [signature, setSignature] = useState("");
   const [challengeId, setChallengeId] = useState("");
+  const [showPasetoQR, setShowPasetoQR] = useState("");
   // const [showsignbutton, setshowsignbutton] = useState(false);
   const [link, setlink] = useState("");
   const { isSignedIn, setIsSignedIn } = useContext(AuthContext);
@@ -322,6 +325,7 @@ const Navbar = ({ isHome }) => {
     await delay(500);
     setSelectedDropwdown(false);
     setCopied(false);
+    setShowPasetoQR(true);
   };
 
   const [copied, setCopied] = useState(false);
@@ -537,20 +541,20 @@ const Navbar = ({ isHome }) => {
 
                 {paseto && (
                   <>
-                {copied && (
+                {/* {copied && (
                       <p className="text-green-500 pt-2 pl-8">Paseto Copied!</p>
-                    )}
+                    )} */}
                       <button
                         className="block w-full text-left px-4 py-2 text-lg text-white hover:bg-gray-900"
-                        onClick={() => {
-                          navigator.clipboard.writeText(paseto ? paseto : "");
-                          setCopied(true);
-                        }}
+                        // onClick={() => {
+                        //   navigator.clipboard.writeText(paseto ? paseto : "");
+                        //   setCopied(true);
+                        // }}
                       >
                         <div className="flex gap-4" onClick={handlePasetoClick}>
                           <span>
                           </span>
-                          <span>Copy Paseto</span>
+                          <span>Mobile Auth</span>
                         </div>
                       </button>
                       </>
@@ -824,6 +828,7 @@ const Navbar = ({ isHome }) => {
                 >
                   Docs
                 </Link>
+
                 {paseto && (
                   <>
                 {copied && (
@@ -844,6 +849,7 @@ const Navbar = ({ isHome }) => {
                       </button>
                       </>
 )}
+
                 {account?.address && (
                   <div
                     className="lg:mt-0 mt-4 lg:mr-4 z-50 rounded-xl flex gap-4"
@@ -928,6 +934,70 @@ const Navbar = ({ isHome }) => {
           </div>
         )}
       </motion.nav>
+
+
+      {showPasetoQR && (
+        <div
+        style={{ backgroundColor: "#040819D9" }}
+        className='flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full'
+        id='popupmodal'
+      >
+        <div className='relative px-10 pb-10 pt-6 lg:w-1/4 w-full max-w-2xl max-h-full rounded-3xl' style={{backgroundColor:'#1B213A'}}>
+        <div className="flex items-center justify-end rounded-t dark:border-gray-600">
+                <button
+                  onClick={() => setShowPasetoQR(false)}
+                  type="button"
+                  className="text-white bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                >
+                  <svg
+                    className="w-3 h-3"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 14 14"
+                  >
+                    <path
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+                    />
+                  </svg>
+                  <span className="sr-only">Close modal</span>
+                </button>
+              </div>
+          <div className='relative rounded-lg shadow'>
+            <div className='text-center text-white text-xl mb-10 -mt-6'>Scan QR Code</div>
+            <div className='flex justify-center gap-4'>
+
+             <QRCodeSVG value={paseto} size={300} />
+
+            </div>
+
+<div className="flex justify-center gap-4 text-white mt-10">
+            <button
+             onClick={async() => {
+              navigator.clipboard.writeText(paseto ? paseto : "");
+              setCopied(true);
+              await delay(3000);
+              setCopied(false);
+            }}
+            className="border border-white p-2 rounded-lg"
+            >
+              Copy Auth Token
+            </button>
+
+            {copied && (
+                      <p className="text-green-500 pt-2 pl-8">Paseto Copied!</p>
+                    )}
+
+            </div>
+          </div>
+        </div>
+      </div>
+      )}
+
     </nav>
   );
 };
