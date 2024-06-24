@@ -942,12 +942,12 @@ const Navbar = ({ isHome }) => {
         className='flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full'
         id='popupmodal'
       >
-        <div className='relative px-10 pb-10 pt-6 lg:w-1/4 w-full max-w-2xl max-h-full rounded-3xl' style={{backgroundColor:'#1B213A'}}>
+        <div className='relative px-10 pb-10 pt-6 lg:w-1/4 w-full max-w-2xl max-h-full rounded-3xl' style={{backgroundColor:'white'}}>
         <div className="flex items-center justify-end rounded-t dark:border-gray-600">
                 <button
                   onClick={() => setShowPasetoQR(false)}
                   type="button"
-                  className="text-white bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                  className="text-black bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
                 >
                   <svg
                     className="w-3 h-3"
@@ -967,15 +967,15 @@ const Navbar = ({ isHome }) => {
                   <span className="sr-only">Close modal</span>
                 </button>
               </div>
-          <div className='relative rounded-lg shadow'>
-            <div className='text-center text-white text-xl mb-10 -mt-6'>Scan QR Code</div>
-            <div className='flex justify-center gap-4'>
+          <div className='relative'>
+            <div className='text-center text-black text-xl mb-10 -mt-6'>Scan QR Code</div>
+            <div className='flex justify-center'>
 
              <QRCodeSVG value={paseto} size={300} />
 
             </div>
 
-<div className="flex justify-center gap-4 text-white mt-10">
+<div className="flex justify-center gap-4 text-black mt-10">
             <button
              onClick={async() => {
               navigator.clipboard.writeText(paseto ? paseto : "");
@@ -983,7 +983,7 @@ const Navbar = ({ isHome }) => {
               await delay(3000);
               setCopied(false);
             }}
-            className="border border-white p-2 rounded-lg"
+            className="border border-black p-2 rounded-lg"
             >
               Copy Auth Token
             </button>
