@@ -44,15 +44,19 @@ jobs:
       matrix:
         server: [ "SRV_1", "SRV_2" ]
     steps:
-      - name: Set environment variables
-        run: |
-          echo "PROD_REMOTE_SERVER_ADDRESS_${{ matrix.server }}=${{ secrets['PROD_REMOTE_SERVER_ADDRESS_' + matrix.server] }}" >> $GITHUB_ENV
+      - name: Set environment variables for SRV_1
+        if: matrix.server == 'SRV_1'
+        run: echo "REMOTE_SERVER_ADDRESS=${{ secrets.PROD_REMOTE_SERVER_ADDRESS_SRV_1 }}" >> $GITHUB_ENV
+
+      - name: Set environment variables for SRV_2
+        if: matrix.server == 'SRV_2'
+        run: echo "REMOTE_SERVER_ADDRESS=${{ secrets.PROD_REMOTE_SERVER_ADDRESS_SRV_2 }}" >> $GITHUB_ENV
 
       - name: Deploy on ${{ matrix.server }} server
         if: github.ref == 'refs/heads/prod'
         uses: appleboy/ssh-action@v0.1.7
         with:
-          host: ${{ env['PROD_REMOTE_SERVER_ADDRESS_' + matrix.server] }}
+          host: ${{ env.REMOTE_SERVER_ADDRESS }}
           username: ${{ secrets.PROD_SERVER_USERNAME }}
           key: ${{ secrets.PROD_REMOTE_SERVER_KEY }}
           port: ${{ secrets.PROD_SSH_PORT }}
