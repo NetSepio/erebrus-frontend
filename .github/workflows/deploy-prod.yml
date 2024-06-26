@@ -42,7 +42,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        server: [ "SRV_1", "SRV_2" ]
+        server: 
+            - SRV_1
+            - SRV_2
     steps:
       - name: Set environment variables for SRV_1
         if: matrix.server == 'SRV_1'
