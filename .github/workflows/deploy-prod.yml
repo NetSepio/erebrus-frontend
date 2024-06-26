@@ -42,17 +42,17 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        include:
-          - name: SRV_1
-            address: ${{ secrets.PROD_REMOTE_SERVER_ADDRESS_SRV_1 }}
-          - name: SRV_2
-            address: ${{ secrets.PROD_REMOTE_SERVER_ADDRESS_SRV_2 }}
+        server: [ "SRV_1", "SRV_2" ]
     steps:
-      - name: Deploy on ${{ matrix.name }} server
+      - name: Set environment variables
+        run: |
+          echo "PROD_REMOTE_SERVER_ADDRESS_${{ matrix.server }}=${{ secrets['PROD_REMOTE_SERVER_ADDRESS_' + matrix.server] }}" >> $GITHUB_ENV
+
+      - name: Deploy on ${{ matrix.server }} server
         if: github.ref == 'refs/heads/prod'
         uses: appleboy/ssh-action@v0.1.7
         with:
-          host: ${{ matrix.address }}
+          host: ${{ env['PROD_REMOTE_SERVER_ADDRESS_' + matrix.server] }}
           username: ${{ secrets.PROD_SERVER_USERNAME }}
           key: ${{ secrets.PROD_REMOTE_SERVER_KEY }}
           port: ${{ secrets.PROD_SSH_PORT }}
