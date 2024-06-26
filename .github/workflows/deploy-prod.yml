@@ -44,11 +44,11 @@ jobs:
       matrix:
         server: [ SRV_1, SRV_2 ]  # List of server names for PROD 
     steps:
-      - name: Deploy on ${{ matrix.server }}}} server
+      - name: Deploy on ${{ matrix.server }} server
         if: github.ref == 'refs/heads/prod'
         uses: appleboy/ssh-action@v0.1.7
         with:
-          host: ${{ secrets.PROD_REMOTE_SERVER_ADDRESS_${{ matrix.server }}}}
+          host: ${{ secrets.PROD_REMOTE_SERVER_ADDRESS}}_${{ matrix.server }}
           username: ${{ secrets.PROD_SERVER_USERNAME }}
           key: ${{ secrets.PROD_REMOTE_SERVER_KEY }}
           port: ${{ secrets.PROD_SSH_PORT }}
