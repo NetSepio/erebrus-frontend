@@ -40,12 +40,15 @@ jobs:
   deploy_dev:
     needs: build_push
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        server: [ SRV_1, SRV_2 ]  # List of server names for PROD 
     steps:
-      - name: Deploy on PROD server
+      - name: Deploy on ${{ matrix.server }}}} server
         if: github.ref == 'refs/heads/prod'
         uses: appleboy/ssh-action@v0.1.7
         with:
-          host: ${{ secrets.PROD_REMOTE_SERVER_ADDRESS }}
+          host: ${{ secrets.PROD_REMOTE_SERVER_ADDRESS_${{ matrix.server }}}}
           username: ${{ secrets.PROD_SERVER_USERNAME }}
           key: ${{ secrets.PROD_REMOTE_SERVER_KEY }}
           port: ${{ secrets.PROD_SSH_PORT }}
