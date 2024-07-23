@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { useState, useEffect, useContext } from "react";
-
 import axios from "axios";
 import Cookies from "js-cookie";
 import { motion } from "framer-motion";
@@ -25,6 +24,7 @@ import { useAptosWallet } from "./Login/aptos";
 import { useSuiWallet } from "./Login/suiwallet";
 import { useEthWallet } from "./Login/ethereum";
 import { useSolWallet } from "./Login/solana";
+import { usePeaqWallet } from "./Login/peaq";
 import { handleLoginClick } from "./Login/googleLogin";
 
 import QRCodeSVG from "qrcode.react";
@@ -63,6 +63,8 @@ const Navbar = ({ isHome }) => {
   const [connectedAddress, setConnectedAddress] = useState("");
   const [sendable, setSendable] = useState(false);
   const [requiredNetwork, setRequiredNetwork] = useState(false);
+  const [showExplorerDropdown, setShowExplorerDropdown] = useState(false);
+
   //--------------------------------gpt --------------------------------------------------------------------
   const {
     account: aptosAccount,
@@ -76,14 +78,21 @@ const Navbar = ({ isHome }) => {
     ethAddress,
     isConnected: ethConnected,
     onSignMessageEth,
-    disconnect: ethdisconnect
   } = useEthWallet();
+
+  const {
+    peaqAddress,
+    isConnected: peaqConnected,
+    onSignMessagepeaq,
+    disconnect: peaqdisconnect,
+  } = usePeaqWallet();
   const { solconnected, solPublicKey, OnSignMessageSol } = useSolWallet();
 
   const [showsignbuttoneth, setshowsignbuttoneth] = useState(false);
   const [showsignbuttonaptos, setshowsignbuttonaptos] = useState(false);
   const [showsignbuttonsui, setshowsignbuttonsui] = useState(false);
   const [showsignbuttonsol, setshowsignbuttonsol] = useState(false);
+  const [showsignbuttonpeaq, setshowsignbuttonpeaq] = useState(false);
 
   const [showchainbutton, setshowchainbutton] = useState(false);
 
@@ -100,13 +109,22 @@ const Navbar = ({ isHome }) => {
       setshowsignbuttonsol(true);
     } else if (ethConnected) {
       setshowsignbuttoneth(true);
+    } else if (peaqConnected) {
+      setshowsignbuttonpeaq(true);
     } else {
       setshowsignbuttoneth(false);
       setshowsignbuttonsol(false);
       setshowsignbuttonsui(false);
       setshowsignbuttonaptos(false);
+      setshowsignbuttonpeaq(false);
     }
-  }, [aptosConnected, status == "connected", ethConnected, solconnected]);
+  }, [
+    aptosConnected,
+    status == "connected",
+    ethConnected,
+    peaqConnected,
+    solconnected,
+  ]);
   console.log("sui connected", status == "connected");
 
   // const handleSignMessage = (chainsym) => {
@@ -121,6 +139,7 @@ const Navbar = ({ isHome }) => {
   //   }
   // };
   // //=------------------------------------------------------------------------
+
   const handleClick = () => {
     setHideFilter(!hidefilter);
   };
@@ -139,14 +158,12 @@ const Navbar = ({ isHome }) => {
       Cookies.set("erebrus_wallet", solAccount);
 
       OnSignMessageSol();
-    
-
     }
   }, [solAccount]);
 
   useEffect(() => {
     const erebrus_wallet = Cookies.get("erebrus_wallet");
-    if (aptosConnected&& !erebrus_wallet) {
+    if (aptosConnected && !erebrus_wallet) {
       onSignMessage();
     }
   }, [aptosConnected]);
@@ -163,6 +180,12 @@ const Navbar = ({ isHome }) => {
       onSignMessageEth();
     }
   }, [ethConnected]);
+  useEffect(() => {
+    // const erebrus_wallet =Cookies.get("erebrus_wallet") ;
+    if (peaqConnected && getchainsym == "peaq") {
+      onSignMessagepeaq();
+    }
+  }, [peaqConnected]);
 
   useEffect(() => {
     const getchainsym = Cookies.get("Chain_symbol");
@@ -258,30 +281,39 @@ const Navbar = ({ isHome }) => {
   };
 
   const handleDeleteCookie = () => {
+    localStorage.setItem("wagmi.io.metamask.disconnected", true);
     Cookies.remove("erebrus_wallet");
     Cookies.remove("erebrus_token");
     Cookies.remove("erebrus_userId");
     Cookies.remove("Chain_symbol");
+    signOut();
     if (status == "connected") {
       disconnect();
     }
     if (status == "connected") {
       const timer = setTimeout(() => {
         ethdisconnect();
-    }, 100);
+      }, 100);
 
-    return () => clearTimeout(timer);
+      return () => clearTimeout(timer);
     }
     window.location.href = "/";
   };
   //dropdown
   const [selectedDropwdown, setSelectedDropwdown] = useState(false);
 
-  const [selectedOption, setSelectedOption] = useState(""); // Set default to 'Chain 1'
+  const [selectedOption, setSelectedOption] = useState("Aptos"); // Set default to 'Chain 1'
   const [selectedLogo, setSelectedLogo] = useState("aptosicon");
-  const options = ["Aptos", "Sui", "Solana", "Ethereum", "Google"];
-  const optionssym = ["apt", "sui", "sol",  "evm", "google"];
-  const chainimg = ["aptosicon", "suiicon", "solanaicon", "ethicon", "googleicon"];
+  const options = ["Aptos", "Manta", "Peaq", "Solana", "Sui", "Google"];
+  const optionssym = ["apt", "evm", "peaq", "sol", "sui", "google"];
+  const chainimg = [
+    "aptosicon",
+    "mantaicon",
+    "peaqicon",
+    "solanaicon",
+    "suiicon",
+    "googleicon",
+  ];
 
   const handleOptionSelect = (option, index) => {
     setSelectedOption(option);
@@ -294,34 +326,43 @@ const Navbar = ({ isHome }) => {
     if (getchainsym != null) {
       if (getchainsym == "apt") {
         setSelectedOption("Aptos");
+        setSelectedLogo("aptosicon")
+      }
+      if (getchainsym == "evm") {
+        setSelectedOption("Manta");
+         setSelectedLogo("mantaicon")
+      }
+      if (getchainsym == "peaq") {
+        setSelectedOption("Peaq");
+        setSelectedLogo("peaqicon")
       }
       if (getchainsym == "sui") {
         setSelectedOption("Sui");
+        setSelectedLogo("suiicon")
       }
       if (getchainsym == "sol") {
         setSelectedOption("Solona");
+        setSelectedLogo("solanaicon")
       }
-      if (getchainsym == "evm") {
-        setSelectedOption("Ethereum");
-      }
+
       if (getchainsym == "google") {
         setSelectedOption("Google");
+        setSelectedLogo("googleicon")
       }
     } else {
       setSelectedOption("Aptos");
+      setSelectedLogo("aptosicon")
     }
   }, []);
-
-
 
   const handleProfileClick = () => {
     setSelectedDropwdown(false);
   };
 
   // Delay function
-  const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  const handlePasetoClick = async() => {
+  const handlePasetoClick = async () => {
     await delay(500);
     setSelectedDropwdown(false);
     setCopied(false);
@@ -332,7 +373,7 @@ const Navbar = ({ isHome }) => {
   const paseto = Cookies.get("erebrus_token");
 
   return (
-    <nav className="bg-transparent py-4">
+    <nav className=" py-4 z-10 bg-black">
       <div
         className={`container mx-auto px-10 flex items-center justify-between lg:mb-0 ${
           isHome && !isOpen ? "mb-24" : ""
@@ -348,48 +389,83 @@ const Navbar = ({ isHome }) => {
               />
             </div>
           </Link>
-          {/* <Link href="/" scroll={false}>
-            <h1 className="text-xl font-bold text-white ml-2">EREBRUS</h1>
-          </Link> */}
+          
         </div>
 
         <div className="hidden lg:flex items-center">
-          {link !== "explorer" ? (
-            <Link
-              href="/explorer"
-              className="text-gray-300 mr-8"
-              scroll={false}
-              onClick={() => {
-                setlink("explorer");
-              }}
-              style={{
-                textDecoration: "none",
-                position: "relative",
-                borderBottom: router.pathname.includes("explorer")
-                  ? "2px solid white"
-                  : "",
-              }}
-              onMouseOver={(e) =>
-                (e.currentTarget.style.borderBottom = "1px solid #fff")
-              }
-              onMouseOut={(e) => (e.currentTarget.style.borderBottom = "none")}
-            >
-              Explorer
-            </Link>
-          ) : (
-            <Link
-              href="/explorer"
-              className="text-gray-300 mr-8"
-              scroll={false}
-              style={{
-                textDecoration: "none",
-                position: "relative",
-                borderBottom: "2px solid white",
-              }}
-            >
-              Explorer
-            </Link>
-          )}
+          
+          <div
+            className="relative z-10"
+            onMouseEnter={() => setShowExplorerDropdown(true)}
+            onMouseLeave={() => setShowExplorerDropdown(false)}
+          >
+            {link !== "explorer" ? (
+              <Link
+                href="/explorer"
+                className="text-gray-300 mr-8"
+                scroll={false}
+                onClick={() => setLink("explorer")}
+                style={{
+                  textDecoration: "none",
+                  position: "relative",
+                  borderBottom: router.pathname.includes("explorer")
+                    ? "2px solid white"
+                    : "",
+                }}
+              >
+                Explorer
+              </Link>
+            ) : (
+              <Link
+                href="/explorer"
+                className="text-gray-300 mr-8"
+                scroll={false}
+                style={{
+                  textDecoration: "none",
+                  position: "relative",
+                  borderBottom: "2px solid white",
+                }}
+              >
+                Explorer
+              </Link>
+            )}
+
+            {showExplorerDropdown && (
+              <div
+                className="absolute  w-44 origin-top-right rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
+                style={{ background: 'linear-gradient(to bottom, rgba(32, 37, 58, 1), rgba(66, 79, 127, 1))' }}
+              >
+                <div className="py-1 z-10">
+                  <Link
+                    href="/explorer"
+                    className="block w-full text-left px-4 py-2 text-lg text-white hover:bg-gray-900"
+                  >
+                    ÐVPN
+                  </Link>
+                  <Link
+                    href="/dwifi"
+                    className="block w-full text-left px-4 py-2 text-lg text-white hover:bg-gray-900"
+                  >
+                   ÐWi-Fi
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
+
+          
+
+          <Link
+            href="https://docs.netsepio.com/erebrus/"
+            target="_blank"
+            className="text-gray-300 mr-8"
+            onMouseOver={(e) =>
+              (e.currentTarget.style.borderBottom = "1px solid #fff")
+            }
+            onMouseOut={(e) => (e.currentTarget.style.borderBottom = "none")}
+          >
+            Docs
+          </Link>
 
           {link !== "subscription" ? (
             <Link
@@ -411,7 +487,7 @@ const Navbar = ({ isHome }) => {
               }
               onMouseOut={(e) => (e.currentTarget.style.borderBottom = "none")}
             >
-              Subscription
+              Dashboard
             </Link>
           ) : (
             <Link
@@ -424,230 +500,66 @@ const Navbar = ({ isHome }) => {
                 borderBottom: "2px solid white",
               }}
             >
-              Subscription
+              Dashboard
             </Link>
           )}
+          <div className="px-4">
+            {/* dropdown */}
 
-          <Link
-            href="https://docs.netsepio.com/erebrus/"
-            target="_blank"
-            className="text-gray-300 mr-8"
-            onMouseOver={(e) =>
-              (e.currentTarget.style.borderBottom = "1px solid #fff")
-            }
-            onMouseOut={(e) => (e.currentTarget.style.borderBottom = "none")}
-          >
-            Docs
-          </Link>
-
-          <>
-            {!token ? (
-              <div className="lg:mt-0 mt-4 z-50 rounded-xl text-white">
-                {!aptosConnected && chainsym === "apt" && (
-                  <button>
-                    <WalletSelectorAntDesign />
-                  </button>
-                )}
-                {chainsym === "evm" && (
-                  <button>
-                    <w3m-button />
-                  </button>
-                )}
-                {chainsym === "sui" && (
-                  <button>
-                    <ConnectButton />
-                  </button>
-                )}
-                {chainsym === "sol" && (
-                  <button>
-                    <WalletMultiButton />
-                  </button>
-                )}
-                 {chainsym === "google" && (
-                  <button className="text-black bg-white rounded-lg w-full px-2" onClick={handleLoginClick}>
-                  <div className="flex gap-2 justify-center">
-                  <div> <img src="/googleicon.png" alt="" className="w-10 h-10 rounded-l-lg"/></div>  
-                  <div className="mt-2">Sign in with Google</div>
-                  </div>
-              </button>
-                )}
-                {/* {solconnected && showsignbuttonsol && (
-                <Button
-                  color={"blue"}
-                  onClick={OnSignMessageSol}
-                  disabled={false}
-                  message={"Authenticate"}
-                />
-              )}
-              {aptosConnected && showsignbuttonaptos && (
-                <Button
-                  color={"blue"}
-                  onClick={onSignMessage}
-                  disabled={false}
-                  message={"Authenticate"}
-                />
-              )}
-              {ethConnected && chainsym === "evm" && showsignbuttoneth && (
-                <Button
-                  color={"blue"}
-                  onClick={onSignMessageEth}
-                  disabled={false}
-                  message={"Authenticate"}
-                />
-              )}
-              {status == "connected" && chainsym === "sui" && showsignbuttonsui && (
-                <Button
-                  color={"blue"}
-                  onClick={handleSignMsg}
-                  disabled={false}
-                  message={"Authenticate"}
-                />
-              )} */}
-              </div>
-            ) : (
-              <div
-                className="lg:mt-0 mt-4 z-50 rounded-xl flex gap-4"
-                style={{ color: "#0162FF" }}
-              >
-                
-                {avatarUrl && (
-                  // <Link href="/profile">
-                  <div className="relative">
-                  <button onClick={() => {
+            {showchainbutton && (
+              <div className="relative z-10">
+                <button
+                  className="block w-full px-10 py-2 text-left rounded-full text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  style={{ backgroundColor: "#253776" }}
+                  onClick={() => {
                     setSelectedDropwdown(!selectedDropwdown);
-                    setSelectedOption(selectedOption ? selectedOption : "Chains");
-                  }}
-                  >
-                  <img src={avatarUrl} alt="Avatar" className="w-10 ml-auto" />
-                  </button>
-
-                  {selectedDropwdown && (
-                <div
-                  className="absolute right-0 mt-2 w-44 origin-top-right rounded-2xl shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                  style={{ backgroundColor: "#20253A" }}
+                    setSelectedOption(
+                      selectedOption ? selectedOption : "Chains"
+                    );
+                  }} // Toggle dropdown on button click
                 >
-                  <div className="py-1">
-                  <Link href="/profile">
+                  <div className="flex gap-2">
+                    <img src={`/${selectedLogo}.png`} className="w-6 h-6" />
+                    {selectedOption || "Select Chain"}{" "}
+                    <img src="/chainarrow.png" />
+                  </div>
+                </button>
+                {selectedDropwdown && (
                   <div
-                    className="block w-full text-left px-4 py-2 text-lg text-white hover:bg-gray-900"
-                    onClick={handleProfileClick}
+                    className="absolute right-0 mt-2 w-44 origin-top-right rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                    style={{ background: 'linear-gradient(to bottom, rgba(32, 37, 58, 1), rgba(66, 79, 127, 1))' }}
                   >
-                    <div className="flex gap-4">
-                      <span></span>
-                      <span>Profile</span>
+                    <div className="py-1 z-10">
+                      {options.map((option, index) => (
+                        <button
+                          key={index}
+                          className="block w-full text-left px-4 py-2 text-lg text-white hover:bg-gray-900"
+                          onClick={() => {
+                            handleOptionSelect(option, index);
+                            setchainsym(optionssym[index]);
+                            Cookies.set("Chain_symbol", optionssym[index]);
+                          }}
+                        >
+                          <div className="flex gap-4">
+                            <span>
+                              <img
+                                src={`/${chainimg[index]}.png`}
+                                className={`${
+                                  chainimg[index] === "suiicon"
+                                    ? "w-5 ml-1 mt-1"
+                                    : "w-6 mt-0.5"
+                                }`}
+                              />
+                            </span>
+                            <span>{option}</span>
+                          </div>
+                        </button>
+                      ))}
                     </div>
                   </div>
-                </Link>
-
-                {paseto && (
-                  <>
-                {/* {copied && (
-                      <p className="text-green-500 pt-2 pl-8">Paseto Copied!</p>
-                    )} */}
-                      <button
-                        className="block w-full text-left px-4 py-2 text-lg text-white hover:bg-gray-900"
-                        // onClick={() => {
-                        //   navigator.clipboard.writeText(paseto ? paseto : "");
-                        //   setCopied(true);
-                        // }}
-                      >
-                        <div className="flex gap-4" onClick={handlePasetoClick}>
-                          <span>
-                          </span>
-                          <span>Mobile Auth</span>
-                        </div>
-                      </button>
-                      </>
-)}
-
-                      <div
-                        className="block w-full text-left px-4 py-2 text-lg text-white hover:bg-gray-900"
-                      >
-                        <div className="flex gap-4">
-                          <span>
-                          </span>
-                          <button
-                  onClick={handleDeleteCookie}
-                  // onMouseOver={(e) =>
-                  //   (e.currentTarget.style.borderBottom = "1px solid #0162FF")
-                  // }
-                  // onMouseOut={(e) =>
-                  //   (e.currentTarget.style.borderBottom = "none")
-                  // }
-                >
-                  Log out
-                </button>
-                        </div>
-                      </div>
-                
-                  </div>
-                </div>
-              )}
-                  </div>
-                  // </Link>
                 )}
               </div>
             )}
-          </>
-
-          
-
-          <div>
-            {/* dropdown */}
-
-            {
-  showchainbutton && (
-            <div className="relative">
-              <button
-                className="block w-full px-10 py-2 text-left rounded-full text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                style={{ backgroundColor: "#253776" }}
-                onClick={() => {
-                  setSelectedDropwdown(!selectedDropwdown);
-                  setSelectedOption(selectedOption ? selectedOption : "Chains");
-                }} // Toggle dropdown on button click
-              >
-                <div className="flex gap-2">
-                <img src={`/${selectedLogo}.png`} className="w-6 h-6"/>
-                  {selectedOption || "Select Chain"}{" "}
-                  <img src="/chainarrow.png" />
-                </div>
-              </button>
-              {selectedDropwdown && (
-                <div
-                  className="absolute right-0 mt-2 w-44 origin-top-right rounded-2xl shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                  style={{ backgroundColor: "#20253A" }}
-                >
-                  <div className="py-1">
-                    {options.map((option, index) => (
-                      <button
-                        key={index}
-                        className="block w-full text-left px-4 py-2 text-lg text-white hover:bg-gray-900"
-                        onClick={() => {
-                          handleOptionSelect(option, index);
-                          setchainsym(optionssym[index]);
-                          Cookies.set("Chain_symbol", optionssym[index]);
-                        }}
-                      >
-                        <div className="flex gap-4">
-                          <span>
-                            <img
-                              src={`/${chainimg[index]}.png`}
-                              className={`${
-                                chainimg[index] === "suiicon"
-                                  ? "w-4 ml-1 mt-1"
-                                  : "w-6 mt-0.5"
-                              }`}
-                            />
-                          </span>
-                          <span>{option}</span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-  )}
 
             {hidefilter && (
               <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-900 bg-opacity-50">
@@ -692,6 +604,7 @@ const Navbar = ({ isHome }) => {
                           setHideFilter(false);
                           Cookies.set("Chain_symbol", "evm");
                           setchainsym("evm");
+                          setshowsignbuttonpeaq(false);
                           setshowsignbuttoneth(false);
                           setshowsignbuttonsol(false);
                           setshowsignbuttonsui(false);
@@ -700,8 +613,31 @@ const Navbar = ({ isHome }) => {
                         // className="mx-auto"
                       >
                         <div className="flex gap-2" style={{ marginLeft: 100 }}>
-                          <img src="/ethicon.png" className="w-6 h-6" />
+                          <img src="/mantaicon.png" className="w-6 h-6" />
                           <div>Ethereum</div>
+                        </div>
+                      </button>
+                    </li>
+                    <li
+                      className="flex items-center justify-between gap-64 p-2 rounded-full"
+                      style={{ backgroundColor: "#202333" }}
+                    >
+                      <button
+                        onClick={() => {
+                          setHideFilter(false);
+                          Cookies.set("Chain_symbol", "peaq");
+                          setchainsym("peaq");
+                          setshowsignbuttonpeaq(false);
+                          setshowsignbuttoneth(false);
+                          setshowsignbuttonsol(false);
+                          setshowsignbuttonsui(false);
+                          setshowsignbuttonaptos(false);
+                        }}
+                        // className="mx-auto"
+                      >
+                        <div className="flex gap-2" style={{ marginLeft: 100 }}>
+                          <img src="/peaqicon.png" className="w-6 h-6" />
+                          <div>Peaq</div>
                         </div>
                       </button>
                     </li>
@@ -713,6 +649,7 @@ const Navbar = ({ isHome }) => {
                         onClick={() => {
                           Cookies.set("Chain_symbol", "apt");
                           setchainsym("apt");
+                          setshowsignbuttonpeaq(false);
                           setshowsignbuttoneth(false);
                           setshowsignbuttonsol(false);
                           setshowsignbuttonsui(false);
@@ -736,6 +673,7 @@ const Navbar = ({ isHome }) => {
                           setHideFilter(false);
                           Cookies.set("Chain_symbol", "sui");
                           setchainsym("sui");
+                          setshowsignbuttonpeaq(false);
                           setshowsignbuttoneth(false);
                           setshowsignbuttonsol(false);
                           setshowsignbuttonsui(false);
@@ -758,6 +696,7 @@ const Navbar = ({ isHome }) => {
                           setHideFilter(false);
                           Cookies.set("Chain_symbol", "sol");
                           setchainsym("sol");
+                          setshowsignbuttonpeaq(false);
                           setshowsignbuttoneth(false);
                           setshowsignbuttonsol(false);
                           setshowsignbuttonsui(false);
@@ -776,6 +715,147 @@ const Navbar = ({ isHome }) => {
               </div>
             )}
           </div>
+          <>
+            {!token ? (
+              <div className="lg:mt-0 mt-4 z-50 rounded-xl text-white">
+                {!aptosConnected && chainsym === "apt" && (
+                  <button>
+                    <WalletSelectorAntDesign />
+                  </button>
+                )}
+                {chainsym === "evm" && (
+                  <button>
+                    <w3m-button />
+                  </button>
+                )}
+                {chainsym === "peaq" && (
+                  <button>
+                    <w3m-button />
+                  </button>
+                )}
+                {chainsym === "sui" && (
+                  <button>
+                    <ConnectButton />
+                  </button>
+                )}
+                {chainsym === "sol" && (
+                  <button>
+                    <WalletMultiButton />
+                  </button>
+                )}
+                {chainsym === "google" && (
+                  <button
+                    className="text-black bg-white rounded-lg w-full px-2"
+                    onClick={handleLoginClick}
+                  >
+                    <div className="flex gap-2 justify-center">
+                      <div>
+                        {" "}
+                        <img
+                          src="/googleicon.png"
+                          alt=""
+                          className="w-10 h-10 rounded-l-lg"
+                        />
+                      </div>
+                      <div className="mt-2">Sign in with Google</div>
+                    </div>
+                  </button>
+                )}
+              
+              </div>
+            ) : (
+              <div
+                className="lg:mt-0 mt-4 z-50 rounded-xl flex gap-4"
+                style={{ color: "#0162FF" }}
+              >
+                {avatarUrl && (
+                  // <Link href="/profile">
+                  <div className="relative z-10">
+                    <button
+                      onClick={() => {
+                        setSelectedDropwdown(!selectedDropwdown);
+                        setSelectedOption(
+                          selectedOption ? selectedOption : "Chains"
+                        );
+                      }}
+                    >
+                      <img
+                        src={avatarUrl}
+                        alt="Avatar"
+                        className="w-10 ml-auto"
+                      />
+                    </button>
+
+                    {selectedDropwdown && (
+                      <div
+                        className="absolute right-0 mt-2 w-44 origin-top-right rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                        style={{ background: 'linear-gradient(to bottom, rgba(32, 37, 58, 1), rgba(66, 79, 127, 1))' }}
+                      >
+                        <div className="py-1 z-10">
+                          <Link href="/profile">
+                            <div
+                              className="block w-full text-left px-4 py-2 text-lg text-white hover:bg-gray-900"
+                              onClick={handleProfileClick}
+                            >
+                              <div className="flex gap-4">
+                                <span></span>
+                                <span>Profile</span>
+                              </div>
+                            </div>
+                          </Link>
+
+                          <Link href="/usernodes">
+                            <div
+                              className="block w-full text-left px-4 py-2 text-lg text-white hover:bg-gray-900"
+                              onClick={handleProfileClick}
+                            >
+                              <div className="flex gap-4">
+                                <span></span>
+                                <span>My Nodes</span>
+                              </div>
+                            </div>
+                          </Link>
+
+                          {paseto && (
+                            <>
+                          
+                              <button
+                                className="block w-full text-left px-4 py-2 text-lg text-white hover:bg-gray-900"
+                               
+                              >
+                                <div
+                                  className="flex gap-4"
+                                  onClick={handlePasetoClick}
+                                >
+                                  <span></span>
+                                  <span>Mobile Auth</span>
+                                </div>
+                              </button>
+                            </>
+                          )}
+
+                          <div className="block w-full text-left px-4 py-2 text-lg text-white hover:bg-gray-900">
+                            <div className="flex gap-4">
+                              <span></span>
+                              <button
+                                onClick={handleDeleteCookie}
+                              
+                              >
+                                Log out
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  // </Link>
+                )}
+              </div>
+            )}
+          </>
+
+         
         </div>
 
         <div className="block lg:hidden">
@@ -818,7 +898,7 @@ const Navbar = ({ isHome }) => {
                   href="/subscription"
                   className="text-white font-bold block lg:inline-block mb-4 lg:mr-0 lg:mb-0"
                 >
-                  Subscription
+                  Dashboard
                 </Link>
 
                 <Link
@@ -831,33 +911,30 @@ const Navbar = ({ isHome }) => {
 
                 {paseto && (
                   <>
-                {copied && (
+                    {copied && (
                       <p className="text-green-500 pt-2 pl-8">Paseto Copied!</p>
                     )}
-                      <button
-                        className="block w-full text-left px-4 py-2 text-lg text-white hover:bg-gray-900"
-                        onClick={() => {
-                          navigator.clipboard.writeText(paseto ? paseto : "");
-                          setCopied(true);
-                        }}
-                      >
-                        <div className="flex gap-4" onClick={handlePasetoClick}>
-                          <span>
-                          </span>
-                          <span>Copy Paseto</span>
-                        </div>
-                      </button>
-                      </>
-)}
+                    <button
+                      className="block w-full text-left px-4 py-2 text-lg text-white hover:bg-gray-900"
+                      onClick={() => {
+                        navigator.clipboard.writeText(paseto ? paseto : "");
+                        setCopied(true);
+                      }}
+                    >
+                      <div className="flex gap-4" onClick={handlePasetoClick}>
+                        <span></span>
+                        <span>Copy Paseto</span>
+                      </div>
+                    </button>
+                  </>
+                )}
 
                 {account?.address && (
                   <div
                     className="lg:mt-0 mt-4 lg:mr-4 z-50 rounded-xl flex gap-4"
                     style={{ color: "#0162FF" }}
                   >
-                    {/* <div>
-                {account?.address.slice(0, 4)}...{account?.address.slice(-4)}
-              </div> */}
+                    
                     {address && (
                       <button
                         onClick={handleDeleteCookie}
@@ -902,14 +979,16 @@ const Navbar = ({ isHome }) => {
 
                 {address && (
                   <div
-                    className="lg:mt-0 mt-4 lg:mr-20 z-50 rounded-xl flex gap-4"
+                    className="lg:mt-0 mt-4 lg:mr-20 z-50 rounded-xl  flex gap-4"
                     style={{ color: "#0162FF" }}
                   >
                     {/* <div>
                 {address.slice(0, 4)}...{address.slice(-4)}
               </div> */}
                     <button
-                      onClick={handleDeleteCookie}
+                      onClick={() => {
+                        disconnect();
+                      }}
                       onMouseOver={(e) =>
                         (e.currentTarget.style.borderBottom =
                           "1px solid #0162FF")
@@ -935,69 +1014,69 @@ const Navbar = ({ isHome }) => {
         )}
       </motion.nav>
 
-
       {showPasetoQR && (
         <div
-        style={{ backgroundColor: "#040819D9" }}
-        className='flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full'
-        id='popupmodal'
-      >
-        <div className='relative px-10 pb-10 pt-6 lg:w-1/4 w-full max-w-2xl max-h-full rounded-3xl' style={{backgroundColor:'white'}}>
-        <div className="flex items-center justify-end rounded-t dark:border-gray-600">
-                <button
-                  onClick={() => setShowPasetoQR(false)}
-                  type="button"
-                  className="text-black bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+          style={{ backgroundColor: "#040819D9" }}
+          className="flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full"
+          id="popupmodal"
+        >
+          <div
+            className="relative px-10 pb-10 pt-6 lg:w-1/4 w-full max-w-2xl max-h-full rounded-3xl"
+            style={{ backgroundColor: "white" }}
+          >
+            <div className="flex items-center justify-end rounded-t dark:border-gray-600">
+              <button
+                onClick={() => setShowPasetoQR(false)}
+                type="button"
+                className="text-black bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+              >
+                <svg
+                  className="w-3 h-3"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 14 14"
                 >
-                  <svg
-                    className="w-3 h-3"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 14 14"
-                  >
-                    <path
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
-                    />
-                  </svg>
-                  <span className="sr-only">Close modal</span>
-                </button>
-              </div>
-          <div className='relative'>
-            <div className='text-center text-black text-xl mb-10 -mt-6'>Scan QR Code</div>
-            <div className='flex justify-center'>
-
-             <QRCodeSVG value={paseto} size={300} />
-
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+                  />
+                </svg>
+                <span className="sr-only">Close modal</span>
+              </button>
             </div>
+            <div className="relative">
+              <div className="text-center text-black text-xl mb-10 -mt-6">
+                Scan QR Code
+              </div>
+              <div className="flex justify-center">
+                <QRCodeSVG value={paseto} size={300} />
+              </div>
 
-<div className="flex justify-center gap-4 text-black mt-10">
-            <button
-             onClick={async() => {
-              navigator.clipboard.writeText(paseto ? paseto : "");
-              setCopied(true);
-              await delay(3000);
-              setCopied(false);
-            }}
-            className="border border-black p-2 rounded-lg"
-            >
-              Copy Auth Token
-            </button>
+              <div className="flex justify-center gap-4 text-black mt-10">
+                <button
+                  onClick={async () => {
+                    navigator.clipboard.writeText(paseto ? paseto : "");
+                    setCopied(true);
+                    await delay(3000);
+                    setCopied(false);
+                  }}
+                  className="border border-black p-2 rounded-lg"
+                >
+                  Copy Auth Token
+                </button>
 
-            {copied && (
-                      <p className="text-green-500 pt-2 pl-8">Paseto Copied!</p>
-                    )}
-
+                {copied && (
+                  <p className="text-green-500 pt-2 pl-8">Paseto Copied!</p>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
       )}
-
     </nav>
   );
 };

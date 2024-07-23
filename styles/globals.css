@@ -37,3 +37,117 @@
 .table-row:hover {
   background-color: #5696FF; /* Path to your image */
 }
+
+body {
+  margin: 0;
+  padding: 0;
+  background: #E3E3E3;
+}
+
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(calc(-250px * 10 - 10px * 10))}
+}
+
+.slider1 {
+  background: white;
+  box-shadow: 0 10px 20px -5px rgba(0, 0, 0, .125);
+  height: 150px;
+  margin: auto;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+.slider::before,
+.slider::after {
+  background: linear-gradient(to right,  rgba(255,255,255,1) 0%,rgba(255,255,255,0) 100%);
+  content: "";
+  height: 150px;
+  position: absolute;
+  width: 200px;
+  z-index: 2;
+}
+
+.slider::after {
+  right: 0;
+  top: 0;
+  transform: rotateZ(180deg);
+}
+
+.slider::before {
+  left: 0;
+  top: 0;
+}
+
+.slide-track {
+  animation: scroll 40s linear infinite;
+  display: flex;
+  width: calc((250px * 10 + 10px * 10) * 2);
+}
+
+.slide1 {
+  height: 150px;
+  width: 250px;
+  display: flex;
+  align-items: center;
+  padding: 0 5px;
+}
+
+.slide img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.gradient-background {
+  background: 
+    radial-gradient(
+      45.89% 156.4% at 2.36% 97.72%, 
+      rgba(21, 11, 160, 0.5) 0%, 
+      rgba(0, 0, 0, 0.5) 50%, 
+      rgba(44, 15, 174, 0.5) 100%
+    ),
+    linear-gradient(
+      105.93deg, 
+      rgba(20, 30, 67, 0.2) 0.61%, 
+      rgba(20, 30, 67, 0.2) 99.6%
+    );
+}
+
+/* styles.css */
+.custom-gradient-bg {
+  @apply bg-gradient-to-b from-blue-400 via-blue-500 to-blue-600; /* Tailwind doesn't directly support your specific gradient, so we need custom CSS */
+  background: linear-gradient(180deg, rgba(1, 98, 255, 0.25) 0%, rgba(160, 194, 249, 0.25) 100%);
+}
+.gradient-background2 {
+  background: linear-gradient(90deg, #011C47  100%, #424F7F 100%, #0B0E1A 100%);
+  /* Other styles */
+}
+
+.button-bg {
+  background: radial-gradient(94.6% 75% at 50% 100%, #7dcbff 0%, rgb(255, 255, 255) 100%);
+}
+
+.background-gradient {
+  background: linear-gradient(360deg, rgba(23, 45, 163, 0.8) 0%, rgba(40, 46, 79, 0.8) 26%, rgba(63, 78, 160, 0.8) 100%);
+}
+
+.win-background {
+  background-color: rgba(20, 30, 67, 0.3);
+}
+
+
+.banner-gradient {
+  background: linear-gradient(90deg, #0162FF 0%, #FFFFFF 49.7%, #0162FF 100%);
+}
+
+.mission-bg {
+  background: radial-gradient(45.89% 156.4% at 2.36% 97.72%, rgba(21, 11, 160, 0.5) 0%, rgba(0, 0, 0, 0.5) 50%, rgba(44, 15, 174, 0.5) 100%), 
+              linear-gradient(105.93deg, rgba(20, 30, 67, 0.2) 0.61%, rgba(20, 30, 67, 0.2) 99.6%);
+}
+
+.bg-button {
+  background: 
+    linear-gradient(0deg, #6ea3f9, #ffffff),
+    linear-gradient(180deg, rgba(118, 224, 250, 0.5) 10%, rgba(57, 133, 255, 0.5) 100%);
+}

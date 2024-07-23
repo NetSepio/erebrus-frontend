@@ -1,74 +1,112 @@
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
 import axios from "axios";
 import Cookies from "js-cookie";
+
 const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_BASE_URL;
 
 const NodesData = () => {
   const [nodesdata, setNodesData] = useState([]);
+  const [filteredNodesData, setFilteredNodesData] = useState([]);
   const [activeNodesData, setActiveNodesData] = useState([]);
   const [uniqueRegionsCount, setUniqueRegionsCount] = useState(0);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [regionFilter, setRegionFilter] = useState("all");
+  const [chainFilter, setChainFilter] = useState("all");
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: "ascending" });
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
-    const fetchNodesData = async () => {
-      try {
-        const auth = Cookies.get("erebrus_token");
-
-        const response = await axios.get(
-          `${EREBRUS_GATEWAY_URL}api/v1.0/nodes/all`,
-          {
-            headers: {
-              Accept: "application/json, text/plain, */*",
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (response.status === 200  && response.data) {
-  
-                const payload = response.data.payload;
-                setNodesData(payload);
-                const filteredNodes = payload.filter(
-                  (node) => node.status === "active"
-                );
-                setActiveNodesData(filteredNodes);
-                const uniqueRegions = new Set(payload.map((node) => node.region));
-                setUniqueRegionsCount(uniqueRegions.size);
-                console.log("erebrus nodes", payload);
-          
-        }
-      } catch (error) {
-        console.error("Error fetching nodes data:", error);
-        setNodesData([]);
-        setActiveNodesData([]);
-        setUniqueRegionsCount(0);
-      } finally {
-      }
-    };
-
     fetchNodesData();
   }, []);
 
-  function elapsedTimeSince(timestamp) {
-    // Convert given timestamp to milliseconds
+  useEffect(() => {
+    filterAndSortNodes();
+  }, [nodesdata, statusFilter, regionFilter, chainFilter, sortConfig, showFilters]);
+
+  const fetchNodesData = async () => {
+    try {
+      const response = await axios.get(
+        `${EREBRUS_GATEWAY_URL}api/v1.0/nodes/all`,
+        {
+          headers: {
+            Accept: "application/json, text/plain, */*",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 200 && response.data) {
+        const payload = response.data.payload;
+        setNodesData(payload);
+        const filteredNodes = payload.filter((node) => node.status === "active");
+        setActiveNodesData(filteredNodes);
+        const uniqueRegions = new Set(payload.map((node) => node.region));
+        setUniqueRegionsCount(uniqueRegions.size);
+      }
+    } catch (error) {
+      console.error("Error fetching nodes data:", error);
+      setNodesData([]);
+      setActiveNodesData([]);
+      setUniqueRegionsCount(0);
+    }
+  };
+
+  const filterAndSortNodes = () => {
+    let filtered = nodesdata;
+
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((node) => node.status === statusFilter);
+    }
+    if (regionFilter !== "all") {
+      filtered = filtered.filter((node) => node.region === regionFilter);
+    }
+    if (chainFilter !== "all") {
+      filtered = filtered.filter((node) => node.chainName === chainFilter);
+    }
+
+    if (sortConfig.key) {
+      filtered.sort((a, b) => {
+        if (sortConfig.key === "networkSpeed") {
+          const aSpeed = parseFloat(a.downloadSpeed) + parseFloat(a.uploadSpeed);
+          const bSpeed = parseFloat(b.downloadSpeed) + parseFloat(b.uploadSpeed);
+          return sortConfig.direction === "ascending" ? aSpeed - bSpeed : bSpeed - aSpeed;
+        }
+        if (sortConfig.key === "uptime") {
+          return sortConfig.direction === "ascending"
+            ? a.startTimeStamp - b.startTimeStamp
+            : b.startTimeStamp - a.startTimeStamp;
+        }
+        if (sortConfig.key === "lastPing") {
+          return sortConfig.direction === "ascending"
+            ? a.lastPingedTimeStamp - b.lastPingedTimeStamp
+            : b.lastPingedTimeStamp - a.lastPingedTimeStamp;
+        }
+        if (a[sortConfig.key] < b[sortConfig.key]) return sortConfig.direction === "ascending" ? -1 : 1;
+        if (a[sortConfig.key] > b[sortConfig.key]) return sortConfig.direction === "ascending" ? 1 : -1;
+        return 0;
+      });
+    }
+
+    setFilteredNodesData(filtered);
+  };
+
+  const handleSort = (key) => {
+    let direction = "ascending";
+    if (sortConfig.key === key && sortConfig.direction === "ascending") {
+      direction = "descending";
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const elapsedTimeSince = (timestamp) => {
     const givenTimeMilliseconds = timestamp * 1000;
-
-    // Current timestamp in milliseconds
     const currentTimeMilliseconds = new Date().getTime();
-
-    // Calculate the time difference
     const timeDifference = currentTimeMilliseconds - givenTimeMilliseconds;
-
-    // Convert milliseconds to seconds
     const timeDifferenceInSeconds = timeDifference / 1000;
-
-    // Calculate elapsed time components
     const seconds = Math.floor(timeDifferenceInSeconds % 60);
     const minutes = Math.floor((timeDifferenceInSeconds / 60) % 60);
     const hours = Math.floor((timeDifferenceInSeconds / (60 * 60)) % 24);
     const days = Math.floor(timeDifferenceInSeconds / (60 * 60 * 24));
-
-    // Construct the string representation of elapsed time
     let elapsedTimeString = "";
     if (days > 0) {
       elapsedTimeString += `${days} d, `;
@@ -80,12 +118,11 @@ const NodesData = () => {
       elapsedTimeString += `${minutes} m, `;
     }
     elapsedTimeString += `${seconds} s`;
-
     return elapsedTimeString;
-  }
+  };
 
   const handleRowClick = (id) => {
-    window.location.href = `/nodeinfo/${id}`; // Navigate to the node info page
+    window.location.href = `/nodeinfo/${id}`;
   };
 
   return (
@@ -94,7 +131,7 @@ const NodesData = () => {
       className="flex flex-col items-center justify-start scroll-mt-16 lg:scroll-mt-0 min-h-screen"
       style={{ backgroundColor: "#010001" }}
     >
-      <div className="font-figtree text-left text-gray-200 w-full p-3">
+      <div className="font-figtree text-left text-gray-200 w-full px-3">
         <div className="text-white">
           <div className="flex uppercase">
             <div
@@ -128,7 +165,74 @@ const NodesData = () => {
               </div>
             </div>
           </div>
-          <table className="w-full text-center">
+
+          <div className="mb-4 flex justify-end">
+  <div className="relative inline-block">
+    <button
+      onClick={() => setShowFilters(!showFilters)}
+      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-12 rounded"
+    >
+      Filters
+    </button>
+    {showFilters && (
+      <div className="absolute right-0 mt-2 w-48 bg-blue-500 rounded-md shadow-lg z-10">
+        <div className="py-1">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="block w-full px-4 py-2 text-white bg-blue-500 hover:bg-gray-700"
+          >
+            <option value="all">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+          <select
+            value={regionFilter}
+            onChange={(e) => setRegionFilter(e.target.value)}
+            className="block w-full px-4 py-2 text-white bg-blue-500 hover:bg-gray-700"
+          >
+            <option value="all">All Regions</option>
+            <option value="CA">CA</option>
+            <option value="JP">JP</option>
+            <option value="SG">SG</option>
+            <option value="IN">IN</option>
+            <option value="GB">GB</option>
+            <option value="AU">AU</option>
+            <option value="US">US</option>
+          </select>
+          <select
+            value={chainFilter}
+            onChange={(e) => setChainFilter(e.target.value)}
+            className="block w-full px-4 py-2 text-white bg-blue-500 hover:bg-gray-700"
+          >
+            <option value="all">All Chains</option>
+            <option value="APT">APT</option>
+            <option value="EVM">EVM</option>
+            <option value="SUI">SUI</option>
+            <option value="SOL">SOL</option>
+            <option value="PEAQ">PEAQ</option>
+          </select>
+        </div>
+      </div>
+    )}
+  </div>
+  <div className="relative inline-block ml-4">
+  <select
+    onChange={(e) => handleSort(e.target.value)}
+    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded appearance-none"
+  >
+    <option value="" disabled selected hidden className="">Sort By</option>
+    <option value="name">Name</option>
+    <option value="status">Status</option>
+    <option value="region">Region</option>
+    <option value="networkSpeed">Network Speed</option>
+  </select>
+</div>
+</div>
+        
+
+          <div className="overflow-x-auto">
+            <table className="min-w-full bg-black rounded-lg">
             <thead style={{ height: "10px" }}>
               <tr>
                 <th style={{ border: "solid 1px #FFFFFF66" }}>
@@ -181,8 +285,8 @@ const NodesData = () => {
                 </th>
               </tr>
             </thead>
-            <tbody>
-              {nodesdata.map((node) => (
+              <tbody>
+              {filteredNodesData.map((node) => (
                 <tr
                   key={node.id}
                   className={`table-row cursor-pointer ${
@@ -244,7 +348,8 @@ const NodesData = () => {
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -252,3 +357,6 @@ const NodesData = () => {
 };
 
 export default NodesData;
+
+
+

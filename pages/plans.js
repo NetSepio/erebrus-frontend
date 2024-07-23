@@ -25,6 +25,10 @@ const Plans = () => {
       } else if (chainSym === 'evm') {
         setDisplayText('0.00028 ETH/ 3 month');
         setDisplayText2(' Pay by ETH, crytocurrency or Fiat')
+      }
+      else if (chainSym === 'peaq') {
+        setDisplayText('0.00028 KRST/ 3 month');
+        setDisplayText2(' Pay by KRST, crytocurrency or Fiat')
       } else if (chainSym === 'sol') {
         setDisplayText('18.94 Sol/ 3 month');
         setDisplayText2(' Pay by SOL, crytocurrency or Fiat')
@@ -76,7 +80,7 @@ const Plans = () => {
         <div className="lg:flex mt-10 mx-auto justify-center">
          {chainSymbol=="apt"&&( <div className="relative p-2 lg:w-2/5">
             <div
-              className="relative rounded-3xl shadow dark:bg-gray-700 rounded-3xl mx-auto"
+              className="relative rounded-3xl shadow dark:bg-gray-700  mx-auto"
               style={{
                 backgroundColor: "#202333",
                 border: "1px solid #0162FF",
@@ -152,7 +156,7 @@ const Plans = () => {
                       </span>
                     </h1>
                     <h1 className="w-3/4 mx-auto text-4xl font-semibold leading-none tracking-normal text-gray-100 md:text-3xl md:tracking-tight">
-                      <span className="text-white">$9.99/month</span>
+                      <span className="text-white">$5.99/month</span>
                     </h1>
 
                     <h1

@@ -1,183 +1,119 @@
 import React, { useState } from "react";
-import Link from "next/link";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { Carousel } from "react-responsive-carousel";
-
+import { motion } from "framer-motion";
+import Link from 'next/link';
 const DepinCarousel = () => {
+  const [currentSlide, setCurrentSlide] = useState(0);
 
-  const customRenderIndicator = (clickHandler, isSelected, index, label) => {
+  const customRenderIndicator = (index) => {
     const indicatorStyle = {
-      width: 20, // Adjust the width
-      height: 20, // Adjust the height
+      width: 30,
+      height: 30,
       borderRadius: '50%',
-      backgroundColor: isSelected ? '#202434' : 'white', // Change colors as needed
+      backgroundColor: currentSlide === index ? '#202434' : 'white',
       display: 'inline-block',
-      margin: '10px 8px', // Adjust the space between indicators
+      margin: '10px 8px',
       cursor: 'pointer'
     };
 
     return (
       <button
+        key={index}
         style={indicatorStyle}
-        onClick={clickHandler}
-        onKeyDown={clickHandler}
-        tabIndex={0}
-        title={`${label} ${index}`}
-        aria-label={`${label} ${index}`}
+        onClick={() => setCurrentSlide(index)}
+        aria-label={`Go to slide ${index + 1}`}
       />
     );
   };
 
+  const slides = [
+    {
+      heading: "Last Mile Safe Internet Connectivity",
+      subheadings: [
+        {
+          subheading: "Break Free from Censorship",
+          description: "Get rid of censorship and geo-restrictions and provide access to any website, anywhere, with complete freedom."
+        },
+        {
+          subheading: "Security That Pays",
+          description: "We've got you covered. Enjoy peace of mind knowing your clients’ internet access and cybersecurity are covered when using your apps."
+        },
+        {
+          subheading: "Smart Security, Seamless Speed",
+          description: "Use targeted VPN protection (split tunneling) for your apps, ensuring clients’ security without slowing down their browsing experience."
+        }
+      ]
+    },
+    {
+      heading: "DNS-Based Roaming Firewall",
+      subheadings: [
+        {
+          subheading: "Unprecedented Network Control",
+          description: "Gain complete oversight and deep inspection capabilities for all your network traffic with our DNS-Based Roaming Firewall."
+        },
+        {
+          subheading: "Fortress on the Move",
+          description: "Securely connect to a highly secure enterprise network anytime, anywhere, with our innovative solution."
+        },
+        {
+          subheading: "Enhanced Security & Privacy by Design",
+          description: "Manage and regulate your network traffic with ease, ensuring unparalleled security and privacy for your connected devices."
+        }
+      ]
+    }
+  ];
+
   return (
-    <div
-      id="howto"
-      className="min-h-screen flex flex-col items-center justify-start scroll-mt-16 lg:scroll-mt-0 mb-20"
-      // style={{ backgroundColor: "#E3EEFF" }}
-    >
-      <div className="mb-2 font-figtree w-[70%] text-left text-white lg:text-2xl text-sm text-left">
-        <h1 className="font-bold lg:text-4xl text-2xl lg:mb-16 mb-12 lg:mt-40 text-left text-black">
-          From Challenge to Connectivity
+    <div id="howto" className="min-h-screen flex flex-col items-center justify-start scroll-mt-16 lg:scroll-mt-0 mb-20">
+      <div className="mb-2  font-normal w-[80%] text-white lg:text-2xl text-sm text-left">
+        <h1 className=" lg:text-5xl md:text-4xl text-3xl lg:mb-8 mb-8 lg:mt-10 text-left text-white">
+          Companies and Enterprises: Content Delivery, Uninterrupted
         </h1>
-        <div>
-          <Carousel
-            showArrows={false}
-            showStatus={false}
-            showThumbs={false}
-            infiniteLoop={true}
-            autoPlay={true}
-            renderIndicator={customRenderIndicator}
-          >
-            <div className="mb-20">
-                <div className="lg:flex gap-2">
-                  <div className="rounded-3xl lg:w-2/3 relative">
-                    <img src="/depin1.png" alt="Slide 1" className="rounded-3xl"/>
-                    <div className="absolute bottom-0 right-0 mb-4 w-26 h-26">
-                      <img src="/carousel_logo.png" alt="Bottom logo"/>
+        <h1 className=" lg:text-xl text-xl lg:mb-8 mb-10 text-left text-white">
+          Subsidize Safe and Uncensored Internet & Cybersecurity for Your Teams and Users
+        </h1>
+        <motion.div
+      initial={{ y: 100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1, transition: { duration: 1 } }}
+      className="bg-[#E3EEFF] text-black py-3 px-6 text-center lg:text-lg md:text-sm text-sm rounded-[10vh] z-10 w-[30vh] mb-10 h-[7vh]"
+    >
+      <Link href="/subscription">
+        Deploy Your Node
+      </Link>
+    </motion.div>
+        <div className="lg:flex gap-14">
+          <div className="rounded-3xl lg:w-2/5 w-full relative">
+            <img src="/depin.png" alt="Static Image" className="rounded-3xl w-full" />
+          </div>
+          <div className="rounded-3xl px-10 pt-10 lg:w-3/5 w-full text-left custom-gradient-bg mt-10 lg:mt-0 md:mt-0" >
+            <Carousel
+              selectedItem={currentSlide}
+              onChange={setCurrentSlide}
+              showArrows={false}
+              showStatus={false}
+              showIndicators={false}
+              showThumbs={false}
+              infiniteLoop={true}
+              autoPlay={true}
+            >
+              {slides.map((slide, index) => (
+                <div key={index} className="text-left">
+                  <h2 className="text-3xl  font-normal mb-10">{slide.heading}</h2>
+                  {slide.subheadings.map((sub, subIndex) => (
+                    <div key={subIndex} className="mb-4">
+                      <h3 className="text-xl font-semibold">{sub.subheading}</h3>
+                      <p className="text-base text-[#BEBEBE] mb-10">{sub.description}</p>
                     </div>
-                  </div>
-                  <div
-                    className="rounded-3xl p-10 lg:w-1/3 text-left"
-                    style={{ backgroundColor: "#202434" }}
-                  >
-                    <div>
-                    Navigate the web 
-                    securely with Erebrus
-                    VPN, keeping  <span style={{color:'#3985FF'}}>your data 
-                    safe</span> from threats.
-                    </div>
-                  </div>
+                  ))}
                 </div>
-              </div>
-            <div className="mb-20">
-            <div className="lg:flex gap-2">
-                  <div className="rounded-3xl lg:w-2/3 relative">
-                    <img src="/depin2.png" alt="Slide 2" className="rounded-3xl"/>
-                    <div 
-                      className="absolute top-0 left-0 right-0 bottom-0 rounded-3xl p-10 text-left text-3xl font-semibold"
-                    >
-                        A World Connected
-                    </div>
-                    <div className="absolute bottom-0 right-0 mb-4 w-26 h-26">
-                      <img src="/carousel_logo.png" alt="Bottom logo"/>
-                    </div>
-                  </div>
-                  <div
-                    className="rounded-3xl p-10 lg:w-1/3 text-left"
-                    style={{ backgroundColor: "#202434" }}
-                  >
-                    <div>
-                    Erebrus connects you to 
-                    a world of <span style={{color:'#3985FF'}}>decentralized 
-                    Wi-Fi hotspots,</span> making 
-                    digital boundaries 
-                    disappear.
-                    </div>
-                  </div>
-                </div>
-            </div>
-            <div className="mb-20">
-            <div className="lg:flex gap-2">
-                  <div className="rounded-3xl lg:w-2/3 relative">
-                    <img src="/depin3.png" alt="Slide 3" className="rounded-3xl"/>
-                    <div 
-                      className="absolute top-0 left-0 right-0 bottom-0 rounded-3xl p-10 text-left text-3xl font-semibold"
-                    >
-                       Quest for Connection
-                    </div>
-                    <div className="absolute bottom-0 right-0 mb-4 w-26 h-26">
-                      <img src="/carousel_logo.png" alt="Bottom logo"/>
-                    </div>
-                  </div>
-                  <div
-                    className="rounded-3xl p-10 lg:w-1/3 text-left"
-                    style={{ backgroundColor: "#202434" }}
-                  >
-                    <div>
-                    Lost in a bustling city 
-                    and craving a solid 
-                    internet link? Erebrus is 
-                    your answer, offering 
-                    <span style={{color:'#3985FF'}}> reliable access </span>
-                    everywhere.
-                    </div>
-                  </div>
-                </div>
-            </div>
-            <div className="mb-20">
-            <div className="lg:flex gap-2">
-                  <div className="rounded-3xl lg:w-2/3 relative">
-                    <img src="/depin4.png" alt="Slide 4" className="rounded-3xl"/>
-                    <div 
-                      className="absolute top-0 left-0 right-0 bottom-0 rounded-3xl p-10 text-left text-3xl font-semibold"
-                    >
-                        Be Part of the Change
-                    </div>
-                    <div className="absolute bottom-0 right-0 mb-4 w-26 h-26">
-                      <img src="/carousel_logo.png" alt="Bottom logo"/>
-                    </div>
-                  </div>
-                  <div
-                    className="rounded-3xl p-10 lg:w-1/3 text-left"
-                    style={{ backgroundColor: "#202434" }}
-                  >
-                    <div>
-                      Transition from a <span style={{color:'#3985FF'}}>user to 
-                    a contributor</span> with Erebrus, 
-                    shaping a more secure 
-                    and open internet for all.
-                    </div>
-                  </div>
-                </div>
-            </div>
-            <div className="mb-20">
-            <div className="lg:flex gap-2">
-                  <div className="rounded-3xl lg:w-2/3 relative">
-                    <img src="/depin5.png" alt="Slide 5" className="rounded-3xl"/>
-                    <div 
-                      className="absolute top-0 left-10 right-0 bottom-0 rounded-3xl p-10 text-left text-3xl font-semibold"
-                    >
-                        Connect and Earn
-                    </div>
-                    <div className="absolute bottom-0 right-0 mb-4 w-26 h-26">
-                      <img src="/carousel_logo2.png" alt="Bottom logo"/>
-                    </div>
-                  </div>
-                  <div
-                    className="rounded-3xl p-10 lg:w-1/3 text-left"
-                    style={{ backgroundColor: "#202434" }}
-                  >
-                    <div>
-                    Share your bandwidth or 
-                    set up a node and <span style={{color:'#3985FF'}}>earn 
-                    crypto rewards, </span>
-                    enhancing your 
-                    connectivity experience.
-                    </div>
-                  </div>
-                </div>
-            </div>
-          </Carousel>
+              ))}
+            </Carousel>
+          </div>
         </div>
+      </div>
+      <div className="mt-4 flex w-1/3 justify-end">
+        {slides.map((_, index) => customRenderIndicator(index))}
       </div>
     </div>
   );

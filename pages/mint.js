@@ -23,7 +23,8 @@ import { aptosClient } from "../module";
 export const APTOS_COIN = "0x1::aptos_coin::AptosCoin";
 import { useAddress } from "@thirdweb-dev/react";
 import { ethers } from 'ethers';
-import { abi } from "../components/mantaabi";
+// import { abi } from "../components/mantaabi";
+import { abi } from "../components/peaqabi";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
@@ -91,10 +92,10 @@ const Mint = () => {
           setDisplayText2('Pay in SUI');
           setImageSrc('/mintSui.png');
           setImageSrc2('/nft_ape1.png')
-        } else if (chainSym === 'evm') {
+        } else if (chainSym === 'evm' || chainSym === 'peaq') {
           setDisplayText('Only at 0.00028 ETH');
           setDisplayText2('Pay in ETH')
-          setImageSrc('/mintEth.jpg');
+          setImageSrc('/mintManta.png');
           setImageSrc2('/nft_ape2.png')
         } else if (chainSym === 'sol') {
           setDisplayText('Only at 18.94 Sol');
@@ -227,108 +228,63 @@ const Mint = () => {
   };
 
   //---------------------------------------------------------------------------------------------------------------------------------
-  // const mintreading = async () => {
-  //   // setLoading(true);
+  const mintreading = async () => {
+    setLoadingTx(true);
+    const wallet_Address = Cookies.get('erebrus_wallet');
+    try {
 
-  //   try {
+      if (typeof window !== "undefined" && window.ethereum && chainSymbol === 'evm') {
+        const provider = new ethers.providers.Web3Provider(window.ethereum)
 
-  //     if (typeof window !== "undefined" && window.ethereum) {
-  //       const provider = new ethers.providers.Web3Provider(window.ethereum)
-
-  //       // Create a JavaScript object from the Contract ABI, to interact
-  //       // with the HelloWorld contract.
-  //       const contract = new ethers.Contract(
-  //         '0x3414457C53D076D395B05dA6a9FD1b856c30E5F9',
-  //         abi ,
-  //         provider.getSigner()
-  //       )
-
+        const contract = new ethers.Contract(
+          '0x25fCdcd43a66A4E609cc32c91D0a926388D4902C',
+          abi,
+          provider.getSigner()
+        )
         
-  //       const tx = await contract.mintNFT(
-  //         1311312
-  //       );
-  //       //  const tx = await  contract.registerNode(
-  //       //     354353453453,
-  //       //     34543535345,
-  //       //     "active",
-  //       //     "SG"
-  //       // )
-  //       const result = await tx.wait();
-  //       const integerValue = parseInt(result.logs[1].data, 16);
-  //       console.log("Result:", result, integerValue);
-  //       setLoading(false);
-  //       setmintdone(true);
-  //     }
-
-  //   } catch (error) {
-  //     console.error("Error fetching reading:", error);
-  //     // setLoading(false); // Set loading state to false in case of error
-  //   }
-  // };
-
-  const onSignMessage = async () => {
-    if (sendable) {
-      try {
-        const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
-
-        const { data } = await axios.get(
-          `${REACT_APP_GATEWAY_URL}api/v1.0/flowid?walletAddress=${account?.address}`
+        const tx = await contract.safeMint(
+          wallet_Address
         );
-        console.log(data);
 
-        const message = data.payload.eula;
-        const nonce = data.payload.flowId;
-        const publicKey = account?.publicKey;
-
-        const payload = {
-          message: message,
-          nonce: nonce,
-        };
-        const response = await signMessage(payload);
-        console.log(response);
-
-        let signaturewallet = response.signature;
-
-        if (signaturewallet.length === 128) {
-          signaturewallet = `0x${signaturewallet}`;
-        }
-
-        const authenticationData = {
-          flowId: nonce,
-          signature: `${signaturewallet}`,
-          pubKey: publicKey,
-        };
-
-        const authenticateApiUrl = `${REACT_APP_GATEWAY_URL}api/v1.0/authenticate`;
-
-        const config = {
-          url: authenticateApiUrl,
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          data: authenticationData,
-        };
-
-        const authResponse = await axios(config);
-        console.log("auth data", authResponse.data);
-
-        const token = await authResponse?.data?.payload?.token;
-        const userId = await authResponse?.data?.payload?.userId;
-
-        Cookies.set("erebrus_token", token, { expires: 7 });
-        Cookies.set("erebrus_wallet", account?.address ?? "", { expires: 7 });
-        Cookies.set("erebrus_userid", userId, { expires: 7 });
-
-        window.location.reload();
-      } catch (error) {
-        console.error(error);
-        setshowsignbutton(true);
+        const result = await tx.wait();
+        console.log("result", result)
+        const integerValue = parseInt(result.logs[0].data, 16);
+        console.log("Result:", result, integerValue);
+       
+        // setmintdone(true);
       }
-    } else {
-      alert(`Switch to ${mynetwork} in your wallet`);
+
+      if (typeof window !== "undefined" && window.ethereum && chainSymbol === 'peaq') {
+        const provider = new ethers.providers.Web3Provider(window.ethereum)
+
+        const contract = new ethers.Contract(
+          '0x16c3A26f93ccaa96b2F7aA4C01504ED7F2E3aeC0',
+          abi,
+          provider.getSigner()
+        )
+        
+        const tx = await contract.mint(
+          wallet_Address
+        );
+
+        const result = await tx.wait();
+        console.log("result", result)
+        const integerValue = parseInt(result.logs[0].data, 16);
+        console.log("Result:", result, integerValue);
+       
+        // setmintdone(true);
+      }
+
+      setLoadingTx(false);
+      window.location.href="/subscription"
+
+    } catch (error) {
+      console.error("Error fetching reading:", error);
     }
+
   };
+
+
 
   const appearance = {
     theme: "stripe",
@@ -540,7 +496,11 @@ const Mint = () => {
                   <>
                     <button
                       onClick={() => {
-                        setshowconnectbutton(true);
+                        if (chainSymbol === 'evm' || chainSymbol === 'peaq') {
+                          mintreading();
+                        } else {
+                          setshowconnectbutton(true);
+                        }
                       }}
                       style={{ border: "1px solid #0162FF" }}
                       type="button"

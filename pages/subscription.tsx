@@ -33,7 +33,6 @@ export interface WalletData {
 interface FormData {
   name: string;
   region: string;
-  
 }
 const transition = {
   type: "tween",
@@ -94,7 +93,6 @@ const Subscription = () => {
   const initialFormData: FormData = {
     name: "",
     region: "",
-    
   };
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [ConfigFile, setConfigFile] = useState<string>("");
@@ -111,7 +109,6 @@ const Subscription = () => {
       [id]: value,
     }));
   };
-
 
   const handleRegionChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -258,7 +255,11 @@ const Subscription = () => {
           const filteredData = payload.filter(
             (item) => item?.userId === wallet
           );
-          filteredData.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+          filteredData.sort(
+            (a, b) =>
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime()
+          );
           setprojectsData(filteredData);
           console.log("decentralized", filteredData);
         }
@@ -593,12 +594,18 @@ const Subscription = () => {
           const payload = response.data.payload;
           setNodesData(payload);
           const filteredNodes = payload.filter(
-            (node) => node.status === "active" && node.region !== undefined && node.region !== null && node.region.trim()
+            (node) =>
+              node.status === "active" &&
+              node.region !== undefined &&
+              node.region !== null &&
+              node.region.trim()
           );
           setActiveNodesData(filteredNodes);
 
           // Extract and store unique regions
-          const regions = Array.from(new Set(filteredNodes.map(node => node.region)));
+          const regions = Array.from(
+            new Set(filteredNodes.map((node) => node.region))
+          );
           setUniqueRegions(regions);
 
           console.log("erebrus nodes", payload);
@@ -658,51 +665,49 @@ const Subscription = () => {
     return `${day} ${month} ${year} ${time}`;
   };
 
-
   const regiondata = [
-    { id: 'SG', region: 'SG'},
-    { id: 'IN',region: 'IN' },
-    { id: 'US',region: 'US'},
-    { id: 'JP', region: 'JP'},
-    {id: 'CA', region: 'CA'},
-    {id: 'FI', region: 'FI'},
-    {id: 'GB', region: 'GB'},
+    { id: "SG", region: "SG" },
+    { id: "IN", region: "IN" },
+    { id: "US", region: "US" },
+    { id: "JP", region: "JP" },
+    { id: "CA", region: "CA" },
+    { id: "FI", region: "FI" },
+    { id: "GB", region: "GB" },
+    { id: "AU", region: "AU" },
     // Add more nodes as needed
   ];
-//form 
-const [isOpen, setIsOpen] = useState(false);
-const [selectedOption, setSelectedOption] = useState(null); 
-;
-const handleOptionClick = (option) => {
-  setSelectedOption(option); // Ensuring option is an object
-  setFormData((prevData) => ({ ...prevData, region: option.id }));
-  setIsOpen(false);
-};
+  //form
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedOption, setSelectedOption] = useState(null);
+  const handleOptionClick = (option) => {
+    setSelectedOption(option); // Ensuring option is an object
+    setFormData((prevData) => ({ ...prevData, region: option.id }));
+    setIsOpen(false);
+  };
 
-const handleDropdownToggle = () => {
-  setIsOpen(!isOpen);
-};
+  const handleDropdownToggle = () => {
+    setIsOpen(!isOpen);
+  };
 
-const generateSerialNumber = (region, index) => {
-  const number = (index + 1).toString().padStart(3, '0');
-  return `${region}${number}`;
-};
+  const generateSerialNumber = (region, index) => {
+    const number = (index + 1).toString().padStart(3, "0");
+    return `${region}${number}`;
+  };
 
-const sliceNodeId = (nodeId) => {
-  return `${nodeId.slice(0, 3)}...${nodeId.slice(-3)}`;
-};
+  const sliceNodeId = (nodeId) => {
+    return `${nodeId.slice(0, 3)}...${nodeId.slice(-3)}`;
+  };
 
-const sliceWalletAddress = (walletAddress) => {
-  return `${walletAddress.slice(0, 3)}...${walletAddress.slice(-3)}`;
-};
-
-
-
+  const sliceWalletAddress = (walletAddress) => {
+    return `${walletAddress.slice(0, 3)}...${walletAddress.slice(-3)}`;
+  };
 
   // Log activeNodesData and filtered result
-  console.log('Current activeNodesData:', activeNodesData);
-  const filteredNodes = activeNodesData.filter((node) => node.region === regionname);
-  console.log('Filtered nodes based on region:', filteredNodes, regionname);
+  console.log("Current activeNodesData:", activeNodesData);
+  const filteredNodes = activeNodesData.filter(
+    (node) => node.region === regionname
+  );
+  console.log("Filtered nodes based on region:", filteredNodes, regionname);
 
   if (!loggedin) {
     return (
@@ -765,30 +770,27 @@ const sliceWalletAddress = (walletAddress) => {
                   </div>
                 )}
 
-{loading && (
-                          <div
-                            style={{ backgroundColor: "#040819D9" }}
-                            className="flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full"
-                            id="popupmodal"
-                          >
-                            <div className="relative p-4 lg:w-1/5 w-full max-w-2xl max-h-full">
-                              <div className="relative rounded-lg shadow">
-                                <div className="flex justify-center gap-4">
-                                  <img
-                                    className="w-12 animate-spin duration-[3000] h-12"
-                                    src="/Loadingerebrus.png"
-                                    alt="Loading icon"
-                                  />
+                {loading && (
+                  <div
+                    style={{ backgroundColor: "#040819D9" }}
+                    className="flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full"
+                    id="popupmodal"
+                  >
+                    <div className="relative p-4 lg:w-1/5 w-full max-w-2xl max-h-full">
+                      <div className="relative rounded-lg shadow">
+                        <div className="flex justify-center gap-4">
+                          <img
+                            className="w-12 animate-spin duration-[3000] h-12"
+                            src="/Loadingerebrus.png"
+                            alt="Loading icon"
+                          />
 
-                                  <span className="text-white mt-2">
-                                    Loading...
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
+                          <span className="text-white mt-2">Loading...</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex gap-10 w-1/2">
                   {nftdata && (
@@ -815,7 +817,7 @@ const sliceWalletAddress = (walletAddress) => {
                             <div className="w-full">
                               <h3 className="leading-12 mb-2 text-white">
                                 <div className="text-lg font-semibold mt-4 uppercase">
-                                  {trialsubscriptiondata.subscription.type}{" "}
+                                  {/* {trialsubscriptiondata.subscription.type}{" "} */}
                                   Subscription
                                 </div>
                                 <div className="lg:flex md:flex justify-between">
@@ -886,17 +888,21 @@ const sliceWalletAddress = (walletAddress) => {
 
                   <h1 className="flex justify-between gap-4 mb-8 ml-6 mt-0 text-start text-lg font-semibold leading-none tracking-normal text-gray-100 md:text-xl md:tracking-tight">
                     <div className="text-left text-white mt-4 flex gap-4">
-                      { imageSrc ? (<img
-                        src={`${"https://nftstorage.link/ipfs"}/${imageSrc}`}
-                        className="w-14 rounded-full"
-                      />):
-                      (
+                      {imageSrc ? (
                         <img
-                        src="https://img.freepik.com/premium-vector/virtual-private-network-secure-vpn-connection-concept-vector-sign-symbol_660702-458.jpg"
-                        className="w-14 rounded-full"
-                      />
+                          src={`${"https://nftstorage.link/ipfs"}/${imageSrc}`}
+                          className="w-14 rounded-full"
+                        />
+                      ) : (
+                        <img
+                          src="https://img.freepik.com/premium-vector/virtual-private-network-secure-vpn-connection-concept-vector-sign-symbol_660702-458.jpg"
+                          className="w-14 rounded-full"
+                        />
                       )}
-                      <div className="mt-2">Name - {collectionName? collectionName : "Trial Subscription"}</div>
+                      <div className="mt-2">
+                        Name -{" "}
+                        {collectionName ? collectionName : "Trial Subscription"}
+                      </div>
                     </div>
 
                     <div className="text-white mr-40 mt-6">
@@ -964,99 +970,124 @@ const sliceWalletAddress = (walletAddress) => {
                                   </h1>
 
                                   <form
-  id="myForm"
-  className="rounded pt-10"
-  onSubmit={handleSubmit}
->
-  <div className="mb-10">
-    <div className="">
-      <div className="mb-4 w-full">
-        <input
-          type="text"
-          id="name"
-          className="shadow border border-gray-300 rounded-full w-full py-4 px-6 text-gray-900 leading-tight focus:outline-none focus:shadow-outline"
-          placeholder="Name"
-          value={formData.name}
-          onChange={handleInputChange}
-          required
-        />
-      </div>
+                                    id="myForm"
+                                    className="rounded pt-10"
+                                    onSubmit={handleSubmit}
+                                  >
+                                    <div className="mb-10">
+                                      <div className="">
+                                        <div className="mb-4 w-full">
+                                          <input
+                                            type="text"
+                                            id="name"
+                                            className="shadow border border-gray-300 rounded-full w-full py-4 px-6 text-gray-900 leading-tight focus:outline-none focus:shadow-outline"
+                                            placeholder="Name"
+                                            value={formData.name}
+                                            onChange={handleInputChange}
+                                            required
+                                          />
+                                        </div>
 
-      <div className="mb-4 w-full">
-        <select
-          id="regionname"
-          className="shadow border border-gray-300 rounded-full w-full py-4 px-6 text-gray-900 leading-tight focus:outline-none focus:shadow-outline"
-          value={regionname}
-          onChange={handleRegionChange}
-          required
-        >
-          <option className="bg-white text-black" value="">
-            Select Region
-          </option>
+                                        <div className="mb-4 w-full">
+                                          <select
+                                            id="regionname"
+                                            className="shadow border border-gray-300 rounded-full w-full py-4 px-6 text-gray-900 leading-tight focus:outline-none focus:shadow-outline"
+                                            value={regionname}
+                                            onChange={handleRegionChange}
+                                            required
+                                          >
+                                            <option
+                                              className="bg-white text-black"
+                                              value=""
+                                            >
+                                              Select Region
+                                            </option>
 
-          {regiondata.map((node) => (
-            <option key={node.id} className="bg-white text-black" value={node.id}>
-              {node.region}
-            </option>
-          ))}
-        </select>
-      </div>
+                                            {regiondata.map((node) => (
+                                              <option
+                                                key={node.id}
+                                                className="bg-white text-black"
+                                                value={node.id}
+                                              >
+                                                {node.region}
+                                              </option>
+                                            ))}
+                                          </select>
+                                        </div>
 
-      <div className="mb-4 w-full relative">
-        <div
-          className="p-4 bg-white border border-gray-300 rounded-full cursor-pointer"
-          onClick={handleDropdownToggle}
-        >
-          {selectedOption ? sliceNodeId(selectedOption.id) : 'Select Node ID'}
-        </div>
-        {isOpen && (
-          <div className="absolute w-full mt-1 max-h-60 overflow-y-auto bg-white border border-gray-300 rounded-lg shadow-lg z-10">
-            <div className="grid grid-cols-4 p-2 font-bold bg-gray-200">
-              <div>S.No</div>
-              <div>Node ID</div>
-              <div>Wallet Address</div>
-              <div>Chain</div>
-            </div>
-            {activeNodesData
-              .filter((node) => node.region === regionname)
-              .map((option, index) => (
-                <div
-                  key={option.id}
-                  className="grid grid-cols-4 p-2 cursor-pointer hover:bg-gray-100"
-                  onClick={() => handleOptionClick(option)}
-                >
-                  <div>{generateSerialNumber(regionname, index)}</div>
-                  <div>{sliceNodeId(option.id)}</div>
-                  <div>{sliceWalletAddress(option.walletAddress)}</div>
-                  <div>{option.chainName}</div>
-                </div>
-              ))}
-          </div>
-        )}
-      </div>
-    </div>
+                                        <div className="mb-4 w-full relative">
+                                          <div
+                                            className="p-4 bg-white border border-gray-300 rounded-full cursor-pointer"
+                                            onClick={handleDropdownToggle}
+                                          >
+                                            {selectedOption
+                                              ? sliceNodeId(selectedOption.id)
+                                              : "Select Node ID"}
+                                          </div>
+                                          {isOpen && (
+                                            <div className="absolute w-full mt-1 max-h-60 overflow-y-auto bg-white border border-gray-300 rounded-lg shadow-lg z-10">
+                                              <div className="grid grid-cols-4 p-2 font-bold bg-gray-200">
+                                                <div>S.No</div>
+                                                <div>Node ID</div>
+                                                <div>Wallet Address</div>
+                                                <div>Chain</div>
+                                              </div>
+                                              {activeNodesData
+                                                .filter(
+                                                  (node) =>
+                                                    node.region === regionname
+                                                )
+                                                .map((option, index) => (
+                                                  <div
+                                                    key={option.id}
+                                                    className="grid grid-cols-4 p-2 cursor-pointer hover:bg-gray-100"
+                                                    onClick={() =>
+                                                      handleOptionClick(option)
+                                                    }
+                                                  >
+                                                    <div>
+                                                      {generateSerialNumber(
+                                                        regionname,
+                                                        index
+                                                      )}
+                                                    </div>
+                                                    <div>
+                                                      {sliceNodeId(option.id)}
+                                                    </div>
+                                                    <div>
+                                                      {sliceWalletAddress(
+                                                        option.walletAddress
+                                                      )}
+                                                    </div>
+                                                    <div>
+                                                      {option.chainName}
+                                                    </div>
+                                                  </div>
+                                                ))}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
 
-    <div className="flex-col gap-4 mr-4">
-      <div className="text-center w-1/2 mt-10 mx-auto">
-        <div className="mb-4 md:mb-8">
-          <button
-            style={{
-              backgroundColor: "#0162FF",
-            }}
-            type="submit"
-            value="submit"
-            className="py-3 mb-2 text-md text-white font-semibold rounded-full w-full sm:mb-0 hover:bg-green-200 focus:ring focus:ring-green-300 focus:ring-opacity-80"
-          >
-            Create Client
-          </button>
-        </div>
-      </div>
-      <p className="text-red-500">{msg}</p>
-    </div>
-  </div>
-</form>
-
-
+                                      <div className="flex-col gap-4 mr-4">
+                                        <div className="text-center w-1/2 mt-10 mx-auto">
+                                          <div className="mb-4 md:mb-8">
+                                            <button
+                                              style={{
+                                                backgroundColor: "#0162FF",
+                                              }}
+                                              type="submit"
+                                              value="submit"
+                                              className="py-3 mb-2 text-md text-white font-semibold rounded-full w-full sm:mb-0 hover:bg-green-200 focus:ring focus:ring-green-300 focus:ring-opacity-80"
+                                            >
+                                              Create Client
+                                            </button>
+                                          </div>
+                                        </div>
+                                        <p className="text-red-500">{msg}</p>
+                                      </div>
+                                    </div>
+                                  </form>
                                 </div>
                               </div>
                             </section>
