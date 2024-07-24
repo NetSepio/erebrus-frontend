@@ -74,16 +74,16 @@ const Plans = () => {
     <>
       <div className="mt-10 mx-auto min-h-screen max-w-7xl">
         <div className="text-center text-4xl text-white">
-          Pay for what you use
+          Subscription
         </div>
 
         <div className="lg:flex mt-10 mx-auto justify-center gap-10">
-         {chainSymbol=="apt"&&( 
+         {chainSymbol=="apt" || chainSymbol=="sol" &&( 
           
           <div className="bg-[#202333E5] rounded-3xl p-10 w-full border-[2px] border-[#0162FF] md:w-5/12 lg:w-4/12 text-white"
           >
           <h2 className="text-2xl font-semibold text-[#5696FF] mb-4">Tier 1 Subcription</h2>
-          <p className="text-2xl  mb-4">1.76 APT/ 3 month</p>
+          <p className="text-2xl  mb-4">{displayText}</p>
           <button className="bg-[#0162FF] text-white rounded-lg px-4 py-2 mb-4 w-2/3">
           Early Node Operator Access
           </button>
@@ -121,7 +121,7 @@ const Plans = () => {
               Mobile app
             </li> */}
           </ul>
-          <button className="bg-[#0162FF] text-white  px-2 py-5 rounded-full mt-6 w-3/4 ml-10 ">
+          <button className="bg-[#0162FF] text-white  px-2 py-5 rounded-full mt-32 w-3/4 ml-10 ">
           <Link 
            href="/mint">
             Mint NFT

@@ -88,23 +88,23 @@ const Mint = () => {
   
       if (wallet) {
         if (chainSym === 'sui') {
-          setDisplayText('Only at 4.91 SUI');
+          setDisplayText(' 4.91 SUI');
           setDisplayText2('Pay in SUI');
           setImageSrc('/mintSui.png');
           setImageSrc2('/nft_ape1.png')
         } else if (chainSym === 'evm' || chainSym === 'peaq') {
-          setDisplayText('Only at 0.00028 ETH');
+          setDisplayText('0.00029 ETH');
           setDisplayText2('Pay in ETH')
           setImageSrc('/mintManta.png');
-          setImageSrc2('/nft_ape2.png')
+          setImageSrc2('/nft_manta.png')
         } else if (chainSym === 'sol') {
-          setDisplayText('Only at 18.94 Sol');
+          setDisplayText('22.51 Sol');
           setDisplayText2('Pay in SOL')
-          setImageSrc('/mintSui.png');  // change needed
-          setImageSrc2('/nft_ape1.png')
+          setImageSrc('/solanaicon.png');  // change needed
+          setImageSrc2('/nft_sol.png')
         }
         else if (chainSym === 'google') {
-          setDisplayText('Only at 18.94 Sol');
+          setDisplayText(' 18.94 Sol');
           setDisplayText2('Pay in Dollars')
           setImageSrc('/mintSui.png');  // change needed
           setImageSrc2('/nft_ape1.png')
@@ -301,45 +301,50 @@ const Mint = () => {
       </Head>
 
       {mintpage === "page1" && (
-        <>
+        <div style={{backgroundColor: '#040819'}}>
           <div className="p-20">
             <div
-              className="text-white text-5xl uppercase leading-normal"
+              className="text-white text-5xl leading-normal"
               style={{
-                marginLeft: "25vh",
+                marginLeft: "10vh",
                 marginRight: "10vh",
-                fontFamily: "Times New Roman",
+                fontFamily: 'sans-serif',
               }}
             >
-              Step into the Future of Internet Safety with{" "}
-              <span style={{ color: "#0162FF" }}>111 NFT VPN</span>
+              Mint Your VPN NFT, Secure, Private, 
+              {" "}<br></br>
+              <span >Exclusive</span>
             </div>
-            <div class="flex justify-center gap-20">
+
+            {/* <div
+          className="absolute w-50vw inset-0 h-full opacity-30 lg:bg-[radial-gradient(ellipse_at_center,#0262FF,#040819_30%,#080d1f_100%)] md:bg-[radial-gradient(circle_at_top,#0262FF,#040819_30%,#080d1f_100%)] bg-[radial-gradient(circle_at_center,#0262FF,#040819_30%,#080d1f_100%)]"
+          style={{ transform: "scale(2.0)" }}
+        ></div> */}
+
+            <div class="flex justify-center gap-20 m-10 z-20" 
+            style={{backgroundColor:'#202333', marginLeft: "10vh", marginRight: "10vh"}}>
               <div
-                className="text-white w-1/3 p-10"
-                style={{ marginLeft: "20vh" }}
+                className="text-white w-1/2"
               >
                 <img
                   src={imageSrc2}
-                  style={{ border: "1px solid #0162FF" }}
-                  className="rounded-lg"
                 />
               </div>
-              <div className="w-1/2 mt-10">
+              <div className="w-1/2 mt-10" >
                 <div className="text-white text-xl mt-10 mx-auto flex gap-2">
                   <img src="/uis_calender.png" className="w-6 h-6 mt-1" />
                   <div>3-Month Coverage</div>
                 </div>
                 <div className="text-white text-xl mt-4 mx-auto flex gap-2">
                   <img src="/mdi_users.png" className="w-6 h-6 mt-1" />
-                  <div>Unlimited Devices</div>
+                  <div>Unlimited Clients</div>
                 </div>
                 <div className="text-white text-xl mt-4 mx-auto flex gap-2">
                   <img
                     src="/icomoon-free_price-tags.png"
                     className="w-6 h-6 mt-1"
                   />
-                  <div>{displayText}</div>
+                  <div>{displayText}<span className="text-[18px]">  ($5.99)</span></div>
                 </div>
                 <div className="text-white text-xl mt-4 mx-auto flex gap-2">
                   <img
@@ -349,7 +354,7 @@ const Mint = () => {
                   <div>Exceptional Value for Unmatched Security</div>
                 </div>
 
-                <div className="flex gap-10 mt-10">
+                {/* <div className="flex gap-10 mt-10">
                   <div
                     className="text-white text-md rounded-full py-3 px-10"
                     style={{ border: "1px solid #0162FF" }}
@@ -368,7 +373,7 @@ const Mint = () => {
                     </span>{" "}
                     NFTs Left
                   </div>
-                </div>
+                </div> */}
 
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -433,7 +438,7 @@ const Mint = () => {
               </div>
             </div>
           </div>
-        </>
+        </div>
       )}
 
       {mintpage === "page2" && (

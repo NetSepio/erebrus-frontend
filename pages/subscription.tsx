@@ -825,7 +825,7 @@ const Subscription = () => {
                                     Status: {trialsubscriptiondata.status}
                                   </div>
                                   <div className="text-md font-semibold mt-4">
-                                    Valid for 7 days
+                                    Valid for 30 days
                                   </div>
                                 </div>
                               </h3>
@@ -848,12 +848,14 @@ const Subscription = () => {
                                     <span className="text-red-500 ">
                                       End time :
                                     </span>{" "}
-                                    {trialsubscriptiondata.subscription.endTime
+                                    {/* {trialsubscriptiondata.subscription.endTime
                                       ? formatDateTime(
                                           trialsubscriptiondata.subscription
                                             .endTime
                                         )
-                                      : "Loading..."}
+                                      : "Loading..."} */}
+                                      23 August 2024 23:43:34
+
                                   </div>
                                 </div>
                               </div>
