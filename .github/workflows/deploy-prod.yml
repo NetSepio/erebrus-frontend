@@ -3,7 +3,7 @@ name: "Build and Push to GHCR"
 on:
   push:
     branches:
-      - cloud-run-deployment
+      - prod
 
 jobs:
   build_push:
