@@ -48,5 +48,6 @@ jobs:
           docker tag  ghcr.io/netsepio/erebrus-frontend:prod us-west4-docker.pkg.dev/erebrus-prod/erebrus/erebrus-frontend:prod
           gcloud auth activate-service-account --key-file=${{ secrets.SERVICE_ACCOUNT_KEY_FILE_PATH }} --project=${{ secrets.PROJECT }}
           gcloud config set account ${{ secrets.SERVICE_ACCOUNT }}
+          gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://us-west4-docker.pkg.dev
           docker push us-west4-docker.pkg.dev/erebrus-prod/erebrus/erebrus-frontend:prod
           gcloud run deploy erebrus-frontend --image us-west4-docker.pkg.dev/erebrus-prod/erebrus/erebrus-frontend:prod --region us-west4
