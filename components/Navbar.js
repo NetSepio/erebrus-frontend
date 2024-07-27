@@ -341,7 +341,7 @@ const Navbar = ({ isHome }) => {
         setSelectedLogo("suiicon")
       }
       if (getchainsym == "sol") {
-        setSelectedOption("Solona");
+        setSelectedOption("Solana");
         setSelectedLogo("solanaicon")
       }
 

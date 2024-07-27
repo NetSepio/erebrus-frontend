@@ -103,15 +103,17 @@ export default function Home() {
     <div>
      
       
-      <Head>
-        <meta charset="UTF-8"></meta>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0"></meta>
-        <meta name="description" content="Where decentralization meets VPN for ultimate internet security.
-Anonymous Virtual Private Network for accessing internet in stealth mode bypassing filewalls and filters."></meta>
-        <meta name="keywords" content="Erebrus, vpn, decentralized, mint, 111, nft, clients, netsepio, apt, aptos"></meta>
-        <title>Erebrus</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+     <Head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Redefining digital connectivity and unleashing the future of internet with globally accessible, secure and private network through the power of DePIN." />
+  <meta name="keywords" content="Erebrus, vpn, decentralized, mint, 111, nft, clients, netsepio, apt, aptos" />
+  <title>Erebrus</title>
+  <link rel="icon" href="/favicon.ico" />
+  <meta property="og:image" content="/metaimg.png" />
+  <meta property="og:title" content="Erebrus" />
+  <meta property="og:description" content="Redefining digital connectivity and unleashing the future of internet with globally accessible, secure and private network through the power of DePIN." />
+</Head>
 
       <div className="min-h-screen relative overflow-hidden ">
     {/* <video

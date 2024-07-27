@@ -75,10 +75,12 @@ const Mint = () => {
     useWallet();
     const [chainSymbol, setChainSymbol] = useState('');
     const [erebrusWallet, setErebrusWallet] = useState(null);
-    const [displayText, setDisplayText] = useState('Only at 1.76 APT');
+    const [displayText, setDisplayText] = useState('Only at 1.11 APT');
     const [displayText2, setDisplayText2] = useState('Pay in APT');
     const [imageSrc, setImageSrc] = useState('/mintApt.png');
-    const [imageSrc2, setImageSrc2] = useState('/nft_ape2.png');
+    const [imageSrc2, setImageSrc2] = useState('/nft_aptos.png');
+
+    const chain = Cookies.get('Chain_symbol');
   
     useEffect(() => {
       const chainSym = Cookies.get('Chain_symbol');
@@ -92,19 +94,27 @@ const Mint = () => {
           setDisplayText2('Pay in SUI');
           setImageSrc('/mintSui.png');
           setImageSrc2('/nft_ape1.png')
-        } else if (chainSym === 'evm' || chainSym === 'peaq') {
-          setDisplayText('0.00029 ETH');
+        } 
+        else if (chainSym === 'evm') {
+          setDisplayText('0.0019 ETH');
           setDisplayText2('Pay in ETH')
           setImageSrc('/mintManta.png');
           setImageSrc2('/nft_manta.png')
-        } else if (chainSym === 'sol') {
-          setDisplayText('22.51 Sol');
+        } 
+        else if (chainSym === 'peaq') {
+          setDisplayText('0.0019 ETH');
+          setDisplayText2('Pay in ETH')
+          setImageSrc('/mintManta.png');
+          setImageSrc2('/nft_peaq.png')
+        }
+        else if (chainSym === 'sol') {
+          setDisplayText('0.035 SOL');
           setDisplayText2('Pay in SOL')
           setImageSrc('/solanaicon.png');  // change needed
           setImageSrc2('/nft_sol.png')
         }
         else if (chainSym === 'google') {
-          setDisplayText(' 18.94 Sol');
+          setDisplayText('22.52 Sol');
           setDisplayText2('Pay in Dollars')
           setImageSrc('/mintSui.png');  // change needed
           setImageSrc2('/nft_ape1.png')
@@ -344,7 +354,7 @@ const Mint = () => {
                     src="/icomoon-free_price-tags.png"
                     className="w-6 h-6 mt-1"
                   />
-                  <div>{displayText}<span className="text-[18px]">  ($5.99)</span></div>
+                  <div>{displayText}<span className="text-[18px]">{ chain === 'apt' ? "" : "($5.99)"}</span></div>
                 </div>
                 <div className="text-white text-xl mt-4 mx-auto flex gap-2">
                   <img

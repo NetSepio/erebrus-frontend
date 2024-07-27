@@ -75,13 +75,13 @@ const NodeDwifiStreamUser = () => {
                 <th style={{ border: "solid 1px #FFFFFF66" }}>
                   <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
                     <img src="/nodetable4.png" className="w-12 h-12" />
-                    <div>Chain Name</div>
+                    <div>Chain</div>
                   </div>
                 </th>
                 <th style={{ border: "solid 1px #FFFFFF66" }}>
                   <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
                     <img src="/nodetable7.png" className="w-10 h-10" />
-                    <div>Interface Name</div>
+                    <div>Interface</div>
                   </div>
                 </th>
                 <th style={{ border: "solid 1px #FFFFFF66" }}>
