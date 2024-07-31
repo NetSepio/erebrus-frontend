@@ -11,7 +11,7 @@ const images = [
   { src: '/loop7.png', name: 'Image 7', height: 100, width: 120 },
   { src: '/loop8.png', name: 'Image 8', height: 130, width: 50 },
   { src: '/loop9.png', name: 'Image 9', height: 110, width: 80 },
-  { src: '/loop10.png', name: 'Image 10', height: 90, width: 60 }
+  { src: '/loop10.png', name: 'Image 10', height: 110, width: 130 }
 ];
 
 const Carousel = () => {
