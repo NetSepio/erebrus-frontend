@@ -40,29 +40,29 @@ const WalletContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   const wallets = [
     // TODO IdentityConnectWallet and BloctoWallet to use Network enum from @aptos-labs/ts-sdk
-    new IdentityConnectWallet("57fa42a9-29c6-4f1e-939c-4eefa36d9ff5", {
-      networkName: NetworkName.Testnet,
-    }),
+    // new IdentityConnectWallet("57fa42a9-29c6-4f1e-939c-4eefa36d9ff5", {
+    //   networkName: NetworkName.Testnet,
+    // }),
     // Blocto supports Testnet/Mainnet for now.
     // new BloctoWallet({
     //   network: NetworkName.Testnet,
     //   bloctoAppId: "6d85f56e-5f2e-46cd-b5f2-5cf9695b4d46",
     // }),
     // new FaceWallet(face!),
-    new FewchaWallet(),
+    // new FewchaWallet(),
     // new FlipperWallet(),
     new MartianWallet(),
-    new MSafeWalletAdapter(),
-    new NightlyWallet(),
-    new OpenBlockWallet(),
+    // new MSafeWalletAdapter(),
+    // new NightlyWallet(),
+    // new OpenBlockWallet(),
     new PetraWallet(),
     // new PontemWallet(),
-    new RiseWallet(),
-    new TokenPocketWallet(),
-    new TrustWallet(),
-    new WelldoneWallet(),
-    new OKXWallet(),
-    new OnekeyWallet(),
+    // new RiseWallet(),
+    // new TokenPocketWallet(),
+    // new TrustWallet(),
+    // new WelldoneWallet(),
+    // new OKXWallet(),
+    // new OnekeyWallet(),
   ];
 
   return (

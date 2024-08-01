@@ -21,7 +21,7 @@ const Footer = () => {
           </div>
 
           <div className="text-gray-300 flex flex-col">
-          <div className="lg:text-xl text-md font-semibold tracking-wide text-gray-200 mb-4">Company</div>
+          <div className="lg:text-xl text-md font-semibold tracking-wide text-gray-200 mb-4">About</div>
           <a href="/terms" target="_blank" rel="noopener noreferrer" className="mb-2">Terms and Conditions</a>
           <a href="/privacy" target="_blank" rel="noopener noreferrer" className="">Privacy Policy</a>
           </div>

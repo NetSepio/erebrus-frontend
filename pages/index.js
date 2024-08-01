@@ -167,7 +167,7 @@ export default function Home() {
           className="text-black font-bold lg:py-3 lg:px-14 md:py-3 md:px-14 py-3 px-8 rounded-full lg:text-md text-sm mt-4 lg:mt-0 md:mt-0"
           style={{backgroundColor:'#E3EEFF'}}
         >
-          <Link href="/dwifiFlow">
+          <Link href="/dwifi">
             Explore Wi-Fi
           </Link>
         </motion.div>
