@@ -3,7 +3,7 @@ name: "Build and Push to GHCR"
 on:
   push:
     branches:
-      - prod
+      - vm-deployment
 
 jobs:
   build_push:
@@ -21,9 +21,9 @@ jobs:
 
       - name: Build and Push Docker Image
         env:
-          PROD_ENV_FILE: ${{ secrets.PROD_ENV_FILE }}
+          DEV_ENV_FILE: ${{ secrets.DEV_ENV_FILE }}
         run: |
-          echo "$PROD_ENV_FILE" > .env
+          echo "$DEV_ENV_FILE" > .env
           export CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
           export TAG=$([[ $CURRENT_BRANCH == $(basename ${{ github.ref }}) ]] && echo $CURRENT_BRANCH || echo "latest")
           echo $TAG
@@ -39,19 +39,18 @@ jobs:
 
   deploy_dev:
     needs: build_push
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
-      - name: Deploy on PROD server
-        if: github.ref == 'refs/heads/prod'
+      - name: Deploy on DEV server
+        if: github.ref == 'refs/heads/vm-deployment'
         uses: appleboy/ssh-action@v0.1.7
         with:
-          host: ${{ secrets.PROD_REMOTE_SERVER_ADDRESS }}
-          username: ${{ secrets.PROD_SERVER_USERNAME }}
-          key: ${{ secrets.PROD_REMOTE_SERVER_KEY }}
-          port: ${{ secrets.PROD_SSH_PORT }}
+          host: ${{ secrets.DEV_REMOTE_SERVER_ADDRESS }}
+          username: ${{ secrets.DEV_SERVER_USERNAME }}
+          key: ${{ secrets.DEV_REMOTE_SERVER_KEY }}
+          port: ${{ secrets.DEV_SSH_PORT }}
           script: |
-            pwd
-            docker stop erebrus-frontend || true && docker image rm ghcr.io/netsepio/erebrus-frontend:prod
+            docker stop erebrus-frontend || true && docker image rm ghcr.io/netsepio/erebrus-frontend:vm-deployment
             echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
-            docker pull ghcr.io/netsepio/erebrus-frontend:prod
-            docker run --name="erebrus-frontend" --rm -p 4040:8080 --net=bridge -d ghcr.io/netsepio/erebrus-frontend:prod
+            docker pull ghcr.io/netsepio/erebrus-frontend:vm-deployment
+            docker run --name="erebrus-frontend" --rm -p 4040:8080 --net=bridge -d ghcr.io/netsepio/erebrus-frontend:deployment
