@@ -1,0 +1,58 @@
+name: "Build and Push to GHCR"
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_push:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GHCR_USERNAME }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Build and Push Docker Image for Main
+        env:
+          DEV_ENV_FILE: ${{ vars.DEV_EREBRUS_FRONTEND }}
+        run: |
+          echo "$DEV_ENV_FILE" > .env
+          cat .env
+          export CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
+          export TAG=$([[ $CURRENT_BRANCH == $(basename ${{ github.ref }}) ]] && echo $CURRENT_BRANCH || echo "latest")
+          echo $TAG
+          export GITHUB_REF_IMAGE=ghcr.io/$GITHUB_REPOSITORY:$GITHUB_SHA
+          export GITHUB_BRANCH_IMAGE=ghcr.io/$GITHUB_REPOSITORY:$TAG
+          export GITHUB_REF_IMAGE=$(echo $GITHUB_REF_IMAGE | tr '[:upper:]' '[:lower:]')
+          export GITHUB_BRANCH_IMAGE=$(echo $GITHUB_BRANCH_IMAGE | tr '[:upper:]' '[:lower:]')
+          docker build --build-arg version=$GITHUB_SHA -t $GITHUB_REF_IMAGE -t $GITHUB_BRANCH_IMAGE .
+          echo "Pushing Image to GitHub Container Registry"
+          docker push $GITHUB_REF_IMAGE
+          docker push $GITHUB_BRANCH_IMAGE
+          rm -rf .env
+
+  deploy_dev:
+    needs: build_push
+    runs-on: self-hosted
+    steps:
+      - name: Deploy on DEV server
+        if: github.ref == 'refs/heads/main'
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.DEV_REMOTE_SERVER_ADDRESS }}
+          username: ${{ secrets.DEV_SERVER_USERNAME }}
+          key: ${{ secrets.DEV_REMOTE_SERVER_KEY }}
+          port: ${{ secrets.DEV_SSH_PORT }}
+          script: |
+            docker stop erebrus-frontend || true && docker image rm ghcr.io/netsepio/erebrus-frontend:main
+            echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
+            docker pull ghcr.io/netsepio/erebrus-frontend:main
+            docker run --name="erebrus-frontend" --rm -p 4040:8080 --net=bridge -d ghcr.io/netsepio/erebrus-frontend:main
