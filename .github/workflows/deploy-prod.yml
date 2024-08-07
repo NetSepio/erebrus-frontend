@@ -21,7 +21,7 @@ jobs:
 
       - name: Build and Push Docker Image
         env:
-          PROD_ENV_FILE: ${{ secrets.PROD_ENV_FILE }}
+          PROD_ENV_FILE: ${{ vars.PROD_EREBRUS_ENV }}
         run: |
           echo "$PROD_ENV_FILE" > .env
           export CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
