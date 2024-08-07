@@ -8,6 +8,7 @@ on:
 jobs:
   build_push:
     runs-on: ubuntu-latest
+    environment: Production
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -24,6 +25,7 @@ jobs:
           PROD_ENV_FILE: ${{ vars.PROD_EREBRUS_ENV }}
         run: |
           echo "$PROD_ENV_FILE" > .env
+          cat .env
           export CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
           export TAG=$([[ $CURRENT_BRANCH == $(basename ${{ github.ref }}) ]] && echo $CURRENT_BRANCH || echo "latest")
           echo $TAG
