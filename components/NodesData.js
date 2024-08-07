@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react"; 
 import axios from "axios";
 import Cookies from "js-cookie";
 
@@ -14,6 +14,9 @@ const NodesData = () => {
   const [chainFilter, setChainFilter] = useState("all");
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "ascending" });
   const [showFilters, setShowFilters] = useState(false);
+  const filterRef = useRef(null);
+  
+  
 
   useEffect(() => {
     fetchNodesData();
@@ -22,6 +25,41 @@ const NodesData = () => {
   useEffect(() => {
     filterAndSortNodes();
   }, [nodesdata, statusFilter, regionFilter, chainFilter, sortConfig, showFilters]);
+
+
+
+  const handleFilterChange = (filterType, value) => {
+    switch (filterType) {
+      case 'status':
+        setStatusFilter(value);
+        break;
+      case 'region':
+        setRegionFilter(value);
+        break;
+      case 'chain':
+        setChainFilter(value);
+        break;
+    }
+    setShowFilters(false);
+  };
+
+  const handleSortChange = (value) => {
+    if (value) {
+      handleSort(value);
+    }
+  };
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setShowFilters(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const fetchNodesData = async () => {
     try {
@@ -167,68 +205,69 @@ const NodesData = () => {
           </div>
 
           <div className="mb-4 flex justify-end">
-  <div className="relative inline-block">
-    <button
-      onClick={() => setShowFilters(!showFilters)}
-      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-12 rounded"
-    >
-      Filters
-    </button>
-    {showFilters && (
-      <div className="absolute right-0 mt-2 w-48 bg-blue-500 rounded-md shadow-lg z-10">
-        <div className="py-1">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="block w-full px-4 py-2 text-white bg-blue-500 hover:bg-gray-700"
+          <div className="relative inline-block" ref={filterRef}>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-12 rounded"
           >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-          <select
-            value={regionFilter}
-            onChange={(e) => setRegionFilter(e.target.value)}
-            className="block w-full px-4 py-2 text-white bg-blue-500 hover:bg-gray-700"
-          >
-            <option value="all">All Regions</option>
-            <option value="CA">CA</option>
-            <option value="JP">JP</option>
-            <option value="SG">SG</option>
-            <option value="IN">IN</option>
-            <option value="GB">GB</option>
-            <option value="AU">AU</option>
-            <option value="US">US</option>
-          </select>
-          <select
-            value={chainFilter}
-            onChange={(e) => setChainFilter(e.target.value)}
-            className="block w-full px-4 py-2 text-white bg-blue-500 hover:bg-gray-700"
-          >
-            <option value="all">All Chains</option>
-            <option value="APT">APT</option>
-            <option value="EVM">EVM</option>
-            <option value="SUI">SUI</option>
-            <option value="SOL">SOL</option>
-            <option value="PEAQ">PEAQ</option>
-          </select>
+            Filters
+          </button>
+          {showFilters && (
+            <div className="absolute right-0 mt-2 w-48 bg-blue-500 rounded-md shadow-lg z-10">
+              <div className="py-1">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => handleFilterChange('status', e.target.value)}
+                  className="block w-full px-4 py-2 text-white bg-blue-500 hover:bg-gray-700"
+                >
+                  <option value="all">All Status</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+                <select
+                  value={regionFilter}
+                  onChange={(e) => handleFilterChange('region', e.target.value)}
+                  className="block w-full px-4 py-2 text-white bg-blue-500 hover:bg-gray-700"
+                >
+                  <option value="all">All Regions</option>
+                  <option value="CA">CA</option>
+                  <option value="JP">JP</option>
+                  <option value="SG">SG</option>
+                  <option value="IN">IN</option>
+                  <option value="GB">GB</option>
+                  <option value="AU">AU</option>
+                  <option value="US">US</option>
+                </select>
+                <select
+                  value={chainFilter}
+                  onChange={(e) => handleFilterChange('chain', e.target.value)}
+                  className="block w-full px-4 py-2 text-white bg-blue-500 hover:bg-gray-700"
+                >
+                  <option value="all">All Chains</option>
+                  <option value="APT">APT</option>
+                  <option value="EVM">EVM</option>
+                  <option value="SUI">SUI</option>
+                  <option value="SOL">SOL</option>
+                  <option value="PEAQ">PEAQ</option>
+                </select>
+              </div>
+            </div>
+          )}
         </div>
-      </div>
-    )}
-  </div>
-  <div className="relative inline-block ml-4">
+        <div className="relative inline-block ml-4">
   <select
-    onChange={(e) => handleSort(e.target.value)}
-    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded appearance-none"
+    onChange={(e) => handleSortChange(e.target.value)}
+    className="bg-blue-500 hover:bg-blue-700 text-white  font-bold py-2 px-4 rounded appearance-none"
+    value=""
   >
-    <option value="" disabled selected hidden className="">Sort By</option>
+    <option value="" disabled className="text-center">Sort By</option>
     <option value="name">Name</option>
     <option value="status">Status</option>
     <option value="region">Region</option>
     <option value="networkSpeed">Network Speed</option>
   </select>
 </div>
-</div>
+      </div>
         
 
           <div className="overflow-x-auto">

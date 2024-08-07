@@ -1,12 +1,16 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
+import Link from "next/link";
+import { motion } from "framer-motion";
 
 const NodeDwifiStreamUser = () => {
   const [data, setData] = useState([]);
+  const [noData, setNoData] = useState(false);
 
   useEffect(() => {
     const socket = new WebSocket('wss://dev.gateway.erebrus.io/api/v1.0/nodedwifi/stream');
+    const wallet = Cookies.get("erebrus_wallet");
 
     socket.onopen = function (event) {
       console.log('WebSocket is open now.');
@@ -15,28 +19,24 @@ const NodeDwifiStreamUser = () => {
     socket.onmessage = function (event) {
       const newData = JSON.parse(event.data);
 
-      // Check if the walletAddress is "123"
-      const wallet = Cookies.get("erebrus_wallet");
       if (newData.wallet_address === wallet) {
+        setData((prevData) => {
+          const updatedData = prevData.map((item) => {
+            if (item.id === newData.id) {
+              return newData;
+            }
+            return item;
+          });
 
-      setData((prevData) => {
-        // Update existing data if the ID already exists
-        const updatedData = prevData.map((item) => {
-          if (item.id === newData.id) {
-            return newData;
+          const existingIndex = prevData.findIndex((item) => item.id === newData.id);
+          if (existingIndex === -1) {
+            updatedData.push(newData);
           }
-          return item;
+
+          return updatedData;
         });
-
-        // If the ID doesn't exist, append the new data
-        const existingIndex = prevData.findIndex((item) => item.id === newData.id);
-        if (existingIndex === -1) {
-          updatedData.push(newData);
-        }
-
-        return updatedData;
-      });
-    }
+        setNoData(false);
+      }
     };
 
     socket.onerror = function (event) {
@@ -47,11 +47,42 @@ const NodeDwifiStreamUser = () => {
       console.log('WebSocket is closed now.');
     };
 
+    // Set a timeout to check if any data has been received
+    const timeoutId = setTimeout(() => {
+      if (data.length === 0) {
+        setNoData(true);
+      }
+    }, 2); // Wait for 5 seconds
+
     return () => {
       socket.close();
+      clearTimeout(timeoutId);
     };
   }, []);
 
+  const handleRunNode = () => {
+    // Implement the logic to run a node
+    console.log("Running a new node...");
+  };
+
+  if (noData) {
+    return (
+      <div className="text-white px-3 flex flex-col items-center justify-center h-[10vh]">
+        <p className="mb-4 text-2xl">You do not have any running nodes.</p>
+        <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1, transition: { duration: 1 } }}
+            className="text-black font-bold py-3 px-10 rounded-full bg-white text-lg" 
+            // style={{backgroundImage: 'linear-gradient(#FFFFFF00, #0099FF)'}}
+          >
+            <Link href="https://discord.com/invite/5uaFhNpRF6" target="_blank"
+              rel="noopener noreferrer">
+              Run Your Node
+            </Link>
+          </motion.div>
+      </div>
+    );
+  }
   return (
     <div className='text-white px-3'>
 
