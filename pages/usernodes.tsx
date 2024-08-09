@@ -1,6 +1,7 @@
 import React, { useEffect, useState} from "react";
 import Link from "next/link";
 import NodeDwifiStreamUser from "../components/nodedataDwifiUser";
+import NodesDataStreamDvpn from "../components/NodesDataDvpnUser";
 import { motion } from "framer-motion";
 
 const Dwifi = () => {
@@ -35,6 +36,7 @@ const Dwifi = () => {
       </div>
     </div>
       <NodeDwifiStreamUser />
+      <NodesDataStreamDvpn/>
             {/* <img src="/mapRegions.png"/> */}
             <div className="h-[30vh]"></div>
         </div>

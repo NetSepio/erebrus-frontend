@@ -12,9 +12,11 @@ const NodesData = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [regionFilter, setRegionFilter] = useState("all");
   const [chainFilter, setChainFilter] = useState("all");
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: "ascending" });
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
   const [showFilters, setShowFilters] = useState(false);
   const filterRef = useRef(null);
+  const [sortBy, setSortBy] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
   
   
 
@@ -22,7 +24,10 @@ const NodesData = () => {
     fetchNodesData();
   }, []);
 
-  useEffect(() => {
+  useEffect((value) => {
+    if(isOpen){
+      handleSort(value)
+    }
     filterAndSortNodes();
   }, [nodesdata, statusFilter, regionFilter, chainFilter, sortConfig, showFilters]);
 
@@ -43,31 +48,61 @@ const NodesData = () => {
     setShowFilters(false);
   };
 
-  const handleSortChange = (value) => {
-    if (value) {
-      handleSort(value);
-    }
+  const handleSort = (key) => {
+    console.log("in handle sort ")
+    setSortConfig((prevConfig) => {
+      console.log("in handle sort config ", prevConfig, sortConfig)
+      const direction = prevConfig.key === key && prevConfig.direction === "ascending"
+        ? "descending"
+        : "ascending";
+      
+      return { key, direction };
+    });
   };
+  
+  const handleSortChange = (value) => {
+    console.log("in handle sort chnage ")
+    
+    if (value) {
+      
+      handleSort(value);
+      console.log("in handle sort chnage done ", )
+      setSortBy(value);
+      setTimeout(() => {
+        setIsOpen(false);
+      }, 100);
+      
+    }
+ 
+    
+  };
+  
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (filterRef.current && !filterRef.current.contains(event.target)) {
+      if (
+        filterRef.current &&
+        !filterRef.current.contains(event.target) &&
+        !event.target.closest('.dropdown-menu')
+      ) {
         setShowFilters(false);
+        setIsOpen(false);
       }
     };
-
+  
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [filterRef, isOpen]);
+
 
   const fetchNodesData = async () => {
     try {
       const response = await axios.get(
-        `${EREBRUS_GATEWAY_URL}api/v1.0/nodes/all`,
+       ` ${EREBRUS_GATEWAY_URL}api/v1.0/nodes/all`,
         {
           headers: {
-            Accept: "application/json, text/plain, */*",
+            Accept: "application/json, text/plain, /",
             "Content-Type": "application/json",
           },
         }
@@ -88,6 +123,10 @@ const NodesData = () => {
       setUniqueRegionsCount(0);
     }
   };
+  const toggleDropdown = () => {
+    setIsOpen((prevState) => !prevState);
+    
+  };
 
   const filterAndSortNodes = () => {
     let filtered = nodesdata;
@@ -107,7 +146,7 @@ const NodesData = () => {
         if (sortConfig.key === "networkSpeed") {
           const aSpeed = parseFloat(a.downloadSpeed) + parseFloat(a.uploadSpeed);
           const bSpeed = parseFloat(b.downloadSpeed) + parseFloat(b.uploadSpeed);
-          return sortConfig.direction === "ascending" ? aSpeed - bSpeed : bSpeed - aSpeed;
+          return sortConfig.direction === "desending" ? aSpeed - bSpeed : bSpeed - aSpeed;
         }
         if (sortConfig.key === "uptime") {
           return sortConfig.direction === "ascending"
@@ -128,13 +167,13 @@ const NodesData = () => {
     setFilteredNodesData(filtered);
   };
 
-  const handleSort = (key) => {
-    let direction = "ascending";
-    if (sortConfig.key === key && sortConfig.direction === "ascending") {
-      direction = "descending";
-    }
-    setSortConfig({ key, direction });
-  };
+  // const handleSort = (key) => {
+  //   let direction = "ascending";
+  //   if (sortConfig.key === key && sortConfig.direction === "ascending") {
+  //     direction = "descending";
+  //   }
+  //   setSortConfig({ key, direction });
+  // };
 
   const elapsedTimeSince = (timestamp) => {
     const givenTimeMilliseconds = timestamp * 1000;
@@ -160,7 +199,7 @@ const NodesData = () => {
   };
 
   const handleRowClick = (id) => {
-    window.location.href = `/nodeinfo/${id}`;
+    `window.location.href = /nodeinfo/${id}`;
   };
 
   return (
@@ -204,69 +243,118 @@ const NodesData = () => {
             </div>
           </div>
 
-          <div className="mb-4 flex justify-end">
+          <div className="mb-4 flex justify-end gap-10">
           <div className="relative inline-block" ref={filterRef}>
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-12 rounded"
-          >
-            Filters
-          </button>
-          {showFilters && (
-            <div className="absolute right-0 mt-2 w-48 bg-blue-500 rounded-md shadow-lg z-10">
-              <div className="py-1">
-                <select
-                  value={statusFilter}
-                  onChange={(e) => handleFilterChange('status', e.target.value)}
-                  className="block w-full px-4 py-2 text-white bg-blue-500 hover:bg-gray-700"
-                >
-                  <option value="all">All Status</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-                <select
-                  value={regionFilter}
-                  onChange={(e) => handleFilterChange('region', e.target.value)}
-                  className="block w-full px-4 py-2 text-white bg-blue-500 hover:bg-gray-700"
-                >
-                  <option value="all">All Regions</option>
-                  <option value="CA">CA</option>
-                  <option value="JP">JP</option>
-                  <option value="SG">SG</option>
-                  <option value="IN">IN</option>
-                  <option value="GB">GB</option>
-                  <option value="AU">AU</option>
-                  <option value="US">US</option>
-                </select>
-                <select
-                  value={chainFilter}
-                  onChange={(e) => handleFilterChange('chain', e.target.value)}
-                  className="block w-full px-4 py-2 text-white bg-blue-500 hover:bg-gray-700"
-                >
-                  <option value="all">All Chains</option>
-                  <option value="APT">APT</option>
-                  <option value="EVM">EVM</option>
-                  <option value="SUI">SUI</option>
-                  <option value="SOL">SOL</option>
-                  <option value="PEAQ">PEAQ</option>
-                </select>
-              </div>
-            </div>
-          )}
-        </div>
-        <div className="relative inline-block ml-4">
-  <select
-    onChange={(e) => handleSortChange(e.target.value)}
-    className="bg-blue-500 hover:bg-blue-700 text-white  font-bold py-2 px-4 rounded appearance-none"
-    value=""
+  <button
+    onClick={() => setShowFilters(!showFilters)}
+    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-12 rounded"
   >
-    <option value="" disabled className="text-center">Sort By</option>
-    <option value="name">Name</option>
-    <option value="status">Status</option>
-    <option value="region">Region</option>
-    <option value="networkSpeed">Network Speed</option>
-  </select>
+    {statusFilter !== 'all' || regionFilter !== 'all' || chainFilter !== 'all' ? 'Filters Applied' : 'Filters'}
+  </button>
+  {showFilters && (
+    <div className="absolute right-0 mt-2 w-48 bg-blue-500 rounded-md shadow-lg z-10">
+      <div className="py-1">
+        <select
+          value={statusFilter}
+          onChange={(e) => handleFilterChange('status', e.target.value)}
+          className="block w-full px-4 py-2 text-white bg-blue-500 hover:bg-blue-400"
+        >
+          <option value="all">All Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+        <select
+          value={regionFilter}
+          onChange={(e) => handleFilterChange('region', e.target.value)}
+          className="block w-full px-4 py-2 text-white bg-blue-500 hover:bg-blue-400"
+        >
+          <option value="all">All Regions</option>
+          <option value="CA">CA</option>
+          <option value="JP">JP</option>
+          <option value="SG">SG</option>
+          <option value="IN">IN</option>
+          <option value="GB">GB</option>
+          <option value="AU">AU</option>
+          <option value="US">US</option>
+        </select>
+        <select
+          value={chainFilter}
+          onChange={(e) => handleFilterChange('chain', e.target.value)}
+          className="block w-full px-4 py-2 text-white bg-blue-500 hover:bg-blue-400"
+        >
+          <option value="all">All Chains</option>
+          <option value="APT">APT</option>
+          <option value="EVM">EVM</option>
+          <option value="SUI">SUI</option>
+          <option value="SOL">SOL</option>
+          <option value="PEAQ">PEAQ</option>
+        </select>
+      </div>
+    </div>
+  )}
 </div>
+
+ 
+
+
+<div className="relative inline-block text-left w-[30vh]">
+      <button
+        onClick={toggleDropdown}
+        className="inline-flex justify-center w-full rounded-md   shadow-sm px-4 py-2 bg-blue-500 text-md font-medium text-white hover:bg-blue-700"
+      >
+        Sort by: {sortBy || 'Select'}
+        <svg
+          className={`-mr-1 ml-2 h-5 w-5 transform transition-transform ${
+            isOpen ? 'rotate-180' : 'rotate-0'
+          }`}
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            fillRule="evenodd"
+            d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0l-4.25-4.25a.75.75 0 01.02-1.06z"
+            clipRule="evenodd"
+          />
+        </svg>
+      </button>
+
+      {isOpen && (
+        <div
+        className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-blue-500 ring-1 ring-black ring-opacity-5 dropdown-menu"
+        role="menu"
+        aria-orientation="vertical"
+        aria-labelledby="options-menu"
+      > <div className="py-1 " role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+            <button
+              className="block px-4 py-2 text-md text-white hover:bg-blue-400 w-full text-left"
+              onClick={() => handleSortChange('name') }
+            >
+              Name
+            </button>
+            <button
+              className="block px-4 py-2 text-md text-white hover:bg-blue-400 w-full text-left"
+              onClick={() => handleSortChange('status')}
+            >
+              Status
+            </button>
+            <button
+              className="block px-4 py-2 text-md text-white hover:bg-blue-400 w-full text-left"
+              onClick={() => handleSortChange('region')}
+            >
+              Region
+            </button>
+            <button
+              className="block px-4 py-2 text-md text-white hover:bg-blue-400 w-full text-left"
+              onClick={() => handleSortChange('networkSpeed')}
+            >
+              Network Speed
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
       </div>
         
 
@@ -396,6 +484,3 @@ const NodesData = () => {
 };
 
 export default NodesData;
-
-
-

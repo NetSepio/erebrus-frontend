@@ -104,7 +104,7 @@ const Footer = () => {
         </li>
         <li className="mr-4">
           <Link
-            href="https://github.com/NetSepio"
+            href="https://www.youtube.com/@NetSepio"
             target="_blank"
             rel="noopener noreferrer"
           >

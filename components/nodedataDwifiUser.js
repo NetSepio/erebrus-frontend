@@ -8,6 +8,7 @@ const NodeDwifiStreamUser = () => {
   const [data, setData] = useState([]);
   const [noData, setNoData] = useState(false);
 
+
   useEffect(() => {
     const socket = new WebSocket('wss://dev.gateway.erebrus.io/api/v1.0/nodedwifi/stream');
     const wallet = Cookies.get("erebrus_wallet");
@@ -60,159 +61,84 @@ const NodeDwifiStreamUser = () => {
     };
   }, []);
 
-  const handleRunNode = () => {
-    // Implement the logic to run a node
-    console.log("Running a new node...");
-  };
+  const uniqueNodesData = data.reduce((acc, item) => {
+    if (!acc[item.id]) {
+      acc[item.id] = {...item, status: [item.status[0]]};
+    }
+    return acc;
+  }, {});
 
   if (noData) {
     return (
-      <div className="text-white px-3 flex flex-col items-center justify-center h-[10vh]">
-        <p className="mb-4 text-2xl">You do not have any running nodes.</p>
-        <motion.div
+      /* eslint-disable */
+      <div className="bg-gray-900 text-white p-6 rounded-lg shadow-lg">
+        <h1 className="text-3xl font-bold mb-6">DWifi Nodes Dashboard</h1>
+        <div className="bg-gray-800 rounded-lg p-8 text-center">
+          <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <h3 className="mt-2 text-sm font-medium text-gray-400">No dVPN Nodes</h3>
+        
+          <p className="mt-1 text-sm text-gray-500">You don't have any dVPN nodes running at the moment.</p>
+          <motion.div
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1, transition: { duration: 1 } }}
-            className="text-black font-bold py-3 px-10 rounded-full bg-white text-lg" 
-            // style={{backgroundImage: 'linear-gradient(#FFFFFF00, #0099FF)'}}
+            className="mt-6"
           >
-            <Link href="https://discord.com/invite/5uaFhNpRF6" target="_blank"
-              rel="noopener noreferrer">
-              Run Your Node
+            <Link href="https://discord.com/invite/5uaFhNpRF6" target="_blank" rel="noopener noreferrer">
+        
+                Run Your Node
+              
             </Link>
           </motion.div>
+        </div>
       </div>
     );
   }
+
   return (
-    <div className='text-white px-3'>
-
-
-<div className="overflow-x-auto">
-            <table className="min-w-full bg-black rounded-lg">
-            <thead style={{ height: "10px" }}>
-              <tr>
-              <th style={{ border: "solid 1px #FFFFFF66" }}>
-                  <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable9.png" className="w-10 h-10" />
-                    <div>Host SSID</div>
-                  </div>
+    <div className="bg-gray-900 text-white p-6 rounded-lg shadow-lg">
+      <h1 className="text-3xl font-bold mb-6">DWifi Nodes Dashboard</h1>
+      
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-gray-800 rounded-lg overflow-hidden">
+          <thead className="bg-gray-700">
+            <tr>
+              {["Host SSID", "Gateway", "Chain", "Interface", "Connected Devices", "Status", "Location", "Connected At", "Last Pinged"].map((header) => (
+                <th key={header} className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  {header}
                 </th>
-                <th style={{ border: "solid 1px #FFFFFF66" }}>
-                  <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable4.png" className="w-12 h-12" />
-                    <div>Gateway</div>
-                  </div>
-                </th>
-                <th style={{ border: "solid 1px #FFFFFF66" }}>
-                  <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable4.png" className="w-12 h-12" />
-                    <div>Chain</div>
-                  </div>
-                </th>
-                <th style={{ border: "solid 1px #FFFFFF66" }}>
-                  <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable7.png" className="w-10 h-10" />
-                    <div>Interface</div>
-                  </div>
-                </th>
-                <th style={{ border: "solid 1px #FFFFFF66" }}>
-                  <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable7.png" className="w-10 h-10" />
-                    <div>Connected Devices</div>
-                  </div>
-                </th>
-                <th style={{ border: "solid 1px #FFFFFF66" }}>
-                  <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable7.png" className="w-10 h-10" />
-                    <div>Status</div>
-                  </div>
-                </th>
-                <th style={{ border: "solid 1px #FFFFFF66" }}>
-                  <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable7.png" className="w-10 h-10" />
-                    <div>Location</div>
-                  </div>
-                </th>
-                <th style={{ border: "solid 1px #FFFFFF66" }}>
-                  <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable9.png" className="w-10 h-10" />
-                    <div>Connected At</div>
-                  </div>
-                </th>
-                <th style={{ border: "solid 1px #FFFFFF66" }}>
-                  <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable9.png" className="w-10 h-10" />
-                    <div>Last Pinged</div>
-                  </div>
-                </th>
-              </tr>
-            </thead>
-              <tbody>
-              {data.map((item) => (
-            item.status.map((device, index) => (
-              <tr key={`${item.id}-${index}`}>
-                {index === 0 && (
-                  <>
-                    {/* <td rowSpan={item.status.length}>{item.id}</td> */}
-                    <td rowSpan={item.status.length}
-                    style={{ border: "solid 1px #FFFFFF66" }}>
-                    <div className="flex gap-4 justify-center items-center py-2 px-4">
-                       {item.status[0].hostSSID}
-                      </div>
-                      </td>
-                    <td rowSpan={item.status.length}
-                    style={{ border: "solid 1px #FFFFFF66" }}>
-                    <div className="flex gap-4 justify-center items-center py-2 px-4">
-                       {item.gateway}
-                      </div>
-                      </td>
-                      <td rowSpan={item.status.length}
-                    style={{ border: "solid 1px #FFFFFF66" }}>
-                    <div className="flex gap-4 justify-center items-center py-2 px-4">
-                       {item.chain_name}
-                      </div>
-                      </td>
-                      <td style={{ border: "solid 1px #FFFFFF66" }}>
-                <div className="flex gap-4 justify-center items-center py-2 px-4">
-                  {item.status[0].interfaceName}
-                  </div>
-                  </td>
-
-                  <td style={{ border: "solid 1px #FFFFFF66" }}>
-                <div className="flex gap-4 justify-center items-center py-2 px-4">
-                  {item.status.length}
-                  </div>
-                  </td>
-                  
-                  <td style={{ border: "solid 1px #FFFFFF66" }}>
-                <div className="flex gap-4 justify-center items-center py-2 px-4">
-                  {item.connected == "true" ? "Offline" : "Online"}
-                  </div>
-                  </td>
-
-                  <td style={{ border: "solid 1px #FFFFFF66" }}>
-                <div className="flex gap-4 justify-center items-center py-2 px-4">
-                  {item.location}
-                  </div>
-                  </td>
-                 
-                <td style={{ border: "solid 1px #FFFFFF66" }}>
-                <div className="flex gap-4 justify-center items-center py-2 px-4">
-                  {new Date(item.status[0].connectedAt).toLocaleString()}
-                  </div></td>
-                <td style={{ border: "solid 1px #FFFFFF66" }}>
-                <div className="flex gap-4 justify-center items-center py-2 px-4">
-                  {new Date(item.status[0].lastChecked).toLocaleString()}
-                  </div>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-600">
+            {Object.values(uniqueNodesData).map((item) => (
+              <tr
+                key={item.id}
+                className={`hover:bg-gray-700 transition-colors duration-200 ${
+                  item.connected === "true" ? "text-red-300" : "text-blue-300"
+                }`}
+              >
+                <td className="px-6 py-4 whitespace-nowrap">{item.status[0].hostSSID}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{item.gateway}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{item.chain_name}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{item.status[0].interfaceName}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{item.status.length}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                    item.connected === "true" ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800"
+                  }`}>
+                    {item.connected === "true" ? "Offline" : "Online"}
+                  </span>
                 </td>
-                </>
-                )}
+                <td className="px-6 py-4 whitespace-nowrap">{item.location}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{new Date(item.status[0].connectedAt).toLocaleString()}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{new Date(item.status[0].lastChecked).toLocaleString()}</td>
               </tr>
-            ))
-          ))}
-            </tbody>
-            </table>
-          </div>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

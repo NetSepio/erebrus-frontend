@@ -10,7 +10,9 @@ const NodeDwifiStream = () => {
   const [showFilters, setShowFilters] = useState(false);
   const filterRef = useRef(null);
   const [showSortOptions, setShowSortOptions] = useState(false);
+  const [sortBy, setSortBy] = useState('');
   const sortRef = useRef(null);
+  
 
   useEffect(() => {
     const socket = new WebSocket('wss://dev.gateway.erebrus.io/api/v1.0/nodedwifi/stream');
@@ -130,19 +132,22 @@ const NodeDwifiStream = () => {
       direction = "descending";
     }
     setSortConfig({ key, direction });
+    // setShowSortOptions(false);
+    console.log(`Sorting by: ${key}`);
+    setSortBy(key);
     setShowSortOptions(false);
   };
 
   return (
     <div className='text-white px-3'>
-      <div className="mb-4 flex justify-end">
+      <div className="mb-4 flex justify-end gap-7">
         <div className="relative inline-block" ref={filterRef}>
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-12 rounded"
-          >
-            Filters
-          </button>
+        <button
+    onClick={() => setShowFilters(!showFilters)}
+    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-12 rounded"
+  >
+    {statusFilter !== 'all' || chainFilter !== 'all' ? 'Filters Applied' : 'Filters'}
+  </button>
           {showFilters && (
             <div className="absolute right-0 mt-2 w-48 bg-blue-500 rounded-md shadow-lg z-10">
               <div className="py-1">
@@ -172,43 +177,43 @@ const NodeDwifiStream = () => {
           )}
         </div>
         <div className="relative inline-block ml-4" ref={sortRef}>
-          <button
-            onClick={() => setShowSortOptions(!showSortOptions)}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-12 rounded"
-          >
-            Sort By
-          </button>
-          {showSortOptions && (
-            <div className="absolute right-0 mt-2 w-48 bg-blue-500 rounded-md shadow-lg z-10">
-              <div className="py-1">
-                <button
-                  onClick={() => handleSort("hostSSID")}
-                  className="block w-full text-left px-4 py-2 text-white hover:bg-gray-700"
-                >
-                  Host SSID
-                </button>
-                <button
-                  onClick={() => handleSort("gateway")}
-                  className="block w-full text-left px-4 py-2 text-white hover:bg-gray-700"
-                >
-                  Gateway
-                </button>
-                <button
-                  onClick={() => handleSort("chain_name")}
-                  className="block w-full text-left px-4 py-2 text-white hover:bg-gray-700"
-                >
-                  Chain
-                </button>
-                <button
-                  onClick={() => handleSort("location")}
-                  className="block w-full text-left px-4 py-2 text-white hover:bg-gray-700"
-                >
-                  Location
-                </button>
-              </div>
-            </div>
-          )}
-      </div>
+      <button
+        onClick={() => setShowSortOptions(!showSortOptions)}
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-12 rounded"
+      >
+        Sort By: {sortBy || 'Select'}
+      </button>
+      {showSortOptions && (
+        <div className="absolute right-0 mt-2 w-48 bg-blue-500 rounded-md shadow-lg z-10">
+          <div className="py-1">
+            <button
+              onClick={() => handleSort('hostSSID')}
+              className="block w-full text-left px-4 py-2 text-white hover:bg-gray-700"
+            >
+              Host SSID
+            </button>
+            <button
+              onClick={() => handleSort('gateway')}
+              className="block w-full text-left px-4 py-2 text-white hover:bg-gray-700"
+            >
+              Gateway
+            </button>
+            <button
+              onClick={() => handleSort('chain_name')}
+              className="block w-full text-left px-4 py-2 text-white hover:bg-gray-700"
+            >
+              Chain
+            </button>
+            <button
+              onClick={() => handleSort('location')}
+              className="block w-full text-left px-4 py-2 text-white hover:bg-gray-700"
+            >
+              Location
+            </button>
+          </div>
+        </div>
+      )}
+    </div>  
       </div>
 <div className="overflow-x-auto">
             <table className="min-w-full bg-black rounded-lg">
