@@ -21,7 +21,7 @@ const Dwifi = () => {
           animate={{ y: 0, opacity: 1, transition: { duration: 1 } }}
           className="text-6xl font-semibold text-gray-300 mb-8 w-3/5"
         >
-          Manage Your ÐWi-Fi Nodes
+          Manage Your ÐVPN & ÐWi-Fi Nodes
         </motion.h1>
         <motion.h1
           initial={{ y: 100, opacity: 0 }}
