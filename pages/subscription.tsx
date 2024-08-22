@@ -712,11 +712,10 @@ const Subscription = () => {
   if (!loggedin) {
     return (
       <>
-        <div className="min-h-screen">
-          <img src="/Brazuca_Sitting.png" className="mx-auto p-10" />
-          <div className="flex justify-center text-white bg-black font-bold text-3xl text-center">
-            Subscribe and Unlock Full Access, <br></br>
-            Log In to Get Started
+      <div className="min-h-screen bg-[url('/subscriptionbg.png')] bg-cover flex flex-col justify-center items-center">
+      <div className="text-white bg-transparent  font-medium text-4xl text-center">
+            Subscribe and Unlock Full Access <br></br>
+            Log in to Get Started
           </div>
           {/* <button
                   className="bg-blue-500 text-white font-bold py-4 px-10 rounded-lg mx-auto flex justify-center mt-10"
@@ -724,11 +723,17 @@ const Subscription = () => {
                 >
                   Login now
                 </button> */}
-          <div className="text-white font-bold py-4 px-10 rounded-lg mx-auto flex justify-center mt-10">
+          <div className="text-white font-bold pb-24 px-10 rounded-lg mx-auto flex justify-center ">
             {!connected && (
               <button className="">
                 {/* <WalletSelectorAntDesign /> */}
-                <h1 className="text-[#9999] text-2xl">PLEASE LOGIN FIRST</h1>
+                {/* <h1 className="text-[#9999] text-2xl">PLEASE LOGIN FIRST</h1> */}
+                  <button
+                  className="bg-white text-black font-bold py-3 px-10 rounded-3xl mx-auto flex justify-center mt-10"
+                  onClick={connectWallet}
+                >
+                  Login now
+                </button>
               </button>
             )}
             {connected && (

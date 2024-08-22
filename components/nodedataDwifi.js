@@ -139,8 +139,8 @@ const NodeDwifiStream = () => {
   };
 
   return (
-    <div className='text-white px-3'>
-      <div className="mb-4 flex justify-end gap-7">
+    <div className='text-white px-3 bg-[#20253A] '>
+      <div className="mb-4 flex justify-end gap-7 py-5">
         <div className="relative inline-block" ref={filterRef}>
         <button
     onClick={() => setShowFilters(!showFilters)}
@@ -190,13 +190,13 @@ const NodeDwifiStream = () => {
               onClick={() => handleSort('hostSSID')}
               className="block w-full text-left px-4 py-2 text-white hover:bg-gray-700"
             >
-              Host SSID
+             SSID
             </button>
             <button
               onClick={() => handleSort('gateway')}
               className="block w-full text-left px-4 py-2 text-white hover:bg-gray-700"
             >
-              Gateway
+            IP Address
             </button>
             <button
               onClick={() => handleSort('chain_name')}
@@ -216,19 +216,19 @@ const NodeDwifiStream = () => {
     </div>  
       </div>
 <div className="overflow-x-auto">
-            <table className="min-w-full bg-black rounded-lg">
+            <table className="min-w-full bg-[#20253A] rounded-lg">
             <thead style={{ height: "10px" }}>
               <tr>
               <th style={{ border: "solid 1px #FFFFFF66" }}>
                   <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable9.png" className="w-10 h-10" />
-                    <div>Host SSID</div>
+                    <img src="/dwifi1.png" className="w-10 h-10" />
+                    <div>SSID</div>
                   </div>
                 </th>
                 <th style={{ border: "solid 1px #FFFFFF66" }}>
                   <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable4.png" className="w-12 h-12" />
-                    <div>Gateway</div>
+                    <img src="/dwifi2.png" className="w-12 h-12" />
+                    <div>IP Address</div>
                   </div>
                 </th>
                 <th style={{ border: "solid 1px #FFFFFF66" }}>
@@ -239,37 +239,37 @@ const NodeDwifiStream = () => {
                 </th>
                 <th style={{ border: "solid 1px #FFFFFF66" }}>
                   <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable7.png" className="w-10 h-10" />
-                    <div>Interface</div>
+                    <img src="/dwifi4.png" className="w-10 h-10" />
+                    <div>Price_per_min</div>
                   </div>
                 </th>
                 <th style={{ border: "solid 1px #FFFFFF66" }}>
                   <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable7.png" className="w-10 h-10" />
+                    <img src="/dwifi5.png" className="w-10 h-10" />
                     <div>Connected Devices</div>
                   </div>
                 </th>
-                <th style={{ border: "solid 1px #FFFFFF66" }}>
+                {/* <th style={{ border: "solid 1px #FFFFFF66" }}>
                   <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
                     <img src="/nodetable7.png" className="w-10 h-10" />
                     <div>Status</div>
                   </div>
-                </th>
+                </th> */}
                 <th style={{ border: "solid 1px #FFFFFF66" }}>
                   <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable7.png" className="w-10 h-10" />
+                    <img src="/dwifi3.png" className="w-10 h-10" />
                     <div>Location</div>
                   </div>
                 </th>
                 <th style={{ border: "solid 1px #FFFFFF66" }}>
                   <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable9.png" className="w-10 h-10" />
-                    <div>Connected At</div>
+                    <img src="/dwifi7.png" className="w-10 h-10" />
+                    <div>Uptime</div>
                   </div>
                 </th>
                 <th style={{ border: "solid 1px #FFFFFF66" }}>
                   <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable9.png" className="w-10 h-10" />
+                    <img src="/dwifi8.png" className="w-10 h-10" />
                     <div>Last Pinged</div>
                   </div>
                 </th>
@@ -302,7 +302,7 @@ const NodeDwifiStream = () => {
                       </td>
                       <td style={{ border: "solid 1px #FFFFFF66" }}>
                 <div className="flex gap-4 justify-center items-center py-2 px-4">
-                  {item.status[0].interfaceName}
+                  {item.price_per_min}
                   </div>
                   </td>
 
@@ -312,11 +312,11 @@ const NodeDwifiStream = () => {
                   </div>
                   </td>
                   
-                  <td style={{ border: "solid 1px #FFFFFF66" }}>
+                  {/* <td style={{ border: "solid 1px #FFFFFF66" }}>
                 <div className="flex gap-4 justify-center items-center py-2 px-4">
                   {item.connected == "true" ? "Online" : "Offline"}
                   </div>
-                  </td>
+                  </td> */}
 
                   <td style={{ border: "solid 1px #FFFFFF66" }}>
                 <div className="flex gap-4 justify-center items-center py-2 px-4">

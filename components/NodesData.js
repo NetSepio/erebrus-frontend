@@ -206,7 +206,7 @@ const NodesData = () => {
     <div
       id="howto"
       className="flex flex-col items-center justify-start scroll-mt-16 lg:scroll-mt-0 min-h-screen"
-      style={{ backgroundColor: "#010001" }}
+      style={{ backgroundColor: "#20253A" }}
     >
       <div className="font-figtree text-left text-gray-200 w-full px-3">
         <div className="text-white">
@@ -359,7 +359,7 @@ const NodesData = () => {
         
 
           <div className="overflow-x-auto">
-            <table className="min-w-full bg-black rounded-lg">
+            <table className="min-w-full bg-[#20253A] rounded-lg">
             <thead style={{ height: "10px" }}>
               <tr>
                 <th style={{ border: "solid 1px #FFFFFF66" }}>

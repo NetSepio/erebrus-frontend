@@ -30,7 +30,7 @@ const Footer = () => {
     Contact us
   </div>
   <a
-    href="/terms"
+    href="https://discordapp.com/invite/5uaFhNpRF6"
     target="_blank"
     rel="noopener noreferrer"
     className="mb-2 flex items-center"
@@ -56,7 +56,7 @@ const Footer = () => {
     Telegram
   </a> */}
   <a
-    href="/privacy"
+    href="https://netsepio.com/"
     target="_blank"
     rel="noopener noreferrer"
     className="flex items-center"

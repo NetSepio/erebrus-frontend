@@ -2,6 +2,10 @@ import React, { useEffect, useState} from "react";
 import Link from "next/link";
 import  NodeDwifiStream from "../components/nodedataDwifi";
 import { motion } from "framer-motion";
+import dynamic from 'next/dynamic';
+
+const DwifiMap = dynamic(() => import('../components/DwifiMap'), { ssr: false });
+
 
 const Dwifi = () => {
 
@@ -45,8 +49,18 @@ const Dwifi = () => {
         </motion.div>
       </div>
     </div>
+    <div className="map-page" style={{ height: '100vh', width: '100vw' }}>
+      
+      <div className="map-controls" style={{ position: 'absolute', top: 10, left: 10, zIndex: 1000 }}>
+      </div>
+      <div className="map-container" style={{ height: '100%', width: '100%' }}>
+          <DwifiMap />
+      </div>
+    </div>
+
       <NodeDwifiStream />
-            <img src="/mapRegions.png"/>
+
+            {/* <img src="/mapRegions.png"/> */}
         </div>
     )
 }
