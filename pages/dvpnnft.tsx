@@ -63,7 +63,9 @@ const BaliDVPNNFTPage = () => {
     if (error) {
       return <p className="text-red-500 mt-4">{error}</p>;
     }
-    if (response) {
+
+
+    if (response && !response.alreadyMinted) {
       return (
         <div className="mt-4">
           <h3 className="text-xl font-bold">Response:</h3>
@@ -108,6 +110,17 @@ const BaliDVPNNFTPage = () => {
               <div className="bg-gray-100 p-3 rounded-lg mb-6">
                 <p className="text-sm font-medium text-gray-500">Transaction Hash:</p>
                 <p className="text-xs text-gray-700 break-all">{response.transaction_hash}</p>
+                <p className="text-gray-600 mb-6">
+                You can view these NFTs at{' '}
+                <a 
+                  href="https://element.market/collections/erebrus-1" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-500 hover:text-blue-700 und  erline"
+                >
+                  element.market
+                </a>
+              </p>
               </div>
             )}
             <button 
@@ -145,7 +158,7 @@ const BaliDVPNNFTPage = () => {
           >
             {isLoading ? 'Processing...' : 'GO'}
           </button>
-
+{renderResponse()}
       <div className="w-full max-w-xs my-10">
         <img src="/bali-dvpn-nft.jpeg" alt="Erebrus DVPN" className="rounded-lg" />
       </div>
@@ -194,6 +207,7 @@ const BaliDVPNNFTPage = () => {
             >
               {isLoading ? 'Processing...' : 'GO'}
             </button>
+            {renderResponse()}
                 </div>
               </form>
               {renderPopup()}

@@ -81,7 +81,7 @@ const Mission = () => {
                 animate={{ y: 0, opacity: 1, transition: { duration: 1 } }}
                 className="text-black font-bold py-2 px-4 text-center rounded-[8px] text-sm w-auto z-10 bg-[#8EB9FF]" 
               >
-                <Link href="/subscription">
+                <Link href="https://netsepio.com/mission">
                   Our Mission
                 </Link>
               </motion.div>
@@ -107,7 +107,7 @@ const Mission = () => {
                 animate={{ y: 0, opacity: 1, transition: { duration: 1 } }}
                 className="text-black font-bold py-3 text-center rounded-[50px] lg:w-[25%] md:w-[25%] w-1/2 z-10 bg-button " 
               >
-                <Link href="/subscription">
+                <Link href="https://netsepio.com/mission">
                   Our mission
                 </Link>
               </motion.div>

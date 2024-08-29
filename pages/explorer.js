@@ -1,80 +1,111 @@
-import React, { useEffect, useState} from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import NodesData from "../components/NodesData";
 import dynamic from 'next/dynamic';
-// import Dvpn Map from "../components/DvpnMap"
 import { motion } from "framer-motion";
+import { EnvironmentOutlined } from '@ant-design/icons';
 
 const DvpnMap = dynamic(() => import('../components/DvpnMap'), { ssr: false });
-
+const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_BASE_URL;
 
 const Explorer = () => {
-
   const [nodes, setNodes] = useState([]);
   const [activeMap, setActiveMap] = useState('pin');
+  const mapRef = useRef(null);
 
   useEffect(() => {
     async function fetchNodes() {
-      const response = await fetch('https://gateway.erebrus.io/api/v1.0/nodes/all');
-      const data = await response.json();
-      setNodes(data.payload);
+      try {
+        const response = await fetch(`https://gateway.erebrus.io/api/v1.0/nodes/all`);
+        const data = await response.json();
+        if (data && Array.isArray(data.payload)) {
+          setNodes(data.payload);
+        } else {
+          setNodes([]);
+          console.warn("Received invalid data payload from API.");
+        }
+      } catch (error) {
+        console.error("Error fetching nodes data:", error);
+        setNodes([]);
+      }
     }
     fetchNodes();
   }, []);
 
-    return (
-      <div className="bg-[#040819]">
-        <div className="mx-auto py-20"
-          style={{
-            backgroundImage: 'radial-gradient(circle at left, rgba(86, 150, 255, 0.6) 4%, #0162FF80 10%, black 30%), url("/explorer4.png") ',  
-              backgroundSize: 'cover',
-              backgroundBlendMode: 'overlay',
-            }}
-            >
-        <div className="flex flex-col items-start justify-start lg:h-full mt-10 lg:ml-0 lg:mr-0 md:ml-0 md:mr-0 ml-4 mr-4 mb-36 lg:mb-0 px-20 py-40">
+  const scrollToMap = () => {
+    mapRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  return (
+    <div className="explorer-page">
+      <div className="mx-auto relative flex flex-col lg:flex-row items-center lg:items-start lg:justify-between p-4 lg:p-10 lg:h-[40vw]"
+        style={{
+          backgroundImage: 'url("/explorerhero.png")',
+          backgroundSize: 'cover',
+          backgroundBlendMode: 'lighten',
+        }}
+      >
+        <div className="flex flex-col items-center lg:items-start lg:w-2/3 lg:pr-10 text-left py-40">
           <motion.h1
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1, transition: { duration: 1 } }}
-            className="text-6xl font-semibold text-gray-300 mb-8 w-3/5"
+            className="text-6xl font-semibold text-gray-300 mb-8 px-4"
           >
             Decentralized Access with 
+            <br />
             Erebrus ÐVPN
           </motion.h1>
           <motion.h1
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1, transition: { duration: 1 } }}
-            className="text-2xl text-white mb-8"
+            className="text-2xl text-white mb-8 px-4"
           >
             <p>
-            Unrestricted Uncensored Web Access
+              Unrestricted Uncensored Web Access
             </p>
           </motion.h1>
+          <div className="flex gap-5">
           <motion.div
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1, transition: { duration: 1 } }}
-            className="text-black font-bold py-3 px-10 rounded-full bg-white text-lg" 
-            // style={{backgroundImage: 'linear-gradient(#FFFFFF00, #0099FF)'}}
+            className="text-black font-bold py-3 px-10 rounded-full bg-white text-lg inline-block"
           >
-            <Link href="https://discord.com/invite/5uaFhNpRF6" target="_blank"
-              rel="noopener noreferrer">
+            <Link href="https://discord.com/invite/5uaFhNpRF6" target="_blank" rel="noopener noreferrer">
               Run Your Node
             </Link>
           </motion.div>
-        </div>
-      </div>
-            {/* <img src="/mapRegions.png"/> */}
-        <div className="map-page" style={{ height: '100vh', width: '100vw' }}>
-  
-          <div className="map-controls" style={{ position: 'absolute', top: 10, left: 10, zIndex: 1000 }}>
-            </div>
-          <div className="map-container" style={{ height: '100%', width: '100%' }}>
-              <DvpnMap nodes={nodes} />
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1, transition: { duration: 1 } }}
+            className="text-white font-bold py-3 px-10 rounded-full bg-[#5696FF] text-lg inline-block cursor-pointer"
+            onClick={scrollToMap}
+          >
+           < EnvironmentOutlined   className="inline-block mr-2 animate-bounce duration-1000 ease-in-out" /> Active Node Map
+          </motion.div>
           </div>
         </div>
-
-        <NodesData />
       </div>
-    )
+
+      <div className="pt-16 px-4 lg:px-20 bg-gradient-to-b from-[#20253A] to-[#20253A]">
+        <div className="text-2xl font-semibold text-gray-300 mb-8">
+          Erebrus Decentralized VPN (ÐVPN) Network Nodes Overview
+        </div>
+        <div className="text-white">
+          <p>
+            Explore the Erebrus decentralized VPN network with our interactive map. View detailed information on active nodes, including their location, network performance, and status. This map provides real-time insights into the global distribution and operation of our secure and private VPN infrastructure.
+          </p>
+        </div>
+      </div>
+
+      <div ref={mapRef} className="map-page" style={{ height: '100vh' }}>
+        <div className="map-container" style={{ height: '100%', width: '100%' }}>
+          <DvpnMap nodes={nodes} />
+        </div>
+      </div>
+
+      <NodesData />
+    </div>
+  );
 }
 
 export default Explorer;

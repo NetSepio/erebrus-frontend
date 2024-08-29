@@ -150,7 +150,7 @@ export default function Home() {
         Unleash the power of future internet with our ÐVPN and ÐWi-Fi 
         </p>
       </motion.h1>
-      <div className="lg:flex md:flex lg:space-x-4 md:space-x-4 w-3/5 mr-auto lg:gap-10 md:gap-10 gap-0">
+      <div className="lg:flex md:flex lg:space-x-4 md:space-x-4 w-3/5 mr-auto lg:gap-5 md:gap-10 gap-0">
         <motion.div
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1, transition: { duration: 1 } }}

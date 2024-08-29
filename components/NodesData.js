@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react"; 
 import axios from "axios";
+import { FilterOutlined, SortAscendingOutlined } from '@ant-design/icons';
 import Cookies from "js-cookie";
 
 const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_BASE_URL;
@@ -17,7 +18,8 @@ const NodesData = () => {
   const filterRef = useRef(null);
   const [sortBy, setSortBy] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-  
+  const [sortByDisplay, setSortByDisplay] = useState("");
+ 
   
 
   useEffect(() => {
@@ -48,6 +50,13 @@ const NodesData = () => {
     setShowFilters(false);
   };
 
+  const sortOptions = {
+    name: "Name",
+    status: "Status",
+    region: "Region",
+    networkSpeed: "Network Speed"
+  };
+
   const handleSort = (key) => {
     console.log("in handle sort ")
     setSortConfig((prevConfig) => {
@@ -61,21 +70,19 @@ const NodesData = () => {
   };
   
   const handleSortChange = (value) => {
-    console.log("in handle sort chnage ")
+    console.log("in handle sort change ");
     
     if (value) {
-      
       handleSort(value);
-      console.log("in handle sort chnage done ", )
+      console.log("in handle sort change done ");
       setSortBy(value);
+      setSortByDisplay(sortOptions[value]);
       setTimeout(() => {
         setIsOpen(false);
       }, 100);
-      
     }
- 
-    
   };
+  
   
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -99,7 +106,7 @@ const NodesData = () => {
   const fetchNodesData = async () => {
     try {
       const response = await axios.get(
-       ` ${EREBRUS_GATEWAY_URL}api/v1.0/nodes/all`,
+       `https://gateway.erebrus.io/api/v1.0/nodes/all`,
         {
           headers: {
             Accept: "application/json, text/plain, /",
@@ -199,7 +206,7 @@ const NodesData = () => {
   };
 
   const handleRowClick = (id) => {
-    `window.location.href = /nodeinfo/${id}`;
+    window.location.href = `/nodeinfo/${id}`;
   };
 
   return (
@@ -249,7 +256,7 @@ const NodesData = () => {
     onClick={() => setShowFilters(!showFilters)}
     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-12 rounded"
   >
-    {statusFilter !== 'all' || regionFilter !== 'all' || chainFilter !== 'all' ? 'Filters Applied' : 'Filters'}
+    <FilterOutlined /> {statusFilter !== 'all' || regionFilter !== 'all' || chainFilter !== 'all' ? 'Filters Applied' : 'Filter'}
   </button>
   {showFilters && (
     <div className="absolute right-0 mt-2 w-48 bg-blue-500 rounded-md shadow-lg z-10">
@@ -297,21 +304,12 @@ const NodesData = () => {
  
 
 
-<div className="relative inline-block text-left w-[30vh]">
+<div className="relative inline-block text-left min-w-[30vh] ">
       <button
         onClick={toggleDropdown}
-        className="inline-flex justify-center w-full rounded-md   shadow-sm px-4 py-2 bg-blue-500 text-md font-medium text-white hover:bg-blue-700"
-      >
-        Sort by: {sortBy || 'Select'}
-        <svg
-          className={`-mr-1 ml-2 h-5 w-5 transform transition-transform ${
-            isOpen ? 'rotate-180' : 'rotate-0'
-          }`}
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          aria-hidden="true"
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-12 rounded inline-flex items-center"
         >
+       <SortAscendingOutlined />  { sortByDisplay || ' Sort'} <svg className={`-mr-1 ml-2 h-5 w-5 transform transition-transform ${ isOpen ? 'rotate-180' : 'rotate-0' }`}  xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 20 20"  fill="currentColor"  aria-hidden="true">
           <path
             fillRule="evenodd"
             d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0l-4.25-4.25a.75.75 0 01.02-1.06z"
@@ -413,7 +411,23 @@ const NodesData = () => {
               </tr>
             </thead>
               <tbody>
-              {filteredNodesData.map((node) => (
+              {nodesdata.length === 0 ? (
+                <tr className="table-row" style={{ height: "60px" }}>
+                  <td
+                    colSpan="8" 
+                    style={{ 
+                      textAlign: "center",
+                      border: "solid 1px #FFFFFF66",
+                      padding: "16px" 
+                    }}
+                  >
+                    <div className="flex justify-center items-center py-2 px-4">
+                      No Nodes Available
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+              filteredNodesData.map((node) => (
                 <tr
                   key={node.id}
                   className={`table-row cursor-pointer ${
@@ -473,7 +487,8 @@ const NodesData = () => {
                   </td>
                   {/* <td style={{paddingTop:'20px'}}>{node.lastPinged}</td> */}
                 </tr>
-              ))}
+              ))
+              )}
             </tbody>
             </table>
           </div>

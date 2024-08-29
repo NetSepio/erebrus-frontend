@@ -78,7 +78,7 @@ const Mint = () => {
     const [displayText, setDisplayText] = useState('Only at 1.11 APT');
     const [displayText2, setDisplayText2] = useState('Pay in APT');
     const [imageSrc, setImageSrc] = useState('/mintApt.png');
-    const [imageSrc2, setImageSrc2] = useState('/nft_aptos.png');
+    const [imageSrc2, setImageSrc2] = useState('/mint/nft_aptos.jpeg');
 
     const chain = Cookies.get('Chain_symbol');
   
@@ -311,144 +311,82 @@ const Mint = () => {
       </Head>
 
       {mintpage === "page1" && (
-        <div style={{backgroundColor: '#040819'}}>
-          <div className="p-20">
-            <div
-              className="text-white text-5xl leading-normal"
-              style={{
-                marginLeft: "10vh",
-                marginRight: "10vh",
-                fontFamily: 'sans-serif',
-              }}
-            >
-              Mint Your VPN NFT, Secure, Private, 
-              {" "}<br></br>
-              <span >Exclusive</span>
-            </div>
-
-            {/* <div
-          className="absolute w-50vw inset-0 h-full opacity-30 lg:bg-[radial-gradient(ellipse_at_center,#0262FF,#040819_30%,#080d1f_100%)] md:bg-[radial-gradient(circle_at_top,#0262FF,#040819_30%,#080d1f_100%)] bg-[radial-gradient(circle_at_center,#0262FF,#040819_30%,#080d1f_100%)]"
-          style={{ transform: "scale(2.0)" }}
-        ></div> */}
-
-            <div class="flex justify-center gap-20 m-10 z-20" 
-            style={{backgroundColor:'#202333', marginLeft: "10vh", marginRight: "10vh"}}>
-              <div
-                className="text-white w-1/2"
-              >
-                <img
-                  src={imageSrc2}
-                />
-              </div>
-              <div className="w-1/2 mt-10" >
-                <div className="text-white text-xl mt-10 mx-auto flex gap-2">
-                  <img src="/uis_calender.png" className="w-6 h-6 mt-1" />
-                  <div>3-Month Coverage</div>
-                </div>
-                <div className="text-white text-xl mt-4 mx-auto flex gap-2">
-                  <img src="/mdi_users.png" className="w-6 h-6 mt-1" />
-                  <div>Unlimited Clients</div>
-                </div>
-                <div className="text-white text-xl mt-4 mx-auto flex gap-2">
-                  <img
-                    src="/icomoon-free_price-tags.png"
-                    className="w-6 h-6 mt-1"
-                  />
-                  <div>{displayText}<span className="text-[18px]">{ chain === 'apt' ? "" : "($5.99)"}</span></div>
-                </div>
-                <div className="text-white text-xl mt-4 mx-auto flex gap-2">
-                  <img
-                    src="/wpf_security-checked.png"
-                    className="w-6 h-6 mt-1"
-                  />
-                  <div>Exceptional Value for Unmatched Security</div>
-                </div>
-
-                {/* <div className="flex gap-10 mt-10">
-                  <div
-                    className="text-white text-md rounded-full py-3 px-10"
-                    style={{ border: "1px solid #0162FF" }}
-                  >
-                    <span className="font-bold text-2xl mr-4">
-                      {totalNFTMinted ? totalNFTMinted.length : ""}
-                    </span>{" "}
-                    Minted NFTs
-                  </div>
-                  <div
-                    className="text-white text-md rounded-full py-3 px-14"
-                    style={{ border: "1px solid #0162FF" }}
-                  >
-                    <span className="font-bold text-2xl mr-4">
-                      {totalNFTMinted ? `${111 - totalNFTMinted.length}` : ""}
-                    </span>{" "}
-                    NFTs Left
-                  </div>
-                </div> */}
-
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={transition}
-                >
-                  <div className="mt-10 text-white flex flex-col justify-center items-center">
-                    {isLoadingTx ? (
-                      <div className="animate-spin text-white text-7xl">⛏</div>
-                    ) : (
-                      <>
-                        {/* {!isSignedIn || !isauthenticate ? (
-                      <div className="text-white font-bold py-4 px-10 rounded-lg mr-auto ml-10 -mt-10">
-                        {!connected && (
-                          <button className="">
-                            <WalletSelectorAntDesign />
-                          </button>
-                        )}
-                        {connected && (
-                          // <SingleSignerTransaction isSendableNetwork={isSendableNetwork} />
-                          <Button
-                            color={"blue"}
-                            onClick={onSignMessage}
-                            disabled={!sendable}
-                            message={"Authenticate"}
-                          />
-                        )}
-                      </div>
-                    ) : ( */}
-                        <div className="mr-auto">
-                          <div className="text-orange-300 text-sm mb-2">
-                            (one wallet address can only mint one)
-                          </div>
-                          {buttonblur ? (
-                            <div
-                              className={`text-white font-bold py-4 px-10 rounded-full mr-auto bg-blue-300`}
-                            >
-                              Mint Erebrus NFT
-                            </div>
-                          ) : (
-                            <button
-                              className={`text-white font-bold py-4 px-10 rounded-full mr-auto `}
-                              onClick={() => {
-                                setmintpage("page2");
-                              }}
-                              style={{ backgroundColor: "#0162FF" }}
-                            >
-                              Mint Erebrus NFT
-                            </button>
-                          )}
-                        </div>
-                        {/* )} */}
-
-                        {error && (
-                          <div className="text-red-500 mt-4">{error}</div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </motion.div>
-              </div>
-            </div>
-          </div>
-        </div>
+       <div className="bg-[#040819]">
+       <div className="p-6 sm:p-10 lg:p-20">
+         <div
+           className="text-white text-3xl sm:text-4xl md:text-5xl leading-normal mx-auto lg:ml-10"
+           style={{ fontFamily: 'sans-serif' }}
+         >
+           Mint Your VPN NFT, Secure, Private, <br />
+           Exclusive
+         </div>
+     
+         <div
+           className="flex flex-col lg:flex-row justify-center gap-8 lg:gap-20 m-6 lg:m-10 bg-[#202333] mx-auto rounded-lg shadow-lg"
+         >
+           <div className="w-full lg:w-1/2 flex justify-center items-center p-4">
+             <img src={imageSrc2} alt="VPN NFT" className="max-w-full h-auto" />
+           </div>
+           <div className="w-full lg:w-1/2 mt-20 flex flex-col gap-8">
+             <div className="text-white text-base sm:text-xl lg:text-2xl flex items-center gap-2 ">
+               <img src="/uis_calender.png" className="w-6 h-6" alt="Calendar" />
+               <div>3-Month Coverage</div>
+             </div>
+             <div className="text-white text-base sm:text-xl lg:text-2xl flex items-center gap-2">
+               <img src="/mdi_users.png" className="w-6 h-6" alt="Users" />
+               <div>Unlimited Clients</div>
+             </div>
+             <div className="text-white text-base sm:text-xl lg:text-2xl  flex items-center gap-2">
+               <img src="/icomoon-free_price-tags.png" className="w-6 h-6" alt="Price Tags" />
+               <div>
+                 {displayText}<span className="text-[16px] sm:text-[18px]">{chain === 'apt' ? "" : "($5.99)"}</span>
+               </div>
+             </div>
+             <div className="text-white text-base sm:text-xl lg:text-2xl  flex items-center gap-2">
+               <img src="/wpf_security-checked.png" className="w-6 h-6" alt="Security Checked" />
+               <div>Exceptional Value for Unmatched Security</div>
+             </div>
+     
+             <motion.div
+               initial={{ opacity: 0 }}
+               animate={{ opacity: 1 }}
+               exit={{ opacity: 0 }}
+               transition={transition}
+               className="mt-6 sm:mt-10 flex flex-col lg:items-start items-center"
+             >
+               {isLoadingTx ? (
+                 <div className="animate-spin text-white text-5xl sm:text-7xl">⛏</div>
+               ) : (
+                 <>
+                   <div className=" lg:text-start text-center">
+                     <div className="text-orange-300 text-xs sm:text-sm mb-2">
+                       (one wallet address can only mint one)
+                     </div>
+                     {buttonblur ? (
+                       <div className="text-white font-bold py-3 px-6 rounded-full bg-blue-300 mx-auto">
+                         Mint Erebrus NFT
+                       </div>
+                     ) : (
+                       <button
+                         className="text-white font-bold py-3 px-6 rounded-full mx-auto"
+                         onClick={() => setmintpage("page2")}
+                         style={{ backgroundColor: "#0162FF" }}
+                       >
+                         Mint Erebrus NFT
+                       </button>
+                     )}
+                   </div>
+                   {error && (
+                     <div className="text-red-500 mt-4 text-center">{error}</div>
+                   )}
+                 </>
+               )}
+             </motion.div>
+           </div>
+         </div>
+       </div>
+     </div>
+     
       )}
 
       {mintpage === "page2" && (
@@ -469,12 +407,14 @@ const Mint = () => {
               className="w-60 -mt-10 absolute -top-10 -left-20"
             />
             <div
-              className="relative rounded-3xl shadow dark:bg-gray-700 bgcolor pb-20"
-              style={{
-                border: "1px solid #0162FF",
-                boxShadow: "inset -10px -10px 60px 0 rgba(255, 255, 255, 0.4)",
-              }}
-            >
+  className="relative rounded-3xl shadow dark:bg-gray-700 pb-20"
+  style={{
+    border: "1px solid #0162FF",
+    background: "radial-gradient(89.33% 117.45% at 7.79% 5.87%, rgba(1, 98, 255, 0.52) 0%, rgba(1, 98, 255, 0.05) 100%)",
+    boxShadow: "0px 11px 62px rgba(21, 169, 234, 0.2), inset -12px 12px 26.8px rgba(0, 0, 0, 0.13)",
+    backdropFilter: "blur(12.5px)"
+  }}
+>
               <div
                 className="flex items-center justify-end px-4 py-6 rounded-t"
                 style={{ borderBottom: "1px solid #FFFFFF80" }}
@@ -543,17 +483,6 @@ const Mint = () => {
                 )}
               </div>
 
-              {/* { !showconnectbutton && (<div className="flex items-center pb-20 pt-10 rounded-b w-1/2 mx-auto">
-                              <button
-                                onClick={stripe}
-                                style={{ border: "1px solid #0162FF" }}
-                                type="button"
-                                className="flex w-full text-white font-bold focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-md text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                              >
-                                <img src="/mint3.png" className="w-12"/>
-                                <div className="px-5 py-2.5 ">Pay in USD</div>
-                              </button>
-                            </div>)} */}
             </div>
             <img
               src="/coin2.png"
@@ -620,16 +549,16 @@ const Mint = () => {
                 </button>
               </div>
 
-              <img src="/mint.png" className="mx-auto" />
+              <img src="/mint.png" className="mx-auto w-[24vh] h-[24vh]" />
 
               <div className="p-4 md:p-5 space-y-4">
                 <p className="text-2xl text-center font-semibold text-white">
                   Congratulations
                 </p>
+                
                 <p className="text-md text-center w-full mx-auto text-white">
-                  You have minted your Erebrus NFT, welcome to an exclusive
-                  journey of innovation and community. To set clients, click
-                  button to go to subscription page.
+                  {/* eslint-disable-next-line */}
+                You've minted your Erebrus NFT, Want to create VPN clients? Click View Subscription
                 </p>
               </div>
 

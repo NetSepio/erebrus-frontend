@@ -11,6 +11,8 @@ import { lib, enc } from "crypto-js";
 import { generateKeyPair } from "curve25519-js";
 import { Network } from "@aptos-labs/ts-sdk";
 import Button from "../components/Button";
+import { useRouter } from "next/router";
+import Image from "next/image";
 import SingleSignerTransaction from "../components/transactionFlow/SingleSigner";
 const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
 const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_BASE_URL;
@@ -68,9 +70,9 @@ const Subscription = () => {
   const [valueFromChild2, setValueFromChild2] = useState<string>("");
   const [note, setnote] = useState<boolean>(true);
   const [trialsubscriptiondata, settrialsubscriptiondata] = useState<any>(null);
-
+  const [selectedIndex, setSelectedIndex] = useState(null);
   const { account, connected, network, signMessage } = useWallet();
-
+  const router = useRouter();
   let sendable = isSendableNetwork(connected, network?.name);
 
   const bg = {
@@ -229,6 +231,31 @@ const Subscription = () => {
     }
   };
 
+  const [isDataChecked, setIsDataChecked] = useState(false);
+  const loggedin = Cookies.get("erebrus_token");
+  const wallet = Cookies.get("erebrus_wallet");
+
+  useEffect(() => {
+    if (loggedin &&!loading && isDataChecked && !nftdata && !trialsubscriptiondata) {
+      const redirectTimer = setTimeout(() => {
+        router.push("/plans");
+      }, 1000); // 1 second delay
+
+      // Cleanup the timer if the component unmounts
+      return () => clearTimeout(redirectTimer);
+    }
+  }, [nftdata, trialsubscriptiondata, loading, isDataChecked]);
+
+  useEffect(() => {
+    if (
+      !loading &&
+      nftdata !== undefined &&
+      trialsubscriptiondata !== undefined
+    ) {
+      setIsDataChecked(true);
+    }
+  }, [loading, nftdata, trialsubscriptiondata]);
+
   useEffect(() => {
     const fetchProjectsData = async () => {
       setLoading(true);
@@ -269,6 +296,7 @@ const Subscription = () => {
         setLoading(false);
       }
     };
+    
 
     const vpnnft = async () => {
       setLoading(true);
@@ -378,8 +406,7 @@ const Subscription = () => {
   //   setregion(e.target.value);
   // };
 
-  const loggedin = Cookies.get("erebrus_token");
-  const wallet = Cookies.get("erebrus_wallet");
+
 
   const getAptosWallet = () => {
     if ("aptos" in window) {
@@ -712,8 +739,8 @@ const Subscription = () => {
   if (!loggedin) {
     return (
       <>
-      <div className="min-h-screen bg-[url('/subscriptionbg.png')] bg-cover flex flex-col justify-center items-center">
-      <div className="text-white bg-transparent  font-medium text-4xl text-center">
+        <div className="min-h-screen bg-[url('/subscriptionbg.png')] bg-cover flex flex-col justify-center items-center">
+          <div className="text-white bg-transparent  font-medium text-4xl text-center">
             Subscribe and Unlock Full Access <br></br>
             Log in to Get Started
           </div>
@@ -728,7 +755,7 @@ const Subscription = () => {
               <button className="">
                 {/* <WalletSelectorAntDesign /> */}
                 {/* <h1 className="text-[#9999] text-2xl">PLEASE LOGIN FIRST</h1> */}
-                  <button
+                <button
                   className="bg-white text-black font-bold py-3 px-10 rounded-3xl mx-auto flex justify-center mt-10"
                   onClick={connectWallet}
                 >
@@ -762,7 +789,7 @@ const Subscription = () => {
                 <div className="text-2xl text-white font-semibold text-left ml-4 my-6 border-b border-gray-700 pb-4">
                   Subscription
                 </div>
-                {!nftdata && !trialsubscriptiondata && !loading && (
+                {/* {!nftdata && !trialsubscriptiondata && !loading && (
                   <div className="mx-auto px-4 min-h-screen">
                     <div className="w-full text-center py-20">
                       <h2 className="text-4xl font-bold text-white">
@@ -773,7 +800,7 @@ const Subscription = () => {
                       </div>
                     </div>
                   </div>
-                )}
+                )} */}
 
                 {loading && (
                   <div
@@ -810,7 +837,7 @@ const Subscription = () => {
 
                   {trialsubscriptiondata && (
                     <div
-                      className="w-1/2 rounded-3xl mt-2 mb-2 relative min-h-96"
+                      className="lg:w-1/2  w-3/4 absolute rounded-3xl mt-2 mb-2 lg:relative min-h-96"
                       style={{
                         backgroundColor: "#202333",
                         border: "1px solid #0162FF",
@@ -822,15 +849,29 @@ const Subscription = () => {
                             <div className="w-full">
                               <h3 className="leading-12 mb-2 text-white">
                                 <div className="text-lg font-semibold mt-4 uppercase">
-                                  {/* {trialsubscriptiondata.subscription.type}{" "} */}
+                                  {trialsubscriptiondata.subscription.type}{" "}
                                   Subscription
                                 </div>
-                                <div className="lg:flex md:flex justify-between">
-                                  <div className="text-md font-semibold mt-4">
-                                    Status: {trialsubscriptiondata.status}
+                                <div className="lg:flex md:flex justify-between ">
+                                  <div className="text-md font-semibold mt-4 capitalize">
+                                    Status :{" "}
+                                    <span
+                                      className={
+                                        trialsubscriptiondata.status ===
+                                        "active"
+                                          ? "text-green-500"
+                                          : "text-red-500"
+                                      }
+                                    >
+                                      {trialsubscriptiondata.status
+                                        .charAt(0)
+                                        .toUpperCase() +
+                                        trialsubscriptiondata.status.slice(1)}
+                                    </span>
                                   </div>
-                                  <div className="text-md font-semibold mt-4">
-                                    Valid for 30 days
+
+                                  <div className="text-md font-light mt-4 ml-1">
+                                    (Valid for 7 days)
                                   </div>
                                 </div>
                               </h3>
@@ -838,7 +879,7 @@ const Subscription = () => {
                               <div className="rounded-xl">
                                 <div className="text-sm text-white text-start mt-2">
                                   <div className="mb-3">
-                                    <span className="text-green-500 ">
+                                    <span className="text-white ">
                                       Start time :
                                     </span>{" "}
                                     {trialsubscriptiondata.subscription
@@ -850,17 +891,15 @@ const Subscription = () => {
                                       : "Loading..."}
                                   </div>
                                   <div className="">
-                                    <span className="text-red-500 ">
+                                    <span className="text-white">
                                       End time :
                                     </span>{" "}
-                                    {/* {trialsubscriptiondata.subscription.endTime
+                                    {trialsubscriptiondata.subscription.endTime
                                       ? formatDateTime(
                                           trialsubscriptiondata.subscription
                                             .endTime
                                         )
-                                      : "Loading..."} */}
-                                      23 August 2024 23:43:34
-
+                                      : "Loading..."}
                                   </div>
                                 </div>
                               </div>
@@ -893,39 +932,38 @@ const Subscription = () => {
                     <span className="text-white">My VPN Clients</span>
                   </h1>
 
-                  <h1 className="flex justify-between gap-4 mb-8 ml-6 mt-0 text-start text-lg font-semibold leading-none tracking-normal text-gray-100 md:text-xl md:tracking-tight">
-                    <div className="text-left text-white mt-4 flex gap-4">
+                  <h1 className="flex flex-col md:flex-row justify-between gap-4 mb-8 ml-6 mt-0 text-start text-lg font-semibold leading-none tracking-normal text-gray-100 md:text-xl md:tracking-tight">
+                    <div className="text-left text-white mt-4 flex gap-4 items-center">
                       {imageSrc ? (
                         <img
                           src={`${"https://nftstorage.link/ipfs"}/${imageSrc}`}
-                          className="w-14 rounded-full"
+                          className="w-14 h-14 rounded-full"
                         />
                       ) : (
                         <img
-                          src="https://img.freepik.com/premium-vector/virtual-private-network-secure-vpn-connection-concept-vector-sign-symbol_660702-458.jpg"
-                          className="w-14 rounded-full"
+                          src="subscriptionprofile.png"
+                          className="w-14 h-14 rounded-full"
                         />
                       )}
-                      <div className="mt-2">
+                      <div className="mt-2 md:mt-0">
                         Name -{" "}
                         {collectionName ? collectionName : "Trial Subscription"}
                       </div>
                     </div>
 
-                    <div className="text-white mr-40 mt-6">
+                    <div className="text-white mt-4 md:mt-6 md:mr-40 flex justify-end">
                       <button
                         style={{ border: "1px solid #0162FF" }}
                         onClick={() => {
                           setcollectionsPage(true);
                           setvpnPage(false);
                         }}
-                        className="px-4 py-3 text-xs font-semibold rounded-full w-full"
+                        className="px-4 py-3 text-xs font-semibold rounded-full w-full md:w-auto"
                       >
                         View Subscriptions
                       </button>
                     </div>
                   </h1>
-
                   {buttonset && (
                     <>
                       <div
@@ -935,7 +973,7 @@ const Subscription = () => {
                       >
                         <div className="relative p-4 w-full max-w-2xl max-h-full">
                           <div
-                            className="relative rounded-3xl shadow dark:bg-gray-700 rounded-3xl mx-auto w-3/4"
+                            className="relative rounded-3xl shadow dark:bg-gray-700 mx-auto w-full lg:w-3/4"
                             style={{
                               backgroundColor: "#202333",
                               border: "1px solid #0162FF",
@@ -958,19 +996,19 @@ const Subscription = () => {
                                 >
                                   <path
                                     stroke="currentColor"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
                                     d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
                                   />
                                 </svg>
                                 <span className="sr-only">Close modal</span>
                               </button>
                             </div>
-                            <section className="">
+                            <section>
                               <div className="mx-auto max-w-3xl">
-                                <div className="w-full mx-auto text-left px-10 pb-10">
-                                  <h1 className="text-4xl font-semibold leading-none tracking-normal text-gray-100 md:text-3xl md:tracking-tight">
+                                <div className="w-full mx-auto text-left px-6 md:px-10 pb-6 md:pb-10">
+                                  <h1 className="text-2xl md:text-4xl font-semibold leading-none tracking-normal text-gray-100 md:tracking-tight">
                                     <span className="text-white text-center">
                                       Create your client
                                     </span>
@@ -978,27 +1016,28 @@ const Subscription = () => {
 
                                   <form
                                     id="myForm"
-                                    className="rounded pt-10"
+                                    className="rounded pt-6 md:pt-10"
                                     onSubmit={handleSubmit}
                                   >
-                                    <div className="mb-10">
-                                      <div className="">
+                                    <div className="mb-6 md:mb-10">
+                                      <div>
                                         <div className="mb-4 w-full">
                                           <input
                                             type="text"
                                             id="name"
-                                            className="shadow border border-gray-300 rounded-full w-full py-4 px-6 text-gray-900 leading-tight focus:outline-none focus:shadow-outline"
-                                            placeholder="Name"
+                                            className="shadow border border-gray-300 rounded-full w-full py-3 md:py-4 px-4 md:px-6 text-gray-900 leading-tight focus:outline-none focus:shadow-outline"
+                                            placeholder="Enter Client Name (Max 8 characters)"
                                             value={formData.name}
                                             onChange={handleInputChange}
+                                            maxLength={8} // Limits input to 8 characters
                                             required
                                           />
                                         </div>
 
-                                        <div className="mb-4 w-full">
+                                        <div className="mb-4 w-full relative">
                                           <select
                                             id="regionname"
-                                            className="shadow border border-gray-300 rounded-full w-full py-4 px-6 text-gray-900 leading-tight focus:outline-none focus:shadow-outline"
+                                            className="shadow border border-gray-300 rounded-full w-full py-3 md:py-4 px-4 md:px-6 text-gray-900 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out appearance-none"
                                             value={regionname}
                                             onChange={handleRegionChange}
                                             required
@@ -1009,7 +1048,6 @@ const Subscription = () => {
                                             >
                                               Select Region
                                             </option>
-
                                             {regiondata.map((node) => (
                                               <option
                                                 key={node.id}
@@ -1020,20 +1058,67 @@ const Subscription = () => {
                                               </option>
                                             ))}
                                           </select>
+                                          <svg
+                                            className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                          >
+                                            <path
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              strokeWidth="2"
+                                              d="M19 9l-7 7-7-7"
+                                            />
+                                          </svg>
                                         </div>
 
                                         <div className="mb-4 w-full relative">
                                           <div
-                                            className="p-4 bg-white border border-gray-300 rounded-full cursor-pointer"
+                                            className="p-4 bg-white border border-gray-300 rounded-full cursor-pointer flex items-center justify-between shadow hover:shadow-lg transition duration-150 ease-in-out"
                                             onClick={handleDropdownToggle}
                                           >
-                                            {selectedOption
-                                              ? sliceNodeId(selectedOption.id)
-                                              : "Select Node ID"}
+                                            {selectedOption ? (
+                                              <div className="flex items-center">
+                                                <span className="mr-2">
+                                                  {generateSerialNumber(
+                                                    regionname,
+                                                    selectedIndex
+                                                  )}
+                                                  -
+                                                </span>
+                                                <span>
+                                                  {sliceNodeId(
+                                                    selectedOption.id
+                                                  )}
+                                                </span>
+                                              </div>
+                                            ) : (
+                                              "Select Node ID"
+                                            )}
+                                            <svg
+                                              className={`w-5 h-5 transform transition-transform ${
+                                                isOpen
+                                                  ? "rotate-180"
+                                                  : "rotate-0"
+                                              }`}
+                                              fill="none"
+                                              stroke="currentColor"
+                                              viewBox="0 0 24 24"
+                                              xmlns="http://www.w3.org/2000/svg"
+                                            >
+                                              <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2"
+                                                d="M19 9l-7 7-7-7"
+                                              />
+                                            </svg>
                                           </div>
                                           {isOpen && (
-                                            <div className="absolute w-full mt-1 max-h-60 overflow-y-auto bg-white border border-gray-300 rounded-lg shadow-lg z-10">
-                                              <div className="grid grid-cols-4 p-2 font-bold bg-gray-200">
+                                            <div className="absolute w-full mt-2 max-h-60 overflow-y-auto bg-white border border-gray-300 rounded-lg shadow-lg z-10">
+                                              <div className="grid grid-cols-4 p-2 font-bold bg-gray-200 text-gray-700">
                                                 <div>S.No</div>
                                                 <div>Node ID</div>
                                                 <div>Wallet Address</div>
@@ -1047,10 +1132,11 @@ const Subscription = () => {
                                                 .map((option, index) => (
                                                   <div
                                                     key={option.id}
-                                                    className="grid grid-cols-4 p-2 cursor-pointer hover:bg-gray-100"
-                                                    onClick={() =>
-                                                      handleOptionClick(option)
-                                                    }
+                                                    className="grid grid-cols-4 p-2 cursor-pointer hover:bg-gray-100 transition duration-150 ease-in-out"
+                                                    onClick={() => {
+                                                      handleOptionClick(option);
+                                                      setSelectedIndex(index); // Store the selected index
+                                                    }}
                                                   >
                                                     <div>
                                                       {generateSerialNumber(
@@ -1077,7 +1163,7 @@ const Subscription = () => {
                                       </div>
 
                                       <div className="flex-col gap-4 mr-4">
-                                        <div className="text-center w-1/2 mt-10 mx-auto">
+                                        <div className="text-center w-full md:w-1/2 mt-6 md:mt-10 mx-auto">
                                           <div className="mb-4 md:mb-8">
                                             <button
                                               style={{
@@ -1112,25 +1198,25 @@ const Subscription = () => {
                     >
                       <div className="relative p-4 w-full max-w-2xl max-h-full">
                         <div
-                          className="relative rounded-3xl shadow dark:bg-gray-700 w-3/4 mx-auto"
+                          className="relative rounded-3xl shadow dark:bg-gray-700 w-full max-w-lg mx-auto"
                           style={{
                             backgroundColor: "#202333",
                             border: "1px solid #0162FF",
                           }}
                         >
                           <div className="py-4 space-y-4 mt-4">
-                            <p className="text-3xl text-center font-semibold text-white">
+                            <p className="text-3xl text-center font-semibold text-white mb-10">
                               Successfully created!
                             </p>
 
                             <div className="flex w-full flex-col items-center justify-center">
-                              <div className="bg-white mx-auto my-4 w-1/2 justify-center flex h-60 rounded-3xl">
-                                <div className="mt-4">
+                              <div className="bg-white lg:mx-auto lg:my-4 lg:w-1/2  lg:p-0 p-3 justify-center flex h-60 rounded-3xl">
+                                <div className="my-auto">
                                   <QRCode value={ConfigFile} size={200} />
                                 </div>
                               </div>
 
-                              <div className="text-center text-white text-sm w-2/3 mt-2">
+                              <div className="text-center text-white text-xs font-light  w-2/3 mt-2">
                                 Open{" "}
                                 <Link
                                   href="https://www.wireguard.com/"
@@ -1139,14 +1225,14 @@ const Subscription = () => {
                                 >
                                   WireGaurd
                                 </Link>
-                                &nbsp;app on mobile, scan the QR code to add a
-                                new connection, and instantly connect to Erebrus
-                                VPN.
+                                &nbsp;app on mobile, scan the QR code <br /> to
+                                add a new connection, and instantly connect to
+                                Erebrus VPN.
                               </div>
 
-                              <div className="flex gap-4">
+                              <div className="flex gap-4 w-3/4">
                                 <button
-                                  className="text-md rounded-lg text-white flex btn bg-blue-gray-700"
+                                  className="text-md rounded-lg text-white flex btn bg-blue-gray-700 flex-1"
                                   onClick={() => {
                                     const blob = new Blob([ConfigFile], {
                                       type: "text/plain;charset=utf-8",
@@ -1155,7 +1241,7 @@ const Subscription = () => {
                                   }}
                                 >
                                   <div
-                                    className="flex cursor-pointer p-2 rounded-full mt-4 gap-2 px-20"
+                                    className="flex cursor-pointer p-2 rounded-full mt-4 gap-2 justify-center w-full hover:opacity-80 mb-5"
                                     style={{
                                       backgroundColor: "#0162FF",
                                     }}
@@ -1166,21 +1252,22 @@ const Subscription = () => {
                                   </div>
                                 </button>
                               </div>
+
+                              <div className="flex items-center pb-10 rounded-b w-3/4">
+                                <button
+                                  style={button}
+                                  onClick={() => {
+                                    setbuttonset(false);
+                                    setverify(false);
+                                    setMsg("");
+                                  }}
+                                  type="button"
+                                  className="flex-1 text-white focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-sm px-5 py-2.5 text-center dark:bg-transparent dark:hover:opacity-80 dark:focus:ring-blue-800"
+                                >
+                                  My Clients
+                                </button>
+                              </div>
                             </div>
-                          </div>
-                          <div className="flex items-center pb-10 rounded-b w-1/2 mx-auto">
-                            <button
-                              style={button}
-                              onClick={() => {
-                                setbuttonset(false);
-                                setverify(false);
-                                setMsg("");
-                              }}
-                              type="button"
-                              className="w-full text-white focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                            >
-                              My VPN Clients
-                            </button>
                           </div>
                         </div>
                       </div>
@@ -1214,21 +1301,20 @@ const Subscription = () => {
                       <section className="pb-10 rounded-xl">
                         {
                           loading ? (
-                            // <Loader />
+                            
                             <div className="min-h-screen"></div>
                           ) : projectsData && projectsData?.length !== 0 ? (
-                            // (!dedicatedVpnData ||
-                            //   dedicatedVpnData?.length == 0) && (
-                            <div className="mx-6 -mt-20">
+                          
+                            <div className="mx-6 lg:-mt-20 ">
                               <div className="flex gap-4">
-                                <div className="ml-auto text-white">
+                                <div className="ml-auto text-white ">
                                   <button
                                     style={{
-                                      // border: "1px solid #11D9C5",
+                                   
                                       backgroundColor: "#0162FF",
                                     }}
                                     onClick={() => setbuttonset(true)}
-                                    className="px-4 py-3 mb-2 text-xs font-semibold rounded-full w-full sm:mb-0"
+                                    className="px-4 py-3 mb-2 text-xs font-semibold rounded-full lg:w-full mx-auto  "
                                   >
                                     Add More Clients
                                   </button>
@@ -1273,13 +1359,6 @@ const Subscription = () => {
                                   >
                                     Region
                                   </div>
-
-                                  {/* <div
-                                    className="text-lg text-center w-1/5"
-                                    style={text}
-                                  >
-                                    Logo
-                                  </div> */}
 
                                   <div
                                     className="text-lg flex justify-end w-1/4"
@@ -1351,30 +1430,27 @@ const Subscription = () => {
                             </div>
                           ) : (
                             <>
-                              <img
+                              <Image
                                 src="/create.png"
-                                className="mx-auto -mt-10"
+                                alt="Create"
+                                className="mx-auto lg:mt-5 mt-10 h-[200px] w-[200px] md:h-[250px] md:w-[250px]"
+                                width={500} // Set an appropriate width
+                                height={500} // Set an appropriate height
                               />
 
-                              <div className="p-2 md:p-5 space-y-4">
-                                <p className="text-2xl text-center font-semibold text-white">
-                                  Ready for Enhanced security? <br></br>
+                              <div className="p-4 md:p-5 space-y-4">
+                                <p className="text-lg md:text-2xl text-center font-semibold text-white">
+                                  Ready for Enhanced security? <br />
                                   Create Your VPN Client, Start Safe Surfing
                                   Today!
                                 </p>
-                                <p className="text-md text-center w-full mx-auto">
-                                  You have minted your Erebrus NFT, welcome to
-                                  an exclusive journey of innovation and
-                                  community. To set clients, click button to go
-                                  to subscription page.
-                                </p>
+
                                 <button
                                   style={{
-                                    // border: "1px solid #11D9C5",
                                     backgroundColor: "#0162FF",
                                   }}
                                   onClick={() => setbuttonset(true)}
-                                  className="py-4 text-md rounded-full w-1/6 text-white"
+                                  className="py-2 md:py-4 text-sm md:text-md rounded-full w-3/4 md:w-1/6 lg:mt-5 mx-auto block text-white"
                                 >
                                   Create Client now
                                 </button>

@@ -151,3 +151,7 @@ body {
     linear-gradient(0deg, #6ea3f9, #ffffff),
     linear-gradient(180deg, rgba(118, 224, 250, 0.5) 10%, rgba(57, 133, 255, 0.5) 100%);
 }
+.explorer-page {
+ 
+  background: linear-gradient(180deg, #040819 0%, #092187 21.62%, #20253A 36.5%);
+}
