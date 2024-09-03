@@ -1,5 +1,7 @@
 import React from "react";
-import DwifiMap from "../components/DwifiMap";
+import dynamic from 'next/dynamic';
+
+const DwifiMap = dynamic(() => import('../components/DwifiMap'), { ssr: false });
 
 const Scan = () => {
   return (
