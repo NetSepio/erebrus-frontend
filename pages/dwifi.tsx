@@ -74,7 +74,7 @@ const Dwifi = () => {
       </div>
       <div ref={mapRef} className="map-page" style={{ height: '100vh' }}>
         <div className="map-container" style={{ height: '100%', width: '100%' }}>
-          <DwifiMap />
+          <DwifiMap showCurrentLocation={ null } />
         </div>
       </div>
 
