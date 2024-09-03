@@ -1,8 +1,8 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
-import Link from "next/link";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 const NodeDwifiStreamUser = () => {
   const [data, setData] = useState([]);
@@ -72,6 +72,15 @@ const NodeDwifiStreamUser = () => {
     return (
       /* eslint-disable */
       <div className="bg-gray-900 text-white p-6 rounded-lg shadow-lg">
+        <div className="flex justify-between pb-3 items-center">
+          <h2 className="text-xl text-white font-semibold">
+            Scan To Explore The ÐWi-Fi Nodes Around You
+          </h2>
+          <button
+            className="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-500 transition duration-300"
+          ><Link href='/scan' >Scan</Link>
+          </button>
+        </div>
         <h1 className="text-3xl font-bold mb-6">DWifi Nodes Dashboard</h1>
         <div className="bg-gray-800 rounded-lg p-8 text-center">
           <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -97,8 +106,17 @@ const NodeDwifiStreamUser = () => {
   }
   return (
     <div className="bg-gray-900 text-white p-6 rounded-lg shadow-lg">
+      <div className="flex justify-between pb-3 items-center">
+        <h2 className="text-xl text-white font-semibold">
+          Scan To Explore The ÐWi-Fi Nodes Around You
+        </h2>
+        <button
+          className="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-500 transition duration-300"
+        >
+          <Link  href='/scan' >Scan</Link>
+        </button>
+      </div>
       <h1 className="text-3xl font-bold mb-6">DWifi Nodes Dashboard</h1>
-      
       <div className="overflow-x-auto">
         <table className="min-w-full bg-gray-800 rounded-lg overflow-hidden">
           <thead className="bg-gray-700">
