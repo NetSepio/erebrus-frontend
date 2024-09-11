@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ethers } from 'ethers';
 import contractABI from '../components/peaqabi/contractABI.json';
 
+
 const contractAddress = '0x5940445e1e8A419ebea10B45c5d1C0F603926F41';
 
 const NodeDwifiStreamUser = () => {
@@ -16,6 +17,7 @@ const NodeDwifiStreamUser = () => {
   const [error, setError] = useState(null);
   const [editingNode, setEditingNode] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [expandedLocations, setExpandedLocations] = useState({});
 
   useEffect(() => {
     checkConnection();
@@ -94,6 +96,13 @@ const NodeDwifiStreamUser = () => {
   const handleEdit = (node) => {
     setEditingNode(node);
   };
+  const toggleLocation = (id) => {
+    setExpandedLocations(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
 
   const handleSave = async (updatedNode) => {
     setError(null);
@@ -262,8 +271,26 @@ const NodeDwifiStreamUser = () => {
                       {item.isActive ? "Online" : "Offline"}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">{item.location}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{item.pricePerMinute} ETH</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {expandedLocations[item.id] ? (
+                      <span>{item.location}</span>
+                    ) : (
+                      <span>
+                        {item.location.length > 20
+                          ? `${item.location.slice(0, 20)}...`
+                          : item.location}
+                      </span>
+                    )}
+                    {item.location.length > 20 && (
+                      <button
+                        onClick={() => toggleLocation(item.id)}
+                        className="ml-2 text-blue-500 hover:text-blue-600"
+                      >
+                        {expandedLocations[item.id] ? 'Show less' : 'Show more'}
+                      </button>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.pricePerMinute} AGNG</td>
                   <td className="px-6 py-4 whitespace-nowrap">{new Date(item.connectedAt).toLocaleString()}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{new Date(item.lastChecked).toLocaleString()}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
