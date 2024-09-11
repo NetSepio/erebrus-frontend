@@ -1,0 +1,894 @@
+[
+    {
+      "type": "constructor",
+      "inputs": [
+        {
+          "name": "erebrusmanagerAddr",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "name": "AddAttribute",
+      "type": "event",
+      "inputs": [
+        {
+          "name": "sender",
+          "type": "address",
+          "indexed": false,
+          "internalType": "address"
+        },
+        {
+          "name": "did_account",
+          "type": "address",
+          "indexed": false,
+          "internalType": "address"
+        },
+        {
+          "name": "name",
+          "type": "bytes",
+          "indexed": false,
+          "internalType": "bytes"
+        },
+        {
+          "name": "value",
+          "type": "bytes",
+          "indexed": false,
+          "internalType": "bytes"
+        },
+        {
+          "name": "validity",
+          "type": "uint32",
+          "indexed": false,
+          "internalType": "uint32"
+        }
+      ],
+      "anonymous": false,
+      "constant": false,
+      "payable": false,
+      "signature": "0x13aef52bc4a99da04591533072e304017e3fb76f43e7fadd25eb7f514c5ef6e5"
+    },
+    {
+      "name": "NodeDeactivated",
+      "type": "event",
+      "inputs": [
+        {
+          "name": "operatorAddress",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        }
+      ],
+      "anonymous": false,
+      "constant": false,    
+      "payable": false,
+      "signature": "0xd9957750e6343405c319eb99a4ec67fa11cfd66969318cbc71aa2d45fa53a349"
+    },
+    {
+      "name": "NodeOperatorUpdated",
+      "type": "event",
+      "inputs": [
+        {
+          "name": "operatorAddress",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "ssid",
+          "type": "string",
+          "indexed": false,
+          "internalType": "string"
+        },
+        {
+          "name": "location",
+          "type": "string",
+          "indexed": false,
+          "internalType": "string"
+        }
+      ],
+      "anonymous": false,
+      "constant": false,    
+      "payable": false,
+      "signature": "0xf512e0b8ea262571de058d8b17a3c2d29913f35abcd4c173935ba6fa58b3833b"
+    },
+    {
+      "name": "RemoveAttribte",
+      "type": "event",
+      "inputs": [
+        {
+          "name": "did_account",
+          "type": "address",
+          "indexed": false,
+          "internalType": "address"
+        },
+        {
+          "name": "name",
+          "type": "bytes",
+          "indexed": false,
+          "internalType": "bytes"
+        }
+      ],
+      "anonymous": false,
+      "constant": false,    
+      "payable": false,
+      "signature": "0x647d95b9099b095e5957558106bc51df77720f963539a0ca62ee9948e6554da1"
+    },
+    {
+      "name": "UpdateAttribute",
+      "type": "event",
+      "inputs": [
+        {
+          "name": "sender",
+          "type": "address",
+          "indexed": false,
+          "internalType": "address"
+        },
+        {
+          "name": "did_account",
+          "type": "address",
+          "indexed": false,
+          "internalType": "address"
+        },
+        {
+          "name": "name",
+          "type": "bytes",
+          "indexed": false,
+          "internalType": "bytes"
+        },
+        {
+          "name": "value",
+          "type": "bytes",
+          "indexed": false,
+          "internalType": "bytes"
+        },
+        {
+          "name": "validity",
+          "type": "uint32",
+          "indexed": false,
+          "internalType": "uint32"
+        }
+      ],
+      "anonymous": false,
+      "constant": false,    
+      "payable": false,
+      "signature": "0x018be4d5e2634aefdb51c4ddd186f33072cfb5f6baf685579c2e214995dc9e4f"
+    },
+    {
+      "name": "VPNUpdated",
+      "type": "event",
+      "inputs": [
+        {
+          "name": "nodeId",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        },
+        {
+          "name": "updatedStatus",
+          "type": "uint8",
+          "indexed": false,
+          "internalType": "uint8"
+        },
+        {
+          "name": "updatedRegion",
+          "type": "string",
+          "indexed": false,
+          "internalType": "string"
+        }
+      ],
+      "anonymous": false,
+      "constant": false,    
+      "payable": false,
+      "signature": "0x34349e39780aaa7fc3b8b465ca9a2ada7a8a0a941e269b03102ad3867ff34b66"
+    },
+    {
+      "name": "VpnNodeRegistered",
+      "type": "event",
+      "inputs": [
+        {
+          "name": "nodeId",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        },
+        {
+          "name": "nodename",
+          "type": "string",
+          "indexed": false,
+          "internalType": "string"
+        },
+        {
+          "name": "ipaddress",
+          "type": "string",
+          "indexed": false,
+          "internalType": "string"
+        },
+        {
+          "name": "ispinfo",
+          "type": "string",
+          "indexed": false,
+          "internalType": "string"
+        },
+        {
+          "name": "region",
+          "type": "string",
+          "indexed": false,
+          "internalType": "string"
+        },
+        {
+          "name": "location",
+          "type": "string",
+          "indexed": false,
+          "internalType": "string"
+        }
+      ],
+      "anonymous": false,
+      "constant": false,    
+      "payable": false,
+      "signature": "0x9e6fb352d55d4e4414d6ec189c261105e99d8baba96bd55c43a2013e2ee9453b"
+    },
+    {
+      "name": "WifiNodeOperatorRegistered",
+      "type": "event",
+      "inputs": [
+        {
+          "name": "nodeID",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        },
+        {
+          "name": "owner",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "deviceId",
+          "type": "string",
+          "indexed": false,
+          "internalType": "string"
+        },
+        {
+          "name": "ssid",
+          "type": "string",
+          "indexed": false,
+          "internalType": "string"
+        },
+        {
+          "name": "location",
+          "type": "string",
+          "indexed": false,
+          "internalType": "string"
+        },
+        {
+          "name": "pricePerMinute",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        }
+      ],
+      "anonymous": false,
+      "constant": false,    
+      "payable": false,
+      "signature": "0x72ab8f8888d362028a5ec40836cefca72088b92b1ef7afc7fb795556b02d6658"
+    },
+    {
+      "name": "VpnDeviceCheckpoints",
+      "type": "function",
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "string",
+          "internalType": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "constant": true,
+      "payable": false,
+      "signature": "0xee5458b3"
+    },
+    {
+      "name": "addAttribute",
+      "type": "function",
+      "inputs": [
+        {
+          "name": "did_account",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "name",
+          "type": "bytes",
+          "internalType": "bytes"
+        },
+        {
+          "name": "value",
+          "type": "bytes",
+          "internalType": "bytes"
+        },
+        {
+          "name": "validity_for",
+          "type": "uint32",
+          "internalType": "uint32"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool",
+          "internalType": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "constant": false,    
+      "payable": false,
+      "signature": "0xcc4a70ca"
+    },
+    {
+      "name": "deactivateNode",
+      "type": "function",
+      "inputs": [
+        {
+          "name": "nodeID",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "constant": false,        
+      "payable": false,
+      "signature": "0xe9d63830"
+    },
+    {
+      "name": "didToUser",
+      "type": "function",
+      "inputs": [
+        {
+          "name": "",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "constant": true,
+      "payable": false,
+      "signature": "0xe4f4ff00"
+    },
+    {
+      "name": "getWifiDetails",
+      "type": "function",
+      "inputs": [
+        {
+          "name": "nodeID",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "price",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "owner",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "constant": true,
+      "payable": false,
+      "signature": "0x387f68e1"
+    },
+    {
+      "name": "readAttribute",
+      "type": "function",
+      "inputs": [
+        {
+          "name": "did_account",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "name",
+          "type": "bytes",
+          "internalType": "bytes"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "tuple",
+          "components": [
+            {
+              "name": "name",
+              "type": "bytes",
+              "internalType": "bytes"
+            },
+            {
+              "name": "value",
+              "type": "bytes",
+              "internalType": "bytes"
+            },
+            {
+              "name": "validity",
+              "type": "uint32",
+              "internalType": "uint32"
+            },
+            {
+              "name": "created",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "internalType": "struct DID.Attribute"
+        }
+      ],
+      "stateMutability": "view",
+      "constant": true,
+      "payable": false,
+      "signature": "0xb2028b7d"
+    },
+    {
+      "name": "registerVpnNode",
+      "type": "function",
+      "inputs": [
+        {
+          "name": "node",
+          "type": "tuple",
+          "components": [
+            {
+              "name": "user",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "peaqDid",
+              "type": "string",
+              "internalType": "string"
+            },
+            {
+              "name": "nodename",
+              "type": "string",
+              "internalType": "string"
+            },
+            {
+              "name": "ipaddress",
+              "type": "string",
+              "internalType": "string"
+            },
+            {
+              "name": "ispinfo",
+              "type": "string",
+              "internalType": "string"
+            },
+            {
+              "name": "region",
+              "type": "string",
+              "internalType": "string"
+            },
+            {
+              "name": "location",
+              "type": "string",
+              "internalType": "string"
+            },
+            {
+              "name": "status",
+              "type": "uint8",
+              "internalType": "uint8"
+            }
+          ],
+          "internalType": "struct ErebrusRegistry.VPNNode"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "constant": false,    
+      "payable": false,
+      "signature": "0xd04b7ae4"
+    },
+    {
+      "name": "registerWifiNode",
+      "type": "function",
+      "inputs": [
+        {
+          "name": "_deviceId",
+          "type": "string",
+          "internalType": "string"
+        },
+        {
+          "name": "_peaqDid",
+          "type": "string",
+          "internalType": "string"
+        },
+        {
+          "name": "_ssid",
+          "type": "string",
+          "internalType": "string"
+        },
+        {
+          "name": "_location",
+          "type": "string",
+          "internalType": "string"
+        },
+        {
+          "name": "_pricePermin",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "constant": false,    
+      "payable": false,
+      "signature": "0x04795f58"
+    },
+    {
+      "name": "removeAttribute",
+      "type": "function",
+      "inputs": [
+        {
+          "name": "did_account",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "name",
+          "type": "bytes",
+          "internalType": "bytes"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool",
+          "internalType": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "constant": false,    
+      "payable": false,
+      "signature": "0xe8a81690"
+    },
+    {
+      "name": "updateAttribute",
+      "type": "function",
+      "inputs": [
+        {
+          "name": "did_account",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "name",
+          "type": "bytes",
+          "internalType": "bytes"
+        },
+        {
+          "name": "value",
+          "type": "bytes",
+          "internalType": "bytes"
+        },
+        {
+          "name": "validity_for",
+          "type": "uint32",
+          "internalType": "uint32"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool",
+          "internalType": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "constant": false,    
+      "payable": false,
+      "signature": "0x68b4b2c1"
+    },
+    {
+      "name": "updateVPNNode",
+      "type": "function",
+      "inputs": [
+        {
+          "name": "nodeID",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "_status",
+          "type": "uint8",
+          "internalType": "uint8"
+        },
+        {
+          "name": "_region",
+          "type": "string",
+          "internalType": "string"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "constant": false,    
+      "payable": false,
+      "signature": "0xe48da8a4"
+    },
+    {
+      "name": "updateWiFiNode",
+      "type": "function",
+      "inputs": [
+        {
+          "name": "nodeID",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "ssid",
+          "type": "string",
+          "internalType": "string"
+        },
+        {
+          "name": "location",
+          "type": "string",
+          "internalType": "string"
+        },
+        {
+          "name": "pricePerMin",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "constant": false,    
+      "payable": false,
+      "signature": "0x8a7692dc"
+    },
+    {
+      "name": "vpnDeviceCheckpoint",
+      "type": "function",
+      "inputs": [
+        {
+          "name": "nodeID",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "dataHash",
+          "type": "string",
+          "internalType": "string"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "constant": false,    
+      "payable": false,
+      "signature": "0x1b9f0c95"
+    },
+    {
+      "name": "vpnNodeOperators",
+      "type": "function",
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "user",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "peaqDid",
+          "type": "string",
+          "internalType": "string"
+        },
+        {
+          "name": "nodename",
+          "type": "string",
+          "internalType": "string"
+        },
+        {
+          "name": "ipaddress",
+          "type": "string",
+          "internalType": "string"
+        },
+        {
+          "name": "ispinfo",
+          "type": "string",
+          "internalType": "string"
+        },
+        {
+          "name": "region",
+          "type": "string",
+          "internalType": "string"
+        },
+        {
+          "name": "location",
+          "type": "string",
+          "internalType": "string"
+        },
+        {
+          "name": "status",
+          "type": "uint8",
+          "internalType": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "constant": true,
+      "payable": false,
+      "signature": "0xd5399313"
+    },
+    {
+      "name": "vpnTotalCheckpoints",
+      "type": "function",
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "constant": true,
+      "payable": false,
+      "signature": "0xef5050fb"
+    },
+    {
+      "name": "wifiDeviceCheckpoint",
+      "type": "function",
+      "inputs": [
+        {
+          "name": "nodeID",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "dataHash",
+          "type": "string",
+          "internalType": "string"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "constant": false,    
+      "payable": false,
+      "signature": "0x63c3a7e7"
+    },
+    {
+      "name": "wifiDeviceCheckpoints",
+      "type": "function",
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "string",
+          "internalType": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "constant": true,
+      "payable": false,
+      "signature": "0x4f663d31"
+    },
+    {
+      "name": "wifiNodeOperators",
+      "type": "function",
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "user",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "deviceId",
+          "type": "string",
+          "internalType": "string"
+        },
+        {
+          "name": "peaqDid",
+          "type": "string",
+          "internalType": "string"
+        },
+        {
+          "name": "ssid",
+          "type": "string",
+          "internalType": "string"
+        },
+        {
+          "name": "location",
+          "type": "string",
+          "internalType": "string"
+        },
+        {
+          "name": "pricePerMinute",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "isActive",
+          "type": "bool",
+          "internalType": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "constant": true,
+      "payable": false,
+      "signature": "0x8f9c8ee2"
+    },
+    {
+      "name": "wifiTotalCheckpoints",
+      "type": "function",
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "constant": true,
+      "payable": false,
+      "signature": "0x0608a6b6"
+    }
+  ]
