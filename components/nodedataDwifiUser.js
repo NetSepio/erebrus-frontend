@@ -208,6 +208,7 @@ const NodeDwifiStreamUser = () => {
         <h1 className="text-3xl font-bold mb-6">DWifi Nodes Dashboard</h1>
         <div className="bg-gray-800 rounded-lg p-8 text-center">
           <h3 className="mt-2 text-sm font-medium text-gray-400">No dVPN Nodes</h3>
+          {/* eslint-disable-next-line */}
           <p className="mt-1 text-sm text-gray-500">You don't have any dVPN nodes running at the moment.</p>
           <motion.div
             initial={{ y: 100, opacity: 0 }}
