@@ -14,6 +14,8 @@ import Button from "../components/Button";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import SingleSignerTransaction from "../components/transactionFlow/SingleSigner";
+import SaveToWalrusButton from "../components/walrus/SaveToWalrusButton";
+import DownloadFromWalrusButton from "../components/walrus/DownloadFromWalrusButton";
 const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
 const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_BASE_URL;
 const mynetwork = process.env.NEXT_PUBLIC_NETWORK;
@@ -73,6 +75,7 @@ const Subscription = () => {
   const [selectedIndex, setSelectedIndex] = useState(null);
   const { account, connected, network, signMessage } = useWallet();
   const router = useRouter();
+  const [clientUUID, setClientUUID] = useState<string>('');
   let sendable = isSendableNetwork(connected, network?.name);
 
   const bg = {
@@ -199,6 +202,7 @@ const Subscription = () => {
       if (response.status === 200) {
         const responseData = await response.json();
         setVpnName(responseData.payload.client.Name);
+        setClientUUID(responseData.payload.client.UUID);
         setFormData(initialFormData);
         console.log("vpn data", responseData);
 
@@ -1251,6 +1255,11 @@ const Subscription = () => {
                                     </div>
                                   </div>
                                 </button>
+                                <SaveToWalrusButton 
+  configFile={ConfigFile} 
+  vpnName={VpnName} 
+  clientUUID={clientUUID} // Add this prop
+/>
                               </div>
 
                               <div className="flex items-center pb-10 rounded-b w-3/4">
@@ -1273,7 +1282,7 @@ const Subscription = () => {
                       </div>
                     </div>
                   )}
-
+             
                   {loading && (
                     <div
                       style={{ backgroundColor: "#040819D9" }}

@@ -8,6 +8,9 @@ import QrCode from "./qrCode";
 import dlt from "../public/dlt.png";
 import Image from "next/image";
 import Link from "next/link";
+import CryptoJS from 'crypto-js';
+
+import DownloadFromWalrusButton from "./walrus/DownloadFromWalrusButton";
 const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
 const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_BASE_URL;
 
@@ -82,6 +85,8 @@ const MyVpnCard: React.FC<ReviewCardProps> = ({
   const [delvpn, setdelvpn] = useState(false);
   const [qr, setqr] = useState(false);
   const [formattedDate, setFormattedDate] = useState('');
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [downloadPin, setDownloadPin] = useState('');
 
   useEffect(() => {
     if (metaData) {
@@ -116,6 +121,60 @@ const MyVpnCard: React.FC<ReviewCardProps> = ({
     if (onReviewDeleted) {
       onReviewDeleted(); // Call the callback function when a review is deleted
     }
+  };
+  const handleDownloadClick = () => {
+    setShowDownloadModal(true);
+  };
+
+  const downloadConfig = async () => {
+    if (downloadPin.length !== 6) {
+      alert('Please enter a valid 6-digit PIN');
+      return;
+    }
+  
+    try {
+      const auth = Cookies.get("erebrus_token");
+      const walletAddress = Cookies.get('erebrus_wallet') || '';
+  
+      if (!walletAddress) {
+        throw new Error('Wallet address not found');
+      }
+  
+      // Fetch the encrypted blobId from Erebrus
+      const response = await axios.get(
+        `${EREBRUS_GATEWAY_URL}api/v1.0/erebrus/client/${metaData.UUID}/blobId`,
+        {
+          headers: {
+            Authorization: `Bearer ${auth}`,
+          },
+        }
+      );
+  
+      const encryptedBlobId = response.data.payload.blobId;
+      const decryptedBlobId = decryptBlobId(encryptedBlobId, walletAddress, downloadPin);
+  
+      // Fetch the config from Walrus
+      const walrusResponse = await axios.get(
+        `https://aggregator-devnet.walrus.space/v1/${decryptedBlobId}`,
+        { responseType: 'blob' }
+      );
+  
+      // Download the config file
+      const blob = new Blob([walrusResponse.data], { type: 'text/plain' });
+      saveAs(blob, `${metaData.name}.conf`);
+  
+      setShowDownloadModal(false);
+      setDownloadPin('');
+    } catch (error) {
+      console.error('Error downloading config:', error);
+      alert('Failed to download config. Please check your PIN and try again.');
+    }
+  };
+  
+  const decryptBlobId = (encryptedBlobId: string, walletAddress: string, pin: string) => {
+    const key = `${walletAddress}-${pin}`; // Reconstruct the key
+    const bytes = CryptoJS.AES.decrypt(encryptedBlobId, key);
+    return bytes.toString(CryptoJS.enc.Utf8);
   };
 
   const deletevpn = async (id: string, region: string) => {
@@ -188,60 +247,24 @@ const MyVpnCard: React.FC<ReviewCardProps> = ({
             </div>
           </div>
 
-          {/* <div className="text-white text-lg w-1/5 btn bg-blue-gray-700 text-center justify-center flex -mt-4">
-                <img src={`https://flagsapi.com/${metaData.region}/shiny/64.png`}/>
-          </div> */}
+       
 
 
           <div className="flex gap-4 w-1/4 justify-end">
-            {/* <button
-              className="text-lg rounded-lg text-white flex btn bg-blue-gray-700"
-              onClick={() =>
-                handleDownload(metaData.UUID, metaData.name, metaData.region)
-              }
-            >
-              <div className="flex cursor-pointer">
-                <FaDownload style={color2} className="mt-2" />
-              </div>
-            </button>
-            <button
-              onClick={() => {
-                setqr(true);
-              }}
-            >
-              <FaQrcode style={color2} className="mt-1" />
-            </button> */}
-            <button
-              className="text-lg rounded-lg"
-              onClick={() => setdelvpn(true)}
-            >
-              <Image src={dlt} alt="info" className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* <div className="text-white text-lg w-1/4 btn bg-blue-gray-700">
-                      <div className="ml-4">
-
-                        <div className="flex cursor-pointer" onClick={() => {
-
-                        }}>
-                       <button onClick={()=>{setqr(true)}}>
-                          <FaQrcode style={color2} className="ml-2 mt-1"/>
-                       </button>
-                          </div>  
-                      </div>
-                    
-                  </div>
-
-                  <div className="lg:flex md:flex justify-between w-1/8">
-                  <div
-                    
-                  > 
-                    <button className="text-lg rounded-lg pr-1 text-white" onClick={() => deletevpn(metaData.vpn_id)}>  
-                    <Image src={dlt} alt="info" className="w-4 h-4"/>
-                    </button>    
-                  </div>
-              </div> */}
+        <button
+          className="text-lg rounded-lg"
+          onClick={handleDownloadClick}
+        >
+          <FaDownload className="w-5 h-5 text-white" />
+        </button>
+        <button
+          className="text-lg rounded-lg"
+          onClick={() => setdelvpn(true)}
+        >
+          <Image src={dlt} alt="info" className="w-5 h-5" />
+        </button>
+      </div>
+        
         </div>
       </div>
       {qr && (
@@ -342,6 +365,55 @@ const MyVpnCard: React.FC<ReviewCardProps> = ({
                   className="w-full text-white font-bold focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-md px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                 >
                   Delete
+                </button>
+                
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {showDownloadModal && (
+        <div
+          style={{ backgroundColor: "#222944E5" }}
+          className="flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full"
+          id="downloadModal"
+        >
+          <div className="relative lg:w-1/3 w-full max-w-2xl max-h-full">
+            <div
+              className="relative rounded-3xl shadow dark:bg-gray-700 p-16 md:p-20"
+              style={{ backgroundColor: "#202333", border: "1px solid #0162FF"}}
+            >
+              <div className="p-4 md:p-5 space-y-4">
+                <p className="text-2xl text-center text-white font-bold">
+                  Enter PIN to Download
+                </p>
+              </div>
+              <div className="p-4 md:p-5 space-y-4">
+                <input
+                  type="password"
+                  value={downloadPin}
+                  onChange={(e) => setDownloadPin(e.target.value)}
+                  maxLength={6}
+                  placeholder="Enter 6-digit PIN"
+                  className="w-full p-2 rounded-md text-black"
+                />
+              </div>
+              <div className="flex items-center p-4 md:p-5 rounded-b gap-4">
+                <button
+                  style={{ border: "1px solid #5696FF"}}
+                  onClick={() => setShowDownloadModal(false)}
+                  type="button"
+                  className="w-full text-white font-bold focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-md px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  style={backgroundbutton}
+                  onClick={downloadConfig}
+                  type="button"
+                  className="w-full text-white font-bold focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-md px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                >
+                  Download
                 </button>
               </div>
             </div>
