@@ -183,6 +183,7 @@ const SaveToWalrusButton: React.FC<SaveToWalrusButtonProps> = ({ configFile, vpn
       <h2 className="text-2xl mb-4 font-semibold text-gray-800">Secure Your Configuration</h2>
       <p className="text-amber-600 text-sm mb-4 font-medium bg-amber-50 p-3 rounded-md border border-amber-200">
         Important: This PIN is your key to accessing your saved configuration. 
+        {/*eslint-disable-next-line */}
         Please store it securely. If forgotten, you'll need to create a new configuration.
       </p>
       <div className="mb-4">
