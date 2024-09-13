@@ -14,6 +14,9 @@ import Button from "../components/Button";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import SingleSignerTransaction from "../components/transactionFlow/SingleSigner";
+import SaveToWalrusButton from "../components/walrus/SaveToWalrusButton";
+import DownloadFromWalrusButton from "../components/walrus/DownloadFromWalrusButton";
+import FileStorage from "../components/walrus/FileStorage";
 const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
 const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_BASE_URL;
 const mynetwork = process.env.NEXT_PUBLIC_NETWORK;
@@ -73,6 +76,7 @@ const Subscription = () => {
   const [selectedIndex, setSelectedIndex] = useState(null);
   const { account, connected, network, signMessage } = useWallet();
   const router = useRouter();
+  const [clientUUID, setClientUUID] = useState<string>("");
   let sendable = isSendableNetwork(connected, network?.name);
 
   const bg = {
@@ -199,6 +203,7 @@ const Subscription = () => {
       if (response.status === 200) {
         const responseData = await response.json();
         setVpnName(responseData.payload.client.Name);
+        setClientUUID(responseData.payload.client.UUID);
         setFormData(initialFormData);
         console.log("vpn data", responseData);
 
@@ -219,6 +224,11 @@ const Subscription = () => {
         setValueFromChild2("refreshafterclientcreate");
         // } else if(response.status === 400){
         //   setMsg("Cant create more than 3 clients");
+
+        // Reset the form after successful creation
+        resetForm();
+        // Close the form modal
+        setbuttonset(false);
       } else {
         setMsg("Failed to create VPN. Try with unique name.");
       }
@@ -236,7 +246,13 @@ const Subscription = () => {
   const wallet = Cookies.get("erebrus_wallet");
 
   useEffect(() => {
-    if (loggedin &&!loading && isDataChecked && !nftdata && !trialsubscriptiondata) {
+    if (
+      loggedin &&
+      !loading &&
+      isDataChecked &&
+      !nftdata &&
+      !trialsubscriptiondata
+    ) {
       const redirectTimer = setTimeout(() => {
         router.push("/plans");
       }, 1000); // 1 second delay
@@ -296,7 +312,6 @@ const Subscription = () => {
         setLoading(false);
       }
     };
-    
 
     const vpnnft = async () => {
       setLoading(true);
@@ -405,8 +420,6 @@ const Subscription = () => {
   //   // Update the selected region when the dropdown value changes
   //   setregion(e.target.value);
   // };
-
-
 
   const getAptosWallet = () => {
     if ("aptos" in window) {
@@ -691,16 +704,23 @@ const Subscription = () => {
     const time = dateObj.toLocaleTimeString();
     return `${day} ${month} ${year} ${time}`;
   };
+  const resetForm = () => {
+    setFormData(initialFormData);
+    setSelectedOption(null);
+    setSelectedIndex(null);
+    setregionname('');
+  };
+
 
   const regiondata = [
-    { id: "SG", region: "SG" },
-    { id: "IN", region: "IN" },
-    { id: "US", region: "US" },
-    { id: "JP", region: "JP" },
-    { id: "CA", region: "CA" },
-    { id: "FI", region: "FI" },
-    { id: "GB", region: "GB" },
-    { id: "AU", region: "AU" },
+    { id: "SG", region: "Singapore" },
+    { id: "IN", region: "India" },
+    { id: "US", region: "United States" },
+    { id: "JP", region: "Japan" },
+    { id: "CA", region: "Canada" },
+    { id: "FI", region: "Finland" },
+    { id: "GB", region: "United Kingdom" },
+    { id: "AU", region: "Australia" },
     // Add more nodes as needed
   ];
   //form
@@ -824,7 +844,8 @@ const Subscription = () => {
                   </div>
                 )}
 
-                <div className="flex gap-10 w-1/2">
+<div className="flex justify-between">
+<div className="w-1/2">
                   {nftdata && (
                     <div className="w-1/2">
                       <NftdataContainer
@@ -921,6 +942,11 @@ const Subscription = () => {
                       </div>
                     </div>
                   )}
+                   </div>
+                  
+                  <div className="h-auto ">
+                    <FileStorage />
+                  </div>
                 </div>
               </>
             )}
@@ -1205,6 +1231,31 @@ const Subscription = () => {
                           }}
                         >
                           <div className="py-4 space-y-4 mt-4">
+                            {/* Add cross icon */}
+                            <button
+                              onClick={() => {
+                                setbuttonset(false);
+                                setverify(false);
+                                setMsg("");
+                              }}
+                              className="absolute top-4 right-4 text-white hover:text-gray-300"
+                            >
+                              <svg
+                                className="w-6 h-6"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M6 18L18 6M6 6l12 12"
+                                />
+                              </svg>
+                            </button>
+
                             <p className="text-3xl text-center font-semibold text-white mb-10">
                               Successfully created!
                             </p>
@@ -1251,22 +1302,17 @@ const Subscription = () => {
                                     </div>
                                   </div>
                                 </button>
+                                
                               </div>
-
                               <div className="flex items-center pb-10 rounded-b w-3/4">
-                                <button
-                                  style={button}
-                                  onClick={() => {
-                                    setbuttonset(false);
-                                    setverify(false);
-                                    setMsg("");
-                                  }}
-                                  type="button"
-                                  className="flex-1 text-white focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-sm px-5 py-2.5 text-center dark:bg-transparent dark:hover:opacity-80 dark:focus:ring-blue-800"
-                                >
-                                  My Clients
-                                </button>
+                               <SaveToWalrusButton
+                                  configFile={ConfigFile}
+                                  vpnName={VpnName}
+                                  clientUUID={clientUUID}
+                                />
+                                
                               </div>
+                              
                             </div>
                           </div>
                         </div>
@@ -1301,16 +1347,13 @@ const Subscription = () => {
                       <section className="pb-10 rounded-xl">
                         {
                           loading ? (
-                            
                             <div className="min-h-screen"></div>
                           ) : projectsData && projectsData?.length !== 0 ? (
-                          
                             <div className="mx-6 lg:-mt-20 ">
                               <div className="flex gap-4">
                                 <div className="ml-auto text-white ">
                                   <button
                                     style={{
-                                   
                                       backgroundColor: "#0162FF",
                                     }}
                                     onClick={() => setbuttonset(true)}

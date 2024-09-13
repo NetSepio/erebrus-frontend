@@ -15,7 +15,7 @@ const NodesData = () => {
 
   const fetchNodesData = async () => {
     try {
-      const response = await axios.get(`${EREBRUS_GATEWAY_URL}api/v1.0/nodes/all`);
+      const response = await axios.get(`${EREBRUS_GATEWAY_URL}/api/v1.0/nodes/all`);
       
       console.log("API Response:", response.data);
 
@@ -73,15 +73,21 @@ const NodesData = () => {
     {nodesdata.length > 0 ? (
       <div className="overflow-x-auto">
         <table className="min-w-full bg-gray-800 rounded-lg overflow-hidden">
-          <thead className="bg-gray-700">
-            <tr>
-              {["Node Name", "Chain", "Wallet Address", "Region", "Network Speed", "Status", "Uptime", "Last Ping"].map((header) => (
-                <th key={header} className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  {header}
-                </th>
-              ))}
-            </tr>
-          </thead>
+        <thead className="bg-gray-700">
+  <tr>
+    {["Node Name", "Chain", "Wallet Address", "Region", "Network Speed", "Status", "Uptime", "Last Ping"].map((header) => (
+      <th
+        key={header}
+        className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+        style={{ lineHeight: '1.5', height: 'auto', paddingTop: '12px', paddingBottom: '12px' }}
+      >
+        {header}
+      </th>
+    ))}
+  </tr>
+</thead>
+
+
           <tbody className="divide-y divide-gray-600">
             {nodesdata.map((node) => (
               <tr

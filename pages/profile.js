@@ -551,135 +551,127 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
 
             {profileset && (
               <>
-                <section className="pb-0 rounded-xl">
-                  <h1 className="pt-20 px-24 flex justify-between text-start text-4xl font-semibold leading-none tracking-normal text-gray-100 md:tracking-tight">
-                    <div className="text-white">Profile information</div>
-                    <div className="flex gap-4 text-black text-sm">
-                    <div 
-                        className="px-2 rounded flex items-center space-x-1"
-                        style={{ backgroundColor: '#8EB9FF' }}
-                      >
-                        {chainDetails.icon && <img src={chainDetails.icon} alt={`${chainDetails.name} icon`} style={{ width: '28px', height: '28px' }} />}
-                        <span className="pr-2">{chainDetails.name}</span>
-                      </div>
-                      <div className="px-4 pt-2 rounded" style={{backgroundColor:'#8EB9FF'}}>{walletaddr?.slice(0, 4)}...{walletaddr?.slice(-4)}</div>
-                    </div>
-                  </h1>
-                  <div className="px-24 mx-auto rounded-xl">
-                    <div className="w-full mx-auto text-left">
-                      <form id="myForm" className="rounded pt-10">
-                        <div className="lg:flex md:flex justify-between">
-                          <div className="lg:w-1/4 md:w-1/4">
-                            <div className="flex items-center mb-10 justify-center">
-                              {profileData?.profilePictureUrl ? (
-                                <div className="rounded-2xl h-36 w-36">
-                                <img
-                                  alt="alt"
-                                  src={`${"https://nftstorage.link/ipfs"}/${removePrefix(
-                                    profileData?.profilePictureUrl
-                                  )}`}
-                                  className="rounded-2xl"
-                                  width="170"
-                                  height="170"
-                                />
-                                </div>
-                              ) : (
-                                <div className="rounded-2xl h-36 w-36 ring-offset-2 ring-1 ring-black bg-gray-200">
-                                  {/* <FaUserCircle className="text-3xl text-gray-500 w-48 h-48" /> */}
-                                  <img
-                                    alt="alt"
-                                    src="https://thumbs.dreamstime.com/b/female-user-profile-avatar-woman-character-screen-saver-emotions-website-mobile-app-design-vector-199001739.jpg"
-                                    className="rounded-2xl mx-auto"
-                                    width="170"
-                                    height="170"
-                                  />
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="lg:w-3/4 md:w-3/4">
-                            <div className="lg:flex md:flex justify-between gap-4">
-                              <div
-                                style={border}
-                                className="mb-10 shadow border appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
-                              >
-                                {profileData?.name
-                                  ? profileData?.name
-                                  : "Name"}
-                              </div>
-
-                              <div
-                                style={border}
-                                className="mb-10 shadow border appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
-                              >
-                                {profileData?.country
-                                  ? profileData?.country
-                                  : "Country"}
-                              </div>
-                            </div>
-
-                            <div className="lg:flex md:flex justify-between gap-4">
-                              <div
-                                style={border}
-                                className="mb-10 lg:w-1/2 md:w-1/2 rounded w-full py-4 px-3 text-gray-200 leading-tight"
-                              >
-                                {profileData?.discord
-                                  ? profileData?.discord
-                                  : "Discord"}
-                              </div>
-
-                              <div
-                                style={border}
-                                className="mb-10 lg:w-1/2 md:w-1/2 rounded w-full py-4 px-3 text-gray-200 leading-tight"
-                              >
-                                {profileData?.twitter
-                                  ? profileData?.twitter
-                                  : "Twitter"}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="text-center pt-0 w-3/4 ml-auto pb-48">
-                          <div className="">
-                            <button
-                              style={button}
-                              onClick={() => setprofileset(false)}
-                              className="px-14 py-3 mb-2 text-lg text-white font-semibold rounded-lg w-full sm:mb-0 hover:bg-green-200 focus:ring focus:ring-green-300 focus:ring-opacity-80"
-                            >
-                              Edit Profile
-                            </button>
-                          </div>
-                        </div>
-                      </form>
-
-                      {loading && (
-        <div
-        style={{ backgroundColor: "#040819D9" }}
-        className='flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full'
-        id='popupmodal'
-      >
-        <div className='relative p-4 lg:w-1/5 w-full max-w-2xl max-h-full'>
-          <div className='relative rounded-lg shadow'>
-            <div className='flex justify-center gap-4'>
-              <img
-                className='w-12 animate-spin duration-[3000] h-12'
-                src='/Loadingerebrus.png'
-                alt='Loading icon'
-              />
-  
-              <span className='text-white mt-2'>Loading...</span>
+               <section className="pb-0 rounded-xl">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="pt-8 sm:pt-16 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+          <h1 className="text-3xl sm:text-4xl font-semibold text-gray-100 mb-4 sm:mb-0">
+            Profile information
+          </h1>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-black text-sm">
+            <div 
+              className="px-2 py-1 rounded flex items-center space-x-1"
+              style={{ backgroundColor: '#8EB9FF' }}
+            >
+              {chainDetails.icon && (
+                <img 
+                  src={chainDetails.icon} 
+                  alt={`${chainDetails.name} icon`} 
+                  className="w-6 h-6" 
+                />
+              )}
+              <span className="pr-2">{chainDetails.name}</span>
+            </div>
+            <div 
+              className="px-4 py-1 rounded" 
+              style={{backgroundColor:'#8EB9FF'}}
+            >
+              {walletaddr?.slice(0, 4)}...{walletaddr?.slice(-4)}
             </div>
           </div>
         </div>
-      </div>
-      )}
 
+        <div className="w-full mx-auto text-left mt-8">
+          <form id="myForm" className="rounded">
+            <div className="flex flex-col lg:flex-row gap-8">
+              <div className="lg:w-1/4">
+                <div className="flex items-center justify-center mb-6 lg:mb-0">
+                  {profileData?.profilePictureUrl ? (
+                    <div className="rounded-2xl h-36 w-36">
+                      <img
+                        alt="Profile"
+                        src={`${"https://nftstorage.link/ipfs"}/${removePrefix(profileData?.profilePictureUrl)}`}
+                        className="rounded-2xl object-cover w-full h-full"
+                      />
                     </div>
+                  ) : (
+                    <div className="rounded-2xl h-36 w-36 ring-offset-2 ring-1 ring-black bg-gray-200">
+                      <img
+                        alt="Default Profile"
+                        src="https://thumbs.dreamstime.com/b/female-user-profile-avatar-woman-character-screen-saver-emotions-website-mobile-app-design-vector-199001739.jpg"
+                        className="rounded-2xl mx-auto object-cover w-full h-full"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="lg:w-3/4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div
+                    style={border}
+                    className="mb-4 shadow border appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
+                  >
+                    {profileData?.name || "Name"}
                   </div>
-                  
-                </section>                  
+
+                  <div
+                    style={border}
+                    className="mb-4 shadow border appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
+                  >
+                    {profileData?.country || "Country"}
+                  </div>
+
+                  <div
+                    style={border}
+                    className="mb-4 rounded w-full py-4 px-3 text-gray-200 leading-tight"
+                  >
+                    {profileData?.discord || "Discord"}
+                  </div>
+
+                  <div
+                    style={border}
+                    className="mb-4 rounded w-full py-4 px-3 text-gray-200 leading-tight"
+                  >
+                    {profileData?.twitter || "Twitter"}
+                  </div>
+                </div>
+
+                <div className="text-center mt-6">
+                  <button
+                    style={button}
+                    onClick={() => setprofileset(false)}
+                    className="px-14 py-3 mb-2 text-lg text-white font-semibold rounded-lg w-full sm:w-auto hover:bg-green-200 focus:ring focus:ring-green-300 focus:ring-opacity-80"
+                  >
+                    Edit Profile
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+
+          {loading && (
+            <div
+              style={{ backgroundColor: "#040819D9" }}
+              className='flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full'
+              id='popupmodal'
+            >
+              <div className='relative p-4 w-full max-w-md max-h-full'>
+                <div className='relative rounded-lg shadow'>
+                  <div className='flex justify-center items-center gap-4'>
+                    <img
+                      className='w-12 h-12 animate-spin'
+                      src='/Loadingerebrus.png'
+                      alt='Loading icon'
+                    />
+                    <span className='text-white'>Loading...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>                
               </>
             )}
 

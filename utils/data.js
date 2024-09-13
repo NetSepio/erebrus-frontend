@@ -1,7 +1,7 @@
 export const cardDetails2 = [
   {
     image: "win1",
-    title: " ÐVPN for Unparalleled Privacys",
+    title: " ÐVPN for Unparalleled Privacy",
     desc1: "No data is ever tracked or logged without your explicit consent.",
     desc2:
       "Open-source code ensures complete transparency and reinforces our commitment to safety and user privacy.",

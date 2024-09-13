@@ -21,7 +21,7 @@ const BaliDVPNNFTPage = () => {
     
     setTimeout(async () => {
       try {
-        const result = await axios.post(`${REACT_APP_GATEWAY_URL}api/v1.0/dvpnnft`, {
+        const result = await axios.post(`${REACT_APP_GATEWAY_URL}api/v1.0/dvpnnft/chain=evm`, {
           wallet_address: walletAddress
         });
         setResponse(result.data);
