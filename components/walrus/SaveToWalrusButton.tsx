@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import CryptoJS from 'crypto-js'; // For encryption
@@ -15,6 +15,10 @@ const SaveToWalrusButton: React.FC<SaveToWalrusButtonProps> = ({ configFile, vpn
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  
 
   // Encryption function using wallet address and PIN
   const encryptBlobId = (blobId: string, walletAddress: string, pin: string) => {
@@ -39,6 +43,7 @@ const SaveToWalrusButton: React.FC<SaveToWalrusButtonProps> = ({ configFile, vpn
       return;
     }
 
+    setIsLoading(true);
     setIsSaving(true);
     setSaveStatus('idle');
 
@@ -52,6 +57,12 @@ const SaveToWalrusButton: React.FC<SaveToWalrusButtonProps> = ({ configFile, vpn
           headers: { 'Content-Type': 'text/plain' },
         }
       );
+      if (walrusResponse.data.alreadyCertified) {
+        setSaveStatus('success');
+        setPopupMessage('Configuration is already saved.');
+        setShowPopup(true);
+        return;
+      }
 
       const blobId = walrusResponse.data.newlyCreated.blobObject.blobId;
 
@@ -77,67 +88,154 @@ const SaveToWalrusButton: React.FC<SaveToWalrusButtonProps> = ({ configFile, vpn
       );
 
       setSaveStatus('success');
+      setPopupMessage('Configuration saved successfully!');
+      setShowPopup(true);
     } catch (error) {
       console.error('Error saving to Walrus or updating blobId:', error);
       setSaveStatus('error');
+      setPopupMessage('Failed to save configuration.');
+      setShowPopup(true);
     } finally {
       setIsSaving(false);
-      setIsPinModalOpen(false); // Close the modal after saving
+      setIsPinModalOpen(false);
+      setIsLoading(false);
     }
   };
+  
+  useEffect(() => {
+    if (showPopup) {
+      const timer = setTimeout(() => {
+        setShowPopup(false);
+        setSaveStatus('idle');
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [showPopup]);
 
   return (
     <>
-      <button
+         <button
         onClick={handleSave}
         disabled={isSaving}
-        className="text-md rounded-lg text-white flex btn bg-blue-500 hover:bg-blue-600 transition-colors duration-200 ease-in-out flex-1"
+        className="flex-1 text-white border-2 border-blue-200 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-sm px-5 text-center dark:bg-transparent dark:hover:opacity-80 dark:focus:ring-blue-800"
       >
-        <div className="flex cursor-pointer p-2 rounded-full mt-4 gap-2 justify-center w-full">
+        <div className="flex cursor-pointer p-2 rounded-full gap-2 justify-center w-full">
           {isSaving ? 'Saving...' : 'Save to Walrus'}
         </div>
-        {saveStatus === 'success' && <span className="text-green-500 ml-2">✓</span>}
-        {saveStatus === 'error' && <span className="text-red-500 ml-2">✗</span>}
       </button>
 
-      {/* Modal for PIN and Confirm PIN entry */}
-      {isPinModalOpen && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h2 className="text-lg mb-4">Enter PIN and Confirm PIN</h2>
-            <input
-              type="text"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              maxLength={6}
-              placeholder="Enter 6-digit PIN"
-              className="border border-gray-300 p-2 rounded-md w-full mb-4"
-            />
-            <input
-              type="text"
-              value={confirmPin}
-              onChange={(e) => setConfirmPin(e.target.value)}
-              maxLength={6}
-              placeholder="Confirm PIN"
-              className="border border-gray-300 p-2 rounded-md w-full"
-            />
-            <div className="mt-4 flex justify-end gap-4">
-              <button
-                onClick={() => setIsPinModalOpen(false)}
-                className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={saveToWalrus}
-                className="bg-blue-500 text-white px-4 py-2 rounded-md"
-              >
-                Save
-              </button>
+      {/* Status Popup */}
+      {showPopup && (
+        <div className="fixed bottom-5 right-5 p-4 rounded-lg shadow-lg transition-all duration-300 ease-in-out"
+             style={{
+               backgroundColor: saveStatus === 'success' ? 'rgba(52, 211, 153, 0.9)' : 'rgba(248, 113, 113, 0.9)',
+             }}>
+          <div className="flex items-center">
+            <div className="mr-3">
+              {saveStatus === 'success' ? (
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              ) : (
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              )}
             </div>
+            <p className="text-white font-semibold">
+              {popupMessage}
+            </p>
           </div>
         </div>
       )}
+     {isLoading && (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-80 flex flex-col justify-center items-center z-50">
+          <div className="relative w-64 h-32">
+            {/* Blockchain representation */}
+            <div className="absolute inset-0 flex items-center justify-between">
+              {[0, 1, 2, 3].map((i) => (
+                <div key={i} className={`w-12 h-12 bg-blue-500 rounded-lg ${i % 2 === 0 ? 'animate-pulse' : 'animate-bounce'}`}>
+                  <div className="w-full h-full flex items-center justify-center">
+                    <div className="w-6 h-6 border-2 border-white rounded-full"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Connecting lines */}
+            <div className="absolute inset-0 flex items-center justify-between">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="w-16 h-0.5 bg-blue-300 animate-pulse"></div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Loading text */}
+          <div className="mt-8 text-white text-lg font-semibold animate-pulse">
+            Saving to Walrus...
+          </div>
+        </div>
+      )}
+      {/* Modal for PIN and Confirm PIN entry */}
+      {isPinModalOpen && (
+  <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-30">
+    <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+      <h2 className="text-2xl mb-4 font-semibold text-gray-800">Secure Your Configuration</h2>
+      <p className="text-amber-600 text-sm mb-4 font-medium bg-amber-50 p-3 rounded-md border border-amber-200">
+        Important: This PIN is your key to accessing your saved configuration. 
+        Please store it securely. If forgotten, you'll need to create a new configuration.
+      </p>
+      <div className="mb-4">
+        <label htmlFor="pin" className="block text-sm font-medium text-gray-700 mb-1">Enter 6-digit PIN</label>
+        <div className="relative">
+          <input
+            type="password"
+            id="pin"
+            value={pin}
+            onChange={(e) => setPin(e.target.value)}
+            maxLength={6}
+            placeholder="••••••"
+            className="border border-gray-300 p-2 pl-10 pr-10 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+          />
+          <svg className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+          </svg>
+        </div>
+      </div>
+      <div className="mb-6">
+        <label htmlFor="confirmPin" className="block text-sm font-medium text-gray-700 mb-1">Confirm PIN</label>
+        <div className="relative">
+          <input
+            type="password"
+            id="confirmPin"
+            value={confirmPin}
+            onChange={(e) => setConfirmPin(e.target.value)}
+            maxLength={6}
+            placeholder="••••••"
+            className="border border-gray-300 p-2 pl-10 pr-10 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+          />
+          <svg className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+          </svg>
+        </div>
+      </div>
+      <div className="mt-6 flex justify-end gap-4">
+        <button
+          onClick={() => setIsPinModalOpen(false)}
+          className="bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={saveToWalrus}
+          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          Save Configuration
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </>
   );
 };

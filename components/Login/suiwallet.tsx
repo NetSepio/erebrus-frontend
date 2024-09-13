@@ -62,10 +62,10 @@ const erebrusWallet =getwallet();
    
 
   };
-  console.log("adaddasdasd", result.signature)
+
 
   const authenticateApiUrl = `${REACT_APP_GATEWAY_URL}api/v1.0/authenticate?chain=sui`;
-  // const authenticateApiUrl = `${REACT_APP_GATEWAY_URL}api/v1.0/authenticate/NonSign`;
+
 
   const config = {
     url: authenticateApiUrl,
