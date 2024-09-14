@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import axios from 'axios';
-import { FiUploadCloud, FiDownload, FiShare2 } from 'react-icons/fi';
+import { FiUploadCloud, FiDownload, FiShare2, FiCopy, FiX } from 'react-icons/fi';
 
 const PUBLISHER = 'https://publisher-devnet.walrus.space';
 const AGGREGATOR = 'https://aggregator-devnet.walrus.space';
@@ -15,6 +15,7 @@ const FileStorage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -69,14 +70,20 @@ const FileStorage: React.FC = () => {
   };
 
   const handleShare = (fileInfo: FileInfo) => {
-    const shareUrl = `${AGGREGATOR}/v1/${fileInfo.blobId}`;
-    navigator.clipboard.writeText(shareUrl);
-    alert(`Share link copied to clipboard: ${shareUrl}`);
+    const url = `${AGGREGATOR}/v1/${fileInfo.blobId}`;
+    setShareUrl(url);
+  };
+
+  const handleCopyUrl = () => {
+    if (shareUrl) {
+      navigator.clipboard.writeText(shareUrl);
+      
+    }
   };
 
   return (
     <div className="bg-[#202333] border border-[#0162FF] rounded-3xl p-6 w-full h-[400px] flex flex-col">
-      <h2 className="text-2xl font-semibold text-white mb-4">File Storage</h2>
+      <h2 className="text-2xl font-semibold text-white mb-4">Walrus File Storage</h2>
       
       <div 
         className="flex-shrink-0 flex flex-col items-center justify-center border-2 border-dashed border-[#0162FF] rounded-xl p-6 mb-4 cursor-pointer"
@@ -84,7 +91,7 @@ const FileStorage: React.FC = () => {
       >
         <FiUploadCloud className="text-[#0162FF] text-6xl mb-4" />
         <p className="text-white text-lg mb-2">Click or drag files to upload</p>
-        <p className="text-gray-400 text-sm">Supports any file type</p>
+        <p className="text-gray-400 text-sm">Securely store files on the Walrus network</p>
         <input 
           type="file" 
           ref={fileInputRef}
@@ -94,12 +101,12 @@ const FileStorage: React.FC = () => {
         />
       </div>
 
-      {loading && <p className="text-white mb-4">Uploading...</p>}
+      {loading && <p className="text-white mb-4">Uploading to Walrus network...</p>}
 
       <div className="flex-grow overflow-hidden">
         {files.length > 0 && (
           <div className="bg-[#2A2D3E] rounded-xl p-4 h-full overflow-y-auto">
-            <h3 className="text-white font-semibold mb-2">Uploaded Files</h3>
+            <h3 className="text-white font-semibold mb-2">Files on Walrus Network</h3>
             {files.map((fileInfo, index) => (
               <div key={index} className="flex items-center justify-between text-white py-2 border-b border-gray-700 last:border-b-0">
                 <span className="truncate flex-grow">{fileInfo.name}</span>
@@ -118,6 +125,31 @@ const FileStorage: React.FC = () => {
       </div>
 
       {error && <p className="text-red-500 mt-2">{error}</p>}
+
+      {shareUrl && (
+        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-[#2A2D3E] rounded-xl p-6 max-w-md w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-white font-semibold">Share Walrus File</h3>
+              <button onClick={() => setShareUrl(null)} className="text-gray-400 hover:text-white">
+                <FiX />
+              </button>
+            </div>
+            <p className="text-gray-400 mb-2">Your file is available on the Walrus network:</p>
+            <div className="flex items-center bg-[#202333] rounded p-2">
+              <input 
+                type="text" 
+                value={shareUrl} 
+                readOnly 
+                className="bg-transparent text-white flex-grow mr-2 outline-none"
+              />
+              <button onClick={handleCopyUrl} className="text-[#0162FF] hover:text-white">
+                <FiCopy />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
