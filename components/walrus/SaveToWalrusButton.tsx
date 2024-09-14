@@ -150,31 +150,25 @@ const SaveToWalrusButton: React.FC<SaveToWalrusButtonProps> = ({ configFile, vpn
         </div>
       )}
      {isLoading && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-80 flex flex-col justify-center items-center z-50">
-          <div className="relative w-64 h-32">
-            {/* Blockchain representation */}
-            <div className="absolute inset-0 flex items-center justify-between">
-              {[0, 1, 2, 3].map((i) => (
-                <div key={i} className={`w-12 h-12 bg-blue-500 rounded-lg ${i % 2 === 0 ? 'animate-pulse' : 'animate-bounce'}`}>
-                  <div className="w-full h-full flex items-center justify-center">
-                    <div className="w-6 h-6 border-2 border-white rounded-full"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            {/* Connecting lines */}
-            <div className="absolute inset-0 flex items-center justify-between">
-              {[0, 1, 2].map((i) => (
-                <div key={i} className="w-16 h-0.5 bg-blue-300 animate-pulse"></div>
-              ))}
-            </div>
-          </div>
-          
-          {/* Loading text */}
-          <div className="mt-8 text-white text-lg font-semibold animate-pulse">
-            Saving to Walrus...
-          </div>
-        </div>
+       <div
+       style={{ backgroundColor: "#040819D9" }}
+       className="flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full"
+       id="popupmodal"
+     >
+       <div className="relative p-4 lg:w-1/5 w-full max-w-2xl max-h-full">
+         <div className="relative rounded-lg shadow">
+           <div className="flex justify-center gap-4">
+             <img
+               className="w-12 animate-spin duration-[3000] h-12"
+               src="/Loadingerebrus.png"
+               alt="Loading icon"
+             />
+
+             <span className="text-white mt-2">Loading...</span>
+           </div>
+         </div>
+       </div>
+     </div>
       )}
       {/* Modal for PIN and Confirm PIN entry */}
       {isPinModalOpen && (
