@@ -1,23 +1,31 @@
-import React, { useState, useRef } from 'react';
-import axios from 'axios';
-import { FiUploadCloud, FiDownload, FiShare2, FiCopy, FiX } from 'react-icons/fi';
+'use client'
 
-const PUBLISHER = 'https://publisher-devnet.walrus.space';
-const AGGREGATOR = 'https://aggregator-devnet.walrus.space';
+import React, { useState, useRef, FormEvent, ChangeEvent } from 'react';
+import { FiUploadCloud, FiDownload, FiShare2, FiX, FiCopy, FiCheck } from 'react-icons/fi';
+import { v4 as uuidv4 } from 'uuid';
+
+const PUBLISHER_URL = 'https://publisher-devnet.walrus.space';
+const AGGREGATOR_URL = 'https://aggregator-devnet.walrus.space';
+const EPOCHS = '5';
 
 interface FileInfo {
-  name: string;
+  fileName: string;
   blobId: string;
+  mediaType: string;
+  blobUrl: string;
+  suiUrl: string;
+  isImage: boolean;
 }
 
-const FileStorage: React.FC = () => {
+export default function FileStorage() {
   const [files, setFiles] = useState<FileInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [shareUrl, setShareUrl] = useState<string | null>(null);
+    const [shareLink, setShareLink] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setLoading(true);
       setError(null);
@@ -27,22 +35,39 @@ const FileStorage: React.FC = () => {
 
   const uploadFile = async (file: File) => {
     try {
+      setLoading(true);
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await axios.put(`${PUBLISHER}/v1/store`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      const response = await fetch(`${PUBLISHER_URL}/v1/store?epochs=${EPOCHS}`, {
+        method: "PUT",
+        body: file,
       });
 
-      let blobId = '';
-      if (response.data.newlyCreated) {
-        blobId = response.data.newlyCreated.blobObject.blobId;
-      } else if (response.data.alreadyCertified) {
-        blobId = response.data.alreadyCertified.blobId;
-      }
+      if (response.status === 200) {
+        const info = await response.json();
+        let blobId = '';
+        let suiUrl = '';
 
-      setFiles(prev => [...prev, { name: file.name, blobId }]);
-    } catch (err) {
+        if (info.alreadyCertified) {
+          blobId = info.alreadyCertified.blobId;
+          suiUrl = `https://suiscan.xyz/testnet/tx/${info.alreadyCertified.event.txDigest}`;
+        } else if (info.newlyCreated) {
+          blobId = info.newlyCreated.blobObject.blobId;
+          suiUrl = `https://suiscan.xyz/testnet/object/${info.newlyCreated.blobObject.id}`;
+        }
+
+        const blobUrl = `${AGGREGATOR_URL}/v1/${blobId}`;
+        const isImage = file.type.startsWith('image/');
+
+        setFiles((prev) => [
+          ...prev,
+          { fileName: file.name, blobId, mediaType: file.type, blobUrl, suiUrl, isImage },
+        ]);
+      } else {
+        throw new Error("Failed to upload file");
+      }
+    } catch (err: any) {
       setError(`Failed to upload ${file.name}. Please try again.`);
       console.error(err);
     } finally {
@@ -52,35 +77,39 @@ const FileStorage: React.FC = () => {
 
   const handleDownload = async (fileInfo: FileInfo) => {
     try {
-      const response = await axios.get(`${AGGREGATOR}/v1/${fileInfo.blobId}`, {
-        responseType: 'blob',
-      });
-
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const response = await fetch(fileInfo.blobUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', fileInfo.name);
+      link.setAttribute('download', fileInfo.fileName);
       document.body.appendChild(link);
       link.click();
       link.remove();
-    } catch (err) {
-      setError(`Failed to download ${fileInfo.name}. Please try again.`);
+    } catch (err: any) {
+      setError(`Failed to download ${fileInfo.fileName}. Please try again.`);
       console.error(err);
     }
   };
 
-  const handleShare = (fileInfo: FileInfo) => {
-    const url = `${AGGREGATOR}/v1/${fileInfo.blobId}`;
-    setShareUrl(url);
+ const handleShare = (fileInfo: FileInfo) => {
+    const encodedFileInfo = btoa(JSON.stringify(fileInfo));
+    const link = `${window.location.origin}/filedownload?file=${encodedFileInfo}`;
+    setShareLink(link);
   };
 
-  const handleCopyUrl = () => {
-    if (shareUrl) {
-      navigator.clipboard.writeText(shareUrl);
-      
+  const handleCopy = () => {
+    if (shareLink) {
+      navigator.clipboard.writeText(shareLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
   };
 
+  const closeShareModal = () => {
+    setShareLink(null);
+    setCopied(false);
+  };
   return (
     <div className="bg-[#202333] border border-[#0162FF] rounded-3xl p-6 w-full h-[400px] flex flex-col">
       <h2 className="text-2xl font-semibold text-white mb-4">Walrus File Storage</h2>
@@ -101,7 +130,7 @@ const FileStorage: React.FC = () => {
         />
       </div>
 
-      {loading && <p className="text-white mb-4">Uploading to Walrus network...</p>}
+      {loading && <p className="text-white mb-4">Uploading...</p>}
 
       <div className="flex-grow overflow-hidden">
         {files.length > 0 && (
@@ -109,7 +138,20 @@ const FileStorage: React.FC = () => {
             <h3 className="text-white font-semibold mb-2">Files on Walrus Network</h3>
             {files.map((fileInfo, index) => (
               <div key={index} className="flex items-center justify-between text-white py-2 border-b border-gray-700 last:border-b-0">
-                <span className="truncate flex-grow">{fileInfo.name}</span>
+                <div className="flex items-center flex-grow">
+                  {fileInfo.isImage ? (
+                    <object 
+                      type={fileInfo.mediaType} 
+                      data={fileInfo.blobUrl}
+                      className="w-10 h-10 object-cover rounded mr-2"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 bg-gray-600 flex items-center justify-center rounded mr-2">
+                      <span>{fileInfo.fileName.slice(-3).toUpperCase()}</span>
+                    </div>
+                  )}
+                  <span className="truncate">{fileInfo.fileName}</span>
+                </div>
                 <div className="flex space-x-2">
                   <button onClick={() => handleDownload(fileInfo)} className="p-1 hover:bg-[#0162FF] rounded">
                     <FiDownload />
@@ -124,34 +166,37 @@ const FileStorage: React.FC = () => {
         )}
       </div>
 
-      {error && <p className="text-red-500 mt-2">{error}</p>}
-
-      {shareUrl && (
-        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-[#2A2D3E] rounded-xl p-6 max-w-md w-full">
+        {shareLink && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-[#2A2D3E] rounded-xl p-6 w-full max-w-md">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-white font-semibold">Share Walrus File</h3>
-              <button onClick={() => setShareUrl(null)} className="text-gray-400 hover:text-white">
+              <h3 className="text-white font-semibold">Share Link</h3>
+              <button onClick={closeShareModal} className="text-gray-400 hover:text-white">
                 <FiX />
               </button>
             </div>
-            <p className="text-gray-400 mb-2">Your file is available on the Walrus network:</p>
-            <div className="flex items-center bg-[#202333] rounded p-2">
+            <div className="bg-[#202333] rounded-lg p-3 flex items-center mb-4">
               <input 
                 type="text" 
-                value={shareUrl} 
+                value={shareLink} 
                 readOnly 
                 className="bg-transparent text-white flex-grow mr-2 outline-none"
               />
-              <button onClick={handleCopyUrl} className="text-[#0162FF] hover:text-white">
-                <FiCopy />
+              <button 
+                onClick={handleCopy} 
+                className="text-[#0162FF] hover:text-white transition-colors"
+              >
+                {copied ? <FiCheck /> : <FiCopy />}
               </button>
             </div>
+            <p className="text-gray-400 text-sm">
+              {copied ? "Copied to clipboard!" : "Click the copy icon to copy the link"}
+            </p>
           </div>
         </div>
       )}
+
+      {error && <p className="text-red-500 mt-2">{error}</p>}
     </div>
   );
-};
-
-export default FileStorage;
+}
