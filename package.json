@@ -79,6 +79,7 @@
     "stripe": "^14.14.0",
     "styled-components": "^6.1.12",
     "thirdweb": "^5.15.0",
+    "uuid": "^10.0.0",
     "viem": "^2.9.31",
     "wagmi": "^2.8.1"
   },
