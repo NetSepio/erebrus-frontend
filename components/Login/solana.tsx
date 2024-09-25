@@ -50,6 +50,15 @@ export const useSolWallet = (setshowsignbutton) => {
   const OnSignMessageSol = async () => {
     if (sendable) {
       try {
+        const checktoken = Cookies.get("erebrus_token");
+        const checkwallet = Cookies.get("erebrus_wallet");
+        const checkuserId = Cookies.get("erebrus_userid");
+  
+        if (checktoken && checkwallet && checkuserId) {
+          // All cookies are set, no need to sign message
+          console.log("User already authenticated");
+          return;
+        }
         const wallet = getPhantomWallet();
         const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
 
