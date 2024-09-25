@@ -9,12 +9,14 @@ interface MyReviewContainerProps {
   metaDataArray: any[];
   MyReviews?: boolean;
   selectCollection: any;
+  chainSymbol:string;
 }
 
 const NftdataContainer: React.FC<MyReviewContainerProps> = ({
   metaDataArray,
   MyReviews = false,
   selectCollection,
+   chainSymbol,
 }) => {
   const handleReviewDeleted = () => {
     window.location.reload();
@@ -73,10 +75,11 @@ const NftdataContainer: React.FC<MyReviewContainerProps> = ({
                   )
                 }
               >
-                <NftdataCard
+               <NftdataCard
                   metaData={metaData}
                   MyReviews={MyReviews}
                   onReviewDeleted={handleReviewDeleted}
+                  chainSymbol={chainSymbol} // Pass the chainSymbol prop here
                 />
               </div>
             ))}
