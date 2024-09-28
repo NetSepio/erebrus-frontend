@@ -112,7 +112,7 @@ export default function FileStorage() {
   };
   return (
     <div className="bg-[#202333] border border-[#0162FF] rounded-3xl p-6 w-full h-[400px] flex flex-col">
-      <h2 className="text-2xl font-semibold text-white mb-4">Walrus File Storage</h2>
+      <h2 className="text-2xl font-semibold text-white mb-4">File Storage</h2>
       
       <div 
         className="flex-shrink-0 flex flex-col items-center justify-center border-2 border-dashed border-[#0162FF] rounded-xl p-6 mb-4 cursor-pointer"
@@ -120,7 +120,7 @@ export default function FileStorage() {
       >
         <FiUploadCloud className="text-[#0162FF] text-6xl mb-4" />
         <p className="text-white text-lg mb-2">Click or drag files to upload</p>
-        <p className="text-gray-400 text-sm">Securely store files on the Walrus network</p>
+        <p className="text-gray-400 text-sm">Securely store files on the decentralized network</p>
         <input 
           type="file" 
           ref={fileInputRef}
@@ -135,7 +135,7 @@ export default function FileStorage() {
       <div className="flex-grow overflow-hidden">
         {files.length > 0 && (
           <div className="bg-[#2A2D3E] rounded-xl p-4 h-full overflow-y-auto">
-            <h3 className="text-white font-semibold mb-2">Files on Walrus Network</h3>
+            <h3 className="text-white font-semibold mb-2">Files on decentralized Network</h3>
             {files.map((fileInfo, index) => (
               <div key={index} className="flex items-center justify-between text-white py-2 border-b border-gray-700 last:border-b-0">
                 <div className="flex items-center flex-grow">

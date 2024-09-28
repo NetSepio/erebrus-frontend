@@ -33,6 +33,8 @@ import {
   keypairIdentity,
   percentAmount,
 } from "@metaplex-foundation/umi";
+import UserNFTs from '../components/UserNFTs';
+
 
 import { walletAdapterIdentity } from '@metaplex-foundation/umi-signer-wallet-adapters';
 
@@ -40,7 +42,8 @@ import { walletAdapterIdentity } from '@metaplex-foundation/umi-signer-wallet-ad
 import { useWallet as useSolanaWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { bundlrUploader } from '@metaplex-foundation/umi-uploader-bundlr';
-
+import { createGenericFile } from '@metaplex-foundation/umi';
+import { publicKey } from '@metaplex-foundation/umi';
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
