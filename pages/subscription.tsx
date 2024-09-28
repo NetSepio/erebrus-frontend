@@ -764,6 +764,7 @@ const Subscription = () => {
     { id: "FI", region: "Finland" },
     { id: "GB", region: "United Kingdom" },
     { id: "AU", region: "Australia" },
+    { id: "DE", region: "Germany" },
     // Add more nodes as needed
   ];
   //form
