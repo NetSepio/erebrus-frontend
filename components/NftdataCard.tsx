@@ -31,6 +31,7 @@ interface ReviewCardProps {
   MyReviews?: boolean;
   // review?: ReviewCreated;
   onReviewDeleted?: () => void;
+  chainSymbol?: string;
 }
 
 const background = {
@@ -62,6 +63,7 @@ const NftdataCard: React.FC<ReviewCardProps> = ({
   metaData,
   MyReviews = false,
   onReviewDeleted,
+  chainSymbol,
 }) => {
   const [imageSrc, setImageSrc] = React.useState<string | null>(null);
   const [attributes, setAttributes] = React.useState<any>(null);
@@ -90,18 +92,37 @@ const NftdataCard: React.FC<ReviewCardProps> = ({
 
   useEffect(() => {
     const fetchMetaData = async () => {
-      const ipfsCid = metaData?.current_token_data?.token_uri.replace("ipfs://", "");
-
-  // Fetching metadata from IPFS
-  const metadataResponse = await axios.get(`https://ipfs.io/ipfs/${ipfsCid}`);
-  const metadata = metadataResponse.data;
-
-  console.log("Metadata:", metadata);
-  setImageSrc(metadata?.image.replace("ipfs://", ""));
-  setAttributes(metadata?.attributes);
-    }
+      if (chainSymbol === 'sol') {
+        // Handling for Solana NFTs
+        if (metaData?.current_token_data?.token_uri) {
+          try {
+            const response = await axios.get(metaData.current_token_data.token_uri);
+            const metadata = response.data;
+            console.log("Solana Metadata:", metadata);
+            setImageSrc(metadata?.image);
+            setAttributes(metadata?.attributes);
+          } catch (error) {
+            console.error("Error fetching Solana metadata:", error);
+          }
+        }
+      } else {
+        // Existing code for Aptos NFTs
+        const ipfsCid = metaData?.current_token_data?.token_uri.replace("ipfs://", "");
+        if (ipfsCid) {
+          try {
+            const metadataResponse = await axios.get(`https://ipfs.io/ipfs/${ipfsCid}`);
+            const metadata = metadataResponse.data;
+            console.log("Aptos Metadata:", metadata);
+            setImageSrc(metadata?.image.replace("ipfs://", ""));
+            setAttributes(metadata?.attributes);
+          } catch (error) {
+            console.error("Error fetching Aptos metadata:", error);
+          }
+        }
+      }
+    };
     fetchMetaData();
-  }, [metaData]);
+  }, [metaData, chainSymbol]);
 
   if (!metaData) {
     return (
@@ -118,41 +139,25 @@ const NftdataCard: React.FC<ReviewCardProps> = ({
 
   return (
     <div className="w-full cursor-pointer rounded-3xl" style={{ backgroundColor:'#202333', border: '1px solid #0162FF'}}>
-      {/* <Link href={`/reviews/${metaData.domainName.replace(/^https:\/\//, '')}`}> */}
       <div className="w-full h-full rounded-lg p-6">
         <div>
           <div className="flex flex-col">
             <div className="">
               <img
-                      alt="alt"
-                      src={`${
-                        "https://nftstorage.link/ipfs"
-                      }/${imageSrc}`}
-                      className=""
-                    />
-                    {/* <img
-                      alt="alt"
-                      src={`${metaData?.current_token_data.cdn_asset_uris.cdn_image_uri}`}
-                      className=""
-                    /> */}
+                alt={metaData.current_token_data.token_name}
+                src={
+                  chainSymbol === 'sol'
+                    ? imageSrc || metaData.current_token_data.cdn_asset_uris.cdn_image_uri
+                    : `https://nftstorage.link/ipfs/${imageSrc}`
+                }
+                className="w-full h-48 object-cover rounded-lg"
+              />
             </div>
             <div className="w-full">
               <h3 className="leading-12 mb-2 text-white">
                 <div className="lg:flex md:flex justify-between">
                   <div className="text-xl font-semibold mt-4">
-                    
-                    {
-                      metaData.current_token_data.token_name.slice(0, 4) === "ipfs" ? (
-                        <div>
-                          {metaData.current_token_data.token_name.slice(0, 4)}...{metaData.current_token_data.token_name.slice(-4)}
-                        </div>
-                      ):(
-                        <div>
-                        {metaData.current_token_data.token_name}
-                        </div>
-                      )
-                    }
-                    
+                    {metaData.current_token_data.token_name}
                   </div>
                 </div>
               </h3>
@@ -165,20 +170,25 @@ const NftdataCard: React.FC<ReviewCardProps> = ({
                 </div>
               </div>
 
-              {attributes && (
-                <div className="flex-wrap flex gap-2 text-xs text-white rounded-full px-4 py-2 mt-4" style={{backgroundColor:'#0162FF'}}>
-                  <div>Role: {attributes.Role}</div>
-                  <div className="ml-4">Agility: {attributes.Agility}</div>
-                  <div className="ml-4">Strength: {attributes.Strength}</div>
-                  <div>Endurance: {attributes.Endurance}</div>
-                  <div className="ml-4">Intelligence: {attributes.Intelligence}</div>
-                  </div>
-              )}
+              {attributes && chainSymbol === 'sol' && (
+          <div className="flex-wrap flex gap-2 text-xs text-white justify-center  rounded-full px-4 py-2 mt-4" style={{backgroundColor:'#0162FF'}}>
+            {attributes.map((attr, index) => (
+              <div key={index} className="">{attr.value}</div>
+            ))}
+          </div>
+        )}
+
+        {attributes && chainSymbol !== 'sol' && (
+          <div className="flex-wrap flex gap-2 text-xs text-white  rounded-full px-4 py-2 mt-4" style={{backgroundColor:'#0162FF'}}>
+            {Object.entries(attributes).map(([key, value]) => (
+              <div key={key} className="ml-4">{key}: {value.toString()}</div>
+            ))}
+          </div>
+        )}
             </div>
           </div>
         </div>
       </div>
-      {/* </Link> */}
     </div>
   );
 };

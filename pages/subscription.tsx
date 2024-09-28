@@ -25,6 +25,8 @@ import { saveAs } from "file-saver";
 const envcollectionid = process.env.NEXT_PUBLIC_COLLECTIONID;
 const graphqlaptos = process.env.NEXT_PUBLIC_GRAPHQL_APTOS;
 import Login from "../components/loginComponent";
+import UserNFTs from "../components/UserNFTs";
+import fetchUserNFTs from "../components/UserNFTs";
 
 export interface FlowIdResponse {
   eula: string;
@@ -58,7 +60,7 @@ const isSendableNetwork = (connected, network) => {
 };
 
 const Subscription = () => {
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [buttonset, setbuttonset] = useState<boolean>(false);
   const [projectsData, setprojectsData] = useState<any>(null);
   const [nftdata, setnftdata] = useState<any>(null);
@@ -77,6 +79,9 @@ const Subscription = () => {
   const { account, connected, network, signMessage } = useWallet();
   const router = useRouter();
   const [clientUUID, setClientUUID] = useState<string>("");
+
+  const [nftLoading, setNftLoading] = useState(true);
+  const [nftError, setNftError] = useState(null);
   let sendable = isSendableNetwork(connected, network?.name);
 
   const bg = {
@@ -105,6 +110,7 @@ const Subscription = () => {
   const [VpnName, setVpnName] = useState<string>("");
 
   const [regionname, setregionname] = useState<string>("");
+  
 
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -140,6 +146,41 @@ const Subscription = () => {
 
     return keys;
   };
+
+  const [isDataChecked, setIsDataChecked] = useState(false);
+  const loggedin = Cookies.get("erebrus_token");
+  const wallet = Cookies.get("erebrus_wallet");
+
+  useEffect(() => {
+    const chainSymbol = Cookies.get("Chain_symbol") || "sol";
+    
+    console.log("Redirection check:", {
+      loggedin,
+      loading,
+      isDataChecked,
+      nftLoading,
+      nftdata: nftdata?.length,
+      trialsubscriptiondata,
+      chainSymbol,
+      nftError
+    });
+  
+    if (loggedin && !loading && isDataChecked && !nftLoading) {
+      if (((nftdata && nftdata.length === 0) || !nftdata) && !trialsubscriptiondata && !nftError) {
+        console.log("Conditions met for redirection to /plans");
+        const redirectTimer = setTimeout(() => {
+          console.log("Redirecting to /plans");
+          router.push("/plans");
+        }, 1000); // 1 second delay
+  
+        return () => clearTimeout(redirectTimer);
+      } else {
+        setLoading(false);
+      }
+    }
+  }, [loggedin, loading, isDataChecked, nftLoading, nftdata, trialsubscriptiondata, nftError]);
+
+
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -241,26 +282,7 @@ const Subscription = () => {
     }
   };
 
-  const [isDataChecked, setIsDataChecked] = useState(false);
-  const loggedin = Cookies.get("erebrus_token");
-  const wallet = Cookies.get("erebrus_wallet");
 
-  useEffect(() => {
-    if (
-      loggedin &&
-      !loading &&
-      isDataChecked &&
-      !nftdata &&
-      !trialsubscriptiondata
-    ) {
-      const redirectTimer = setTimeout(() => {
-        router.push("/plans");
-      }, 1000); // 1 second delay
-
-      // Cleanup the timer if the component unmounts
-      return () => clearTimeout(redirectTimer);
-    }
-  }, [nftdata, trialsubscriptiondata, loading, isDataChecked]);
 
   useEffect(() => {
     if (
@@ -420,6 +442,27 @@ const Subscription = () => {
   //   // Update the selected region when the dropdown value changes
   //   setregion(e.target.value);
   // };
+  useEffect(() => {
+    const fetchNFTs = async () => {
+      if (wallet) {
+        setNftLoading(true);
+        setNftError(null);
+        try {
+          const chainSymbol = Cookies.get("Chain_symbol") || "sol"; // Default to "sol" if not set
+          const nfts = await fetchUserNFTs(wallet, chainSymbol);
+          setnftdata(nfts);
+        } catch (error) {
+          console.error("Error fetching NFTs:", error);
+          setNftError("Failed to fetch NFTs");
+        } finally {
+          setNftLoading(false);
+        }
+      }
+    };
+
+    fetchNFTs();
+  }, [wallet]);
+  
 
   const getAptosWallet = () => {
     if ("aptos" in window) {
@@ -721,6 +764,7 @@ const Subscription = () => {
     { id: "FI", region: "Finland" },
     { id: "GB", region: "United Kingdom" },
     { id: "AU", region: "Australia" },
+    { id: "DE", region: "Germany" },
     // Add more nodes as needed
   ];
   //form
@@ -849,10 +893,11 @@ const Subscription = () => {
                   {nftdata && (
                     <div className="w-1/2">
                       <NftdataContainer
-                        metaDataArray={nftdata}
-                        MyReviews={false}
-                        selectCollection={handleCollectionClick}
-                      />
+                  metaDataArray={nftdata}
+                  MyReviews={false}
+                  selectCollection={handleCollectionClick}
+                  chainSymbol={Cookies.get("Chain_symbol") || "sol"} // Pass the chainSymbol here
+                />
                     </div>
                   )}
 
