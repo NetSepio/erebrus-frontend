@@ -1,8 +1,9 @@
 'use client'
 
 import React, { useState, useRef, FormEvent, ChangeEvent } from 'react';
-import { FiUploadCloud, FiDownload, FiShare2, FiX, FiCopy, FiCheck } from 'react-icons/fi';
+import { FiUploadCloud, FiDownload, FiShare2, FiX, FiCopy, FiCheck,FiFolder } from 'react-icons/fi';
 import { v4 as uuidv4 } from 'uuid';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const PUBLISHER_URL = 'https://publisher-devnet.walrus.space';
 const AGGREGATOR_URL = 'https://aggregator-devnet.walrus.space';
@@ -24,6 +25,7 @@ export default function FileStorage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
     const [shareLink, setShareLink] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -111,8 +113,28 @@ export default function FileStorage() {
     setCopied(false);
   };
   return (
-    <div className="bg-[#202333] border border-[#0162FF] rounded-3xl p-6 w-full h-[400px] flex flex-col">
-      <h2 className="text-2xl font-semibold text-white mb-4">File Storage</h2>
+    <div className="relative">
+    <motion.button
+      onClick={() => setIsOpen(!isOpen)}
+      className="flex items-center space-x-2 bg-gradient-to-r from-[#0162FF] to-[#0051D9] text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out"
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+    >
+      <FiFolder className="text-xl" />
+      <span className="font-semibold">File Storage</span>
+    </motion.button>
+
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          transition={{ duration: 0.3 }}
+          className="absolute top-0 right-full mr-4 w-[400px] z-10"
+        >
+          <div className="bg-[#202333] border border-[#0162FF] rounded-3xl p-6 w-full h-[500px] flex flex-col shadow-2xl">
+            <h2 className="text-2xl font-semibold text-white mb-4">File Storage</h2>
       
       <div 
         className="flex-shrink-0 flex flex-col items-center justify-center border-2 border-dashed border-[#0162FF] rounded-xl p-6 mb-4 cursor-pointer"
@@ -198,5 +220,9 @@ export default function FileStorage() {
 
       {error && <p className="text-red-500 mt-2">{error}</p>}
     </div>
+    </motion.div>
+      )}
+      </AnimatePresence>
+      </div>
   );
 }

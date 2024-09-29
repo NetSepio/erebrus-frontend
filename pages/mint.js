@@ -251,7 +251,7 @@ const Mint = () => {
       const umiWithWallet = umi.use(walletAdapterIdentity(solanaWallet))
                                .use(mplTokenMetadata());
   
-      const metadataUri = "https://gateway.pinata.cloud/ipfs/QmUSmdkq3s77w9eMFJpnJaGdXjuCkmGSuBQn8KQkhwZQqT";
+      const metadataUri = "https://gateway.pinata.cloud/ipfs/QmX8Z8DT3vRSVyLyzTos1EVuTbWSgvWgCEPGL5vAgt95p4";
       console.log("Using metadata URI:", metadataUri);
   
       // Fetch and log the metadata to verify its contents
@@ -271,7 +271,7 @@ const Mint = () => {
       const mint = generateSigner(umiWithWallet);
       const { signature } = await createNft(umiWithWallet, {
         mint,
-        name: "Erebrus VPN NFT",
+        name: "Erebrus Community NFT",
         symbol: "EVPN",
         uri: metadataUri,
         sellerFeeBasisPoints: percentAmount(5.5), // 5.5% royalties

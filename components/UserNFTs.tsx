@@ -29,7 +29,7 @@ const fetchUserNFTs = async (userAddress: string, chainSymbol: string) => {
       const userNFTs = await metaplex.nfts().findAllByOwner({ owner: ownerPublicKey });
       console.log('All user NFTs:', userNFTs);
 
-      const erebrusNFTs = userNFTs.filter(nft => nft.name === "Erebrus VPN NFT").map(nft => ({
+      const erebrusNFTs = userNFTs.filter(nft => nft.name === "Erebrus Community NFT").map(nft => ({
         amount: 1,
         current_token_data: {
           token_name: nft.name,
