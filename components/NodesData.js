@@ -106,7 +106,7 @@ const NodesData = () => {
   const fetchNodesData = async () => {
     try {
       const response = await axios.get(
-       `https://gateway.erebrus.io/api/v1.0/nodes/all`,
+        `${EREBRUS_GATEWAY_URL}/api/v1.0/nodes/all`,
         {
           headers: {
             Accept: "application/json, text/plain, /",
