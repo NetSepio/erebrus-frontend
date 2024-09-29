@@ -4,20 +4,10 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { motion } from "framer-motion";
 import { AuthContext } from "../AuthContext";
-// import { useWallet } from "@aptos-labs/wallet-adapter-react";
-// import { WalletConnector } from "@aptos-labs/wallet-adapter-mui-design";
 import dynamic from "next/dynamic";
-import { Network } from "@aptos-labs/ts-sdk";
-import Button from "../components/Button";
 import { useRouter } from "next/router";
 import SingleSignerTransaction from "../components/transactionFlow/SingleSigner";
-const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
-const mynetwork = process.env.NEXT_PUBLIC_NETWORK;
-const networkSui = process.env.NEXT_PUBLIC_SUI_NETWORK_SUI;
-import { useAccount, useSignMessage } from "wagmi";
 import { ConnectButton, useWallet, addressEllipsis } from "@suiet/wallet-kit";
-
-import { useWallet as solUseWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { useAptosWallet } from "./Login/aptos";
@@ -26,8 +16,9 @@ import { useEthWallet } from "./Login/ethereum";
 import { useSolWallet } from "./Login/solana";
 import { usePeaqWallet } from "./Login/peaq";
 import { handleLoginClick } from "./Login/googleLogin";
-
+import ChainSelector from "./Login/ChainSelector";
 import QRCodeSVG from "qrcode.react";
+import UserDropdown from "./Login/UserDropdown"
 
 const networkSol = WalletAdapterNetwork.Devnet;
 
@@ -44,9 +35,6 @@ const WalletSelectorAntDesign = dynamic(
   }
 );
 
-// const isSendableNetwork = (connected, network) => {
-//   return connected && network?.toLowerCase() === mynetwork.toLowerCase() || networkSui || networkSol;
-// };
 
 const Navbar = ({ isHome }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -54,18 +42,13 @@ const Navbar = ({ isHome }) => {
   const [signature, setSignature] = useState("");
   const [challengeId, setChallengeId] = useState("");
   const [showPasetoQR, setShowPasetoQR] = useState("");
-  // const [showsignbutton, setshowsignbutton] = useState(false);
   const [link, setlink] = useState("");
   const { isSignedIn, setIsSignedIn } = useContext(AuthContext);
   const [avatarUrl, setAvatarUrl] = useState("");
   const [chainsym, setchainsym] = useState("apt");
   const [hidefilter, setHideFilter] = useState(false);
-  const [connectedAddress, setConnectedAddress] = useState("");
-  const [sendable, setSendable] = useState(false);
-  const [requiredNetwork, setRequiredNetwork] = useState(false);
   const [showExplorerDropdown, setShowExplorerDropdown] = useState(false);
 
-  //--------------------------------gpt --------------------------------------------------------------------
   const {
     account: aptosAccount,
     connected: aptosConnected,
@@ -127,19 +110,21 @@ const Navbar = ({ isHome }) => {
   ]);
   console.log("sui connected", status == "connected");
 
-  // const handleSignMessage = (chainsym) => {
-  //   if (chainsym === "aptos") {
-  //     onSignMessage(chainsym, setshowsignbutton);
-  //   } else if (chainsym === "sui") {
-  //     onSignMessageSui(chainsym, setshowsignbutton);
-  //   } else if (chainsym === "eth") {
-  //     onSignMessageEth(chainsym, setshowsignbutton);
-  //   } else if (chainsym === "sol") {
-  //     onSignMessageSol(chainsym, setshowsignbutton);
-  //   }
-  // };
-  // //=------------------------------------------------------------------------
 
+  useEffect(() => {
+    const token = Cookies.get("erebrus_token");
+    if (token == null) {
+      setshowchainbutton(true);
+    }
+  }, []);
+
+  const handleChainChange = (newChainSym) => {
+    setchainsym(newChainSym);
+    // Add any other logic you need when the chain changes
+  };
+
+
+  
   const handleClick = () => {
     setHideFilter(!hidefilter);
   };
@@ -304,56 +289,8 @@ const Navbar = ({ isHome }) => {
 
   const [selectedOption, setSelectedOption] = useState("Aptos"); // Set default to 'Chain 1'
   const [selectedLogo, setSelectedLogo] = useState("aptosicon");
-  const options = ["Aptos", "Manta", "Peaq", "Solana", "Sui", "Google"];
-  const optionssym = ["apt", "evm", "peaq", "sol", "sui", "google"];
-  const chainimg = [
-    "aptosicon",
-    "mantaicon",
-    "peaqicon",
-    "solanaicon",
-    "suiicon",
-    "googleicon",
-  ];
 
-  const handleOptionSelect = (option, index) => {
-    setSelectedOption(option);
-    setSelectedLogo(chainimg[index]);
-    setSelectedDropwdown(false); // Close the dropdown after selecting an option
-  };
-
-  useEffect(() => {
-    const getchainsym = Cookies.get("Chain_symbol");
-    if (getchainsym != null) {
-      if (getchainsym == "apt") {
-        setSelectedOption("Aptos");
-        setSelectedLogo("aptosicon")
-      }
-      if (getchainsym == "evm") {
-        setSelectedOption("Manta");
-         setSelectedLogo("mantaicon")
-      }
-      if (getchainsym == "peaq") {
-        setSelectedOption("Peaq");
-        setSelectedLogo("peaqicon")
-      }
-      if (getchainsym == "sui") {
-        setSelectedOption("Sui");
-        setSelectedLogo("suiicon")
-      }
-      if (getchainsym == "sol") {
-        setSelectedOption("Solana");
-        setSelectedLogo("solanaicon")
-      }
-
-      if (getchainsym == "google") {
-        setSelectedOption("Google");
-        setSelectedLogo("googleicon")
-      }
-    } else {
-      setSelectedOption("Aptos");
-      setSelectedLogo("aptosicon")
-    }
-  }, []);
+ 
 
   const handleProfileClick = () => {
     setSelectedDropwdown(false);
@@ -507,59 +444,8 @@ const Navbar = ({ isHome }) => {
             {/* dropdown */}
 
             {showchainbutton && (
-              <div className="relative z-10">
-                <button
-                  className="block w-full px-10 py-2 text-left rounded-full text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  style={{ backgroundColor: "#253776" }}
-                  onClick={() => {
-                    setSelectedDropwdown(!selectedDropwdown);
-                    setSelectedOption(
-                      selectedOption ? selectedOption : "Chains"
-                    );
-                  }} // Toggle dropdown on button click
-                >
-                  <div className="flex gap-2">
-                    <img src={`/${selectedLogo}.png`} className="w-6 h-6" />
-                    {selectedOption || "Select Chain"}{" "}
-                    <img src="/chainarrow.png" />
-                  </div>
-                </button>
-                {selectedDropwdown && (
-                  <div
-                    className="absolute right-0 mt-2 w-44 origin-top-right rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                    style={{ background: 'linear-gradient(to bottom, rgba(32, 37, 58, 1), rgba(66, 79, 127, 1))' }}
-                  >
-                    <div className="py-1 z-10">
-                      {options.map((option, index) => (
-                        <button
-                          key={index}
-                          className="block w-full text-left px-4 py-2 text-lg text-white hover:bg-gray-900"
-                          onClick={() => {
-                            handleOptionSelect(option, index);
-                            setchainsym(optionssym[index]);
-                            Cookies.set("Chain_symbol", optionssym[index]);
-                          }}
-                        >
-                          <div className="flex gap-4">
-                            <span>
-                              <img
-                                src={`/${chainimg[index]}.png`}
-                                className={`${
-                                  chainimg[index] === "suiicon"
-                                    ? "w-5 ml-1 mt-1"
-                                    : "w-6 mt-0.5"
-                                }`}
-                              />
-                            </span>
-                            <span>{option}</span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+            <ChainSelector onChainChange={handleChainChange} />
+          )}
 
             {hidefilter && (
               <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-900 bg-opacity-50">
@@ -763,93 +649,18 @@ const Navbar = ({ isHome }) => {
                 )}
               
               </div>
-            ) : (
+            ) :  (
               <div
                 className="lg:mt-0 mt-4 z-50 rounded-xl flex gap-4"
                 style={{ color: "#0162FF" }}
               >
                 {avatarUrl && (
-                  // <Link href="/profile">
-                  <div className="relative z-10">
-                    <button
-                      onClick={() => {
-                        setSelectedDropwdown(!selectedDropwdown);
-                        setSelectedOption(
-                          selectedOption ? selectedOption : "Chains"
-                        );
-                      }}
-                    >
-                      <img
-                        src={avatarUrl}
-                        alt="Avatar"
-                        className="w-10 ml-auto"
-                      />
-                    </button>
-
-                    {selectedDropwdown && (
-                      <div
-                        className="absolute right-0 mt-2 w-44 origin-top-right rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                        style={{ background: 'linear-gradient(to bottom, rgba(32, 37, 58, 1), rgba(66, 79, 127, 1))' }}
-                      >
-                        <div className="py-1 z-10">
-                          <Link href="/profile">
-                            <div
-                              className="block w-full text-left px-4 py-2 text-lg text-white hover:bg-gray-900"
-                              onClick={handleProfileClick}
-                            >
-                              <div className="flex gap-4">
-                                <span></span>
-                                <span>Profile</span>
-                              </div>
-                            </div>
-                          </Link>
-
-                          <Link href="/usernodes">
-                            <div
-                              className="block w-full text-left px-4 py-2 text-lg text-white hover:bg-gray-900"
-                              onClick={handleProfileClick}
-                            >
-                              <div className="flex gap-4">
-                                <span></span>
-                                <span>My Nodes</span>
-                              </div>
-                            </div>
-                          </Link>
-
-                          {paseto && (
-                            <>
-                          
-                              <button
-                                className="block w-full text-left px-4 py-2 text-lg text-white hover:bg-gray-900"
-                               
-                              >
-                                <div
-                                  className="flex gap-4"
-                                  onClick={handlePasetoClick}
-                                >
-                                  <span></span>
-                                  <span>Mobile Auth</span>
-                                </div>
-                              </button>
-                            </>
-                          )}
-
-                          <div className="block w-full text-left px-4 py-2 text-lg text-white hover:bg-gray-900">
-                            <div className="flex gap-4">
-                              <span></span>
-                              <button
-                                onClick={handleDeleteCookie}
-                              
-                              >
-                                Log out
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  // </Link>
+                  <UserDropdown
+                    avatarUrl={avatarUrl}
+                    handlePasetoClick={handlePasetoClick}
+                    handleDeleteCookie={handleDeleteCookie}
+                    paseto={paseto}
+                  />
                 )}
               </div>
             )}
