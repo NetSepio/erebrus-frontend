@@ -27,6 +27,8 @@ const graphqlaptos = process.env.NEXT_PUBLIC_GRAPHQL_APTOS;
 import Login from "../components/loginComponent";
 import UserNFTs from "../components/UserNFTs";
 import fetchUserNFTs from "../components/UserNFTs";
+import Mintbox from "../components/Mintbox";
+
 
 export interface FlowIdResponse {
   eula: string;
@@ -901,6 +903,9 @@ const Subscription = () => {
                     </div>
                   )}
 
+                 
+
+
                   {trialsubscriptiondata && (
                     <div
                       className="lg:w-1/2  w-3/4 absolute rounded-3xl mt-2 mb-2 lg:relative min-h-96"
@@ -988,7 +993,7 @@ const Subscription = () => {
                     </div>
                   )}
                    </div>
-                  
+                  <Mintbox/>
                   <div className="h-auto ">
                     <FileStorage />
                   </div>

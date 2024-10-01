@@ -2,7 +2,7 @@ import Link from "next/link";
 // import { removePrefix } from "../utils/ipfsUtil";
 import React, {useEffect} from "react";
 import axios from "axios";
-// import eye2 from "../public/eye2.png";
+import { FaPaperclip } from "react-icons/fa";
 import Image from "next/image";
 
 interface ReviewCardProps {
@@ -139,7 +139,17 @@ const NftdataCard: React.FC<ReviewCardProps> = ({
 
   return (
     <div className="w-full cursor-pointer rounded-3xl" style={{ backgroundColor:'#202333', border: '1px solid #0162FF'}}>
-      <div className="w-full h-full rounded-lg p-6">
+      <div className="w-full h-full rounded-lg p-6 relative">
+        {chainSymbol === 'sol' && (
+          <div className="absolute top-2 left-2 flex items-center">
+            <img
+              src="./solanaicon.png" // Update with the correct path to your Solana icon
+              alt="Solana Icon"
+              className="w-10 h-10 rounded-full"
+            />
+           
+          </div>
+        )}
         <div>
           <div className="flex flex-col">
             <div className="">
@@ -159,6 +169,14 @@ const NftdataCard: React.FC<ReviewCardProps> = ({
                   <div className="text-xl font-semibold mt-4">
                     {metaData.current_token_data.token_name}
                   </div>
+                  <a
+              href={`https://explorer.solana.com/tx/dyu7uefnn2Y2bKCDu6uTP4pVBPcBu4RPwsV522rjtbR6B2BJyA4vWC4eLGosDXqPzMpXsaBgzbE8VjqMkaYgf6g?cluster=devnet  -- <@748192618659315753>`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-5 text-white"
+            >
+              <FaPaperclip size={20} />
+            </a>
                 </div>
               </h3>
 
@@ -171,20 +189,23 @@ const NftdataCard: React.FC<ReviewCardProps> = ({
               </div>
 
               {attributes && chainSymbol === 'sol' && (
-          <div className="flex-wrap flex gap-2 text-xs text-white justify-center  rounded-full px-4 py-2 mt-4" style={{backgroundColor:'#0162FF'}}>
-            {attributes.map((attr, index) => (
-              <div key={index} className="">{attr.value}</div>
-            ))}
-          </div>
-        )}
+                
+                <div className="flex-wrap flex gap-2 text-xs text-white justify-center rounded-full px-4 py-2 mt-4" style={{backgroundColor:'#0162FF'}}>
+                  {attributes.map((attr, index) => (
+                    <div key={index} className="">{attr.value}</div>
+                  ))}
+                  
+                </div>
+                
+              )}
 
-        {attributes && chainSymbol !== 'sol' && (
-          <div className="flex-wrap flex gap-2 text-xs text-white  rounded-full px-4 py-2 mt-4" style={{backgroundColor:'#0162FF'}}>
-            {Object.entries(attributes).map(([key, value]) => (
-              <div key={key} className="ml-4">{key}: {value.toString()}</div>
-            ))}
-          </div>
-        )}
+              {attributes && chainSymbol !== 'sol' && (
+                <div className="flex-wrap flex gap-2 text-xs text-white rounded-full px-4 py-2 mt-4" style={{backgroundColor:'#0162FF'}}>
+                  {Object.entries(attributes).map(([key, value]) => (
+                    <div key={key} className="ml-4">{key}: {value.toString()}</div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
