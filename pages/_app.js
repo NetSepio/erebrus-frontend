@@ -19,10 +19,11 @@ import {Peaq} from "../components/peaq.ts"
 import '../styles/globals.css';
 import Banner from "../components/Banner.tsx" 
 import Link from 'next/link';
+import { metaMask } from "wagmi/connectors";
 
 
 
-const activeChainId = ChainId.Mumbai;
+
 const erebrus_wallet = Cookies.get("erebrus_wallet");
 const queryClient = new QueryClient();
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
@@ -68,6 +69,9 @@ const config = defaultWagmiConfig({
   chains,
   projectId,
   metadata,
+  connectors: [
+    metaMask({ chains })
+  ],
 });
 
 createWeb3Modal({
@@ -75,6 +79,8 @@ createWeb3Modal({
   projectId,
   enableAnalytics: true,
   enableOnramp: true,
+  defaultChain: chains[0],
+  allowUnsupportedChain: true
 });
 
 export default function App({ Component, pageProps }) {
@@ -84,7 +90,7 @@ export default function App({ Component, pageProps }) {
   return (
    
     <AppContext>
-      <ThirdwebProvider desiredChainId={chains}>
+      <ThirdwebProvider >
         <AuthProvider>
           <WagmiProvider config={config}>
             <QueryClientProvider client={queryClient}>
