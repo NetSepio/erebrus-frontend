@@ -45,7 +45,7 @@ const Navbar = ({ isHome }) => {
   const [link, setlink] = useState("");
   const { isSignedIn, setIsSignedIn } = useContext(AuthContext);
   const [avatarUrl, setAvatarUrl] = useState("");
-  const [chainsym, setchainsym] = useState("apt");
+  const [chainsym, setchainsym] = useState("sol");
   const [hidefilter, setHideFilter] = useState(false);
   const [showExplorerDropdown, setShowExplorerDropdown] = useState(false);
 
@@ -120,9 +120,9 @@ const Navbar = ({ isHome }) => {
 
   const handleChainChange = (newChainSym) => {
     setchainsym(newChainSym);
+    Cookies.set("Chain_symbol", newChainSym);
     // Add any other logic you need when the chain changes
   };
-
 
   
   const handleClick = () => {
@@ -138,13 +138,11 @@ const Navbar = ({ isHome }) => {
   const token = Cookies.get("erebrus_token");
 
   useEffect(() => {
-    if (solAccount) {
-      // Update the cookie with the new address
+    if (chainsym === "sol" && solAccount) {
       Cookies.set("erebrus_wallet", solAccount);
-
       OnSignMessageSol();
     }
-  }, [solAccount]);
+  }, [solAccount, chainsym]);
 
   useEffect(() => {
     const erebrus_wallet = Cookies.get("erebrus_wallet");
@@ -177,7 +175,7 @@ const Navbar = ({ isHome }) => {
 
     // Update the cookie with the new symbol
     if (getchainsym == null) {
-      Cookies.set("Chain_symbol", "apt");
+      Cookies.set("Chain_symbol", "sol");
     }
   }, []);
 
@@ -289,7 +287,6 @@ const Navbar = ({ isHome }) => {
 
   const [selectedOption, setSelectedOption] = useState("Aptos"); // Set default to 'Chain 1'
   const [selectedLogo, setSelectedLogo] = useState("aptosicon");
-
  
 
   const handleProfileClick = () => {
@@ -610,7 +607,14 @@ const Navbar = ({ isHome }) => {
                   </button>
                 )}
                 {chainsym === "evm" && (
-                  <button>
+                  <button onClick={() => {
+                    // Logic to connect to MetaMask
+                    if (window.ethereum) {
+                      window.ethereum.request({ method: 'eth_requestAccounts' });
+                    } else {
+                      alert('MetaMask is not installed!');
+                    }
+                  }}>
                     <w3m-button />
                   </button>
                 )}
