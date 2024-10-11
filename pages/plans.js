@@ -155,12 +155,19 @@ const Plans = () => {
               Start Free Trial
             </button>
             <button
-              className="bg-white text-black text-base sm:text-lg border-2 border-white px-4 py-2 rounded-[10px] w-full sm:w-1/2 focus:outline-none"
-            >
-              <Link href="/mint">
-                Mint NFT Now
-              </Link>
-            </button>
+    className={`bg-white text-black text-base sm:text-lg border-2 border-white px-4 py-2 rounded-[10px] w-full sm:w-1/2 focus:outline-none ${
+      chainSym === 'sol' ? 'opacity-50 cursor-not-allowed' : ''
+    }`}
+    disabled={chainSym === 'sol'}
+  >
+    {chainSym !== 'sol' ? (
+      <Link href="/mint">
+        Mint NFT Now
+      </Link>
+    ) : (
+      <span>Mint NFT Now</span>
+    )}
+  </button>
           </div>
         </div>
       </div>
