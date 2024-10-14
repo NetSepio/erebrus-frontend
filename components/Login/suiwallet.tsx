@@ -59,6 +59,7 @@ const erebrusWallet =getwallet();
   const authenticationData = {
     flowId: nonce,
     signatureSui:result.signature,
+    chainName : "sui"
    
 
   };

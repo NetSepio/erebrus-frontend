@@ -5,7 +5,8 @@ const COLLECTION_IDS = {
   DL_NFT: '5FusHaKEKjfKsmQwXNrhFcFABGGxu7iYCdbvyVSRe3Ri',
   SOLANA_MONKEY_BUSINESS_GEN2: 'SMBtHCCC6RYRutFEPb4gZqeBLUZbMNhRKaMKZZLHi7W',
   SOLANA_MONKEY_BUSINESS_GEN3: '8Rt3Ayqth4DAiPnW9MDFi63TiQJHmohfTWLMQFHi4KZH',
-  SHARKX: '5f2PvbmKd9pRLjKdMr8nrK8fNisLi7irjB6X5gopnKpB' 
+  SHARKX: '5f2PvbmKd9pRLjKdMr8nrK8fNisLi7irjB6X5gopnKpB',
+  Superteam_Member_NFT :'5sDBuHZ7zDzZ2Px1YQS3ELxoFja5J66vpKKcW84ndRk7' 
 };
 
 const fetchUserNFTs = async (userAddress: string, chainSymbol: string) => {
@@ -40,7 +41,8 @@ const fetchUserNFTs = async (userAddress: string, chainSymbol: string) => {
         nft.collection?.address.toString() === COLLECTION_IDS.DL_NFT ||
         nft.collection?.address.toString() === COLLECTION_IDS.SOLANA_MONKEY_BUSINESS_GEN2 ||
         nft.collection?.address.toString() === COLLECTION_IDS.SOLANA_MONKEY_BUSINESS_GEN3 ||
-        nft.collection?.address.toString() === COLLECTION_IDS.SHARKX
+        nft.collection?.address.toString() === COLLECTION_IDS.SHARKX ||
+        nft.collection?.address.toString() === COLLECTION_IDS.Superteam_Member_NFT
       ).map(nft => ({
         amount: 1,
         current_token_data: {
