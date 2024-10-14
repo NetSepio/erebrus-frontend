@@ -87,6 +87,7 @@ export const useSolWallet = (setshowsignbutton) => {
           pubKey: publicKey,
           walletAddress: publicKey,
           message: message,
+          chainName : "solana"
         };
 
         const authenticateApiUrl = `${REACT_APP_GATEWAY_URL}api/v1.0/authenticate?walletAddress=${publicKey}&chain=sol`;
@@ -110,7 +111,7 @@ export const useSolWallet = (setshowsignbutton) => {
         Cookies.set("erebrus_wallet", publicKey, { expires: 7 });
         Cookies.set("erebrus_userid", userId, { expires: 7 });
 
-        window.location.reload();
+        // window.location.reload();
       } catch (error) {
         console.error(error);
         setshowsignbutton(true);

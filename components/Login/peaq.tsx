@@ -44,6 +44,7 @@ export const usePeaqWallet = () => {
                 const authenticationData = {
                   flowId: nonce,
                   signature: data,
+                  chainName : "peaq"
                 };
 
                 const authenticateApiUrl = `${REACT_APP_GATEWAY_URL}api/v1.0/authenticate?chain=evm`;

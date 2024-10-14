@@ -44,6 +44,7 @@ export const useAptosWallet = () => {
           flowId: nonce,
           signature: `${signaturewallet}`,
           pubKey: publicKey,
+          chainName : "aptos"
         };
 
         const authenticateApiUrl = `${REACT_APP_GATEWAY_URL}api/v1.0/authenticate?chain=${chainsym}`;
@@ -66,7 +67,7 @@ export const useAptosWallet = () => {
         Cookies.set("erebrus_userid", userId, { expires: 7 });
         Cookies.set("Chain_symbol", chainsym, { expires: 7 });
 
-        window.location.reload();
+        // window.location.reload();
       } catch (error) {
         console.error(error);
         setshowsignbuttonaptos(true);

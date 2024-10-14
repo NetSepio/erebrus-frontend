@@ -44,6 +44,7 @@
                   const authenticationData = {
                     flowId: nonce,
                     signature: data,
+                    chainName : "manta"
                   };
 
                   const authenticateApiUrl = `${REACT_APP_GATEWAY_URL}api/v1.0/authenticate?chain=${chainsym}`;
