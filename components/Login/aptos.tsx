@@ -67,7 +67,7 @@ export const useAptosWallet = () => {
         Cookies.set("erebrus_userid", userId, { expires: 7 });
         Cookies.set("Chain_symbol", chainsym, { expires: 7 });
 
-        // window.location.reload();
+        window.location.reload();
       } catch (error) {
         console.error(error);
         setshowsignbuttonaptos(true);
