@@ -1,7 +1,7 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import { Metaplex } from '@metaplex-foundation/js';
 
-const ALLOWED_SYMBOLS = ['SMB', 'sharx', '$TEAM','DEAN', 'SMB Gen3', "EVPN"];
+const ALLOWED_NAMES = ['SMB Gen2', 'sharx by sharky.fi', 'Superteam Member NFT', 'Deanslist', 'SMB Gen3', "Erebrus Community NFT #001"];
 
 const fetchUserNFTs = async (userAddress: string, chainSymbol: string) => {
   if (!userAddress) {
@@ -32,7 +32,7 @@ const fetchUserNFTs = async (userAddress: string, chainSymbol: string) => {
       console.log('All user NFTs:', userNFTs);
 
       const filteredNFTs = userNFTs.filter(nft => 
-        ALLOWED_SYMBOLS.includes(nft.symbol)
+        ALLOWED_NAMES.includes(nft.name)
       ).map(nft => ({
         amount: 1,
         current_token_data: {
@@ -48,7 +48,7 @@ const fetchUserNFTs = async (userAddress: string, chainSymbol: string) => {
         },
       }));
 
-      console.log('Filtered NFTs with specified symbols:', filteredNFTs);
+      console.log('Filtered NFTs with specified Names:', filteredNFTs);
 
       return filteredNFTs;
     } else {
