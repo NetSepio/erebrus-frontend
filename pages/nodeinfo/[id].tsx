@@ -178,7 +178,7 @@ const NodeDetail: React.FC = () => {
       <img src="/ellipse1.png" className="w-20 h-20 md:w-40 md:h-40" />
       <div className="absolute inset-0 flex flex-col items-center justify-center text-xs md:text-base">
         <div className="text-sm md:text-lg font-semibold">{node.uploadSpeed}</div>
-        <div className="text-xs md:text-sm">Kbps Speed</div>
+        <div className="text-xs md:text-sm">Mbps Speed</div>
       </div>
     </div>
     <div className="mt-2 text-xs md:text-base">Upload</div>
@@ -189,7 +189,7 @@ const NodeDetail: React.FC = () => {
       <img src="/ellipse1.png" className="w-20 h-20 md:w-40 md:h-40" />
       <div className="absolute inset-0 flex flex-col items-center justify-center text-xs md:text-base">
         <div className="text-sm md:text-lg font-semibold">{node.downloadSpeed}</div>
-        <div className="text-xs md:text-sm">Kbps Speed</div>
+        <div className="text-xs md:text-sm">Mbps Speed</div>
       </div>
     </div>
     <div className="mt-2 text-xs md:text-base">Download</div>

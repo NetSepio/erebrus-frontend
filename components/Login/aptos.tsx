@@ -44,6 +44,7 @@ export const useAptosWallet = () => {
           flowId: nonce,
           signature: `${signaturewallet}`,
           pubKey: publicKey,
+          chainName : "aptos"
         };
 
         const authenticateApiUrl = `${REACT_APP_GATEWAY_URL}api/v1.0/authenticate?chain=${chainsym}`;

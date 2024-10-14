@@ -87,6 +87,7 @@ export const useSolWallet = (setshowsignbutton) => {
           pubKey: publicKey,
           walletAddress: publicKey,
           message: message,
+          chainName : "solana"
         };
 
         const authenticateApiUrl = `${REACT_APP_GATEWAY_URL}api/v1.0/authenticate?walletAddress=${publicKey}&chain=sol`;
