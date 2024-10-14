@@ -1,13 +1,7 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import { Metaplex } from '@metaplex-foundation/js';
 
-const COLLECTION_IDS = {
-  DL_NFT: '5FusHaKEKjfKsmQwXNrhFcFABGGxu7iYCdbvyVSRe3Ri',
-  SOLANA_MONKEY_BUSINESS_GEN2: 'SMBtHCCC6RYRutFEPb4gZqeBLUZbMNhRKaMKZZLHi7W',
-  SOLANA_MONKEY_BUSINESS_GEN3: '8Rt3Ayqth4DAiPnW9MDFi63TiQJHmohfTWLMQFHi4KZH',
-  SHARKX: '5f2PvbmKd9pRLjKdMr8nrK8fNisLi7irjB6X5gopnKpB',
-  Superteam_Member_NFT :'5sDBuHZ7zDzZ2Px1YQS3ELxoFja5J66vpKKcW84ndRk7' 
-};
+const ALLOWED_SYMBOLS = ['SMB', 'sharx', '$TEAM','DEAN', 'SMB Gen3', "EVPN"];
 
 const fetchUserNFTs = async (userAddress: string, chainSymbol: string) => {
   if (!userAddress) {
@@ -38,11 +32,7 @@ const fetchUserNFTs = async (userAddress: string, chainSymbol: string) => {
       console.log('All user NFTs:', userNFTs);
 
       const filteredNFTs = userNFTs.filter(nft => 
-        nft.collection?.address.toString() === COLLECTION_IDS.DL_NFT ||
-        nft.collection?.address.toString() === COLLECTION_IDS.SOLANA_MONKEY_BUSINESS_GEN2 ||
-        nft.collection?.address.toString() === COLLECTION_IDS.SOLANA_MONKEY_BUSINESS_GEN3 ||
-        nft.collection?.address.toString() === COLLECTION_IDS.SHARKX ||
-        nft.collection?.address.toString() === COLLECTION_IDS.Superteam_Member_NFT
+        ALLOWED_SYMBOLS.includes(nft.symbol)
       ).map(nft => ({
         amount: 1,
         current_token_data: {
@@ -54,10 +44,11 @@ const fetchUserNFTs = async (userAddress: string, chainSymbol: string) => {
             cdn_image_uri: nft.json?.image || '',
           },
           collection: nft.collection?.address.toString(),
+          symbol: nft.symbol,
         },
       }));
 
-      console.log('Filtered NFTs from specified collections:', filteredNFTs);
+      console.log('Filtered NFTs with specified symbols:', filteredNFTs);
 
       return filteredNFTs;
     } else {
