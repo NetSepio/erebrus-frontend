@@ -92,18 +92,21 @@ const NftdataCard: React.FC<ReviewCardProps> = ({
 
   useEffect(() => {
     const fetchMetaData = async () => {
-      if (chainSymbol === 'sol') {
-        // Handling for Solana NFTs
-        if (metaData?.current_token_data?.token_uri) {
-          try {
-            const response = await axios.get(metaData.current_token_data.token_uri);
-            const metadata = response.data;
-            console.log("Solana Metadata:", metadata);
-            setImageSrc(metadata?.image);
-            setAttributes(metadata?.attributes);
-          } catch (error) {
-            console.error("Error fetching Solana metadata:", error);
-          }
+      if (chainSymbol === 'sol' && metaData?.current_token_data?.token_uri) {
+        try {
+          const response = await axios.get(metaData.current_token_data.token_uri);
+          const metadata = response.data;
+          console.log("Solana Metadata:", metadata);
+          setImageSrc(metadata.image);
+          setAttributes({
+            name: metadata.name,
+            description: metadata.description,
+            symbol: metadata.symbol,
+            externalUrl: metadata.external_url,
+            collection: metadata.collection,
+          });
+        } catch (error) {
+          console.error("Error fetching Solana metadata:", error);
         }
       } else {
         // Existing code for Aptos NFTs
@@ -167,10 +170,10 @@ const NftdataCard: React.FC<ReviewCardProps> = ({
               <h3 className="leading-12 mb-2 text-white">
                 <div className="lg:flex md:flex justify-between">
                   <div className="text-xl font-semibold mt-4">
-                    {metaData.current_token_data.token_name}
+                  {attributes?.name || metaData.current_token_data.token_name}
                   </div>
                   <a
-              href={`https://explorer.solana.com/tx/dyu7uefnn2Y2bKCDu6uTP4pVBPcBu4RPwsV522rjtbR6B2BJyA4vWC4eLGosDXqPzMpXsaBgzbE8VjqMkaYgf6g?cluster=devnet  -- <@748192618659315753>`}
+              href={attributes?.externalUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-5 text-white"
@@ -183,7 +186,7 @@ const NftdataCard: React.FC<ReviewCardProps> = ({
               <div className="rounded-xl">
                 <div className="text-sm text-white text-start flex mt-2">
                   <div className="">
-                    {metaData.current_token_data.description}
+                  {attributes?.description || metaData.current_token_data.description}
                   </div>
                 </div>
               </div>
@@ -191,11 +194,10 @@ const NftdataCard: React.FC<ReviewCardProps> = ({
               {attributes && chainSymbol === 'sol' && (
                 
                 <div className="flex-wrap flex gap-2 text-xs text-white justify-center rounded-full px-4 py-2 mt-4" style={{backgroundColor:'#0162FF'}}>
-                  {attributes.map((attr, index) => (
-                    <div key={index} className="">{attr.value}</div>
-                  ))}
-                  
-                </div>
+                <div>Symbol: {attributes.symbol}</div>
+                <div>Collection: {attributes.collection?.name}</div>
+                <div>Family: {attributes.collection?.family}</div>
+              </div>
                 
               )}
 
