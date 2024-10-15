@@ -58,9 +58,9 @@ const NodesData = () => {
   };
 
   const handleSort = (key) => {
-    console.log("in handle sort ")
+    // console.log("in handle sort ")
     setSortConfig((prevConfig) => {
-      console.log("in handle sort config ", prevConfig, sortConfig)
+      // console.log("in handle sort config ", prevConfig, sortConfig)
       const direction = prevConfig.key === key && prevConfig.direction === "ascending"
         ? "descending"
         : "ascending";
@@ -70,11 +70,11 @@ const NodesData = () => {
   };
   
   const handleSortChange = (value) => {
-    console.log("in handle sort change ");
+    // console.log("in handle sort change ");
     
     if (value) {
       handleSort(value);
-      console.log("in handle sort change done ");
+      // console.log("in handle sort change done ");
       setSortBy(value);
       setSortByDisplay(sortOptions[value]);
       setTimeout(() => {
@@ -124,7 +124,7 @@ const NodesData = () => {
         setUniqueRegionsCount(uniqueRegions.size);
       }
     } catch (error) {
-      console.error("Error fetching nodes data:", error);
+      // console.error("Error fetching nodes data:", error);
       setNodesData([]);
       setActiveNodesData([]);
       setUniqueRegionsCount(0);
