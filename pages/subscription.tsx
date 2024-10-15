@@ -451,7 +451,7 @@ const Subscription = () => {
         setNftError(null);
         try {
           const chainSymbol = Cookies.get("Chain_symbol") || "sol"; // Default to "sol" if not set
-          const nfts = await fetchUserNFTs(wallet, chainSymbol);
+          const nfts = await fetchUserNFTs(wallet);
           setnftdata(nfts);
         } catch (error) {
           console.error("Error fetching NFTs:", error);
@@ -693,7 +693,7 @@ const Subscription = () => {
           );
           setUniqueRegions(regions);
 
-          // console.log("erebrus nodes", payload);
+          console.log("erebrus nodes", payload);
         }
       } catch (error) {
         console.error("Error fetching nodes data:", error);
@@ -796,11 +796,11 @@ const Subscription = () => {
   };
 
   // Log activeNodesData and filtered result
-  // console.log("Current activeNodesData:", activeNodesData);
+  console.log("Current activeNodesData:", activeNodesData);
   const filteredNodes = activeNodesData.filter(
     (node) => node.region === regionname
   );
-  // console.log("Filtered nodes based on region:", filteredNodes, regionname);
+  console.log("Filtered nodes based on region:", filteredNodes, regionname);
 
   if (!loggedin) {
     return (
