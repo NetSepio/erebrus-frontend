@@ -451,7 +451,7 @@ const Subscription = () => {
         setNftError(null);
         try {
           const chainSymbol = Cookies.get("Chain_symbol") || "sol"; // Default to "sol" if not set
-          const nfts = await fetchUserNFTs(wallet, chainSymbol);
+          const nfts = await fetchUserNFTs(wallet);
           setnftdata(nfts);
         } catch (error) {
           console.error("Error fetching NFTs:", error);
