@@ -61,36 +61,36 @@ const fetchUserNFTs = async (chainSymbol: string) => {
       return filteredNFTs;
 
     } else if (chainSymbol === 'apt') {
-      const APTOS_GRAPHQL_ENDPOINT = process.env.NEXT_PUBLIC_APTOS_GRAPHQL_ENDPOINT;
+      const APTOS_GRAPHQL_ENDPOINT = process.env.NEXT_PUBLIC_GRAPHQL_APTOS;
       
       const query = `
-        query GetAccountNfts($address: String) {
-          current_token_ownerships_v2(
-            where: {owner_address: {_eq: $address}, amount: {_gt: "0"}}
-          ) {
-            current_token_data {
-              collection_id
-              largest_property_version_v1
-              current_collection {
-                collection_id
-                collection_name
-                description
-                creator_address
-                uri
-                __typename
-              }
-              description
-              token_name
-              token_data_id
-              token_standard
-              token_uri
-              __typename
-            }
-            owner_address
-            amount
-            __typename
-          }
-        }
+       query GetAccountNfts($address: String) {
+current_token_ownerships_v2(
+  where: {owner_address: {_eq: $address}, amount: {_gt: "0"}}
+) {
+  current_token_data {
+    collection_id
+    largest_property_version_v1
+    current_collection {
+      collection_id
+      collection_name
+      description
+      creator_address
+      uri
+      __typename
+    }
+    description
+    token_name
+    token_data_id
+    token_standard
+    token_uri
+    __typename
+  }
+  owner_address
+  amount
+  __typename
+}
+}
       `;
 
       const variables = { address: userAddress };
@@ -114,9 +114,8 @@ const fetchUserNFTs = async (chainSymbol: string) => {
             cdn_asset_uris: {
               cdn_image_uri: nft.current_token_data.token_uri,
             },
-            collection: nft.current_token_data.current_collection.collection_name,
-            symbol: '',
             current_collection: nft.current_token_data.current_collection,
+            symbol: '',
           },
         }));
 
