@@ -1,15 +1,19 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import { Metaplex } from '@metaplex-foundation/js';
 import { AptosClient, TokenClient } from 'aptos';
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const ALLOWED_COLLECTIONS = {
   sol: ['SMB Gen2', 'sharx by sharky.fi', 'Superteam Member NFT', 'Deanslist', 'SMB Gen3', "Erebrus Community NFT #001"],
   apt: ["Undying City Equipment Collection"]
 };
 
-const fetchUserNFTs = async (userAddress: string, chainSymbol: string) => {
+const fetchUserNFTs = async (chainSymbol: string) => {
+  const userAddress = Cookies.get('erebrus_wallet');
+
   if (!userAddress) {
-    console.log('No user address provided');
+    console.log('No user address found in cookies');
     return [];
   }
 
@@ -56,8 +60,70 @@ const fetchUserNFTs = async (userAddress: string, chainSymbol: string) => {
 
       return filteredNFTs;
 
-    } 
-    else {
+    } else if (chainSymbol === 'apt') {
+      const APTOS_GRAPHQL_ENDPOINT = process.env.NEXT_PUBLIC_APTOS_GRAPHQL_ENDPOINT;
+      
+      const query = `
+        query GetAccountNfts($address: String) {
+          current_token_ownerships_v2(
+            where: {owner_address: {_eq: $address}, amount: {_gt: "0"}}
+          ) {
+            current_token_data {
+              collection_id
+              largest_property_version_v1
+              current_collection {
+                collection_id
+                collection_name
+                description
+                creator_address
+                uri
+                __typename
+              }
+              description
+              token_name
+              token_data_id
+              token_standard
+              token_uri
+              __typename
+            }
+            owner_address
+            amount
+            __typename
+          }
+        }
+      `;
+
+      const variables = { address: userAddress };
+
+      const response = await axios.post(APTOS_GRAPHQL_ENDPOINT, {
+        query,
+        variables
+      });
+
+      const nfts = response.data.data.current_token_ownerships_v2;
+
+      const filteredNFTs = nfts
+        .filter(nft => nft.current_token_data.current_collection.collection_name === "Undying City Equipment Collection")
+        .map(nft => ({
+          amount: nft.amount,
+          current_token_data: {
+            token_name: nft.current_token_data.token_name,
+            token_uri: nft.current_token_data.token_uri,
+            description: nft.current_token_data.description,
+            token_data_id: nft.current_token_data.token_data_id,
+            cdn_asset_uris: {
+              cdn_image_uri: nft.current_token_data.token_uri,
+            },
+            collection: nft.current_token_data.current_collection.collection_name,
+            symbol: '',
+            current_collection: nft.current_token_data.current_collection,
+          },
+        }));
+
+      console.log('Filtered Aptos NFTs:', filteredNFTs);
+      return filteredNFTs;
+
+    } else {
       console.log('NFT fetching for this chain not implemented yet');
       return [];
     }
