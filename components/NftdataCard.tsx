@@ -113,14 +113,15 @@ const NftdataCard: React.FC<ReviewCardProps> = ({
           metadata?.image ||
           metadata?.image_url ||
           metadata?.imageUrl ||
-          metadata?.url;
+          metadata?.url ||
+          metaData.current_token_data.cdn_asset_uris?.cdn_image_uri;
         setImageSrc(imageUrl?.replace("ipfs://", "https://ipfs.io/ipfs/"));
         setAttributes({
-          name: metadata.name,
-          description: metadata.description,
+          name: metadata.name || metaData.current_token_data.token_name,
+          description: metadata.description || metaData.current_token_data.description,
           symbol: metadata.symbol,
           externalUrl: metadata.external_url,
-          collection: metadata.collection,
+          collection: metadata.collection || metaData.current_token_data.current_collection,
           ...metadata.attributes,
         });
       } catch (error) {
@@ -133,6 +134,7 @@ const NftdataCard: React.FC<ReviewCardProps> = ({
     fetchMetaData();
   }, [metaData, chainSymbol]);
 
+  
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center w-full max-w-sm mx-auto">
@@ -171,19 +173,9 @@ const NftdataCard: React.FC<ReviewCardProps> = ({
             <div className="">
               <img
                 alt={metaData.current_token_data.token_name}
-                src={
-                  imageSrc ||
-                  metaData.current_token_data.cdn_asset_uris?.cdn_image_uri
-                }
+                src={imageSrc}
                 className="w-full h-48 object-cover rounded-lg"
-                onError={(e) => {
-                  console.error(
-                    "Image failed to load:",
-                    (e.target as HTMLImageElement).src
-                  );
-                  (e.target as HTMLImageElement).src =
-                    "/path/to/placeholder/image.png"; // Fallback image
-                }}
+              
               />
             </div>
             <div className="w-full">
