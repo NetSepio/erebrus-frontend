@@ -56,11 +56,8 @@ const fetchUserNFTs = async (userAddress: string, chainSymbol: string) => {
 
       return filteredNFTs;
 
-    } if (chainSymbol === 'apt') {
-      const client = new AptosClient(process.env.NEXT_PUBLIC_APTOS_NODE_URL);
-    
-      console.log('Connected to Aptos network');
-    } else {
+    } 
+    else {
       console.log('NFT fetching for this chain not implemented yet');
       return [];
     }
