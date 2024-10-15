@@ -168,12 +168,11 @@ const Subscription = () => {
     });
   
     if (loggedin && !loading && isDataChecked && !nftLoading) {
-      if (((nftdata && nftdata.length === 0) || !nftdata) && !trialsubscriptiondata && !nftError) {
-        console.log("Conditions met for redirection to /plans");
+      if ((!nftdata || nftdata.length === 0) && !trialsubscriptiondata && !nftError) {
+        console.log("No NFTs found, redirecting to /plans");
         const redirectTimer = setTimeout(() => {
-          console.log("Redirecting to /plans");
           router.push("/plans");
-        }, 1000); // 1 second delay
+        }, 1000);
   
         return () => clearTimeout(redirectTimer);
       } else {
@@ -181,7 +180,6 @@ const Subscription = () => {
       }
     }
   }, [loggedin, loading, isDataChecked, nftLoading, nftdata, trialsubscriptiondata, nftError]);
-
 
 
   const handleSubmit = async (e: FormEvent) => {
@@ -451,8 +449,9 @@ const Subscription = () => {
         setNftError(null);
         try {
           const chainSymbol = Cookies.get("Chain_symbol") || "sol"; // Default to "sol" if not set
-          const nfts = await fetchUserNFTs(wallet);
+          const nfts = await fetchUserNFTs(chainSymbol);
           setnftdata(nfts);
+          console.log("Fetched NFTs:", nfts);
         } catch (error) {
           console.error("Error fetching NFTs:", error);
           setNftError("Failed to fetch NFTs");
@@ -461,7 +460,7 @@ const Subscription = () => {
         }
       }
     };
-
+  
     fetchNFTs();
   }, [wallet]);
   

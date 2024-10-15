@@ -171,18 +171,11 @@ const NftdataCard: React.FC<ReviewCardProps> = ({
         <div>
           <div className="flex flex-col">
             <div className="">
-            <img
+              <img
                 alt={metaData.current_token_data.token_name}
-                src={imageSrc || "/path/to/placeholder/image.png"}
+                src={imageSrc}
                 className="w-full h-48 object-cover rounded-lg"
-                onError={(e) => {
-                  console.error(
-                    "Image failed to load:",
-                    (e.target as HTMLImageElement).src
-                  );
-                  (e.target as HTMLImageElement).src =
-                    "/path/to/placeholder/image.png";
-                }}
+              
               />
             </div>
             <div className="w-full">
