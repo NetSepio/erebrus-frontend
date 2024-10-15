@@ -68,72 +68,73 @@ const NftdataCard: React.FC<ReviewCardProps> = ({
 }) => {
   const [imageSrc, setImageSrc] = React.useState<string | null>(null);
   const [attributes, setAttributes] = React.useState<any>(null);
-
   const [isLoading, setIsLoading] = useState(true);
+
   const getUserAddressFromCookie = () => {
     return Cookies.get("erebrus_wallet") || "";
   };
   const userAddress = getUserAddressFromCookie();
-  const fetchMetaData = async () => {
-    if (
-      !metaData ||
-      !metaData.current_token_data ||
-      !metaData.current_token_data.token_uri
-    ) {
-      console.log("Missing metadata or token URI");
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      let metadata;
-      if (chainSymbol === "sol") {
-        const response = await axios.get(metaData.current_token_data.token_uri);
-        metadata = response.data;
-        console.log("Solana Metadata:", metadata);
-      } else if (chainSymbol === "apt") {
-        const ipfsCid = metaData.current_token_data.token_uri.replace(
-          "ipfs://",
-          ""
-        );
-        console.log("IPFS CID:", ipfsCid);
-        const metadataResponse = await axios.get(
-          `https://ipfs.io/ipfs/${ipfsCid}`
-        );
-        metadata = metadataResponse.data;
-        console.log("Aptos Metadata:", metadata);
-      } else {
-        console.log("Unsupported chain");
+   useEffect(() => {
+    const fetchMetaData = async () => {
+      if (
+        !metaData ||
+        !metaData.current_token_data ||
+        !metaData.current_token_data.token_uri
+      ) {
+        console.log("Missing metadata or token URI");
         setIsLoading(false);
         return;
       }
 
-      const imageUrl =
-        metadata?.image ||
-        metadata?.image_url ||
-        metadata?.imageUrl ||
-        metadata?.url;
-      setImageSrc(imageUrl?.replace("ipfs://", "https://ipfs.io/ipfs/"));
-      setAttributes({
-        name: metadata.name,
-        description: metadata.description,
-        symbol: metadata.symbol,
-        externalUrl: metadata.external_url,
-        collection: metadata.collection,
-        ...metadata.attributes,
-      });
-    } catch (error) {
-      console.error("Error fetching metadata:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      try {
+        let metadata;
+        if (chainSymbol === "sol") {
+          const response = await axios.get(metaData.current_token_data.token_uri);
+          metadata = response.data;
+          console.log("Solana Metadata:", metadata);
+        } else if (chainSymbol === "apt") {
+          const ipfsCid = metaData.current_token_data.token_uri.replace(
+            "ipfs://",
+            ""
+          );
+          console.log("IPFS CID:", ipfsCid);
+          const metadataResponse = await axios.get(
+            `https://ipfs.io/ipfs/${ipfsCid}`
+          );
+          metadata = metadataResponse.data;
+          console.log("Aptos Metadata:", metadata);
+        } else {
+          console.log("Unsupported chain");
+          setIsLoading(false);
+          return;
+        }
 
-  // Call fetchMetaData immediately if metaData is available
-  if (metaData && isLoading) {
+        const imageUrl =
+          metadata?.image ||
+          metadata?.image_url ||
+          metadata?.imageUrl ||
+          metadata?.url ||
+          metaData.current_token_data.cdn_asset_uris?.cdn_image_uri;
+        setImageSrc(imageUrl?.replace("ipfs://", "https://ipfs.io/ipfs/"));
+        setAttributes({
+          name: metadata.name || metaData.current_token_data.token_name,
+          description: metadata.description || metaData.current_token_data.description,
+          symbol: metadata.symbol,
+          externalUrl: metadata.external_url,
+          collection: metadata.collection || metaData.current_token_data.current_collection,
+          ...metadata.attributes,
+        });
+      } catch (error) {
+        console.error("Error fetching metadata:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     fetchMetaData();
-  }
+  }, [metaData, chainSymbol]);
 
+  
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center w-full max-w-sm mx-auto">
@@ -150,6 +151,7 @@ const NftdataCard: React.FC<ReviewCardProps> = ({
   if (!metaData) {
     return null;
   }
+
 
   return (
     <div
@@ -169,12 +171,9 @@ const NftdataCard: React.FC<ReviewCardProps> = ({
         <div>
           <div className="flex flex-col">
             <div className="">
-              <img
+            <img
                 alt={metaData.current_token_data.token_name}
-                src={
-                  imageSrc ||
-                  metaData.current_token_data.cdn_asset_uris?.cdn_image_uri
-                }
+                src={imageSrc || "/path/to/placeholder/image.png"}
                 className="w-full h-48 object-cover rounded-lg"
                 onError={(e) => {
                   console.error(
@@ -182,7 +181,7 @@ const NftdataCard: React.FC<ReviewCardProps> = ({
                     (e.target as HTMLImageElement).src
                   );
                   (e.target as HTMLImageElement).src =
-                    "/path/to/placeholder/image.png"; // Fallback image
+                    "/path/to/placeholder/image.png";
                 }}
               />
             </div>
