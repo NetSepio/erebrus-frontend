@@ -53,6 +53,7 @@
     "@web3modal/wagmi": "^4.1.11",
     "@welldone-studio/aptos-wallet-adapter": "^0.1.5",
     "antd": "^5.18.1",
+    "aptos": "^1.21.0",
     "axios": "^1.6.5",
     "blockies": "^0.0.2",
     "crypto": "^1.0.1",

@@ -1,7 +1,11 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import { Metaplex } from '@metaplex-foundation/js';
+import { AptosClient, TokenClient } from 'aptos';
 
-const ALLOWED_NAMES = ['SMB Gen2', 'sharx by sharky.fi', 'Superteam Member NFT', 'Deanslist', 'SMB Gen3', "Erebrus Community NFT #001"];
+const ALLOWED_COLLECTIONS = {
+  sol: ['SMB Gen2', 'sharx by sharky.fi', 'Superteam Member NFT', 'Deanslist', 'SMB Gen3', "Erebrus Community NFT #001"],
+  apt: ["Undying City Equipment Collection"]
+};
 
 const fetchUserNFTs = async (userAddress: string, chainSymbol: string) => {
   if (!userAddress) {
@@ -32,7 +36,7 @@ const fetchUserNFTs = async (userAddress: string, chainSymbol: string) => {
       console.log('All user NFTs:', userNFTs);
 
       const filteredNFTs = userNFTs.filter(nft => 
-        ALLOWED_NAMES.includes(nft.name)
+        ALLOWED_COLLECTIONS.sol.includes(nft.name)
       ).map(nft => ({
         amount: 1,
         current_token_data: {
@@ -48,9 +52,14 @@ const fetchUserNFTs = async (userAddress: string, chainSymbol: string) => {
         },
       }));
 
-      console.log('Filtered NFTs with specified Names:', filteredNFTs);
+      console.log('Filtered Solana NFTs:', filteredNFTs);
 
       return filteredNFTs;
+
+    } if (chainSymbol === 'apt') {
+      const client = new AptosClient(process.env.NEXT_PUBLIC_APTOS_NODE_URL);
+    
+      console.log('Connected to Aptos network');
     } else {
       console.log('NFT fetching for this chain not implemented yet');
       return [];
