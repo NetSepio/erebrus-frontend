@@ -190,7 +190,7 @@ const Subscription = () => {
     setLoading(true);
 
     const auth = Cookies.get("erebrus_token");
-    console.log("clicked");
+    // console.log("clicked");
     try {
       const keys = genKeys();
       const formDataObj = new FormData();
@@ -248,7 +248,7 @@ const Subscription = () => {
         setVpnName(responseData.payload.client.Name);
         setClientUUID(responseData.payload.client.UUID);
         setFormData(initialFormData);
-        console.log("vpn data", responseData);
+        // console.log("vpn data", responseData);
 
         const configFile = `
         [Interface]
@@ -313,7 +313,7 @@ const Subscription = () => {
           }
         );
 
-        console.log("vpn decentralized", response);
+        // console.log("vpn decentralized", response);
 
         if (response.status === 200) {
           // Filter the data based on the domain ID
@@ -328,10 +328,10 @@ const Subscription = () => {
               new Date(a.created_at).getTime()
           );
           setprojectsData(filteredData);
-          console.log("decentralized", filteredData);
+          // console.log("decentralized", filteredData);
         }
       } catch (error) {
-        console.error("Error fetching profile data:", error);
+        // console.error("Error fetching profile data:", error);
       } finally {
         setLoading(false);
       }
@@ -422,12 +422,12 @@ const Subscription = () => {
           },
         });
 
-        console.log("vpn nft", response.data.data.current_token_ownerships_v2);
+        // console.log("vpn nft", response.data.data.current_token_ownerships_v2);
         if (response.data.data.current_token_ownerships_v2.length > 0) {
           setnftdata(response.data.data.current_token_ownerships_v2);
         }
       } catch (error) {
-        console.error("Error fetching nft data:", error);
+        // console.error("Error fetching nft data:", error);
       } finally {
         setLoading(false);
       }
@@ -480,7 +480,7 @@ const Subscription = () => {
       const response = await wallet.connect();
 
       const account = await wallet.account();
-      console.log("account", account);
+      // console.log("account", account);
 
       // Get the current network after connecting (optional)
       const networkwallet = await (window as any).aptos.network();
@@ -490,7 +490,7 @@ const Subscription = () => {
         const { data } = await axios.get(
           `${REACT_APP_GATEWAY_URL}api/v1.0/flowid?walletAddress=${account.address}`
         );
-        console.log(data);
+        // console.log(data);
 
         const message = data.payload.eula;
         const nonce = data.payload.flowId;
@@ -500,7 +500,7 @@ const Subscription = () => {
           message,
           nonce,
         });
-        console.log("sign", signature, "full message", fullMessage);
+        // console.log("sign", signature, "full message", fullMessage);
 
         let signaturewallet = signature;
 
@@ -693,7 +693,7 @@ const Subscription = () => {
           );
           setUniqueRegions(regions);
 
-          console.log("erebrus nodes", payload);
+          // console.log("erebrus nodes", payload);
         }
       } catch (error) {
         console.error("Error fetching nodes data:", error);
@@ -796,11 +796,11 @@ const Subscription = () => {
   };
 
   // Log activeNodesData and filtered result
-  console.log("Current activeNodesData:", activeNodesData);
+  // console.log("Current activeNodesData:", activeNodesData);
   const filteredNodes = activeNodesData.filter(
     (node) => node.region === regionname
   );
-  console.log("Filtered nodes based on region:", filteredNodes, regionname);
+  // console.log("Filtered nodes based on region:", filteredNodes, regionname);
 
   if (!loggedin) {
     return (
