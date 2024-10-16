@@ -762,7 +762,6 @@ const Subscription = () => {
     { id: "US", region: "United States" },
     { id: "JP", region: "Japan" },
     { id: "CA", region: "Canada" },
-    { id: "FI", region: "Finland" },
     { id: "GB", region: "United Kingdom" },
     { id: "AU", region: "Australia" },
     { id: "DE", region: "Germany" },
