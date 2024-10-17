@@ -5,7 +5,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 
 const ALLOWED_COLLECTIONS = {
-  sol: ['SMB Gen2', 'sharx by sharky.fi', 'Superteam Member NFT', 'Deanslist', 'SMB Gen3', "Erebrus Community NFT #001"],
+  sol: ['SMB', 'sharx', '$TEAM', 'DEAN', "Erebrus Community NFT #001"],
   apt: ["Undying City Equipment Collection"]
 };
 
@@ -40,7 +40,7 @@ const fetchUserNFTs = async (chainSymbol: string) => {
       console.log('All user NFTs:', userNFTs);
 
       const filteredNFTs = userNFTs.filter(nft => 
-        ALLOWED_COLLECTIONS.sol.includes(nft.name)
+        ALLOWED_COLLECTIONS.sol.includes(nft.symbol)
       ).map(nft => ({
         amount: 1,
         current_token_data: {
