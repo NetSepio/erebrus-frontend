@@ -5,7 +5,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 
 const ALLOWED_COLLECTIONS = {
-  sol: ['SMB', 'sharx', '$TEAM', 'DEAN', "Erebrus Community NFT #001"],
+  sol: ['SMB', 'sharx', '$TEAM', 'DEAN', "TRIAD"],
   apt: ["Undying City Equipment Collection"]
 };
 
