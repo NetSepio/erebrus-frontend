@@ -5,7 +5,6 @@ export default function DeploymentForm() {
   const [formData, setFormData] = useState({
     project_name: '',
     git_url: '',
-    port: '',
     env_vars: ''
   });
   const [deployedUrl, setDeployedUrl] = useState<string | null>(null);
@@ -16,7 +15,6 @@ export default function DeploymentForm() {
     setLoading(true);
     
     try {
-      // Parse env vars from text to object
       const envLines = formData.env_vars.split('\n').filter(line => line.trim());
       const filteredEnvVars = Object.fromEntries(
         envLines.map(line => {
@@ -25,21 +23,22 @@ export default function DeploymentForm() {
         })
       );
 
-      const response = await axios.post('https://35.227.177.48:8080/deploy', {
+      const response = await axios.post('https://35.227.177.48:8443/deploy', {
         git_url: formData.git_url,
         project_name: formData.project_name,
-        port: formData.port,
+        port: "3000",
         env_vars: filteredEnvVars
-      }
-      , {
+      }, {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        timeout: 300000, // 5 minutes timeout
+        timeout: 300000,
       });
       
-      setDeployedUrl(response.data.url);
+      const deployedPort = response.data.port || "3000";
+      const formattedUrl = `https://35.227.177.48:${deployedPort}`;
+      setDeployedUrl(formattedUrl);
     } catch (error) {
       console.error('Deployment failed:', error);
     } finally {
@@ -73,19 +72,6 @@ export default function DeploymentForm() {
             type="url"
             value={formData.git_url}
             onChange={(e) => setFormData(prev => ({...prev, git_url: e.target.value}))}
-            className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-white text-sm font-medium mb-1">
-            Port
-          </label>
-          <input
-            type="text"
-            value={formData.port}
-            onChange={(e) => setFormData(prev => ({...prev, port: e.target.value}))}
             className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
             required
           />
