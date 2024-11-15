@@ -30,6 +30,13 @@ export default function DeploymentForm() {
         project_name: formData.project_name,
         port: formData.port,
         env_vars: filteredEnvVars
+      }
+      , {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        timeout: 300000, // 5 minutes timeout
       });
       
       setDeployedUrl(response.data.url);
