@@ -25,7 +25,7 @@ export default function DeploymentForm() {
         })
       );
 
-      const response = await axios.post('http://35.227.177.48:8080/deploy', {
+      const response = await axios.post('https://35.227.177.48:8080/deploy', {
         git_url: formData.git_url,
         project_name: formData.project_name,
         port: formData.port,
@@ -53,7 +53,7 @@ export default function DeploymentForm() {
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-1">
+          <label className="block text-white text-sm font-medium mb-1">
             Project Name
           </label>
           <input
@@ -66,7 +66,7 @@ export default function DeploymentForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">
+          <label className="block text-white text-sm font-medium mb-1">
             GitHub URL
           </label>
           <input
@@ -79,7 +79,7 @@ export default function DeploymentForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">
+          <label className="block text-white text-sm font-medium mb-1">
             Port
           </label>
           <input
@@ -92,7 +92,7 @@ export default function DeploymentForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">
+          <label className="block text-white text-sm font-medium mb-1">
             Environment Variables (optional)
           </label>
           <textarea
