@@ -4,7 +4,6 @@ import axios from "axios";
 import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import { NFTStorage } from "nft.storage";
 const API_KEY = process.env.NEXT_PUBLIC_STORAGE_API;
-const client = new NFTStorage({ token: API_KEY });
 const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_GATEWAY_URL;
 
 const Profile = () => {
@@ -75,20 +74,38 @@ const Profile = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      const blobDataImage = new Blob([e.target.files[0]]);
-      const metaHash = await client.storeBlob(blobDataImage);
-      setFormData({
-        ...formData,
-        profilePictureUrl: `ipfs://${metaHash}`,
+  
+      const file = e.target.files[0];
+      if (!file) {
+        throw new Error("No file selected");
+      }
+  
+      const formData = new FormData();
+      formData.append("file", file);
+  
+      const response = await fetch("/api/uploadToIPFS", {
+        method: "POST",
+        body: formData,
       });
-      console.log("profilePictureUrl", metaHash);
+  
+      if (!response.ok) {
+        throw new Error(`Upload failed: ${response.statusText}`);
+      }
+  
+      const data = await response.json();
+      setFormData((prevData) => ({
+        ...prevData,
+        profilePictureUrl: `${data.Hash}`,
+      }));
+  
+      console.log("profilePictureUrl", data.Hash);
     } catch (error) {
-      console.log("Error uploading file: ", error);
+      console.log("Error uploading file:", error);
     } finally {
       setLoading(false);
     }
   }
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -410,9 +427,8 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
                             <>
                               <img
                                 alt="Profile"
-                                src={formData.profilePictureUrl.startsWith("ipfs://") 
-                                  ? `https://nftstorage.link/ipfs/${removePrefix(formData.profilePictureUrl)}`
-                                  : formData.profilePictureUrl}
+                                src={`https://ipfs.myriadflow.com/ipfs/${formData.profilePictureUrl}`}
+
                                 className="rounded-2xl w-full h-full object-cover"
                                 onError={(e) => {
                                   e.target.onerror = null; // Prevent infinite loop
@@ -668,14 +684,8 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
                             {profileData?.profilePictureUrl ? (
                               <img
                                 alt="Profile"
-                                src={profileData.profilePictureUrl.startsWith("ipfs://") 
-                                  ? `https://nftstorage.link/ipfs/${removePrefix(profileData.profilePictureUrl)}`
-                                  : profileData.profilePictureUrl}
-                                className="rounded-2xl object-cover w-full h-full"
-                                onError={(e) => {
-                                  e.target.onerror = null; // Prevent infinite loop
-                                  e.target.src = "https://thumbs.dreamstime.com/b/female-user-profile-avatar-woman-character-screen-saver-emotions-website-mobile-app-design-vector-199001739.jpg";
-                                }}
+                                src={`https://ipfs.myriadflow.com/ipfs/${formData.profilePictureUrl}`}
+
                               />
                             ) : (
                               <div className="rounded-2xl h-36 w-36 ring-offset-2 ring-1 ring-black bg-gray-200">
