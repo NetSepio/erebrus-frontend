@@ -189,13 +189,8 @@ const LoginComponent = () => {
     const fetchData = async () => {
       try {
         const getRandomNumber = () => Math.floor(Math.random() * 1000);
-        const apiUrl = `https://api.multiavatar.com/${getRandomNumber()}`;
-
-        const response = await axios.get(apiUrl);
-        const svgDataUri = `data:image/svg+xml,${encodeURIComponent(
-          response.data
-        )}`;
-        setAvatarUrl(svgDataUri);
+        const imageUrl = `https://robohash.org/${getRandomNumber()}`;
+        setAvatarUrl(imageUrl);
       } catch (error) {
         console.error("Error fetching avatar:", error.message);
       }
@@ -309,7 +304,13 @@ const LoginComponent = () => {
                   Log out
                 </button>
                 {avatarUrl && (
-                  <img src={avatarUrl} alt="Avatar" className="w-10 ml-auto" />
+                  <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+                    <img 
+                      src={avatarUrl} 
+                      alt="Avatar1" 
+                      className="w-8 h-8 rounded-full object-contain border-2 border-white bg-white"
+                    />
+                  </div>
                 )}
               </div>
             )}
