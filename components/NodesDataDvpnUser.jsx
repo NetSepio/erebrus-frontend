@@ -15,7 +15,7 @@ const NodesData = () => {
 
   const fetchNodesData = async () => {
     try {
-      const response = await axios.get(`${EREBRUS_GATEWAY_URL}/api/v1.0/nodes/all`);
+      const response = await axios.get(`${EREBRUS_GATEWAY_URL}api/v1.0/nodes/all`);
       
       console.log("API Response:", response.data);
 
