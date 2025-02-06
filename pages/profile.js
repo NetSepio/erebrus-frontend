@@ -4,7 +4,6 @@ import axios from "axios";
 import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import { NFTStorage } from "nft.storage";
 const API_KEY = process.env.NEXT_PUBLIC_STORAGE_API;
-const client = new NFTStorage({ token: API_KEY });
 const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_GATEWAY_URL;
 
 const Profile = () => {
@@ -51,9 +50,14 @@ const Profile = () => {
   const initialFormData = {
     name: "",
     country: "",
-    profilePictureUrl: "",
+    emailId: "",
     discord: "",
     twitter: "",
+    google: "",
+    apple: "",
+    telegram: "",
+    farcaster: "",
+    profilePictureUrl: "",
   };
 
   const [formData, setFormData] = useState(initialFormData);
@@ -70,42 +74,58 @@ const Profile = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      const blobDataImage = new Blob([e.target.files[0]]);
-      const metaHash = await client.storeBlob(blobDataImage);
-      setFormData({
-        ...formData,
-        profilePictureUrl: `ipfs://${metaHash}`,
+  
+      const file = e.target.files[0];
+      if (!file) {
+        throw new Error("No file selected");
+      }
+  
+      const formData = new FormData();
+      formData.append("file", file);
+  
+      const response = await fetch("/api/uploadToIPFS", {
+        method: "POST",
+        body: formData,
       });
-      console.log("profilePictureUrl", metaHash);
+  
+      if (!response.ok) {
+        throw new Error(`Upload failed: ${response.statusText}`);
+      }
+  
+      const data = await response.json();
+      setFormData((prevData) => ({
+        ...prevData,
+        profilePictureUrl: `${data.Hash}`,
+      }));
+  
+      console.log("profilePictureUrl", data.Hash);
     } catch (error) {
-      console.log("Error uploading file: ", error);
+      console.log("Error uploading file:", error);
     } finally {
       setLoading(false);
     }
   }
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     setLoading(true);
-
     const auth = Cookies.get("erebrus_token");
 
     try {
-      const formDataObj = new FormData();
-      formDataObj.append("name", formData.name);
-      formDataObj.append("country", formData.country);
-      formDataObj.append("discord", formData.discord);
-      formDataObj.append("twitter", formData.twitter);
-      formDataObj.append("profilePictureUrl", formData.profilePictureUrl);
+      const formDataObject = {
+        name: formData.name,
+        country: formData.country,
+        emailId: formData.emailId,
+        discord: formData.discord,
+        twitter: formData.twitter,
+        google: formData.google,
+        apple: formData.apple,
+        telegram: formData.telegram,
+        farcaster: formData.farcaster,
+        profilePictureUrl: formData.profilePictureUrl
+      };
 
-      // Convert FormData to JavaScript Object
-      const formDataObject = {};
-      formDataObj.forEach((value, key) => {
-        formDataObject[key] = value;
-      });
-
-      // Convert JavaScript Object to JSON string
+      // Convert to JSON string
       const jsonData = JSON.stringify(formDataObject);
 
       const response = await fetch(`${REACT_APP_GATEWAY_URL}api/v1.0/profile`, {
@@ -122,7 +142,6 @@ const Profile = () => {
         setFormData(initialFormData);
         setMsg("success");
         setprofileset(true);
-        // localStorage.setItem('submissionProfile', 'true');
       } else {
         setMsg("error");
       }
@@ -153,11 +172,21 @@ const Profile = () => {
 
         if (response.status === 200) {
           setProfileData(response.data.payload);
-          if(!response.data.payload.email)
-          {
+          setFormData({
+            name: response.data.payload.name || "",
+            country: response.data.payload.country || "",
+            emailId: response.data.payload.email || "",
+            discord: response.data.payload.discord || "",
+            twitter: response.data.payload.twitter || "",
+            google: response.data.payload.google || "",
+            apple: response.data.payload.apple || "",
+            telegram: response.data.payload.telegram || "",
+            farcaster: response.data.payload.farcaster || "",
+            profilePictureUrl: response.data.payload.profilePictureUrl || ""
+          });
+          if(!response.data.payload.email) {
             setauth(false);
           }
-          console.log(response.data);
         }
       } catch (error) {
         console.error("Error fetching profile data:", error);
@@ -363,522 +392,425 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
     <div
       
     >
-      <section className="h-screen">
-        <div className="px-10 mx-auto">
-          <div className="w-full mx-auto text-left w-full md:text-center">
-        
-        <div className="flex">
+      <section className="min-h-screen">
+        <div className="px-4 sm:px-6 lg:px-10 mx-auto">
 
-        {msg == "success" && (
-                      <div className="text-center mx-auto">
-                      <div className="">
-                        <div
-                          style={button}
-                          className="flex gap-1 px-4 py-3 text-xs text-white font-semibold rounded-lg w-full sm:mb-0 hover:bg-green-200 focus:ring focus:ring-green-300 focus:ring-opacity-80"
-                        >
-                          {/* <Image src={tick} alt="" className="w-4 h-4"/> */}
-                          Changes Saved
+          {/* Success Message */}
+          <div className="flex justify-center">
+            {msg == "success" && (
+              <div className="text-center">
+                <div
+                  style={button}
+                  className="flex gap-1 px-4 py-3 text-xs text-white font-semibold rounded-lg sm:mb-0"
+                >
+                  Changes Saved
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Edit Mode */}
+          {!profileset && (
+            <section className="pb-10 rounded-xl">
+              <div className="px-4 sm:px-6 lg:px-24 mx-auto rounded-xl">
+                <div className="w-full mx-auto text-left py-6 sm:py-10">
+                  <h1 className="mt-4 sm:mt-10 text-3xl sm:text-4xl font-semibold leading-none tracking-normal text-gray-100">
+                    <span className="text-white">Profile Information</span>
+                  </h1>
+
+                  <form id="myForm" className="rounded pt-6 sm:pt-10" onSubmit={handleSubmit}>
+                    <div className="flex flex-col lg:flex-row gap-8">
+                      {/* Profile Picture Section */}
+                      <div className="flex justify-center lg:justify-start lg:ml-10">
+                        <div className="rounded-2xl h-32 w-32 sm:h-36 sm:w-36 relative group">
+                          {formData.profilePictureUrl ? (
+                            <>
+                              <img
+                                alt="Profile"
+                                src={`https://ipfs.myriadflow.com/ipfs/${formData.profilePictureUrl}`}
+
+                                className="rounded-2xl w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.target.onerror = null; // Prevent infinite loop
+                                  e.target.src = "https://thumbs.dreamstime.com/b/female-user-profile-avatar-woman-character-screen-saver-emotions-website-mobile-app-design-vector-199001739.jpg";
+                                }}
+                              />
+                              <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 rounded-2xl flex items-center justify-center transition-opacity">
+                                <label htmlFor="upload" className="cursor-pointer">
+                                  <input
+                                    id="upload"
+                                    type="file"
+                                    className="hidden"
+                                    onChange={uploadImage}
+                                    accept="image/*"
+                                  />
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-10 w-10 text-white"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                                    />
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                                    />
+                                  </svg>
+                                </label>
+                              </div>
+                            </>
+                          ) : (
+                            <label
+                              htmlFor="upload"
+                              className="flex flex-col items-center justify-center gap-2 cursor-pointer h-full w-full border-2 border-dashed border-gray-300 rounded-2xl hover:bg-gray-900 transition-colors"
+                            >
+                              <input
+                                id="upload"
+                                type="file"
+                                className="hidden"
+                                onChange={uploadImage}
+                                accept="image/*"
+                              />
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-10 w-10 text-gray-300"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                                />
+                              </svg>
+                              <span className="text-gray-300 text-sm">Upload Photo</span>
+                            </label>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Form Fields Section */}
+                      <div className="w-full lg:w-3/4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                          <div className="mb-4 sm:mb-6">
+                            <label htmlFor="name" className="block text-gray-200 mb-2">Name</label>
+                            <input
+                              type="text"
+                              id="name"
+                              style={border}
+                              className="shadow border bg-black appearance-none rounded-lg w-full py-3 sm:py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
+                              placeholder="Your Name"
+                              value={formData.name}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+
+                          <div className="mb-4 sm:mb-6">
+                            <label htmlFor="country" className="block text-gray-200 mb-2">Country</label>
+                            <input
+                              type="text"
+                              id="country"
+                              style={border}
+                              className="shadow border bg-black appearance-none rounded-lg w-full py-3 sm:py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
+                              placeholder="Country"
+                              value={formData.country}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+
+                          <div className="mb-4 sm:mb-6">
+                            <label htmlFor="emailId" className="block text-gray-200 mb-2">Email</label>
+                            <input
+                              type="email"
+                              id="emailId"
+                              style={border}
+                              className="shadow border bg-black appearance-none rounded-lg w-full py-3 sm:py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
+                              placeholder="Email"
+                              value={formData.emailId}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+
+                          <div className="mb-4 sm:mb-6">
+                            <label htmlFor="discord" className="block text-gray-200 mb-2">Discord</label>
+                            <input
+                              type="text"
+                              id="discord"
+                              style={border}
+                              className="shadow border bg-black appearance-none rounded-lg w-full py-3 sm:py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
+                              placeholder="Discord"
+                              value={formData.discord}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+
+                          <div className="mb-4 sm:mb-6">
+                            <label htmlFor="twitter" className="block text-gray-200 mb-2">Twitter</label>
+                            <input
+                              type="text"
+                              id="twitter"
+                              style={border}
+                              className="shadow border bg-black appearance-none rounded-lg w-full py-3 sm:py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
+                              placeholder="Twitter"
+                              value={formData.twitter}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+
+                          <div className="mb-4 sm:mb-6">
+                            <label htmlFor="telegram" className="block text-gray-200 mb-2">Telegram</label>
+                            <input
+                              type="text"
+                              id="telegram"
+                              style={border}
+                              className="shadow border bg-black appearance-none rounded-lg w-full py-3 sm:py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
+                              placeholder="Telegram"
+                              value={formData.telegram}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+
+                          <div className="mb-4 sm:mb-6">
+                            <label htmlFor="farcaster" className="block text-gray-200 mb-2">Farcaster</label>
+                            <input
+                              type="text"
+                              id="farcaster"
+                              style={border}
+                              className="shadow border bg-black appearance-none rounded-lg w-full py-3 sm:py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
+                              placeholder="Farcaster"
+                              value={formData.farcaster}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+
+                          <div className="mb-4 sm:mb-6">
+                            <label htmlFor="google" className="block text-gray-200 mb-2">Google</label>
+                            <input
+                              type="text"
+                              id="google"
+                              style={border}
+                              className="shadow border bg-black appearance-none rounded-lg w-full py-3 sm:py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
+                              placeholder="Google"
+                              value={formData.google || ""}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+
+                          <div className="mb-4 sm:mb-6">
+                            <label htmlFor="apple" className="block text-gray-200 mb-2">Apple</label>
+                            <input
+                              type="text"
+                              id="apple"
+                              style={border}
+                              className="shadow border bg-black appearance-none rounded-lg w-full py-3 sm:py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
+                              placeholder="Apple"
+                              value={formData.apple || ""}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Submit Button */}
+                        <div className="text-center mt-6 sm:mt-8">
+                          <div className="pb-6 sm:pb-10">
+                            <button
+                              style={button}
+                              type="submit"
+                              value="submit"
+                              className="px-8 sm:px-14 py-3 text-base sm:text-lg text-white font-semibold rounded-lg w-full sm:w-auto"
+                              >
+                              Change details
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
-            )}
-        </div>
-            
+                  </form>
+                </div>
+              </div>
+            </section>
+          )}
 
-            {!profileset && (
-              <section className="pb-10 rounded-xl">
-                <div className="px-24 mx-auto rounded-xl">
-                  <div className="w-full mx-auto text-left py-10">
-                    <h1 className="mt-10 text-4xl font-semibold leading-none tracking-normal text-gray-100 md:tracking-tight">
-                      <span className="text-white">Change profile Info</span>
-                    </h1>
-
-                    <form
-                      id="myForm"
-                      className="rounded pt-10"
-                      onSubmit={handleSubmit}
+          {/* Display Mode */}
+          {profileset && (
+            <section className="pb-0 rounded-xl">
+              <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                {/* Header Section */}
+                <div className="pt-4 sm:pt-8 lg:pt-16 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-100 mb-4 sm:mb-0">
+                    Profile information
+                  </h1>
+                  <div className="flex flex-wrap gap-2 text-black text-sm">
+                    <div 
+                      className="px-2 py-1.5 rounded-lg flex items-center space-x-2"
+                      style={{ backgroundColor: '#8EB9FF' }}
                     >
-                      <div className="lg:flex md:flex justify-between">
-                        <div className="flex items-center lg:justify-start md:justify-start justify-center mb-40 ml-10">
-                          <div className="rounded-2xl h-36 w-36 ring-1 ring-black bg-gray-200">
-                            {formData.profilePictureUrl ? (
+                      {chainDetails.icon && (
+                        <img 
+                          src={chainDetails.icon} 
+                          alt={`${chainDetails.name} icon`} 
+                          className="w-5 h-5" 
+                        />
+                      )}
+                      <span className="pr-2">{chainDetails.name}</span>
+                    </div>
+                    <div 
+                      className="px-3 py-1.5 rounded-lg" 
+                      style={{backgroundColor:'#8EB9FF'}}
+                    >
+                      {walletaddr?.slice(0, 4)}...{walletaddr?.slice(-4)}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Profile Content */}
+                <div className="w-full mx-auto text-left mt-4 sm:mt-8">
+                  <form id="myForm" className="rounded">
+                    <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+                      {/* Profile Picture */}
+                      <div className="lg:w-1/4">
+                        <div className="flex items-center justify-center mb-6 lg:mb-0">
+                          <div className="rounded-2xl h-32 w-32 sm:h-36 sm:w-36">
+                            {profileData?.profilePictureUrl ? (
                               <img
-                                alt="alt"
-                                src={`${"https://nftstorage.link/ipfs"}/${removePrefix(
-                                  formData.profilePictureUrl
-                                )}`}
-                                className="rounded-2xl"
-                                width="170"
-                                height="170"
+                                alt="Profile"
+                                src={`https://ipfs.myriadflow.com/ipfs/${formData.profilePictureUrl}`}
+
                               />
                             ) : (
-                              <label
-                                htmlFor="upload"
-                                className="flex flex-col items-center gap-2 cursor-pointer mt-12"
-                              >
-                                <input
-                                  id="upload"
-                                  type="file"
-                                  className="hidden"
-                                  onChange={uploadImage}
-                                  accept="image/*"
+                              <div className="rounded-2xl h-36 w-36 ring-offset-2 ring-1 ring-black bg-gray-200">
+                                <img
+                                  alt="Default Profile"
+                                  src="https://thumbs.dreamstime.com/b/female-user-profile-avatar-woman-character-screen-saver-emotions-website-mobile-app-design-vector-199001739.jpg"
+                                  className="rounded-2xl mx-auto object-cover w-full h-full"
                                 />
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  className="h-10 w-10 fill-white stroke-indigo-500"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                  stroke-width="2"
-                                >
-                                  <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                  />
-                                </svg>
-                              </label>
+                              </div>
                             )}
                           </div>
                         </div>
+                      </div>
 
-                        <div className="mb-10 lg:w-3/4 md:w-3/4 mt-10">
-                          <div className="lg:flex md:flex justify-between gap-4">
-                            <div className="mb-10 w-1/2">
-                              <input
-                                type="text"
-                                id="name"
-                                style={border}
-                                className="shadow border bg-black appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
-                                placeholder="Your Name"
-                                value={formData.name}
-                                onChange={handleInputChange}
-                                // required
-                              />
-                            </div>
-
-                            <div className="mb-10 w-1/2">
-                              <input
-                                type="text"
-                                id="country"
-                                style={border}
-                                className="shadow border bg-black appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
-                                placeholder="Country"
-                                value={formData.country}
-                                onChange={handleInputChange}
-                                // required
-                              />
+                      {/* Profile Fields */}
+                      <div className="lg:w-3/4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                          <div className="mb-4">
+                            <label className="block text-gray-200 mb-2">Name</label>
+                            <div
+                              style={border}
+                              className="shadow border appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
+                            >
+                              {profileData?.name || "Name"}
                             </div>
                           </div>
 
-                          <div className="lg:flex md:flex justify-between gap-4">
-                            <div className="mb-0 w-1/2">
-                              <input
-                                type="text"
-                                id="discord"
-                                style={border}
-                                className="shadow border bg-black appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
-                                placeholder="Discord"
-                                value={formData.discord}
-                                onChange={handleInputChange}
-                                // required
-                              />
-                            </div>
-
-                            <div className="mb-0 w-1/2">
-                              <input
-                                type="text"
-                                id="twitter"
-                                style={border}
-                                className="shadow border bg-black appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
-                                placeholder="Twitter"
-                                value={formData.twitter}
-                                onChange={handleInputChange}
-                                // required
-                              />
+                          <div className="mb-4">
+                            <label className="block text-gray-200 mb-2">Country</label>
+                            <div
+                              style={border}
+                              className="shadow border appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
+                            >
+                              {profileData?.country || "Country"}
                             </div>
                           </div>
 
-                          <div className="text-center pt-10 w-1/2">
-                        <div className="pb-10 space-x-0 md:space-x-2 md:mb-8">
+                          <div className="mb-4">
+                            <label className="block text-gray-200 mb-2">Email</label>
+                            <div
+                              style={border}
+                              className="shadow border appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
+                            >
+                              {profileData?.email || "Email"}
+                            </div>
+                          </div>
+
+                          <div className="mb-4">
+                            <label className="block text-gray-200 mb-2">Discord</label>
+                            <div
+                              style={border}
+                              className="shadow border appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
+                            >
+                              {profileData?.discord || "Discord"}
+                            </div>
+                          </div>
+
+                          <div className="mb-4">
+                            <label className="block text-gray-200 mb-2">Twitter</label>
+                            <div
+                              style={border}
+                              className="shadow border appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
+                            >
+                              {profileData?.twitter || "Twitter"}
+                            </div>
+                          </div>
+
+                          <div className="mb-4">
+                            <label className="block text-gray-200 mb-2">Telegram</label>
+                            <div
+                              style={border}
+                              className="shadow border appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
+                            >
+                              {profileData?.telegram || "Telegram"}
+                            </div>
+                          </div>
+
+                          <div className="mb-4">
+                            <label className="block text-gray-200 mb-2">Farcaster</label>
+                            <div
+                              style={border}
+                              className="shadow border appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
+                            >
+                              {profileData?.farcaster || "Farcaster"}
+                            </div>
+                          </div>
+
+                          <div className="mb-4">
+                            <label className="block text-gray-200 mb-2">Google</label>
+                            <div
+                              style={border}
+                              className="shadow border appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
+                            >
+                              {profileData?.google || "Google"}
+                            </div>
+                          </div>
+
+                          <div className="mb-4">
+                            <label className="block text-gray-200 mb-2">Apple</label>
+                            <div
+                              style={border}
+                              className="shadow border appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
+                            >
+                              {profileData?.apple || "Apple"}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Edit Button */}
+                        <div className="text-center mt-6 sm:mt-8">
                           <button
                             style={button}
-                            type="submit"
-                            value="submit"
-                            className="px-14 py-3 mb-2 text-lg text-white font-semibold rounded-lg w-full sm:mb-0 hover:bg-green-200 focus:ring focus:ring-green-300 focus:ring-opacity-80"
+                            onClick={() => setprofileset(false)}
+                            className="px-8 sm:px-14 py-3 text-base sm:text-lg text-white font-semibold rounded-lg w-full sm:w-auto"
                           >
-                            Change details
+                            Edit Profile
                           </button>
                         </div>
                       </div>
-
-                        </div>
-                      </div>
-                      
-                    </form>
-
-                    {loading && (
-        <div
-        style={{ backgroundColor: "#040819D9" }}
-        className='flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full'
-        id='popupmodal'
-      >
-        <div className='relative p-4 lg:w-1/5 w-full max-w-2xl max-h-full'>
-          <div className='relative rounded-lg shadow'>
-            <div className='flex justify-center gap-4'>
-              <img
-                className='w-12 animate-spin duration-[3000] h-12'
-                src='/Loadingerebrus.png'
-                alt='Loading icon'
-              />
-  
-              <span className='text-white mt-2'>Loading...</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      )}
-
-                    {msg == "error" && (
-                      <p className="text-red-500">
-                        There is some issue in updating your profile. Try again
-                        after sometime.
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {profileset && (
-              <>
-               <section className="pb-0 rounded-xl">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="pt-8 sm:pt-16 flex flex-col sm:flex-row justify-between items-start sm:items-center">
-          <h1 className="text-3xl sm:text-4xl font-semibold text-gray-100 mb-4 sm:mb-0">
-            Profile information
-          </h1>
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-black text-sm">
-            <div 
-              className="px-2 py-1 rounded flex items-center space-x-1"
-              style={{ backgroundColor: '#8EB9FF' }}
-            >
-              {chainDetails.icon && (
-                <img 
-                  src={chainDetails.icon} 
-                  alt={`${chainDetails.name} icon`} 
-                  className="w-6 h-6" 
-                />
-              )}
-              <span className="pr-2">{chainDetails.name}</span>
-            </div>
-            <div 
-              className="px-4 py-1 rounded" 
-              style={{backgroundColor:'#8EB9FF'}}
-            >
-              {walletaddr?.slice(0, 4)}...{walletaddr?.slice(-4)}
-            </div>
-          </div>
-        </div>
-
-        <div className="w-full mx-auto text-left mt-8">
-          <form id="myForm" className="rounded">
-            <div className="flex flex-col lg:flex-row gap-8">
-              <div className="lg:w-1/4">
-                <div className="flex items-center justify-center mb-6 lg:mb-0">
-                  {profileData?.profilePictureUrl ? (
-                    <div className="rounded-2xl h-36 w-36">
-                      <img
-                        alt="Profile"
-                        src={`${"https://nftstorage.link/ipfs"}/${removePrefix(profileData?.profilePictureUrl)}`}
-                        className="rounded-2xl object-cover w-full h-full"
-                      />
                     </div>
-                  ) : (
-                    <div className="rounded-2xl h-36 w-36 ring-offset-2 ring-1 ring-black bg-gray-200">
-                      <img
-                        alt="Default Profile"
-                        src="https://thumbs.dreamstime.com/b/female-user-profile-avatar-woman-character-screen-saver-emotions-website-mobile-app-design-vector-199001739.jpg"
-                        className="rounded-2xl mx-auto object-cover w-full h-full"
-                      />
-                    </div>
-                  )}
+                  </form>
                 </div>
               </div>
-
-              <div className="lg:w-3/4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div
-                    style={border}
-                    className="mb-4 shadow border appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
-                  >
-                    {profileData?.name || "Name"}
-                  </div>
-
-                  <div
-                    style={border}
-                    className="mb-4 shadow border appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
-                  >
-                    {profileData?.country || "Country"}
-                  </div>
-
-                  <div
-                    style={border}
-                    className="mb-4 rounded w-full py-4 px-3 text-gray-200 leading-tight"
-                  >
-                    {profileData?.discord || "Discord"}
-                  </div>
-
-                  <div
-                    style={border}
-                    className="mb-4 rounded w-full py-4 px-3 text-gray-200 leading-tight"
-                  >
-                    {profileData?.twitter || "Twitter"}
-                  </div>
-                </div>
-
-                <div className="text-center mt-6">
-                  <button
-                    style={button}
-                    onClick={() => setprofileset(false)}
-                    className="px-14 py-3 mb-2 text-lg text-white font-semibold rounded-lg w-full sm:w-auto hover:bg-green-200 focus:ring focus:ring-green-300 focus:ring-opacity-80"
-                  >
-                    Edit Profile
-                  </button>
-                </div>
-              </div>
-            </div>
-          </form>
-
-          {loading && (
-            <div
-              style={{ backgroundColor: "#040819D9" }}
-              className='flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full'
-              id='popupmodal'
-            >
-              <div className='relative p-4 w-full max-w-md max-h-full'>
-                <div className='relative rounded-lg shadow'>
-                  <div className='flex justify-center items-center gap-4'>
-                    <img
-                      className='w-12 h-12 animate-spin'
-                      src='/Loadingerebrus.png'
-                      alt='Loading icon'
-                    />
-                    <span className='text-white'>Loading...</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            </section>
           )}
-        </div>
-      </div>
-    </section>                
-              </>
-            )}
-
-{ linkpopup && (
-<div style={{backgroundColor:'#222944E5'}} className="flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full" id="popupmodal">
-    <div className="relative p-4 lg:w-1/2 w-full max-w-2xl max-h-full">
-        <div className="relative rounded-lg shadow" style={{backgroundColor:'#37406D'}}>
-            <div className="flex items-center justify-end p-4 md:p-5 rounded-t text-white">
-                <h3 className="text-2xl font-semibold">
-                Link an email account
-                </h3>
-                <button 
-                    onClick={()=>{setlinkpopup(false)}}
-                    type="button" 
-                    className="text-gray-900 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                >
-                    <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                    </svg>
-                    <span className="sr-only">Close modal</span>
-                </button>
-            </div>
-
-            {/* <Image src={googletop} alt="" className="mx-auto"/> */}
-
-            <div className="pb-4 pt-10">
-            <button className="text-black bg-white p-2 rounded-lg w-1/2" onClick={handleLoginClick}>
-                <div className="flex gap-2 justify-center">
-                  <img src="/google.png" className="w-5 h-5 mt-0.5"/>
-                <div>Using Google</div>
-                </div>
-            </button>
-          </div>
-
-          <div className="pb-4">
-            <button className="text-black bg-white p-2 rounded-lg w-1/2" onClick={()=>{setlinkpopup(false);setmagiclinkpopup(true);}}>
-                <div className="flex gap-2 justify-center">
-                <div>Using Magic Link</div>
-                </div>
-            </button>
-          </div>
-
-          <div className="pb-10">
-            <button className="text-white border p-2 rounded-lg w-1/2" onClick={()=>{setlinkpopup(false)}}>
-            <div className="flex gap-2 justify-center">
-                <div>Skip</div>
-                </div>
-            </button>
-          </div>
-
-        </div>          
-    </div>
-</div>
-)}
-
-
-{ unlinkpopup && (
-<div style={{backgroundColor:'#222944E5'}} className="flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full" id="popupmodal">
-    <div className="relative p-4 lg:w-1/2 w-full max-w-2xl max-h-full">
-        <div className="relative rounded-lg shadow" style={{backgroundColor:'#37406D'}}>
-            <div className="flex items-center justify-end p-4 md:p-5 rounded-t text-white">
-                <h3 className="text-2xl font-semibold">
-                Unlink Email account
-                </h3>
-                <button 
-                    onClick={()=>{setunlinkpopup(false)}}
-                    type="button" 
-                    className="text-gray-900 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                >
-                    <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                    </svg>
-                    <span className="sr-only">Close modal</span>
-                </button>
-            </div>
-
-            {/* <Image src={googletop} alt="" className="mx-auto"/> */}
-
-            <div className="pb-4 pt-10">
-            <button className="text-black bg-white p-2 rounded-lg w-1/2" onClick={handleremoveClick}>
-                <div className="flex gap-2 justify-center">
-                <div>Unlink Now</div>
-                </div>
-            </button>
-          </div>
-
-          <div className="pb-10">
-            <button className="text-white border p-2 rounded-lg w-1/2" onClick={()=>{setunlinkpopup(false)}}>
-            <div className="flex gap-2 justify-center">
-                <div>Skip</div>
-                </div>
-            </button>
-          </div>
-
-        </div>          
-    </div>
-</div>
-)}
-
-{ magiclinkpopup && (
-<div style={{backgroundColor:'#222944E5'}} className="flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full" id="popupmodal">
-    <div className="relative p-4 lg:w-1/2 w-full max-w-2xl max-h-full">
-        <div className="relative rounded-lg shadow" style={{backgroundColor:'#37406D'}}>
-            <div className="flex items-center justify-end p-4 md:p-5 rounded-t text-white">
-                <h3 className="text-2xl font-semibold">
-                Link an email account
-                </h3>
-                <button 
-                    onClick={()=>{setmagiclinkpopup(false)}}
-                    type="button" 
-                    className="text-gray-900 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                >
-                    <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                    </svg>
-                    <span className="sr-only">Close modal</span>
-                </button>
-            </div>
-
-            {/* <Image src={googletop} alt="" className="mx-auto"/> */}
-
-            {!magicmessage && (
-
-            <form
-                    id="myForm"
-                    className="rounded pt-10"
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      handleMagicLink();
-                    }}
-                  >
-
-          <div className="pb-4">
-                <input
-                          type="email"
-                          id="gmail"
-                          style={border}
-                          className="shadow border appearance-none rounded-lg w-1/2 py-3 px-4 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
-                          placeholder="Enter your email address"
-                          value={gmail}
-                          onChange={(e) => setgmail(e.target.value)}
-                          required
-                        />
-          </div>
-
-          <div className="pb-10">
-            <button className="text-white border p-2 rounded-lg w-1/2"
-            type="submit"
-            value="submit">
-            <div className="flex gap-2 justify-center">
-                <div>Send Magic Link</div>
-                </div>
-            </button>
-          </div>
-
-          </form>
-          )}
-
-          {magicmessage && !magicloginmessage && (
-            <>
-            <div className="text-green-500 py-10 w-2/3 mx-auto">{magicmessage}! Please check your mail and enter code here or click the magic link.</div>
-            <form
-                    id="magicForm"
-                    className="rounded pt-10"
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      handleMagicLogin();
-                    }}
-                  >
-
-          <div className="pb-4">
-                <input
-                          type="text"
-                          id="code"
-                          style={border}
-                          className="shadow border appearance-none rounded-lg w-1/2 py-3 px-4 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
-                          placeholder="Enter the code"
-                          value={code}
-                          onChange={(e) => setcode(e.target.value)}
-                          required
-                        />
-          </div>
-
-          <div className="pb-10">
-            <button className="text-white border p-2 rounded-lg w-1/2"
-            type="submit"
-            value="submit">
-            <div className="flex gap-2 justify-center">
-                <div>Link</div>
-                </div>
-            </button>
-          </div>
-
-          </form>
-          </>
-          )}
-
-          {magicloginmessage && (
-            <div className="py-10 text-green-500">Successfully Linked your account!!</div>
-          )}
-
-        </div>          
-    </div>
-</div>
-)}
-
-          </div>
         </div>
       </section>
     </div>

@@ -73,7 +73,7 @@ const isSendableNetwork = (connected, network) => {
   return connected && network?.toLowerCase() === mynetwork.toLowerCase();
 };
 
-const QUICKNODE_RPC = process.env.NEXT_PUBLIC_SOLANA_RPC_URL;
+const QUICKNODE_RPC = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://api.devnet.solana.com";
 const umi = createUmi(QUICKNODE_RPC).use(bundlrUploader());
 
 

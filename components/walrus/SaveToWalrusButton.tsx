@@ -50,7 +50,7 @@ const SaveToWalrusButton: React.FC<SaveToWalrusButtonProps> = ({ configFile, vpn
     try {
       // Save to Walrus
       const walrusResponse = await axios.put(
-        'https://publisher-devnet.walrus.space/v1/store',
+        'https://publisher.walrus-testnet.walrus.space',
         configFile,
         {
           params: { epochs: 5 },

@@ -239,13 +239,8 @@ const Navbar = ({ isHome }) => {
     const fetchData = async () => {
       try {
         const getRandomNumber = () => Math.floor(Math.random() * 1000);
-        const apiUrl = `https://api.multiavatar.com/${getRandomNumber()}`;
-
-        const response = await axios.get(apiUrl);
-        const svgDataUri = `data:image/svg+xml,${encodeURIComponent(
-          response.data
-        )}`;
-        setAvatarUrl(svgDataUri);
+        const imageUrl = `https://robohash.org/${getRandomNumber()}`;
+        setAvatarUrl(imageUrl);
       } catch (error) {
         console.error("Error fetching avatar:", error.message);
       }
@@ -768,7 +763,7 @@ const Navbar = ({ isHome }) => {
                       <img
                         src={avatarUrl}
                         alt="Avatar"
-                        className="w-10 ml-auto"
+                        className="w-10 ml-auto bg-white"
                       />
                     )}
                   </div>
@@ -818,7 +813,7 @@ const Navbar = ({ isHome }) => {
                       <img
                         src={avatarUrl}
                         alt="Avatar"
-                        className="w-10 ml-auto"
+                        className="w-10 ml-auto bg-white"
                       />
                     )}
                   </div>
