@@ -38,17 +38,21 @@ jobs:
           docker push $GITHUB_BRANCH_IMAGE
           rm -rf .env
 
-  deploy_prod:
+  deploy_dev:
     needs: build_push
-    runs-on: self-hosted
-    
+    runs-on: ubuntu-latest
     steps:
-      - name: Update image in cloun run 
-        run: |
-          docker pull ghcr.io/netsepio/erebrus-frontend:prod
-          docker tag  ghcr.io/netsepio/erebrus-frontend:prod us-west4-docker.pkg.dev/erebrus-prod/erebrus/erebrus-frontend:prod
-          gcloud auth activate-service-account --key-file=${{ secrets.SERVICE_ACCOUNT_KEY_FILE_PATH }} --project=${{ secrets.PROJECT }}
-          gcloud config set account ${{ secrets.SERVICE_ACCOUNT }}
-          gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://us-west4-docker.pkg.dev
-          docker push us-west4-docker.pkg.dev/erebrus-prod/erebrus/erebrus-frontend:prod
-          gcloud run deploy erebrus-frontend --image us-west4-docker.pkg.dev/erebrus-prod/erebrus/erebrus-frontend:prod --region us-west4
+      - name: Deploy on PROD server
+        if: github.ref == 'refs/heads/prod'
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.PROD_REMOTE_SERVER_ADDRESS }}
+          username: ${{ secrets.PROD_SERVER_USERNAME }}
+          key: ${{ secrets.PROD_REMOTE_SERVER_KEY }}
+          port: ${{ secrets.PROD_SSH_PORT }}
+          script: |
+            pwd
+            docker stop erebrus-frontend || true && docker image rm ghcr.io/netsepio/erebrus-frontend:prod
+            echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
+            docker pull ghcr.io/netsepio/erebrus-frontend:prod
+            docker run --name="erebrus-frontend" --rm -p 4040:8080 --net=bridge -d ghcr.io/netsepio/erebrus-frontend:prod
