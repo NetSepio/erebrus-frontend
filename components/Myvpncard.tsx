@@ -68,7 +68,7 @@ const handleDownload = async (
     );
     console.log(response);
     const config = response.data;
-    const blob = new Blob([config], { type: "text/plain;charset=utf-8" });
+    const blob = new Blob([config], { type: "text/plain;charSet=utf-8" });
     saveAs(blob, `${name}.conf`);
   } catch (error) {}
 };

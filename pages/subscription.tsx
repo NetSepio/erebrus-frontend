@@ -1334,7 +1334,7 @@ const Subscription = () => {
                                   className="text-md rounded-lg text-white flex btn bg-blue-gray-700 flex-1"
                                   onClick={() => {
                                     const blob = new Blob([ConfigFile], {
-                                      type: "text/plain;charset=utf-8",
+                                      type: "text/plain;charSet=utf-8",
                                     });
                                     saveAs(blob, `${VpnName}.conf`);
                                   }}

@@ -1,119 +1,43 @@
-import React, { useState } from "react";
-import "react-responsive-carousel/lib/styles/carousel.min.css";
-import { Carousel } from "react-responsive-carousel";
-import { motion } from "framer-motion";
-import Link from 'next/link';
+"use client";
+import React from "react";
+
 const DepinCarousel = () => {
-  const [currentSlide, setCurrentSlide] = useState(0);
-
-  const customRenderIndicator = (index) => {
-    const indicatorStyle = {
-      width: 30,
-      height: 30,
-      borderRadius: '50%',
-      backgroundColor: currentSlide === index ? '#202434' : 'white',
-      display: 'inline-block',
-      margin: '10px 8px',
-      cursor: 'pointer'
-    };
-
-    return (
-      <button
-        key={index}
-        style={indicatorStyle}
-        onClick={() => setCurrentSlide(index)}
-        aria-label={`Go to slide ${index + 1}`}
-      />
-    );
-  };
-
-  const slides = [
-    {
-      heading: "Last Mile Safe Internet Connectivity",
-      subheadings: [
-        {
-          subheading: "Break Free from Censorship",
-          description: "Get rid of censorship and geo-restrictions and provide access to any website, anywhere, with complete freedom."
-        },
-        {
-          subheading: "Security That Pays",
-          description: "We've got you covered. Enjoy peace of mind knowing your clients’ internet access and cybersecurity are covered when using your apps."
-        },
-        {
-          subheading: "Smart Security, Seamless Speed",
-          description: "Use targeted VPN protection (split tunneling) for your apps, ensuring clients’ security without slowing down their browsing experience."
-        }
-      ]
-    },
-    {
-      heading: "DNS-Based Roaming Firewall",
-      subheadings: [
-        {
-          subheading: "Unprecedented Network Control",
-          description: "Gain complete oversight and deep inspection capabilities for all your network traffic with our DNS-Based Roaming Firewall."
-        },
-        {
-          subheading: "Fortress on the Move",
-          description: "Securely connect to a highly secure enterprise network anytime, anywhere, with our innovative solution."
-        },
-        {
-          subheading: "Enhanced Security & Privacy by Design",
-          description: "Manage and regulate your network traffic with ease, ensuring unparalleled security and privacy for your connected devices."
-        }
-      ]
-    }
-  ];
-
   return (
-    <div id="howto" className="min-h-screen flex flex-col items-center justify-start scroll-mt-16 lg:scroll-mt-0 mb-20">
-      <div className="mb-2  font-normal w-[80%] text-white lg:text-2xl text-sm text-left">
-        <h1 className=" lg:text-5xl md:text-4xl text-3xl lg:mb-8 mb-8 lg:mt-10 text-left text-white">
-          Companies and Enterprises: Content Delivery, Uninterrupted
-        </h1>
-        <h1 className=" lg:text-xl text-xl lg:mb-8 mb-10 text-left text-white">
-          Subsidize Safe and Uncensored Internet & Cybersecurity for Your Teams and Users
-        </h1>
-        <motion.div
-      initial={{ y: 100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1, transition: { duration: 1 } }}
-      className="bg-[#E3EEFF] text-black py-3 px-6 text-center lg:text-lg md:text-sm text-sm rounded-[10vh] z-10 w-[30vh] mb-10 h-[7vh]"
+    <div
+      className="flex justify-center items-center bg-[#040a20] text-center pb-[10rem]"
+      style={{
+        backgroundImage: "url('/Light_Background.png')",
+        backgroundRepeat: "no-repeat",
+      }}
     >
-      <Link href="/subscription">
-        Deploy Your Node
-      </Link>
-    </motion.div>
-        <div className="lg:flex gap-14">
-          <div className="rounded-3xl lg:w-2/5 w-full relative">
-            <img src="/depin.png" alt="Static Image" className="rounded-3xl w-full" />
+      <div className="w-full max-w-6xl px-4">
+        <h1 className="text-white text-5xl mb-12 mt-0 font-bold lg:text-7xl md:text-4xl sm:text-3xl">
+          Meet CyreneAI
+        </h1>
+        <p className="text-[#ccc] text-2xl leading-6 lg:text-2xl mb-8 sm:text-xl sm:mb-6">
+          Private, Secure, and Censorship-Free Internet
+        </p>
+        <div className="flex justify-center items-center gap-[2rem] flex-col lg:flex-row pt-10">
+          <div className="flex-shrink-0 mt-12 lg:mt-0">
+            <img
+              src="/Cyrene.png"
+              alt="Cyrene AI"
+              className="rounded-[20px] max-w-full h-auto"
+            />
           </div>
-          <div className="rounded-3xl px-10 pt-10 lg:w-3/5 w-full text-left custom-gradient-bg mt-10 lg:mt-0 md:mt-0" >
-            <Carousel
-              selectedItem={currentSlide}
-              onChange={setCurrentSlide}
-              showArrows={false}
-              showStatus={false}
-              showIndicators={false}
-              showThumbs={false}
-              infiniteLoop={true}
-              autoPlay={true}
-            >
-              {slides.map((slide, index) => (
-                <div key={index} className="text-left">
-                  <h2 className="text-3xl  font-normal mb-10">{slide.heading}</h2>
-                  {slide.subheadings.map((sub, subIndex) => (
-                    <div key={subIndex} className="mb-4">
-                      <h3 className="text-xl font-semibold">{sub.subheading}</h3>
-                      <p className="text-base text-[#BEBEBE] mb-10">{sub.description}</p>
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </Carousel>
+          <div className="flex flex-col gap-8 lg:gap-12 items-center lg:items-start text-center lg:text-left">
+            <h1 className="text-white text-2xl lg:text-4xl font-bold leading-tight sm:text-3xl">
+              Your Cosmic Guide into the Agentic Future
+            </h1>
+            <h1 className="text-white text-2xl lg:text-4xl font-bold leading-tight sm:text-3xl">
+              Chat with Cyrene, our advanced AI assistant integrated into
+              Erebrus applications, ready to answer your questions and provide
+              instant assistance, across space and time.
+            </h1>
+            <h1 className="text-white text-2xl lg:text-4xl font-bold leading-tight sm:text-3xl">Get the help you need,
+            anytime.</h1>
           </div>
         </div>
-      </div>
-      <div className="mt-4 flex w-1/3 justify-end">
-        {slides.map((_, index) => customRenderIndicator(index))}
       </div>
     </div>
   );

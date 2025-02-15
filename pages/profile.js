@@ -264,7 +264,7 @@ const CLIENT_SECRET= process.env.NEXT_PUBLIC_CLIENT_SECRET;
     const code = urlParams.get('code');
   
     if (code) {
-      localStorage.setItem("code",code)
+      localStorage?.setItem("code",code)
       exchangeCodeForToken(code);
       console.log("code", code)
     }

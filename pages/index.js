@@ -32,7 +32,7 @@ export default function Home() {
     window.history.replaceState({}, document.title, window.location.pathname);
   
     if (code) {
-      localStorage.setItem("code",code)
+      localStorage?.setItem("code",code)
       exchangeCodeForToken(code);
       console.log("code", code)
     }
@@ -104,11 +104,15 @@ export default function Home() {
      
       
      <Head>
-  <meta charset="UTF-8" />
+  <meta charSet="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Redefining digital connectivity and unleashing the future of internet with globally accessible, secure and private network through the power of DePIN." />
   <meta name="keywords" content="Erebrus, vpn, decentralized, mint, 111, nft, clients, netsepio, apt, aptos" />
   <title>Erebrus</title>
+  <meta
+  name="format-detection"
+  content="telephone=no, date=no, email=no, address=no"
+/>
   <link rel="icon" href="/favicon.ico" />
   <meta property="og:image" content="/metaimg.png" />
   <meta property="og:title" content="Erebrus" />
@@ -181,7 +185,7 @@ export default function Home() {
 <Dvpn/>
 
 
-<div  className="py-10 gradient-background2">
+<div  className="gradient-background2">
 
 
 <DepinCarousel />

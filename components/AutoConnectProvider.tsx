@@ -22,7 +22,7 @@ export const AutoConnectProvider: FC<{ children: ReactNode }> = ({
 }) => {
   const [autoConnect, setAutoConnect] = useState<boolean>(() => {
     try {
-      const isAutoConnect = localStorage.getItem(
+      const isAutoConnect = localStorage?.getItem(
         AUTO_CONNECT_LOCAL_STORAGE_KEY
       );
       if (isAutoConnect) return JSON.parse(isAutoConnect);
@@ -36,9 +36,9 @@ export const AutoConnectProvider: FC<{ children: ReactNode }> = ({
   useEffect(() => {
     try {
       if (!autoConnect) {
-        localStorage.removeItem(AUTO_CONNECT_LOCAL_STORAGE_KEY);
+        localStorage?.removeItem(AUTO_CONNECT_LOCAL_STORAGE_KEY);
       } else {
-        localStorage.setItem(
+        localStorage?.setItem(
           AUTO_CONNECT_LOCAL_STORAGE_KEY,
           JSON.stringify(autoConnect)
         );

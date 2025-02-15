@@ -142,7 +142,7 @@ const LoginComponent = () => {
   };
 
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
+    const storedToken = localStorage?.getItem("token");
     if (storedToken) {
       setIsSignedIn(true);
     }
@@ -201,7 +201,7 @@ const LoginComponent = () => {
 
   const signOut = () => {
     sessionStorage.removeItem("token");
-    localStorage.removeItem("token");
+    localStorage?.removeItem("token");
     setMessage("");
     setSignature("");
     setChallengeId("");

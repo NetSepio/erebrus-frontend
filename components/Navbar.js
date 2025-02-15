@@ -8,7 +8,6 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import SingleSignerTransaction from "../components/transactionFlow/SingleSigner";
 import { ConnectButton, useWallet, addressEllipsis } from "@suiet/wallet-kit";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { useAptosWallet } from "./Login/aptos";
 import { useSuiWallet } from "./Login/suiwallet";
@@ -35,6 +34,10 @@ const WalletSelectorAntDesign = dynamic(
   }
 );
 
+const WalletMultiButton = dynamic(
+  () => import("@solana/wallet-adapter-react-ui").then((mod) => mod.WalletMultiButton),
+  { ssr: false }
+);
 
 const Navbar = ({ isHome }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -158,7 +161,7 @@ const Navbar = ({ isHome }) => {
     }
   }, [connected]);
   useEffect(() => {
-    // const erebrus_wallet =Cookies.get("erebrus_wallet") ;
+    // const erebrus_wallet =Cookies.get("erebrus_wallet") ;  
     if (ethConnected && getchainsym == "evm") {
       onSignMessageEth();
     }
