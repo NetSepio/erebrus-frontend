@@ -8,6 +8,7 @@ const DepinCarousel = () => {
       style={{
         backgroundImage: "url('/Light_Background.png')",
         backgroundRepeat: "no-repeat",
+        backgroundSize: "contain",
       }}
     >
       <div className="w-full max-w-6xl px-4">
@@ -26,16 +27,17 @@ const DepinCarousel = () => {
             />
           </div>
           <div className="flex flex-col gap-8 lg:gap-12 items-center lg:items-start text-center lg:text-left">
-            <h1 className="text-white text-2xl lg:text-4xl font-bold leading-tight sm:text-3xl">
+            <h1 className="text-white text-2xl lg:text-3xl font-bold leading-tight sm:text-3xl">
               Your Cosmic Guide into the Agentic Future
             </h1>
-            <h1 className="text-white text-2xl lg:text-4xl font-bold leading-tight sm:text-3xl">
+            <h1 className="text-white text-2xl lg:text-3xl font-bold leading-tight sm:text-3xl">
               Chat with Cyrene, our advanced AI assistant integrated into
               Erebrus applications, ready to answer your questions and provide
               instant assistance, across space and time.
             </h1>
-            <h1 className="text-white text-2xl lg:text-4xl font-bold leading-tight sm:text-3xl">Get the help you need,
-            anytime.</h1>
+            <h1 className="text-white text-2xl lg:text-3xl font-bold leading-tight sm:text-3xl">
+              Get the help you need, anytime.
+            </h1>
           </div>
         </div>
       </div>
