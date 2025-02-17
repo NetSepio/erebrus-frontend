@@ -12,9 +12,7 @@ interface ChainOption {
 const chainOptions: ChainOption[] = [
   { name: "Solana", symbol: "sol", icon: "solanaicon" },
   { name: "Aptos", symbol: "apt", icon: "aptosicon" },
-  { name: "Manta", symbol: "evm", icon: "mantaicon" },
   { name: "Peaq", symbol: "peaq", icon: "peaqicon" },
- 
   { name: "Sui", symbol: "sui", icon: "suiicon" },
   { name: "Google", symbol: "google", icon: "googleicon" },
 ];

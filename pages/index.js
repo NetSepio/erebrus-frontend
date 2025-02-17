@@ -1,22 +1,14 @@
 "use client";
 import Head from "next/head";
-import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import Features from "../components/Features";
-import Howto from "../components/Howto";
 import DepinCarousel from "../components/DepinCarousel";
 import MobileAPK from "../components/MobileAPK";
-import { motion } from "framer-motion";
-import { useAddress } from "@thirdweb-dev/react";
-import Link from "next/link";
-import react, { useEffect } from "react";
+import { useEffect } from "react";
 import Cookies from "js-cookie";
-import Carousel from "./Carousel";
 import Mission from "../components/Mission";
 import Dvpn from "../components/Dvpn.jsx";
 import Future from "../components/futureawait.tsx";
 import WinnersPage from "../components/winners.tsx";
-import Banner from "../components/Banner.tsx";
 
 export default function Home() {
   useEffect(() => {

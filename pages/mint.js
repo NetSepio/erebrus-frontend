@@ -101,7 +101,7 @@ const Mint = () => {
   const [displayText, setDisplayText] = useState("Only at 1.11 APT");
   const [displayText2, setDisplayText2] = useState("Pay in APT");
   const [imageSrc, setImageSrc] = useState("/mintApt.png");
-  const [imageSrc2, setImageSrc2] = useState("/mint/nft_aptos.jpeg");
+  const [imageSrc2, setImageSrc2] = useState("/nft_aptos.jpeg");
   const [showUserNFTs, setShowUserNFTs] = useState(false);
   const [walletAddress, setWalletAddress] = useState("");
   const router = useRouter();
@@ -441,7 +441,7 @@ const Mint = () => {
               <div className="w-full lg:w-1/2 mt-20 flex flex-col gap-8">
                 <div className="text-white text-base sm:text-xl lg:text-2xl flex items-center gap-2 ">
                   <img
-                    src="/uis_calender.png"
+                    src="/  .png"
                     className="w-6 h-6"
                     alt="Calendar"
                   />

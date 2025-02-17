@@ -15,7 +15,7 @@ const Future = () => {
 const Header = () => {
   return (
     <>
-      <h1 className="lg:text-7xl md:text-4xl sm:text-3xl text-5xl font-bold pt-20 text-center">
+      <h1 className="lg:text-7xl md:text-4xl sm:text-3xl text-5xl pt-20 text-center">
         Decentralized for Speed and Privacy
       </h1>
       <div className="flex justify-center">
