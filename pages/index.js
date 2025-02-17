@@ -109,7 +109,7 @@ export default function Home() {
           content="telephone=no, date=no, email=no, address=no"
         />
         <link rel="icon" href="/favicon.ico" />
-        <meta property="og:image" content="/metaimg.png" />
+        <meta property="og:image" content="/metaimg.webp" />
         <meta property="og:title" content="Erebrus" />
         <meta
           property="og:description"
@@ -132,7 +132,7 @@ export default function Home() {
         {/* <iframe className=" absolute top-0 left-0 w-full h-full object-cover" src="https://www.youtube.com/embed/y6X1RbZ9ssE?autoplay=1&loop=1&playlist=y6X1RbZ9ssE" frameborder="0" allowfullscreen></iframe> */}
 
         <img
-          src="/erebrus_hero.png"
+          src="/erebrus_hero.webp"
           className="absolute top-0 left-0 w-full h-full object-cover"
         />
 
@@ -185,13 +185,13 @@ export default function Home() {
         <div
           className="bg-[#040a20] text-center p-5"
           style={{
-            backgroundImage: "url('/Light_Background.png')",
+            backgroundImage: "url('/Light_Background.webp')",
             backgroundRepeat: "no-repeat",
             backgroundSize: "cover",
           }}
         >
           <div className="flex justify-center">
-            <img src="/Erebrus_logo_wordmark.png" />
+            <img src="/Erebrus_logo_wordmark.webp" />
           </div>
           <h1 className="text-white text-3xl lg:text-5xl pt-16 lg:pb-14">
             Joint the Movement. Get Started Now.

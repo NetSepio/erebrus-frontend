@@ -19,7 +19,7 @@ const Header = () => {
         Decentralized for Speed and Privacy
       </h1>
       <div className="flex justify-center">
-        <img src="/Uncensored.png" className="lg:w-[20%] md:w-[50%]" />
+        <img src="/Uncensored.webp" className="lg:w-[20%] md:w-[50%]" />
       </div>
     </>
   );

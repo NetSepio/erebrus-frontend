@@ -100,7 +100,7 @@ const Mint = () => {
   const [erebrusWallet, setErebrusWallet] = useState(null);
   const [displayText, setDisplayText] = useState("Only at 1.11 APT");
   const [displayText2, setDisplayText2] = useState("Pay in APT");
-  const [imageSrc, setImageSrc] = useState("/mintApt.png");
+  const [imageSrc, setImageSrc] = useState("/mintApt.webp");
   const [imageSrc2, setImageSrc2] = useState("/nft_aptos.jpeg");
   const [showUserNFTs, setShowUserNFTs] = useState(false);
   const [walletAddress, setWalletAddress] = useState("");
@@ -117,23 +117,23 @@ const Mint = () => {
       if (chainSym === "sol") {
         setDisplayText("0.035 SOL");
         setDisplayText2("Pay in SOL");
-        setImageSrc("/solanaicon.png");
-        setImageSrc2("/nft_sol.png");
+        setImageSrc("/solanaicon.webp");
+        setImageSrc2("/nft_sol.webp");
       } else if (chainSym === "evm") {
         setDisplayText("0.0019 ETH");
         setDisplayText2("Pay in ETH");
-        setImageSrc("/mintManta.png");
-        setImageSrc2("/nft_manta.png");
+        setImageSrc("/mintManta.webp");
+        setImageSrc2("/nft_manta.webp");
       } else if (chainSym === "peaq") {
         setDisplayText("0.0019 ETH");
         setDisplayText2("Pay in ETH");
-        setImageSrc("/mintManta.png");
-        setImageSrc2("/nft_peaq.png");
+        setImageSrc("/mintManta.webp");
+        setImageSrc2("/nft_peaq.webp");
       } else if (chainSym === "google") {
         setDisplayText("22.52 Sol");
         setDisplayText2("Pay in Dollars");
-        setImageSrc("/mintSui.png"); // change needed
-        setImageSrc2("/nft_ape1.png");
+        setImageSrc("/mintSui.webp"); // change needed
+        setImageSrc2("/nft_ape1.webp");
       }
     }
   }, []);
@@ -441,19 +441,19 @@ const Mint = () => {
               <div className="w-full lg:w-1/2 mt-20 flex flex-col gap-8">
                 <div className="text-white text-base sm:text-xl lg:text-2xl flex items-center gap-2 ">
                   <img
-                    src="/  .png"
+                    src="/  .webp"
                     className="w-6 h-6"
                     alt="Calendar"
                   />
                   <div>3-Month Coverage</div>
                 </div>
                 <div className="text-white text-base sm:text-xl lg:text-2xl flex items-center gap-2">
-                  <img src="/mdi_users.png" className="w-6 h-6" alt="Users" />
+                  <img src="/mdi_users.webp" className="w-6 h-6" alt="Users" />
                   <div>Unlimited Clients</div>
                 </div>
                 <div className="text-white text-base sm:text-xl lg:text-2xl  flex items-center gap-2">
                   <img
-                    src="/icomoon-free_price-tags.png"
+                    src="/icomoon-free_price-tags.webp"
                     className="w-6 h-6"
                     alt="Price Tags"
                   />
@@ -466,7 +466,7 @@ const Mint = () => {
                 </div>
                 <div className="text-white text-base sm:text-xl lg:text-2xl  flex items-center gap-2">
                   <img
-                    src="/wpf_security-checked.png"
+                    src="/wpf_security-checked.webp"
                     className="w-6 h-6"
                     alt="Security Checked"
                   />
@@ -525,7 +525,7 @@ const Mint = () => {
       {mintpage === "page2" && (
         <div
           style={{
-            backgroundImage: `url('/bgmint.png')`,
+            backgroundImage: `url('/bgmint.webp')`,
             backgroundColor: "black",
             backgroundSize: "cover",
             backgroundPosition: "center",
@@ -536,7 +536,7 @@ const Mint = () => {
         >
           <div className="relative p-4 w-full max-w-xl max-h-full">
             <img
-              src="/coin1.png"
+              src="/coin1.webp"
               className="w-60 -mt-10 absolute -top-10 -left-20"
             />
             <div
@@ -629,7 +629,7 @@ const Mint = () => {
             </div>
             </div>
             <img
-              src="/coin2.png"
+              src="/coin2.webp"
               className="w-60 -mt-10 absolute -bottom-24 -right-24"
               style={{ zIndex: -1 }}
             />
@@ -693,7 +693,7 @@ const Mint = () => {
                 </button>
               </div>
 
-              <img src="/mint.png" className="mx-auto w-[24vh] h-[24vh]" />
+              <img src="/mint.webp" className="mx-auto w-[24vh] h-[24vh]" />
 
               <div className="p-4 md:p-5 space-y-4">
                 <p className="text-2xl text-center font-semibold text-white">

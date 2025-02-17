@@ -175,7 +175,7 @@ const NodeDetail: React.FC = () => {
 <div className="flex flex-col md:flex-row gap-4 justify-between mt-4">
   <div className="text-center">
     <div className="relative inline-block">
-      <img src="/ellipse1.png" className="w-20 h-20 md:w-40 md:h-40" />
+      <img src="/ellipse1.webp" className="w-20 h-20 md:w-40 md:h-40" />
       <div className="absolute inset-0 flex flex-col items-center justify-center text-xs md:text-base">
         <div className="text-sm md:text-lg font-semibold">{node.uploadSpeed}</div>
         <div className="text-xs md:text-sm">Mbps Speed</div>
@@ -186,7 +186,7 @@ const NodeDetail: React.FC = () => {
   
   <div className="text-center">
     <div className="relative inline-block">
-      <img src="/ellipse1.png" className="w-20 h-20 md:w-40 md:h-40" />
+      <img src="/ellipse1.webp" className="w-20 h-20 md:w-40 md:h-40" />
       <div className="absolute inset-0 flex flex-col items-center justify-center text-xs md:text-base">
         <div className="text-sm md:text-lg font-semibold">{node.downloadSpeed}</div>
         <div className="text-xs md:text-sm">Mbps Speed</div>
@@ -213,7 +213,7 @@ const NodeDetail: React.FC = () => {
           <div
             className="rounded-xl px-4 py-10 md:px-10 md:py-24"
             style={{
-              backgroundImage: `url(/dns_bg.png)`,
+              backgroundImage: `url(/dns_bg.webp)`,
               backgroundPosition: "center",
             }}
           >

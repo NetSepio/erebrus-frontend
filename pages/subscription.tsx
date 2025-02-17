@@ -803,7 +803,7 @@ const Subscription = () => {
   if (!loggedin) {
     return (
       <>
-        <div className="min-h-screen bg-[url('/subscriptionbg.png')] bg-cover flex flex-col justify-center items-center">
+        <div className="min-h-screen bg-[url('/subscriptionbg.webp')] bg-cover flex flex-col justify-center items-center">
           <div className="text-white bg-transparent  font-medium text-4xl text-center">
             Subscribe and Unlock Full Access <br></br>
             Log in to Get Started
@@ -877,7 +877,7 @@ const Subscription = () => {
                         <div className="flex justify-center gap-4">
                           <img
                             className="w-12 animate-spin duration-[3000] h-12"
-                            src="/Loadingerebrus.png"
+                            src="/Loadingerebrus.webp"
                             alt="Loading icon"
                           />
 
@@ -1015,7 +1015,7 @@ const Subscription = () => {
                         />
                       ) : (
                         <img
-                          src="subscriptionprofile.png"
+                          src="subscriptionprofile.webp"
                           className="w-14 h-14 rounded-full"
                         />
                       )}
@@ -1379,7 +1379,7 @@ const Subscription = () => {
                           <div className="flex justify-center gap-4">
                             <img
                               className="w-12 animate-spin duration-[3000] h-12"
-                              src="/Loadingerebrus.png"
+                              src="/Loadingerebrus.webp"
                               alt="Loading icon"
                             />
 
@@ -1522,7 +1522,7 @@ const Subscription = () => {
                           ) : (
                             <>
                               <Image
-                                src="/create.png"
+                                src="/create.webp"
                                 alt="Create"
                                 className="mx-auto lg:mt-5 mt-10 h-[200px] w-[200px] md:h-[250px] md:w-[250px]"
                                 width={500} // Set an appropriate width
@@ -1562,7 +1562,7 @@ const Subscription = () => {
                                 <div className="flex justify-center gap-4">
                                   <img
                                     className="w-12 animate-spin duration-[3000] h-12"
-                                    src="/Loadingerebrus.png"
+                                    src="/Loadingerebrus.webp"
                                     alt="Loading icon"
                                   />
 

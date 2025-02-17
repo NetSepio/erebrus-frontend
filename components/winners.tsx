@@ -48,7 +48,7 @@ const Winners: React.FC = () => {
             {images.map((img) => (
               <img
                 key={img}
-                src={`/${img}_white.png`}
+                src={`/${img}_white.webp`}
                 alt={img}
                 className="w-[25%] lg:w-[40%]"
               />
@@ -66,7 +66,7 @@ const Winners: React.FC = () => {
                 <h2 className="text-xl lg:text-3xl flex items-center gap-2 mb-4">
                   {item.text}{" "}
                   <img
-                    src="/arrow.png"
+                    src="/arrow.webp"
                     alt="arrow"
                     className="lg:w-[50px] w-[30px]"
                   />

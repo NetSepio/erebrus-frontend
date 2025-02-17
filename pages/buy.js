@@ -532,7 +532,7 @@ const Buy = () => {
       {mintpage === "page2" && (
         <div
           style={{
-            backgroundImage: `url('/bgmint.png')`,
+            backgroundImage: `url('/bgmint.webp')`,
             backgroundColor: "black",
             backgroundSize: "cover",
             backgroundPosition: "center",
@@ -543,7 +543,7 @@ const Buy = () => {
         >
           <div className="relative p-4 w-full max-w-xl max-h-full">
             <img
-              src="/coin1.png"
+              src="/coin1.webp"
               className="w-60 -mt-10 absolute -top-10 -left-20"
             />
             <div
@@ -593,7 +593,7 @@ const Buy = () => {
                               type="button"
                               className="flex w-full text-white font-bold focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-md text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                             >
-                              <img src="/mint2.png" className="w-12"/>
+                              <img src="/mint2.webp" className="w-12"/>
                               <div className="px-5 py-2.5 ">Pay in APT</div>
                             </button>
                           { showconnectbutton && 
@@ -609,7 +609,7 @@ const Buy = () => {
                                 type="button"
                                 className="flex w-full text-white font-bold focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-md text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                               >
-                                <img src="/mint2.png" className="w-12"/>
+                                <img src="/mint2.webp" className="w-12"/>
                                 <div className="px-5 py-2.5 ">Pay in APT</div>
                               </button>
                         )}
@@ -624,14 +624,14 @@ const Buy = () => {
                     type="button"
                     className="flex w-full text-white font-bold focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-md text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                   >
-                    <img src="/mint3.png" className="w-12" />
+                    <img src="/mint3.webp" className="w-12" />
                     <div className="px-5 py-2.5 ">Pay in USD</div>
                   </button>
                 </div>
               )}
             </div>
             <img
-              src="/coin2.png"
+              src="/coin2.webp"
               className="w-60 -mt-10 absolute -bottom-24 -right-24"
               style={{ zIndex: -1 }}
             />
@@ -827,7 +827,7 @@ const Buy = () => {
                 </button>
               </div>
 
-              <img src="/mint.png" className="mx-auto" />
+              <img src="/mint.webp" className="mx-auto" />
 
               <div className="p-4 md:p-5 space-y-4">
                 <p className="text-2xl text-center font-semibold text-white">

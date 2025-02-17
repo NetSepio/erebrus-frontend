@@ -39,7 +39,7 @@ const metadata = {
       "Redefining digital connectivity and unleashing the future of internet with globally accessible, secure and private network through the power of DePIN.",
     images: [
       {
-        url: "/metaimg.png",
+        url: "/metaimg.webp",
         width: 1200,
         height: 630,
         alt: "Erebrus",
@@ -54,7 +54,7 @@ const metadata = {
       "Redefining digital connectivity and unleashing the future of internet with globally accessible, secure and private network through the power of DePIN.",
     images: [
       {
-        url: "/metaimg.png",
+        url: "/metaimg.webp",
         width: 1200,
         height: 630,
         alt: "Erebrus",

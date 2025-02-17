@@ -6,7 +6,7 @@ const DepinCarousel = () => {
     <div
       className="flex justify-center items-center bg-[#040a20] text-center pb-[10rem]"
       style={{
-        backgroundImage: "url('/Light_Background.png')",
+        backgroundImage: "url('/Light_Background.webp')",
         backgroundRepeat: "no-repeat",
         backgroundSize: "contain",
       }}
@@ -21,7 +21,7 @@ const DepinCarousel = () => {
         <div className="flex justify-center items-center gap-[2rem] flex-col lg:flex-row pt-10">
           <div className="flex-shrink-0 mt-12 lg:mt-0">
             <img
-              src="/Cyrene.png"
+              src="/Cyrene.webp"
               alt="Cyrene AI"
               className="rounded-[20px] max-w-full h-auto"
             />

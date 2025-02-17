@@ -19,7 +19,7 @@ const Dwifi = () => {
     <div className="explorer-page">
       <div className="mx-auto py-20 lg:h-[40vw]"
         style={{
-          backgroundImage: 'url("/explorerhero.png")',  
+          backgroundImage: 'url("/explorerhero.webp")',  
           backgroundSize: 'cover',
           backgroundBlendMode: 'overlay',
         }}

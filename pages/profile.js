@@ -368,19 +368,19 @@ const CLIENT_SECRET= process.env.NEXT_PUBLIC_CLIENT_SECRET;
 const chainInfo = {
   apt: {
     name: 'Aptos',
-    icon: '/aptosicon.png' // Replace with the actual path or URL
+    icon: '/aptosicon.webp' // Replace with the actual path or URL
   },
   sui: {
     name: 'Sui',
-    icon: '/suiicon.png' // Replace with the actual path or URL
+    icon: '/suiicon.webp' // Replace with the actual path or URL
   },
   evm: {
     name: 'Ethereum',
-    icon: '/ethicon.png' // Replace with the actual path or URL
+    icon: '/ethicon.webp' // Replace with the actual path or URL
   },
   sol: {
     name: 'Solana',
-    icon: '/solanaicon.png' // Replace with the actual path or URL
+    icon: '/solanaicon.webp' // Replace with the actual path or URL
   }
 };
 

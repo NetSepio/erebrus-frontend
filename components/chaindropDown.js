@@ -2,10 +2,10 @@ import React from 'react';
 import Cookies from 'js-cookie';
 
 const chains = [
-  { name: 'Ethereum', symbol: 'evm', icon: '/ethicon.png', iconSize: 'w-6 h-6' },
-  { name: 'Aptos', symbol: 'apt', icon: '/aptosicon.png', iconSize: 'w-6 h-6' },
-  { name: 'Sui', symbol: 'sui', icon: '/suiicon.png', iconSize: 'w-4 h-5' },
-  { name: 'Solana', symbol: 'sol', icon: '/solanaicon.png', iconSize: 'w-6 h-6' },
+  { name: 'Ethereum', symbol: 'evm', icon: '/ethicon.webp', iconSize: 'w-6 h-6' },
+  { name: 'Aptos', symbol: 'apt', icon: '/aptosicon.webp', iconSize: 'w-6 h-6' },
+  { name: 'Sui', symbol: 'sui', icon: '/suiicon.webp', iconSize: 'w-4 h-5' },
+  { name: 'Solana', symbol: 'sol', icon: '/solanaicon.webp', iconSize: 'w-6 h-6' },
 ];
 
 const ChainListItem = ({ name, symbol, icon, iconSize, onClick }) => (

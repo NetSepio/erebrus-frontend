@@ -5,7 +5,7 @@ import { FaDownload, FaQrcode } from "react-icons/fa";
 import axios from "axios";
 import Cookies from "js-cookie";
 import QrCode from "./qrCode";
-import dlt from "../public/dlt.png";
+import dlt from "../public/dlt.webp";
 import Image from "next/image";
 import Link from "next/link";
 import CryptoJS from 'crypto-js';
@@ -243,7 +243,7 @@ const MyVpnCard: React.FC<ReviewCardProps> = ({
                 <div>
                   {metaData.region} 
                 </div>
-                <img src={`https://flagsapi.com/${metaData.region}/shiny/64.png`} className="w-10"/>
+                <img src={`https://flagsapi.com/${metaData.region}/shiny/64.webp`} className="w-10"/>
             </div>
           </div>
 
@@ -432,7 +432,7 @@ const MyVpnCard: React.FC<ReviewCardProps> = ({
             <div className='flex justify-center gap-4'>
               <img
                 className='w-12 animate-spin duration-[3000] h-12'
-                src='/Loadingerebrus.png'
+                src='/Loadingerebrus.webp'
                 alt='Loading icon'
               />
   

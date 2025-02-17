@@ -388,7 +388,7 @@ const LoginComponent = () => {
                         // className="mx-auto"
                       >
                         <div className="flex gap-2" style={{marginLeft:100}}>
-                          <img src="/ethicon.png" className="w-6 h-6"/>
+                          <img src="/ethicon.webp" className="w-6 h-6"/>
                           <div>Ethereum</div>
                         </div>
                       </button>
@@ -407,7 +407,7 @@ const LoginComponent = () => {
                         // className="mx-auto"
                       >
                          <div className="flex gap-2" style={{marginLeft:100}}>
-                          <img src="/aptosicon.png" className="w-6 h-6"/>
+                          <img src="/aptosicon.webp" className="w-6 h-6"/>
                           <div>Aptos</div>
                         </div>
                       </button>
@@ -426,7 +426,7 @@ const LoginComponent = () => {
                         // className="mx-auto"
                       >
                          <div className="flex gap-2" style={{marginLeft:105}}>
-                          <img src="/suiicon.png" className="w-4 h-5"/>
+                          <img src="/suiicon.webp" className="w-4 h-5"/>
                           <div>Sui</div>
                         </div>
                       </button>
@@ -445,7 +445,7 @@ const LoginComponent = () => {
                         // className="mx-auto"
                       >
                          <div className="flex gap-2" style={{marginLeft:100}}>
-                          <img src="/solanaicon.png" className="w-6 h-6"/>
+                          <img src="/solanaicon.webp" className="w-6 h-6"/>
                           <div>Solana</div>
                         </div>
                       </button>

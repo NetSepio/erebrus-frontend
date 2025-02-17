@@ -315,7 +315,7 @@ const Navbar = ({ isHome }) => {
           <Link href="/" scroll={false}>
             <div className="block">
               <img
-                src="/Erebrus_logo_wordmark.png"
+                src="/Erebrus_logo_wordmark.webp"
                 alt="Logo"
                 className="w-48"
               />
@@ -494,7 +494,7 @@ const Navbar = ({ isHome }) => {
                         // className="mx-auto"
                       >
                         <div className="flex gap-2" style={{ marginLeft: 100 }}>
-                          <img src="/mantaicon.png" className="w-6 h-6" />
+                          <img src="/mantaicon.webp" className="w-6 h-6" />
                           <div>Ethereum</div>
                         </div>
                       </button>
@@ -517,7 +517,7 @@ const Navbar = ({ isHome }) => {
                         // className="mx-auto"
                       >
                         <div className="flex gap-2" style={{ marginLeft: 100 }}>
-                          <img src="/peaqicon.png" className="w-6 h-6" />
+                          <img src="/peaqicon.webp" className="w-6 h-6" />
                           <div>Peaq</div>
                         </div>
                       </button>
@@ -540,7 +540,7 @@ const Navbar = ({ isHome }) => {
                         // className="mx-auto"
                       >
                         <div className="flex gap-2" style={{ marginLeft: 100 }}>
-                          <img src="/aptosicon.png" className="w-6 h-6" />
+                          <img src="/aptosicon.webp" className="w-6 h-6" />
                           <div>Aptos</div>
                         </div>
                       </button>
@@ -563,7 +563,7 @@ const Navbar = ({ isHome }) => {
                         // className="mx-auto"
                       >
                         <div className="flex gap-2" style={{ marginLeft: 105 }}>
-                          <img src="/suiicon.png" className="w-4 h-5" />
+                          <img src="/suiicon.webp" className="w-4 h-5" />
                           <div>Sui</div>
                         </div>
                       </button>
@@ -586,7 +586,7 @@ const Navbar = ({ isHome }) => {
                         // className="mx-auto"
                       >
                         <div className="flex gap-2" style={{ marginLeft: 100 }}>
-                          <img src="/solanaicon.png" className="w-6 h-6" />
+                          <img src="/solanaicon.webp" className="w-6 h-6" />
                           <div>Solana</div>
                         </div>
                       </button>
@@ -640,7 +640,7 @@ const Navbar = ({ isHome }) => {
                       <div>
                         {" "}
                         <img
-                          src="/googleicon.png"
+                          src="/googleicon.webp"
                           alt=""
                           className="w-10 h-10 rounded-l-lg"
                         />

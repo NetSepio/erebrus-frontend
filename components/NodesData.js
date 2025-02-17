@@ -222,7 +222,7 @@ const NodesData = () => {
               className="flex gap-4 w-1/3 justify-center items-center p-6 mb-10"
               style={{ border: "solid 1px #FFFFFF66" }}
             >
-              <img src="/nodetable1.png" className="w-20 h-20" />
+              <img src="/nodetable1.webp" className="w-20 h-20" />
               <div>
                 <div>No. of Nodes</div>
                 <div className="text-3xl">{nodesdata.length}</div>
@@ -232,7 +232,7 @@ const NodesData = () => {
               className="flex gap-4 w-1/3 justify-center items-center p-6  mb-10"
               style={{ border: "solid 1px #FFFFFF66" }}
             >
-              <img src="/nodetable2.png" className="w-14 h-14" />
+              <img src="/nodetable2.webp" className="w-14 h-14" />
               <div>
                 <div>No. of Regions</div>
                 <div className="text-3xl">{uniqueRegionsCount}</div>
@@ -242,7 +242,7 @@ const NodesData = () => {
               className="flex gap-4 w-1/3 justify-center items-center p-6  mb-10"
               style={{ border: "solid 1px #FFFFFF66" }}
             >
-              <img src="/nodetable3.png" className="w-20 h-12" />
+              <img src="/nodetable3.webp" className="w-20 h-12" />
               <div>
                 <div>Active Nodes</div>
                 <div className="text-3xl">{activeNodesData.length}</div>
@@ -362,49 +362,49 @@ const NodesData = () => {
               <tr>
                 <th style={{ border: "solid 1px #FFFFFF66" }}>
                   <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable4.png" className="w-12 h-12" />
+                    <img src="/nodetable4.webp" className="w-12 h-12" />
                     <div>NODE NAME</div>
                   </div>
                 </th>
                 <th style={{ border: "solid 1px #FFFFFF66" }}>
                   <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable5.png" className="w-10 h-10" />
+                    <img src="/nodetable5.webp" className="w-10 h-10" />
                     <div>CHAIN</div>
                   </div>
                 </th>
                 <th style={{ border: "solid 1px #FFFFFF66" }}>
                   <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable5.png" className="w-10 h-10" />
+                    <img src="/nodetable5.webp" className="w-10 h-10" />
                     <div>WALLET ADDRESS</div>
                   </div>
                 </th>
                 <th style={{ border: "solid 1px #FFFFFF66" }}>
                   <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable6.png" className="w-10 h-10" />
+                    <img src="/nodetable6.webp" className="w-10 h-10" />
                     <div>REGION</div>
                   </div>
                 </th>
                 <th style={{ border: "solid 1px #FFFFFF66" }}>
                   <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable7.png" className="w-10 h-10" />
+                    <img src="/nodetable7.webp" className="w-10 h-10" />
                     <div>NETWORK SPEED</div>
                   </div>
                 </th>
                 <th style={{ border: "solid 1px #FFFFFF66" }}>
                   <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable8.png" className="w-10 h-10" />
+                    <img src="/nodetable8.webp" className="w-10 h-10" />
                     <div>STATUS</div>
                   </div>
                 </th>
                 <th style={{ border: "solid 1px #FFFFFF66" }}>
                   <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable9.png" className="w-10 h-10" />
+                    <img src="/nodetable9.webp" className="w-10 h-10" />
                     <div>UPTIME</div>
                   </div>
                 </th>
                 <th style={{ border: "solid 1px #FFFFFF66" }}>
                   <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable9.png" className="w-10 h-10" />
+                    <img src="/nodetable9.webp" className="w-10 h-10" />
                     <div>LAST PING</div>
                   </div>
                 </th>

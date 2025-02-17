@@ -4,12 +4,12 @@ const Footer = () => {
   return (
     <div
       className="bg-cover bg-center text-left"
-      style={{ backgroundImage: "url('/images/Footer.png')" }}
+      style={{ backgroundImage: "url('/images/Footer.webp')" }}
     >
       <div className="flex flex-wrap justify-between items-stretch w-[70%] mx-auto py-8">
         <div>
           <img
-            src="/Erebrus_logo_wordmark.png"
+            src="/Erebrus_logo_wordmark.webp"
             alt="NetSepio-Logo"
             className="h-20"
           />
@@ -35,7 +35,7 @@ const Footer = () => {
               rel="noreferrer"
               className="text-white text-lg font-normal no-underline block py-2 flex items-center gap-2"
             >
-              {item} <img src="/arrow.png" alt="up-arrow" />
+              {item} <img src="/arrow.webp" alt="up-arrow" />
             </a>
           ))}
         </div>
@@ -59,7 +59,7 @@ const Footer = () => {
               rel="noreferrer"
               className="text-white text-lg font-normal no-underline block py-2 flex items-center gap-2"
             >
-              {product.name} <img src="/arrow.png" alt="up-arrow" />
+              {product.name} <img src="/arrow.webp" alt="up-arrow" />
             </a>
           ))}
         </div>
@@ -71,24 +71,24 @@ const Footer = () => {
               {
                 name: "Telegram",
                 url: "https://t.me/NetSepio",
-                img: "Telegram.png",
+                img: "Telegram.webp",
               },
               {
                 name: "Github",
                 url: "https://github.com/Netsepio",
-                img: "Github.png",
+                img: "github_blue.webp",
               },
               {
                 name: "Discord",
                 url: "https://discordapp.com/invite/5uaFhNpRF6",
-                img: "Discord.png",
+                img: "discord_blue.webp",
               },
             ].map((social, index) => (
               <a key={index} href={social.url} target="_blank" rel="noreferrer">
                 <img
                   src={`/${social.img}`}
                   alt={social.name}
-                  className="rounded-xl"
+                  className="rounded-xl h-[40px]"
                 />
               </a>
             ))}
@@ -99,15 +99,15 @@ const Footer = () => {
               {
                 name: "Linkedin",
                 url: "https://www.linkedin.com/company/netsepio/",
-                img: "Linkedin.png",
+                img: "Linkedin.webp",
               },
-              { name: "X", url: "https://x.com/netsepio", img: "X.png" },
+              { name: "X", url: "https://x.com/netsepio", img: "twitter_blue.webp" },
             ].map((social, index) => (
               <a key={index} href={social.url} target="_blank" rel="noreferrer">
                 <img
                   src={`/${social.img}`}
                   alt={social.name}
-                  className="rounded-xl"
+                  className="rounded-xl h-[40px]"
                 />
               </a>
             ))}
