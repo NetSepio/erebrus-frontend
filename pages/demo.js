@@ -239,7 +239,7 @@ export default function FormResultPage() {
                         />
                       </svg>
                     </button>
-                    <h2 className="font-bold text-2xl lg:text-5xl text-gray-200 lg:w-[30%] w-[75%] text-center lg:text-left mb-6 lg:ml-16 lg:mb-48">
+                    <h2 className="font-bold text-2xl lg:text-4xl text-gray-200 lg:w-[30%] w-[75%] text-center lg:text-left mb-6 lg:ml-16 lg:mb-48">
                       Scan QR using the WireGuard® app and activate tunnel or
                       download .conf file to start using VPN 🎉
                       <p className="text-orange-400 lg:text-lg text-sm lg:w-[75%] mt-2">

@@ -1,102 +1,85 @@
-import React from 'react';
+import React from "react";
 
-const WinnersPage = () => {
-  const achievements = [
-    { logo: '/ivs.png', name: 'IVS CRYPTO', prize: 'Grand Prize at IVS Crypto Demoday, Japan' },
-    { logo: 'aptos.png', name: 'APTOS', prize: 'Grand Prize at Aptos Hackathon, Singapore' },
-    { logo: 'soonami.png', name: 'soonami.io', prize: 'On the Fast Track Prize at Soonami Venthuron' },
-    { logo: 'akindo.png', name: 'AKINDO', prize: 'Several Prizes at Akindo WaveHack' },
-    { logo: 'filecoin.png', name: 'Filecoin', prize: 'Grand Prize at Filecoin Browsers 3000 Hackathon' },
+const Winners: React.FC = () => {
+  const images = [
+    "radarthack",
+    "ethsea",
+    "ivscrypto",
+    "aptos",
+    "soonami",
+    "akindo",
   ];
 
-  const positions = [
-    { top: '5%', left: '10%', width: '120px', height: '80px' },
-    { top: '20%', left: '45%', width: '170px', height: '80px' },
-    { top: '45%', left: '12%', width: '180px', height: '55px' },
-    { top: '65%', left: '50%', width: '130px', height: '40px' },
-    { top: '75%', left: '14%', width: '160px', height: '80px' },
+  const links = [
+    {
+      text: "4th Place Solana Radarhack DePIN",
+      url: "https://arena.colosseum.org/projects/explore/netsepio?previous=L3Byb2plY3RzL2V4cGxvcmU_c2VlZD1iNGI0ZTYwYzViNGE0NzkwJnNlYXJjaD1uZXRzZXA",
+    },
+    {
+      text: "Grand Prize at ETH SEA Demoday, Bali",
+      url: "https://netsepio.substack.com/p/erebrus-protocol-by-netsepio-wins",
+    },
+    {
+      text: "Grand Prize at IVS Crypto Demoday, Japan",
+      url: "https://x.com/NetSepio/status/1810538904186982587",
+    },
+    {
+      text: "Grand Prize at Aptos Hackathon, Singapore",
+      url: "https://x.com/overmind_xyz/status/1701980625128071375",
+    },
+    {
+      text: "On the Fast Track Prize at Soonami Venturethon",
+      url: "https://soonami.io/post/soonami-cohort-4-winners",
+    },
+    {
+      text: "Several Prizes at Akindo WaveChack",
+      url: "https://app.akindo.io/communities/0n1VBlaXvCRPQVDG/products/La4OvOMglhWdMwjp",
+    },
   ];
 
   return (
-    <div className="bg-[#040819] text-white pb-20">
-      <h1 className="lg:text-5xl md:text-5xl text-3xl text-center mb-20">Join the Winners!</h1>
-      <div className="max-w-6xl mx-auto flex lg:flex-row md:flex-row flex-col justify-center items-center">
-        <div className="w-80 relative h-80 rounded-2xl lg:block md:block hidden"
-        style={{ background: 'linear-gradient(to bottom, rgba(255, 255, 255, 1), rgba(86, 150, 255, 1))' }}>
-          {achievements.map((item, index) => (
-            <div 
-              key={index} 
-              className="absolute"
-              style={{
-                top: positions[index % positions.length].top,
-                left: positions[index % positions.length].left,
-                width: positions[index % positions.length].width,
-                height: positions[index % positions.length].height,
-                // filter: 'drop-shadow(0 0 40px rgba(255, 255, 255, 1)) drop-shadow(0 0 80px rgba(255, 255, 255, 0.8))',
-                // animation: 'glow 3s infinite alternate',
-              }}
-            >
-              <img 
-                src={item.logo} 
-                alt={item.name} 
-                className="w-full h-full object-contain"
+    <div className="flex justify-center items-center pt-40 bg-[#040a20] text-center pb-40">
+      <div>
+        <h1 className="lg:text-7xl md:text-4xl sm:text-3xl text-4xl pb-20 text-center text-white">
+          Recognition
+        </h1>
+        <div className="flex flex-wrap justify-center items-center">
+          <div className="flex flex-wrap justify-center gap-4 items-center lg:w-[30%] w-[100%]">
+            {images.map((img) => (
+              <img
+                key={img}
+                src={`/${img}_white.webp`}
+                alt={img}
+                className="w-[25%] lg:w-[40%]"
               />
-            </div>
-          ))}
-        </div>
-        <div className="lg:w-1/2 md:w-1/2 w-full space-y-6 px-4 lg:text-start md:text-start text-center lg:-mt-10 md:-mt-10 -mt-20">
-          {achievements.map((item, index) => (
-            <a 
-              key={index} 
-              href="#" 
-              className="block hover:text-blue-300 text-white hover:text-blue-200 transition-colors duration-300 mt-10 lg:ml-20 md:ml-20 lg:text-xl md:text-xl text-sm"
-            >
-              {item.prize} <span className="text-blue-300">↗</span>
-            </a>
-          ))}
-        </div>
-        <div className="w-80 relative h-80 rounded-2xl lg:hidden md:hidden block mt-10 lg:mt-0 md:mt-0"
-        style={{ background: 'linear-gradient(to bottom, rgba(255, 255, 255, 1), rgba(86, 150, 255, 1))' }}>
-          {achievements.map((item, index) => (
-            <div 
-              key={index} 
-              className="absolute"
-              style={{
-                top: positions[index % positions.length].top,
-                left: positions[index % positions.length].left,
-                width: positions[index % positions.length].width,
-                height: positions[index % positions.length].height,
-                // filter: 'drop-shadow(0 0 40px rgba(255, 255, 255, 1)) drop-shadow(0 0 80px rgba(255, 255, 255, 0.8))',
-                // animation: 'glow 3s infinite alternate',
-              }}
-            >
-              <img 
-                src={item.logo} 
-                alt={item.name} 
-                className="w-full h-full object-contain"
-              />
-            </div>
-          ))}
+            ))}
+          </div>
+          <div className="text-left text-white px-8 pt-14 lg:pt-0">
+            {links.map((item) => (
+              <a
+                key={item.text}
+                href={item.url}
+                target="_blank"
+                rel="noreferrer"
+                className="no-underline text-white flex items-center gap-2 hover:text-gray-300"
+              >
+                <h2 className="text-xl lg:text-3xl flex items-center gap-2 mb-4">
+                  {item.text}{" "}
+                  <img
+                    src="/arrow.webp"
+                    alt="arrow"
+                    className="lg:w-[50px] w-[30px]"
+                  />
+                </h2>
+              </a>
+            ))}
+            <br />
+            <h2 className="text-lg lg:text-3xl">+ many more!!</h2>
+          </div>
         </div>
       </div>
-      <style jsx>{`
-        @keyframes glow {
-          0% {
-            filter: drop-shadow(0 0 40px rgba(255, 255, 255, 1)) drop-shadow(0 0 80px rgba(255, 255, 255, 0.8));
-          }
-          100% {
-            filter: drop-shadow(0 0 60px rgba(255, 255, 255, 1)) drop-shadow(0 0 100px rgba(255, 255, 255, 0.8));
-          }
-        }
-        .glow-effect {
-          transition: filter 0.3s ease-in-out;
-        }
-        .glow-effect:hover {
-          filter: drop-shadow(0 0 70px rgba(255, 255, 255, 1)) drop-shadow(0 0 120px rgba(255, 255, 255, 0.9)) !important;
-        }
-      `}</style>
     </div>
   );
 };
 
-export default WinnersPage;
+export default Winners;

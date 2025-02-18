@@ -15,7 +15,7 @@ const customIcon = new L.DivIcon({
   iconSize: [25, 41], 
   iconAnchor: [12, 25],
   popupAnchor: [1, -34],
-  shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.webp',
   shadowSize: [41, 41],
 });
 
@@ -134,7 +134,7 @@ export default function WorldMap({ showCurrentLocation }) {
         maxBoundsViscosity={1.0}
       >
         <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.webp"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         {nodes.map((node) => {

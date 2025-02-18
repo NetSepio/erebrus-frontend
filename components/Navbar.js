@@ -8,7 +8,6 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import SingleSignerTransaction from "../components/transactionFlow/SingleSigner";
 import { ConnectButton, useWallet, addressEllipsis } from "@suiet/wallet-kit";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { useAptosWallet } from "./Login/aptos";
 import { useSuiWallet } from "./Login/suiwallet";
@@ -35,6 +34,10 @@ const WalletSelectorAntDesign = dynamic(
   }
 );
 
+const WalletMultiButton = dynamic(
+  () => import("@solana/wallet-adapter-react-ui").then((mod) => mod.WalletMultiButton),
+  { ssr: false }
+);
 
 const Navbar = ({ isHome }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -158,7 +161,7 @@ const Navbar = ({ isHome }) => {
     }
   }, [connected]);
   useEffect(() => {
-    // const erebrus_wallet =Cookies.get("erebrus_wallet") ;
+    // const erebrus_wallet =Cookies.get("erebrus_wallet") ;  
     if (ethConnected && getchainsym == "evm") {
       onSignMessageEth();
     }
@@ -312,7 +315,7 @@ const Navbar = ({ isHome }) => {
           <Link href="/" scroll={false}>
             <div className="block">
               <img
-                src="/Erebrus_logo_wordmark.png"
+                src="/Erebrus_logo_wordmark.webp"
                 alt="Logo"
                 className="w-48"
               />
@@ -491,7 +494,7 @@ const Navbar = ({ isHome }) => {
                         // className="mx-auto"
                       >
                         <div className="flex gap-2" style={{ marginLeft: 100 }}>
-                          <img src="/mantaicon.png" className="w-6 h-6" />
+                          <img src="/mantaicon.webp" className="w-6 h-6" />
                           <div>Ethereum</div>
                         </div>
                       </button>
@@ -514,7 +517,7 @@ const Navbar = ({ isHome }) => {
                         // className="mx-auto"
                       >
                         <div className="flex gap-2" style={{ marginLeft: 100 }}>
-                          <img src="/peaqicon.png" className="w-6 h-6" />
+                          <img src="/peaqicon.webp" className="w-6 h-6" />
                           <div>Peaq</div>
                         </div>
                       </button>
@@ -537,7 +540,7 @@ const Navbar = ({ isHome }) => {
                         // className="mx-auto"
                       >
                         <div className="flex gap-2" style={{ marginLeft: 100 }}>
-                          <img src="/aptosicon.png" className="w-6 h-6" />
+                          <img src="/aptosicon.webp" className="w-6 h-6" />
                           <div>Aptos</div>
                         </div>
                       </button>
@@ -560,7 +563,7 @@ const Navbar = ({ isHome }) => {
                         // className="mx-auto"
                       >
                         <div className="flex gap-2" style={{ marginLeft: 105 }}>
-                          <img src="/suiicon.png" className="w-4 h-5" />
+                          <img src="/suiicon.webp" className="w-4 h-5" />
                           <div>Sui</div>
                         </div>
                       </button>
@@ -583,10 +586,33 @@ const Navbar = ({ isHome }) => {
                         // className="mx-auto"
                       >
                         <div className="flex gap-2" style={{ marginLeft: 100 }}>
-                          <img src="/solanaicon.png" className="w-6 h-6" />
+                          <img src="/solanaicon.webp" className="w-6 h-6" />
                           <div>Solana</div>
                         </div>
                       </button>
+                    </li>
+                    <li
+                      className="flex items-center justify-between p-2 rounded-full"
+                      style={{ backgroundColor: "#202333" }}
+                    >
+                      {/* <button
+                        onClick={() => {
+                          setHideFilter(false);
+                          Cookies.set("Chain_symbol", "monad");
+                          setchainsym("monad");
+                          setshowsignbuttonpeaq(false);
+                          setshowsignbuttoneth(false);
+                          setshowsignbuttonsol(false);
+                          setshowsignbuttonsui(false);
+                          setshowsignbuttonaptos(false);
+                        }}
+                        // className="mx-auto"
+                      >
+                        <div className="flex gap-2" style={{ marginLeft: 100 }}>
+                          <img src="/monad.svg" className="w-6 h-6" />
+                          <div>Monad</div>
+                        </div>
+                      </button> */}
                     </li>
                   </ul>
                 </div>
@@ -618,32 +644,14 @@ const Navbar = ({ isHome }) => {
                     <w3m-button />
                   </button>
                 )}
-                {chainsym === "sui" && (
-                  <button>
-                    <ConnectButton />
-                  </button>
-                )}
                 {chainsym === "sol" && (
                   <button>
                     <WalletMultiButton />
                   </button>
                 )}
-                {chainsym === "google" && (
-                  <button
-                    className="text-black bg-white rounded-lg w-full px-2"
-                    onClick={handleLoginClick}
-                  >
-                    <div className="flex gap-2 justify-center">
-                      <div>
-                        {" "}
-                        <img
-                          src="/googleicon.png"
-                          alt=""
-                          className="w-10 h-10 rounded-l-lg"
-                        />
-                      </div>
-                      <div className="mt-2">Sign in with Google</div>
-                    </div>
+                {chainsym === "monad" && (
+                  <button>
+                    
                   </button>
                 )}
               

@@ -25,7 +25,6 @@ jobs:
           DEV_ENV_FILE: ${{ vars.DEV_EREBRUS_FRONTEND }}
         run: |
           echo "$DEV_ENV_FILE" > .env
-          cat .env
           export CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
           export TAG=$([[ $CURRENT_BRANCH == $(basename ${{ github.ref }}) ]] && echo $CURRENT_BRANCH || echo "latest")
           echo $TAG
@@ -41,7 +40,7 @@ jobs:
 
   deploy_dev:
     needs: build_push
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Deploy on DEV server
         if: github.ref == 'refs/heads/main'

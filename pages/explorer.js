@@ -40,7 +40,7 @@ const Explorer = () => {
     <div className="explorer-page">
       <div className="mx-auto relative flex flex-col lg:flex-row items-center lg:items-start lg:justify-between p-4 lg:p-10 lg:h-[40vw]"
         style={{
-          backgroundImage: 'url("/explorerhero.png")',
+          backgroundImage: 'url("/explorerhero.webp")',
           backgroundSize: 'cover',
           backgroundBlendMode: 'lighten',
         }}

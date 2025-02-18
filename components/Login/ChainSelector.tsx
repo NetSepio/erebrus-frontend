@@ -12,11 +12,8 @@ interface ChainOption {
 const chainOptions: ChainOption[] = [
   { name: "Solana", symbol: "sol", icon: "solanaicon" },
   { name: "Aptos", symbol: "apt", icon: "aptosicon" },
-  { name: "Manta", symbol: "evm", icon: "mantaicon" },
   { name: "Peaq", symbol: "peaq", icon: "peaqicon" },
- 
-  { name: "Sui", symbol: "sui", icon: "suiicon" },
-  { name: "Google", symbol: "google", icon: "googleicon" },
+  // { name: "Monad", symbol: "monad", icon: "monad" },
 ];
 
 interface ChainSelectorProps {
@@ -51,7 +48,7 @@ const ChainSelector: React.FC<ChainSelectorProps> = ({ onChainChange }) => {
     <Menu as="div" className="relative inline-block text-left">
       <div>
         <Menu.Button className="inline-flex w-full justify-center gap-x-1.5 rounded-full bg-[#253776] px-10 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#1e2d5f]">
-          <img src={`/${selectedChain.icon}.png`} className="w-6 h-6 mr-2" alt={selectedChain.name} />
+          <img src={`/${selectedChain.icon}.webp`} className="w-6 h-6 mr-2" alt={selectedChain.name} />
           {selectedChain.name}
           <ChevronDownIcon className="-mr-1 h-5 w-5 text-gray-400" aria-hidden="true" />
         </Menu.Button>
@@ -79,7 +76,7 @@ const ChainSelector: React.FC<ChainSelectorProps> = ({ onChainChange }) => {
                     onClick={() => handleOptionSelect(option)}
                   >
                     <img
-                      src={`/${option.icon}.png`}
+                      src={`/${option.icon}.webp`}
                       className={`mr-3 h-5 w-5 ${option.icon === "suiicon" ? "ml-1" : ""}`}
                       aria-hidden="true"
                     />
