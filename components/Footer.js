@@ -1,6 +1,7 @@
 import React from "react";
 
 const Footer = () => {
+  
   const links = [
     { label: "About NetSepio", url: "https://netsepio.com/" },
     { label: "Meet CyreneAI", url: "https://www.cyreneai.com/" },
