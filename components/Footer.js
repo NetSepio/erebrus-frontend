@@ -1,14 +1,12 @@
 import React from "react";
 
 const Footer = () => {
-  
   const links = [
     { label: "About NetSepio", url: "https://netsepio.com/" },
     { label: "Meet CyreneAI", url: "https://www.cyreneai.com/" },
     { label: "Terms and Conditions", url: "https://erebrus.io/terms" },
     { label: "Privacy Policy", url: "https://erebrus.io/privacy" },
   ];
-
   return (
     <div
       className="bg-cover bg-center text-left"
