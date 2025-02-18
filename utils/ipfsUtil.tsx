@@ -1,7 +1,7 @@
 import Link from "next/link";
 // import { removePrefix } from "../modules/Utils/ipfsUtil";
 import React from "react";
-import eye2 from "../public/eye2.png";
+import eye2 from "../public/eye2.webp";
 import Image from "next/image";
 
 interface ReviewCardProps {

@@ -3,36 +3,73 @@ import Link from "next/link";
 
 const Pricing = () => {
   return (
-    <div
-      id="pricing"
-      className="lg:flex md:flex items-center justify-center lg:gap-20 md:gap-20 mx-auto pt-20 pb-32 bg-[#040819]"
-    >
-
-<div className="lg:w-1/2 md:w-1/2 w-full">
-        <img src="/apk1.png" />
+    <div className="bg-[#040a20] text-center pb-40">
+      <div>
+        <h1 className="lg:text-7xl md:text-4xl sm:text-3xl text-4xl pb-20 text-center text-white">
+          Your Content Delivery, Uninterrupted!
+        </h1>
+        <p className="text-[#ccc] text-2xl leading-6 lg:text-2xl mb-8 sm:text-xl sm:mb-6">
+          Launch your own VPN and AI agents for sovereign and private experience
+        </p>
       </div>
+      <div className="flex items-center justify-center mt-20 flex-wrap gap-8 pl-4 pr-4">
+        <div className="rounded-3xl pt-12 pb-12 pl-8 pr-8 w-full border-[1px] bg-[#051337] border-white lg:w-3/12">
+          <h2 className="text-4xl font-normal mb-10 text-white">
+            Last Mile Safe Internet
+          </h2>
+          <p className="text-[#ccc] text-2xl leading-6 lg:text-2xl mb-8 sm:text-xl sm:mb-6">
+            No censorship or geo-restrictions
+          </p>
+          <p className="text-[#ccc] text-2xl leading-6 lg:text-2xl mb-8 sm:text-xl sm:mb-6">
+            Enhanced security and privacy
+          </p>
+        </div>
+        <div className="rounded-3xl pt-12 pb-12 pl-8 pr-8 w-full border-[1px] border-white lg:w-3/12 flex flex-col">
+          <h2 className="text-4xl font-normal mb-10 text-white">
+            CyreneAI <br />
+            Coordination Layer
+          </h2>
+          <p className="text-[#ccc] text-2xl leading-6 lg:text-2xl mb-8 sm:text-xl sm:mb-6">
+            Communication layer for apps and AI agents with sensitive data{" "}
+          </p>
 
-      <div className="lg:w-1/2 md:w-1/2 w-full lg:p-0 md:p-0 p-4">
-  <h1 className="lg:text-5xl md:text-5xl text-3xl font-semibold mb-4 lg:font-thin md:font-thin text-white lg:pr-20 md:pr-20 text-center lg:text-left md:text-left">
-    Unleash the Power of Future Internet
-  </h1>
-  <div className="flex mb-10 text-white lg:text-xl md:text-xl text-sm font-thin lg:pr-20 md:pr-20 text-center lg:text-left md:text-left">
-    <div>
-      Empower your online activity with our mobile app for secure, private <br/> and accessible network. We utilize NFTs for robust 
-      privacy and decentralization.
-    </div>
-  </div>
-  <div className="text-center lg:text-left md:text-left">
-    <Link
-     href='https://drive.google.com/file/d/1jdkqwIXY825iG3shRRoFyg5SMGy6LN8J/view?usp=drive_link' target="_blank"
-      className="text-black bg-white font-bold py-3 px-6 rounded-full w-full lg:w-auto md:w-auto button-bg"
-    >
-      Download Now
-    </Link>
-  </div>
-</div>
+          <p className="text-[#ccc] text-2xl leading-6 lg:text-2xl mb-8 sm:text-xl sm:mb-6">
+            Multi-agent coordination with discovery & access control
+          </p>
+        </div>
+        <div className="rounded-3xl pt-12 pb-12 pl-8 pr-8 w-full border-[1px] bg-[#051337] border-white lg:w-3/12 h-auto">
+          <h2 className="text-4xl font-normal mb-10 text-white">
+            DNS Firewall
+          </h2>
+          <p className="text-[#ccc] text-2xl leading-6 lg:text-2xl mb-8 sm:text-xl sm:mb-6">
+            Block adware, spyware and malware
+          </p>
 
-      
+          <p className="text-[#ccc] text-2xl leading-6 lg:text-2xl mb-8 sm:text-xl sm:mb-6">
+            Targeted network protection
+          </p>
+        </div>
+      </div>
+      <div className="flex flex-wrap justify-center gap-8 items-center lg:items-start pt-20">
+        <a
+          href="https://erebrus.io/subscription"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <button className="px-6 py-2 lg:px-8 lg:py-4 border-2 border-white rounded-[10px] text-black bg-[#ccc] font-bold text-lg transition-all duration-300 hover:bg-white">
+            Deploy Your Node
+          </button>
+        </a>
+        <a
+          href="https://www.cyreneai.com/launch-agent"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <button className="px-6 py-2 lg:px-8 lg:py-4 border-2 border-white rounded-[10px] text-black bg-[#ccc] font-bold text-lg transition-all duration-300 hover:bg-white">
+            Launch Agent
+          </button>
+        </a>
+      </div>
     </div>
   );
 };

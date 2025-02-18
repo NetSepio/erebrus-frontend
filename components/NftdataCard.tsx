@@ -162,7 +162,7 @@ const NftdataCard: React.FC<ReviewCardProps> = ({
         {chainSymbol === "sol" && (
           <div className="absolute top-2 left-2 flex items-center">
             <img
-              src="./solanaicon.png" // Update with the correct path to your Solana icon
+              src="./solanaicon.webp" // Update with the correct path to your Solana icon
               alt="Solana Icon"
               className="w-10 h-10 rounded-full"
             />

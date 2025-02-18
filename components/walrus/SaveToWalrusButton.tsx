@@ -160,7 +160,7 @@ const SaveToWalrusButton: React.FC<SaveToWalrusButtonProps> = ({ configFile, vpn
            <div className="flex justify-center gap-4">
              <img
                className="w-12 animate-spin duration-[3000] h-12"
-               src="/Loadingerebrus.png"
+               src="/Loadingerebrus.webp"
                alt="Loading icon"
              />
 

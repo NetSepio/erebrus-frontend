@@ -72,7 +72,7 @@ const connectWallet = async () => {
         console.log("auth data", response.data);
         const token = await response?.data?.payload?.token;
         const userId = await response?.data?.payload?.userId;
-        // localStorage.setItem("platform_token", token);
+        // localStorage?.setItem("platform_token", token);
         Cookies.set("erebrus_token", token, { expires: 7 });
         Cookies.set("erebrus_wallet", account.address, { expires: 7 });
         Cookies.set("erebrus_userid", userId, { expires: 7 });

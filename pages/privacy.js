@@ -8,7 +8,7 @@ const Privacy = () => {
   return (
     <div className='p-20 text-white'>
     <div className='text-lg text-gray-200 mt-10'>Last Revised: June 21st 2024</div>  
-      <div className='text-5xl font-semibold mt-10 '>Erebrus Privacy Policy</div>
+      <div className='text-4xl font-semibold mt-10 '>Erebrus Privacy Policy</div>
       <div className='text-lg text-gray-200 mt-10'>
       Effective Date: June 20th 2024 <br />
         <div className='text-3xl my-10 font-semibold'>1. Introduction</div>

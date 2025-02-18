@@ -107,16 +107,16 @@ const DvpnMap = ({ nodes }) => {
         style={{ height: '100%', width: '100%', padding: '20px', borderRadius: '20px', border: '2px solid gray', boxShadow: '0 0px 25px black' }}
       >
         <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.webp"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
 {/* <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" // CartoDB Dark theme URL
+          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.webp" // CartoDB Dark theme URL
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | Map tiles by <a href="https://carto.com/attributions">CartoDB</a>'
           noWrap={true}
         /> */}
          {/* <TileLayer
-          url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png"
+          url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.webp"
           attribution='&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'
           noWrap={true}
         /> */}

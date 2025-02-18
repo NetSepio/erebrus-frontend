@@ -10,7 +10,7 @@ const Dwifi = () => {
         <div
           className="flex flex-col items-center justify-center lg:h-[40vw] mb-36 lg:mb-0   w-full h-full "
           style={{
-            backgroundImage: 'url("/explorerhero.png")',
+            backgroundImage: 'url("/explorerhero.webp")',
             backgroundSize: 'cover',
             backgroundBlendMode: 'overlay',
           }}

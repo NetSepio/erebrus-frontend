@@ -231,55 +231,55 @@ const NodeDwifiStream = () => {
               <tr>
               <th style={{ border: "solid 1px #FFFFFF66" }}>
                   <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/dwifi1.png" className="w-10 h-10" />
+                    <img src="/dwifi1.webp" className="w-10 h-10" />
                     <div>SSID</div>
                   </div>
                 </th>
                 <th style={{ border: "solid 1px #FFFFFF66" }}>
                   <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/dwifi2.png" className="w-12 h-12" />
+                    <img src="/dwifi2.webp" className="w-12 h-12" />
                     <div>IP Address</div>
                   </div>
                 </th>
                 <th style={{ border: "solid 1px #FFFFFF66" }}>
                   <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable4.png" className="w-12 h-12" />
+                    <img src="/nodetable4.webp" className="w-12 h-12" />
                     <div>Chain</div>
                   </div>
                 </th>
                 <th style={{ border: "solid 1px #FFFFFF66" }}>
                   <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/dwifi4.png" className="w-10 h-10" />
+                    <img src="/dwifi4.webp" className="w-10 h-10" />
                     <div>Price/min</div>
                   </div>
                 </th>
                 <th style={{ border: "solid 1px #FFFFFF66" }}>
                   <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/dwifi5.png" className="w-10 h-10" />
+                    <img src="/dwifi5.webp" className="w-10 h-10" />
                     <div>Connected Devices</div>
                   </div>
                 </th>
                 {/* <th style={{ border: "solid 1px #FFFFFF66" }}>
                   <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/nodetable7.png" className="w-10 h-10" />
+                    <img src="/nodetable7.webp" className="w-10 h-10" />
                     <div>Status</div>
                   </div>
                 </th> */}
                 <th style={{ border: "solid 1px #FFFFFF66" }}>
                   <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/dwifi3.png" className="w-10 h-10" />
+                    <img src="/dwifi3.webp" className="w-10 h-10" />
                     <div>Location</div>
                   </div>
                 </th>
                 <th style={{ border: "solid 1px #FFFFFF66" }}>
                   <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/dwifi7.png" className="w-10 h-10" />
+                    <img src="/dwifi7.webp" className="w-10 h-10" />
                     <div>Uptime</div>
                   </div>
                 </th>
                 <th style={{ border: "solid 1px #FFFFFF66" }}>
                   <div className="flex gap-4 justify-center items-center pt-4 pb-4 px-4">
-                    <img src="/dwifi8.png" className="w-10 h-10" />
+                    <img src="/dwifi8.webp" className="w-10 h-10" />
                     <div>Last Pinged</div>
                   </div>
                 </th>
