@@ -1,10 +1,17 @@
 import React from "react";
 
 const Footer = () => {
+  const links = [
+    { label: "About NetSepio", url: "https://netsepio.com/" },
+    { label: "Meet CyreneAI", url: "https://www.cyreneai.com/" },
+    { label: "Terms and Conditions", url: "https://erebrus.io/terms" },
+    { label: "Privacy Policy", url: "https://erebrus.io/privacy" },
+  ];
+
   return (
     <div
       className="bg-cover bg-center text-left"
-      style={{ backgroundImage: "url('/images/Footer.webp')" }}
+      style={{ backgroundImage: "url('/Footer.png')" }}
     >
       <div className="flex flex-wrap justify-between items-stretch w-[70%] mx-auto py-8">
         <div>
@@ -22,20 +29,15 @@ const Footer = () => {
 
         <div className="flex flex-col min-h-full">
           <h1 className="text-2xl text-white font-normal pt-4 pb-8">Explore</h1>
-          {[
-            "About NetSepio",
-            "Meet CyreneAI",
-            "Terms and Conditions",
-            "Privacy Policy",
-          ].map((item, index) => (
+          {links.map((link, index) => (
             <a
               key={index}
-              href={`/${item.toLowerCase().replace(/\s+/g, "-")}`}
+              href={link.url}
               target="_blank"
               rel="noreferrer"
               className="text-white text-lg font-normal no-underline block py-2 flex items-center gap-2"
             >
-              {item} <img src="/arrow.webp" alt="up-arrow" />
+              {link.label} <img src="/arrow.webp" alt="up-arrow" />
             </a>
           ))}
         </div>
@@ -45,11 +47,11 @@ const Footer = () => {
             Get Erebrus
           </h1>
           {[
-            { name: "Play Store", url: "https://erebrus.io/" },
-            { name: "App Store", url: "https://www.cyreneai.com/" },
+            { name: "Play Store", url: "https://play.google.com/store/apps/details?id=com.erebrus.app" },
+            { name: "App Store", url: "https://testflight.apple.com/join/BvdARC75" },
             {
               name: "WebApp",
-              url: "https://chromewebstore.google.com/detail/netsepio/bbkfclgnbddljhepbfpongcollhocghd",
+              url: "/",
             },
           ].map((product, index) => (
             <a
@@ -71,7 +73,7 @@ const Footer = () => {
               {
                 name: "Telegram",
                 url: "https://t.me/NetSepio",
-                img: "Telegram.webp",
+                img: "Telegram.png",
               },
               {
                 name: "Github",
@@ -99,9 +101,13 @@ const Footer = () => {
               {
                 name: "Linkedin",
                 url: "https://www.linkedin.com/company/netsepio/",
-                img: "Linkedin.webp",
+                img: "Linkedin.png",
               },
-              { name: "X", url: "https://x.com/netsepio", img: "twitter_blue.webp" },
+              {
+                name: "X",
+                url: "https://x.com/netsepio",
+                img: "twitter_blue.webp",
+              },
             ].map((social, index) => (
               <a key={index} href={social.url} target="_blank" rel="noreferrer">
                 <img

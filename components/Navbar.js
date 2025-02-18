@@ -591,6 +591,29 @@ const Navbar = ({ isHome }) => {
                         </div>
                       </button>
                     </li>
+                    <li
+                      className="flex items-center justify-between p-2 rounded-full"
+                      style={{ backgroundColor: "#202333" }}
+                    >
+                      <button
+                        onClick={() => {
+                          setHideFilter(false);
+                          Cookies.set("Chain_symbol", "monad");
+                          setchainsym("monad");
+                          setshowsignbuttonpeaq(false);
+                          setshowsignbuttoneth(false);
+                          setshowsignbuttonsol(false);
+                          setshowsignbuttonsui(false);
+                          setshowsignbuttonaptos(false);
+                        }}
+                        // className="mx-auto"
+                      >
+                        <div className="flex gap-2" style={{ marginLeft: 100 }}>
+                          <img src="/monad.svg" className="w-6 h-6" />
+                          <div>Monad</div>
+                        </div>
+                      </button>
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -621,32 +644,14 @@ const Navbar = ({ isHome }) => {
                     <w3m-button />
                   </button>
                 )}
-                {chainsym === "sui" && (
-                  <button>
-                    <ConnectButton />
-                  </button>
-                )}
                 {chainsym === "sol" && (
                   <button>
                     <WalletMultiButton />
                   </button>
                 )}
-                {chainsym === "google" && (
-                  <button
-                    className="text-black bg-white rounded-lg w-full px-2"
-                    onClick={handleLoginClick}
-                  >
-                    <div className="flex gap-2 justify-center">
-                      <div>
-                        {" "}
-                        <img
-                          src="/googleicon.webp"
-                          alt=""
-                          className="w-10 h-10 rounded-l-lg"
-                        />
-                      </div>
-                      <div className="mt-2">Sign in with Google</div>
-                    </div>
+                {chainsym === "monad" && (
+                  <button>
+                    
                   </button>
                 )}
               

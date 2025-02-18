@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import Cookies from "js-cookie";
 import axios from "axios";
 import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
@@ -74,30 +74,30 @@ const Profile = () => {
     e.preventDefault();
     try {
       setLoading(true);
-  
+
       const file = e.target.files[0];
       if (!file) {
         throw new Error("No file selected");
       }
-  
+
       const formData = new FormData();
       formData.append("file", file);
-  
+
       const response = await fetch("/api/uploadToIPFS", {
         method: "POST",
         body: formData,
       });
-  
+
       if (!response.ok) {
         throw new Error(`Upload failed: ${response.statusText}`);
       }
-  
+
       const data = await response.json();
       setFormData((prevData) => ({
         ...prevData,
         profilePictureUrl: `${data.Hash}`,
       }));
-  
+
       console.log("profilePictureUrl", data.Hash);
     } catch (error) {
       console.log("Error uploading file:", error);
@@ -105,7 +105,7 @@ const Profile = () => {
       setLoading(false);
     }
   }
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -122,7 +122,7 @@ const Profile = () => {
         apple: formData.apple,
         telegram: formData.telegram,
         farcaster: formData.farcaster,
-        profilePictureUrl: formData.profilePictureUrl
+        profilePictureUrl: formData.profilePictureUrl,
       };
 
       // Convert to JSON string
@@ -182,9 +182,9 @@ const Profile = () => {
             apple: response.data.payload.apple || "",
             telegram: response.data.payload.telegram || "",
             farcaster: response.data.payload.farcaster || "",
-            profilePictureUrl: response.data.payload.profilePictureUrl || ""
+            profilePictureUrl: response.data.payload.profilePictureUrl || "",
           });
-          if(!response.data.payload.email) {
+          if (!response.data.payload.email) {
             setauth(false);
           }
         }
@@ -200,58 +200,69 @@ const Profile = () => {
 
   const wallet = Cookies.get("platform_wallet");
 
-  const handleMagicLink = async() =>{
+  const handleMagicLink = async () => {
     const auth = Cookies.get("erebrus_token");
 
-    const obj = {"email":gmail};
+    const obj = { email: gmail };
     const jsonData = JSON.stringify(obj);
 
-    Cookies.set("magic_link", gmail , { expires: 7 });
+    Cookies.set("magic_link", gmail, { expires: 7 });
 
     try {
-      const response = await axios.post(`${REACT_APP_GATEWAY_URL}api/v1.0/account/generate-auth-id`, {
-       ...obj
-      },{headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "application/json",
-        // Authorization: `Bearer ${auth}`,
-      }});
-  
+      const response = await axios.post(
+        `${REACT_APP_GATEWAY_URL}api/v1.0/account/generate-auth-id`,
+        {
+          ...obj,
+        },
+        {
+          headers: {
+            Accept: "application/json, text/plain, */*",
+            "Content-Type": "application/json",
+            // Authorization: `Bearer ${auth}`,
+          },
+        }
+      );
+
       const responseData = await response.data;
-      console.log('magic link response:', responseData);
+      console.log("magic link response:", responseData);
       setmagicmessage(responseData.message);
     } catch (error) {
-      console.error('magic link error:', error);
+      console.error("magic link error:", error);
     }
   };
 
-  const handleMagicLogin = async() =>{
+  const handleMagicLogin = async () => {
     const auth = Cookies.get("erebrus_token");
 
-    const obj = {"code":code,"emailId":gmail};
+    const obj = { code: code, emailId: gmail };
     const jsonData = JSON.stringify(obj);
 
     try {
-      const response = await axios.post(`${REACT_APP_GATEWAY_URL}api/v1.0/account/paseto-from-magic-link`, {
-       ...obj
-      },{headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${auth}`,
-      }});
-  
+      const response = await axios.post(
+        `${REACT_APP_GATEWAY_URL}api/v1.0/account/paseto-from-magic-link`,
+        {
+          ...obj,
+        },
+        {
+          headers: {
+            Accept: "application/json, text/plain, */*",
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${auth}`,
+          },
+        }
+      );
+
       const responseData = await response.data;
-      console.log('magic login response:', responseData);
+      console.log("magic login response:", responseData);
       setmagicloginmessage(true);
     } catch (error) {
-      console.error('magic login error:', error);
+      console.error("magic login error:", error);
     }
   };
 
-const CLIENT_ID = process.env.NEXT_PUBLIC_CLIENT_ID;
-const REDIRECT_URI = process.env.NEXT_PUBLIC_REDIRECT_URI_PROFILE;
-const CLIENT_SECRET= process.env.NEXT_PUBLIC_CLIENT_SECRET;
-
+  const CLIENT_ID = process.env.NEXT_PUBLIC_CLIENT_ID;
+  const REDIRECT_URI = process.env.NEXT_PUBLIC_REDIRECT_URI_PROFILE;
+  const CLIENT_SECRET = process.env.NEXT_PUBLIC_CLIENT_SECRET;
 
   const handleLoginClick = () => {
     const state = Math.random().toString(36).substring(7);
@@ -261,140 +272,141 @@ const CLIENT_SECRET= process.env.NEXT_PUBLIC_CLIENT_SECRET;
 
   const parseAuthorizationCode = () => {
     const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-  
+    const code = urlParams.get("code");
+
     if (code) {
-      localStorage?.setItem("code",code)
+      localStorage?.setItem("code", code);
       exchangeCodeForToken(code);
-      console.log("code", code)
+      console.log("code", code);
     }
   };
-  
+
   const exchangeCodeForToken = async (code) => {
-    const tokenEndpoint = 'https://www.googleapis.com/oauth2/v4/token';
-  
+    const tokenEndpoint = "https://www.googleapis.com/oauth2/v4/token";
+
     const tokenRequestBody = {
       code,
       client_id: CLIENT_ID,
       client_secret: CLIENT_SECRET,
       redirect_uri: REDIRECT_URI,
-      grant_type: 'authorization_code',
+      grant_type: "authorization_code",
     };
-  
+
     try {
       const response = await fetch(tokenEndpoint, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams(tokenRequestBody).toString(),
       });
-  
+
       const tokenData = await response.json();
-  
+
       // Assuming id_token is present in tokenData
       const idToken = tokenData.id_token;
-  
+
       // setpage("googlewalletboth");
 
       // Use idToken in another API call
       setidtoken(idToken);
       // await getgoogledata(idToken);
-  
+
       handleTokenData(tokenData);
       console.log("token", tokenData);
     } catch (error) {
-      console.error('Token exchange error:', error);
+      console.error("Token exchange error:", error);
     }
   };
-  
-  
+
   const handleTokenData = (tokenData) => {
     window.history.replaceState({}, document.title, window.location.pathname);
   };
-  
-  
+
   useEffect(() => {
     parseAuthorizationCode();
   }, []);
-
-
 
   const handleremoveClick = async () => {
     const auth = Cookies.get("erebrus_token");
 
     try {
-      const response = await axios.delete(`${REACT_APP_GATEWAY_URL}api/v1.0/account/remove-mail`,{headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${auth}`,
-      }});
-  
+      const response = await axios.delete(
+        `${REACT_APP_GATEWAY_URL}api/v1.0/account/remove-mail`,
+        {
+          headers: {
+            Accept: "application/json, text/plain, */*",
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${auth}`,
+          },
+        }
+      );
+
       const responseData = await response.data;
-      console.log('Another API call response:', responseData);
+      console.log("Another API call response:", responseData);
       setunlinkpopup(false);
     } catch (error) {
-      console.error('Another API call error:', error);
+      console.error("Another API call error:", error);
     }
-
-    }
+  };
 
   useEffect(() => {
-      const handleConnectWallet = async () => {
-        const loggedin = Cookies.get("erebrus_token");
-        // const auth = Cookies.get("google_token");
-        if (loggedin) {
-          setloggedin(true);
-        }
-      };
-      handleConnectWallet();
-    }, [change]);
-
-    useEffect(() => {
-      const timeoutId = setTimeout(() => {
-        setMsg('');
-      }, 3000); // 5 seconds in milliseconds
-  
-      return () => clearTimeout(timeoutId);
-    }, [msg]);
-
-    function removePrefix(url) {
-        // Use the slice method to remove the first 7 characters
-        return url.slice(7);
+    const handleConnectWallet = async () => {
+      const loggedin = Cookies.get("erebrus_token");
+      // const auth = Cookies.get("google_token");
+      if (loggedin) {
+        setloggedin(true);
       }
+    };
+    handleConnectWallet();
+  }, [change]);
 
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setMsg("");
+    }, 3000); // 5 seconds in milliseconds
 
-      // Define a mapping of chain symbols to names and icons
-const chainInfo = {
-  apt: {
-    name: 'Aptos',
-    icon: '/aptosicon.webp' // Replace with the actual path or URL
-  },
-  sui: {
-    name: 'Sui',
-    icon: '/suiicon.webp' // Replace with the actual path or URL
-  },
-  evm: {
-    name: 'Ethereum',
-    icon: '/ethicon.webp' // Replace with the actual path or URL
-  },
-  sol: {
-    name: 'Solana',
-    icon: '/solanaicon.webp' // Replace with the actual path or URL
+    return () => clearTimeout(timeoutId);
+  }, [msg]);
+
+  function removePrefix(url) {
+    // Use the slice method to remove the first 7 characters
+    return url.slice(7);
   }
-};
 
+  // Define a mapping of chain symbols to names and icons
+  const chainInfo = {
+    apt: {
+      name: "Aptos",
+      icon: "/aptosicon.webp", // Replace with the actual path or URL
+    },
+    sui: {
+      name: "Sui",
+      icon: "/suiicon.webp", // Replace with the actual path or URL
+    },
+    evm: {
+      name: "Ethereum",
+      icon: "/ethicon.webp", // Replace with the actual path or URL
+    },
+    sol: {
+      name: "Solana",
+      icon: "/solanaicon.webp", // Replace with the actual path or URL
+    },
+    monad: {
+      name: "Monad",
+      icon: "/monad.webp", // Replace with the actual path or URL
+    },
+  };
 
-const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chain', icon: '' };
-  
+  const chainDetails = chainInfo[chainsym?.toLowerCase()] || {
+    name: "Unknown Chain",
+    icon: "",
+  };
 
   return (
-    <div
-      
-    >
+    <div>
       <section className="min-h-screen">
         <div className="px-4 sm:px-6 lg:px-10 mx-auto">
-
           {/* Success Message */}
           <div className="flex justify-center">
             {msg == "success" && (
@@ -418,7 +430,11 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
                     <span className="text-white">Profile Information</span>
                   </h1>
 
-                  <form id="myForm" className="rounded pt-6 sm:pt-10" onSubmit={handleSubmit}>
+                  <form
+                    id="myForm"
+                    className="rounded pt-6 sm:pt-10"
+                    onSubmit={handleSubmit}
+                  >
                     <div className="flex flex-col lg:flex-row gap-8">
                       {/* Profile Picture Section */}
                       <div className="flex justify-center lg:justify-start lg:ml-10">
@@ -428,15 +444,18 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
                               <img
                                 alt="Profile"
                                 src={`https://ipfs.myriadflow.com/ipfs/${formData.profilePictureUrl}`}
-
                                 className="rounded-2xl w-full h-full object-cover"
                                 onError={(e) => {
                                   e.target.onerror = null; // Prevent infinite loop
-                                  e.target.src = "https://thumbs.dreamstime.com/b/female-user-profile-avatar-woman-character-screen-saver-emotions-website-mobile-app-design-vector-199001739.jpg";
+                                  e.target.src =
+                                    "https://thumbs.dreamstime.com/b/female-user-profile-avatar-woman-character-screen-saver-emotions-website-mobile-app-design-vector-199001739.jpg";
                                 }}
                               />
                               <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 rounded-2xl flex items-center justify-center transition-opacity">
-                                <label htmlFor="upload" className="cursor-pointer">
+                                <label
+                                  htmlFor="upload"
+                                  className="cursor-pointer"
+                                >
                                   <input
                                     id="upload"
                                     type="file"
@@ -493,7 +512,9 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
                                   d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                                 />
                               </svg>
-                              <span className="text-gray-300 text-sm">Upload Photo</span>
+                              <span className="text-gray-300 text-sm">
+                                Upload Photo
+                              </span>
                             </label>
                           )}
                         </div>
@@ -503,7 +524,12 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
                       <div className="w-full lg:w-3/4">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                           <div className="mb-4 sm:mb-6">
-                            <label htmlFor="name" className="block text-gray-200 mb-2">Name</label>
+                            <label
+                              htmlFor="name"
+                              className="block text-gray-200 mb-2"
+                            >
+                              Name
+                            </label>
                             <input
                               type="text"
                               id="name"
@@ -516,7 +542,12 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
                           </div>
 
                           <div className="mb-4 sm:mb-6">
-                            <label htmlFor="country" className="block text-gray-200 mb-2">Country</label>
+                            <label
+                              htmlFor="country"
+                              className="block text-gray-200 mb-2"
+                            >
+                              Country
+                            </label>
                             <input
                               type="text"
                               id="country"
@@ -529,7 +560,12 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
                           </div>
 
                           <div className="mb-4 sm:mb-6">
-                            <label htmlFor="emailId" className="block text-gray-200 mb-2">Email</label>
+                            <label
+                              htmlFor="emailId"
+                              className="block text-gray-200 mb-2"
+                            >
+                              Email
+                            </label>
                             <input
                               type="email"
                               id="emailId"
@@ -542,7 +578,12 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
                           </div>
 
                           <div className="mb-4 sm:mb-6">
-                            <label htmlFor="discord" className="block text-gray-200 mb-2">Discord</label>
+                            <label
+                              htmlFor="discord"
+                              className="block text-gray-200 mb-2"
+                            >
+                              Discord
+                            </label>
                             <input
                               type="text"
                               id="discord"
@@ -555,7 +596,12 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
                           </div>
 
                           <div className="mb-4 sm:mb-6">
-                            <label htmlFor="twitter" className="block text-gray-200 mb-2">Twitter</label>
+                            <label
+                              htmlFor="twitter"
+                              className="block text-gray-200 mb-2"
+                            >
+                              Twitter
+                            </label>
                             <input
                               type="text"
                               id="twitter"
@@ -568,7 +614,12 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
                           </div>
 
                           <div className="mb-4 sm:mb-6">
-                            <label htmlFor="telegram" className="block text-gray-200 mb-2">Telegram</label>
+                            <label
+                              htmlFor="telegram"
+                              className="block text-gray-200 mb-2"
+                            >
+                              Telegram
+                            </label>
                             <input
                               type="text"
                               id="telegram"
@@ -581,7 +632,12 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
                           </div>
 
                           <div className="mb-4 sm:mb-6">
-                            <label htmlFor="farcaster" className="block text-gray-200 mb-2">Farcaster</label>
+                            <label
+                              htmlFor="farcaster"
+                              className="block text-gray-200 mb-2"
+                            >
+                              Farcaster
+                            </label>
                             <input
                               type="text"
                               id="farcaster"
@@ -594,7 +650,12 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
                           </div>
 
                           <div className="mb-4 sm:mb-6">
-                            <label htmlFor="google" className="block text-gray-200 mb-2">Google</label>
+                            <label
+                              htmlFor="google"
+                              className="block text-gray-200 mb-2"
+                            >
+                              Google
+                            </label>
                             <input
                               type="text"
                               id="google"
@@ -607,7 +668,12 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
                           </div>
 
                           <div className="mb-4 sm:mb-6">
-                            <label htmlFor="apple" className="block text-gray-200 mb-2">Apple</label>
+                            <label
+                              htmlFor="apple"
+                              className="block text-gray-200 mb-2"
+                            >
+                              Apple
+                            </label>
                             <input
                               type="text"
                               id="apple"
@@ -628,7 +694,7 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
                               type="submit"
                               value="submit"
                               className="px-8 sm:px-14 py-3 text-base sm:text-lg text-white font-semibold rounded-lg w-full sm:w-auto"
-                              >
+                            >
                               Change details
                             </button>
                           </div>
@@ -651,22 +717,22 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
                     Profile information
                   </h1>
                   <div className="flex flex-wrap gap-2 text-black text-sm">
-                    <div 
+                    <div
                       className="px-2 py-1.5 rounded-lg flex items-center space-x-2"
-                      style={{ backgroundColor: '#8EB9FF' }}
+                      style={{ backgroundColor: "#8EB9FF" }}
                     >
                       {chainDetails.icon && (
-                        <img 
-                          src={chainDetails.icon} 
-                          alt={`${chainDetails.name} icon`} 
-                          className="w-5 h-5" 
+                        <img
+                          src={chainDetails.icon}
+                          alt={`${chainDetails.name} icon`}
+                          className="w-5 h-5"
                         />
                       )}
                       <span className="pr-2">{chainDetails.name}</span>
                     </div>
-                    <div 
-                      className="px-3 py-1.5 rounded-lg" 
-                      style={{backgroundColor:'#8EB9FF'}}
+                    <div
+                      className="px-3 py-1.5 rounded-lg"
+                      style={{ backgroundColor: "#8EB9FF" }}
                     >
                       {walletaddr?.slice(0, 4)}...{walletaddr?.slice(-4)}
                     </div>
@@ -685,7 +751,6 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
                               <img
                                 alt="Profile"
                                 src={`https://ipfs.myriadflow.com/ipfs/${formData.profilePictureUrl}`}
-
                               />
                             ) : (
                               <div className="rounded-2xl h-36 w-36 ring-offset-2 ring-1 ring-black bg-gray-200">
@@ -704,7 +769,9 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
                       <div className="lg:w-3/4">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                           <div className="mb-4">
-                            <label className="block text-gray-200 mb-2">Name</label>
+                            <label className="block text-gray-200 mb-2">
+                              Name
+                            </label>
                             <div
                               style={border}
                               className="shadow border appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
@@ -714,7 +781,9 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
                           </div>
 
                           <div className="mb-4">
-                            <label className="block text-gray-200 mb-2">Country</label>
+                            <label className="block text-gray-200 mb-2">
+                              Country
+                            </label>
                             <div
                               style={border}
                               className="shadow border appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
@@ -724,7 +793,9 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
                           </div>
 
                           <div className="mb-4">
-                            <label className="block text-gray-200 mb-2">Email</label>
+                            <label className="block text-gray-200 mb-2">
+                              Email
+                            </label>
                             <div
                               style={border}
                               className="shadow border appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
@@ -734,7 +805,9 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
                           </div>
 
                           <div className="mb-4">
-                            <label className="block text-gray-200 mb-2">Discord</label>
+                            <label className="block text-gray-200 mb-2">
+                              Discord
+                            </label>
                             <div
                               style={border}
                               className="shadow border appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
@@ -744,7 +817,9 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
                           </div>
 
                           <div className="mb-4">
-                            <label className="block text-gray-200 mb-2">Twitter</label>
+                            <label className="block text-gray-200 mb-2">
+                              Twitter
+                            </label>
                             <div
                               style={border}
                               className="shadow border appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
@@ -754,7 +829,9 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
                           </div>
 
                           <div className="mb-4">
-                            <label className="block text-gray-200 mb-2">Telegram</label>
+                            <label className="block text-gray-200 mb-2">
+                              Telegram
+                            </label>
                             <div
                               style={border}
                               className="shadow border appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
@@ -764,7 +841,9 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
                           </div>
 
                           <div className="mb-4">
-                            <label className="block text-gray-200 mb-2">Farcaster</label>
+                            <label className="block text-gray-200 mb-2">
+                              Farcaster
+                            </label>
                             <div
                               style={border}
                               className="shadow border appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
@@ -774,7 +853,9 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
                           </div>
 
                           <div className="mb-4">
-                            <label className="block text-gray-200 mb-2">Google</label>
+                            <label className="block text-gray-200 mb-2">
+                              Google
+                            </label>
                             <div
                               style={border}
                               className="shadow border appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"
@@ -784,7 +865,9 @@ const chainDetails = chainInfo[chainsym?.toLowerCase()] || { name: 'Unknown Chai
                           </div>
 
                           <div className="mb-4">
-                            <label className="block text-gray-200 mb-2">Apple</label>
+                            <label className="block text-gray-200 mb-2">
+                              Apple
+                            </label>
                             <div
                               style={border}
                               className="shadow border appearance-none rounded w-full py-4 px-3 text-gray-200 leading-tight focus:outline-none focus:shadow-outline"

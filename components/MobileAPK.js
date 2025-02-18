@@ -52,7 +52,7 @@ const Pricing = () => {
       </div>
       <div className="flex flex-wrap justify-center gap-8 items-center lg:items-start pt-20">
         <a
-          href="https://play.google.com/store/apps/details?id=com.erebrus.app"
+          href="https://erebrus.io/subscription"
           target="_blank"
           rel="noreferrer"
         >
@@ -61,7 +61,7 @@ const Pricing = () => {
           </button>
         </a>
         <a
-          href="https://testflight.apple.com/join/BvdARC75"
+          href="https://www.cyreneai.com/launch-agent"
           target="_blank"
           rel="noreferrer"
         >

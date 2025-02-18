@@ -146,19 +146,19 @@ export default function Home() {
           }}
         >
           <h1>
-          Building the Global <br/> Decentralized Network
+            Building the Global <br /> Decentralized Network
           </h1>
           <div className="flex gap-8 mt-6">
-            <a href="https://x.com/netsepio" target="_blank" rel="noreferrer">
+            <a
+              href="https://erebrus.io/explorer"
+              target="_blank"
+              rel="noreferrer"
+            >
               <button className="px-6 py-4 lg:px-12 lg:py-4 bg-[#5696FF] text-white rounded-lg text-base font-bold cursor-pointer">
                 Explore VPN
               </button>
             </a>
-            <a
-              href="https://discordapp.com/invite/5uaFhNpRF6"
-              target="_blank"
-              rel="noreferrer"
-            >
+            <a href="https://erebrus.io/dwifi" target="_blank" rel="noreferrer">
               <button className="px-6 py-4 lg:px-12 lg:py-4 bg-[#5696FF] text-white rounded-lg text-base font-bold cursor-pointer">
                 Explore Wifi
               </button>
@@ -194,7 +194,7 @@ export default function Home() {
             <img src="/Erebrus_logo_wordmark.webp" />
           </div>
           <h1 className="text-white text-3xl lg:text-5xl pt-16 lg:pb-14">
-            Joint the Movement. Get Started Now.
+            Join the Movement. Get Started Now.
           </h1>
           <div className="flex justify-center items-center gap-12 pt-12 pb-40">
             <a
