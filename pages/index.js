@@ -137,7 +137,7 @@ export default function Home() {
         />
 
         <div
-          className="text-white text-left text-5xl lg:text-8xl font-normal"
+          className="text-white text-left text-4xl lg:text-8xl font-normal"
           style={{
             position: "absolute",
             top: "40%",
@@ -193,7 +193,7 @@ export default function Home() {
           <div className="flex justify-center">
             <img src="/Erebrus_logo_wordmark.webp" />
           </div>
-          <h1 className="text-white text-3xl lg:text-5xl pt-16 lg:pb-14">
+          <h1 className="text-white text-3xl lg:text-4xl pt-16 lg:pb-14">
             Join the Movement. Get Started Now.
           </h1>
           <div className="flex justify-center items-center gap-12 pt-12 pb-40">

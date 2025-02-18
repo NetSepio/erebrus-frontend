@@ -5,7 +5,7 @@ const Pricing = () => {
   return (
     <div className="bg-[#040a20] text-center pb-40">
       <div>
-        <h1 className="lg:text-7xl md:text-4xl sm:text-3xl text-5xl pb-20 text-center text-white">
+        <h1 className="lg:text-7xl md:text-4xl sm:text-3xl text-4xl pb-20 text-center text-white">
           Your Content Delivery, Uninterrupted!
         </h1>
         <p className="text-[#ccc] text-2xl leading-6 lg:text-2xl mb-8 sm:text-xl sm:mb-6">
@@ -25,7 +25,7 @@ const Pricing = () => {
           </p>
         </div>
         <div className="rounded-3xl pt-12 pb-12 pl-8 pr-8 w-full border-[1px] border-white lg:w-3/12 flex flex-col">
-          <h2 className="text-5xl font-normal mb-10 text-white">
+          <h2 className="text-4xl font-normal mb-10 text-white">
             CyreneAI <br />
             Coordination Layer
           </h2>

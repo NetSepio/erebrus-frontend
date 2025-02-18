@@ -595,7 +595,7 @@ const Navbar = ({ isHome }) => {
                       className="flex items-center justify-between p-2 rounded-full"
                       style={{ backgroundColor: "#202333" }}
                     >
-                      <button
+                      {/* <button
                         onClick={() => {
                           setHideFilter(false);
                           Cookies.set("Chain_symbol", "monad");
@@ -612,7 +612,7 @@ const Navbar = ({ isHome }) => {
                           <img src="/monad.svg" className="w-6 h-6" />
                           <div>Monad</div>
                         </div>
-                      </button>
+                      </button> */}
                     </li>
                   </ul>
                 </div>

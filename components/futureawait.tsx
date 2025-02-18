@@ -15,7 +15,7 @@ const Future = () => {
 const Header = () => {
   return (
     <>
-      <h1 className="lg:text-7xl md:text-4xl sm:text-3xl text-5xl pt-20 text-center">
+      <h1 className="lg:text-7xl md:text-4xl sm:text-3xl text-4xl pt-20 text-center">
         Decentralized for Speed and Privacy
       </h1>
       <div className="flex justify-center">
@@ -31,7 +31,7 @@ const SubscriptionCard = () => {
       <h2 className="text-2xl font-semibold text-[#5696FF] mb-4">
         Tier 1 Subscription
       </h2>
-      <p className="lg:text-5xl text-3xl mb-4">$5.99/month</p><br />
+      <p className="lg:text-4xl text-3xl mb-4">$5.99/month</p><br />
       <button className="bg-[#0162FF] text-white rounded-lg px-4 py-2 mb-4 w-2/3">
         Start Free Trial for 7 Days
       </button>
@@ -82,7 +82,7 @@ const SubscriptionCard = () => {
 const BenefitsCard = () => {
   return (
     <div className="rounded-3xl p-12 w-full border-[1px] border-white md:w-5/12 lg:w-4/12 flex flex-col min-h-full">
-      <h2 className="text-5xl font-normal mb-10">Features</h2>
+      <h2 className="text-4xl font-normal mb-10">Features</h2>
       <ul className="space-y-4 flex-grow">
         <li>
           <h3 className="font-normal text-3xl mb-4">1. Top-Notch Security</h3>

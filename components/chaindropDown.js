@@ -5,7 +5,7 @@ const chains = [
   { name: 'Ethereum', symbol: 'evm', icon: '/ethicon.webp', iconSize: 'w-6 h-6' },
   { name: 'Aptos', symbol: 'apt', icon: '/aptosicon.webp', iconSize: 'w-6 h-6' },
   { name: 'Solana', symbol: 'sol', icon: '/solanaicon.webp', iconSize: 'w-6 h-6' },
-  { name: 'Monad', symbol: 'monad', icon: '/monad.webp', iconSize: 'w-6 h-6' },
+  // { name: 'Monad', symbol: 'monad', icon: '/monad.webp', iconSize: 'w-6 h-6' },
 ];
 
 const ChainListItem = ({ name, symbol, icon, iconSize, onClick }) => (

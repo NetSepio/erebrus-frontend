@@ -29,7 +29,7 @@ const Dwifi = () => {
             <motion.h1
               initial={{ y: 100, opacity: 0 }}
               animate={{ y: 0, opacity: 1, transition: { duration: 1 } }}
-              className="text-4xl md:text-5xl lg:text-6xl font-semibold text-gray-300 mb-8 lg:w-4/5"
+              className="text-4xl md:text-4xl lg:text-6xl font-semibold text-gray-300 mb-8 lg:w-4/5"
             >
               Decentralized Connectivity with Erebrus ÐWi-Fi
             </motion.h1>

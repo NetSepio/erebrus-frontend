@@ -40,7 +40,7 @@ const Winners: React.FC = () => {
   return (
     <div className="flex justify-center items-center pt-40 bg-[#040a20] text-center pb-40">
       <div>
-        <h1 className="lg:text-7xl md:text-4xl sm:text-3xl text-5xl pb-20 text-center text-white">
+        <h1 className="lg:text-7xl md:text-4xl sm:text-3xl text-4xl pb-20 text-center text-white">
           Recognition
         </h1>
         <div className="flex flex-wrap justify-center items-center">

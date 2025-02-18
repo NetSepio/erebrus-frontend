@@ -423,7 +423,7 @@ const Mint = () => {
         <div className="bg-[#040819]">
           <div className="p-6 sm:p-10 lg:p-20">
             <div
-              className="text-white text-3xl sm:text-4xl md:text-5xl leading-normal mx-auto lg:ml-10"
+              className="text-white text-3xl sm:text-4xl md:text-4xl leading-normal mx-auto lg:ml-10"
               style={{ fontFamily: "sans-serif" }}
             >
               Mint Your VPN NFT, Secure, Private, <br />
@@ -481,7 +481,7 @@ const Mint = () => {
                   className="mt-6 sm:mt-10 flex flex-col lg:items-start items-center"
                 >
                   {isLoadingTx ? (
-                    <div className="animate-spin text-white text-5xl sm:text-7xl">
+                    <div className="animate-spin text-white text-4xl sm:text-7xl">
                       ⛏
                     </div>
                   ) : (

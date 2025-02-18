@@ -11,7 +11,7 @@ const Dvpn = () => {
       }}
     >
       <div className="w-full max-w-6xl px-4">
-        <h1 className="text-white text-5xl mb-12 mt-0 lg:text-7xl md:text-4xl sm:text-3xl">
+        <h1 className="text-white text-4xl mb-12 mt-0 lg:text-7xl md:text-4xl sm:text-3xl">
           Decentralized VPN
         </h1>
         <p className="text-[#ccc] text-2xl leading-6 lg:text-2xl mb-8 sm:text-xl sm:mb-6">
