@@ -40,7 +40,7 @@ jobs:
 
   deploy_dev:
     needs: build_push
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Deploy on DEV server
         if: github.ref == 'refs/heads/main'
