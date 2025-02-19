@@ -5,7 +5,7 @@ const Pricing = () => {
   return (
     <div className="bg-[#040a20] text-center pb-40">
       <div>
-        <h1 className="lg:text-7xl md:text-4xl sm:text-3xl text-4xl pb-20 text-center text-white" style={{fontFamily: "DM Sans"}}>
+        <h1 className="lg:text-7xl md:text-4xl sm:text-3xl text-4xl pb-20 text-center text-white">
           Your Content Delivery, Uninterrupted!
         </h1>
         <p className="text-[#ccc] text-2xl leading-6 lg:text-2xl mb-8 sm:text-xl sm:mb-6">
@@ -52,7 +52,7 @@ const Pricing = () => {
       </div>
       <div className="flex flex-wrap justify-center gap-8 items-center lg:items-start pt-20">
         <a
-          href="https://docs.netsepio.com/latest/erebrus/setup"
+          href="https://erebrus.io/subscription"
           target="_blank"
           rel="noreferrer"
         >

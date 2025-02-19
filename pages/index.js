@@ -131,21 +131,18 @@ export default function Home() {
 
         {/* <iframe className=" absolute top-0 left-0 w-full h-full object-cover" src="https://www.youtube.com/embed/y6X1RbZ9ssE?autoplay=1&loop=1&playlist=y6X1RbZ9ssE" frameborder="0" allowfullscreen></iframe> */}
 
-        <div className="hero-background">
-          <video autoPlay loop muted playsInline className="hero-video">
-            <source src="/background.mp4" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        </div>
+        <img
+          src="/erebrus_hero.webp"
+          className="absolute top-0 left-0 w-full h-full object-cover"
+        />
 
         <div
           className="text-white text-left text-4xl lg:text-8xl font-normal"
           style={{
             position: "absolute",
-            top: "43%",
+            top: "40%",
             left: "5%",
             transform: "translate(-0%, -50%)",
-            fontFamily: "DM Sans",
           }}
         >
           <h1>
