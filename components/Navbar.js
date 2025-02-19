@@ -592,13 +592,13 @@ const Navbar = ({ isHome }) => {
                       </button>
                     </li>
                     <li
-                      className="flex items-center justify-between p-2 rounded-full"
+                      className="flex items-center justify-between gap-64 p-2 rounded-full"
                       style={{ backgroundColor: "#202333" }}
                     >
-                      {/* <button
+                      <button
                         onClick={() => {
                           setHideFilter(false);
-                          Cookies.set("Chain_symbol", "monad");
+                          Cookies.set("Chain_symbol", "peaq");
                           setchainsym("monad");
                           setshowsignbuttonpeaq(false);
                           setshowsignbuttoneth(false);
@@ -609,10 +609,10 @@ const Navbar = ({ isHome }) => {
                         // className="mx-auto"
                       >
                         <div className="flex gap-2" style={{ marginLeft: 100 }}>
-                          <img src="/monad.svg" className="w-6 h-6" />
-                          <div>Monad</div>
+                          <img src="/monad.webp" className="w-6 h-6" />
+                          <div>Peaq</div>
                         </div>
-                      </button> */}
+                      </button>
                     </li>
                   </ul>
                 </div>
@@ -651,10 +651,9 @@ const Navbar = ({ isHome }) => {
                 )}
                 {chainsym === "monad" && (
                   <button>
-                    
+                    <w3m-button />
                   </button>
                 )}
-              
               </div>
             ) :  (
               <div
