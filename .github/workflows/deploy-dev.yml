@@ -38,20 +38,20 @@ jobs:
           docker push $GITHUB_BRANCH_IMAGE
           rm -rf .env
 
-  deploy_dev:
-    needs: build_push
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy on DEV server
-        if: github.ref == 'refs/heads/main'
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: ${{ secrets.DEV_REMOTE_SERVER_ADDRESS }}
-          username: ${{ secrets.DEV_SERVER_USERNAME }}
-          key: ${{ secrets.DEV_REMOTE_SERVER_KEY }}
-          port: ${{ secrets.DEV_SSH_PORT }}
-          script: |
-            docker stop erebrus-frontend || true && docker image rm ghcr.io/netsepio/erebrus-frontend:main
-            echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
-            docker pull ghcr.io/netsepio/erebrus-frontend:main
-            docker run --name="erebrus-frontend" --rm -p 4040:8080 --net=bridge -d ghcr.io/netsepio/erebrus-frontend:main
+  # deploy_dev:
+  #   needs: build_push
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Deploy on DEV server
+  #       if: github.ref == 'refs/heads/main'
+  #       uses: appleboy/ssh-action@v0.1.7
+  #       with:
+  #         host: ${{ secrets.DEV_REMOTE_SERVER_ADDRESS }}
+  #         username: ${{ secrets.DEV_SERVER_USERNAME }}
+  #         key: ${{ secrets.DEV_REMOTE_SERVER_KEY }}
+  #         port: ${{ secrets.DEV_SSH_PORT }}
+  #         script: |
+  #           docker stop erebrus-frontend || true && docker image rm ghcr.io/netsepio/erebrus-frontend:main
+  #           echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
+  #           docker pull ghcr.io/netsepio/erebrus-frontend:main
+  #           docker run --name="erebrus-frontend" --rm -p 4040:8080 --net=bridge -d ghcr.io/netsepio/erebrus-frontend:main

@@ -29,7 +29,7 @@ COPY . .
 # ENV NEXT_TELEMETRY_DISABLED 1
 
 RUN yarn global add pnpm
-RUN pnpm run build
+RUN NODE_OPTIONS="--max-old-space-size=8192" pnpm run build
 
 # If using npm comment out above and use below instead
 # RUN npm run build
