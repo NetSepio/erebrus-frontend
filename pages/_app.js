@@ -90,17 +90,6 @@ export default function App({ Component, pageProps }) {
           <WagmiProvider config={config}>
             <QueryClientProvider client={queryClient}>
               <div className=" bg-black">
-                {!erebrus_wallet && (
-                  <div className="w-full ">
-                    <Link
-                      className="w-full"
-                      href="https://drive.google.com/file/d/1jdkqwIXY825iG3shRRoFyg5SMGy6LN8J/view?usp=drive_link"
-                      target="_blank"
-                    >
-                      <Banner />
-                    </Link>
-                  </div>
-                )}
                 <Navbar />
                 <Component {...pageProps} />
               </div>

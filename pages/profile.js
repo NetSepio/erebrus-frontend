@@ -392,10 +392,10 @@ const Profile = () => {
       name: "Solana",
       icon: "/solanaicon.webp", // Replace with the actual path or URL
     },
-    // monad: {
-    //   name: "Monad",
-    //   icon: "/monad.webp", // Replace with the actual path or URL
-    // },
+    monad: {
+      name: "Monad",
+      icon: "/monad.webp", // Replace with the actual path or URL
+    },
   };
 
   const chainDetails = chainInfo[chainsym?.toLowerCase()] || {

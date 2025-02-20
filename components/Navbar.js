@@ -610,7 +610,7 @@ const Navbar = ({ isHome }) => {
                       >
                         <div className="flex gap-2" style={{ marginLeft: 100 }}>
                           <img src="/monad.webp" className="w-6 h-6" />
-                          <div>Peaq</div>
+                          <div>Monad</div>
                         </div>
                       </button>
                     </li>

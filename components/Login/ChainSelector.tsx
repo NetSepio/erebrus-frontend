@@ -13,7 +13,7 @@ const chainOptions: ChainOption[] = [
   { name: "Solana", symbol: "sol", icon: "solanaicon" },
   { name: "Aptos", symbol: "apt", icon: "aptosicon" },
   { name: "Peaq", symbol: "peaq", icon: "peaqicon" },
-  // { name: "Monad", symbol: "monad", icon: "monad" },
+  { name: "Monad", symbol: "monad", icon: "monad" },
 ];
 
 interface ChainSelectorProps {
