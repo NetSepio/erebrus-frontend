@@ -38,7 +38,7 @@ jobs:
           docker push $GITHUB_BRANCH_IMAGE
           rm -rf .env
 
-  deploy_dev:
+  deploy_prod:
     needs: build_push
     runs-on: ubuntu-latest
     steps:
