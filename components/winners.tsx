@@ -40,7 +40,7 @@ const Winners: React.FC = () => {
   return (
     <div className="flex justify-center items-center pt-40 bg-[#040a20] text-center pb-40">
       <div>
-        <h1 className="lg:text-7xl md:text-4xl sm:text-3xl text-4xl pb-20 text-center text-white">
+        <h1 className="lg:text-7xl md:text-4xl sm:text-3xl text-4xl pb-20 text-center text-white" style={{fontFamily: "DM Sans"}}>
           Recognition
         </h1>
         <div className="flex flex-wrap justify-center items-center">
@@ -63,7 +63,7 @@ const Winners: React.FC = () => {
                 rel="noreferrer"
                 className="no-underline text-white flex items-center gap-2 hover:text-gray-300"
               >
-                <h2 className="text-xl lg:text-3xl flex items-center gap-2 mb-4">
+                <h2 className="text-xl lg:text-2xl flex items-center gap-2 mb-4">
                   {item.text}{" "}
                   <img
                     src="/arrow.webp"
@@ -74,7 +74,7 @@ const Winners: React.FC = () => {
               </a>
             ))}
             <br />
-            <h2 className="text-lg lg:text-3xl">+ many more!!</h2>
+            <h2 className="text-lg lg:text-2xl">+ many more!!</h2>
           </div>
         </div>
       </div>
