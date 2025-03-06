@@ -9,7 +9,7 @@ import { EnvironmentOutlined } from '@ant-design/icons';
 const DwifiMap = dynamic(() => import('../components/DwifiMap'), { ssr: false });
 
 const Dwifi = () => {
-  const mapRef = useRef(null);
+  const mapRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToMap = () => {
     mapRef.current?.scrollIntoView({ behavior: 'smooth' });

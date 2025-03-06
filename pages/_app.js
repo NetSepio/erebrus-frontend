@@ -1,6 +1,5 @@
 import "../styles/globals.css";
 import { ThirdwebProvider } from "@thirdweb-dev/react";
-import { ChainId } from "@thirdweb-dev/sdk";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { AuthProvider } from "../AuthContext";
@@ -15,7 +14,6 @@ import { polygonAmoy } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MantaPacific } from "../components/manta.ts";
 import { Peaq } from "../components/peaq.ts";
-import "../styles/globals.css";
 import Link from "next/link";
 import { metaMask } from "wagmi/connectors";
 
@@ -98,5 +96,5 @@ export default function App({ Component, pageProps }) {
         </AuthProvider>
       </ThirdwebProvider>
     </AppContext>
-  );      
+  );
 }

@@ -305,7 +305,7 @@ const Navbar = ({ isHome }) => {
   const paseto = Cookies.get("erebrus_token");
 
   return (
-    <nav className=" py-4 z-10 bg-black">
+    <nav className="py-4 z-10 bg-black">
       <div
         className={`container mx-auto px-10 flex items-center justify-between lg:mb-0 ${
           isHome && !isOpen ? "mb-24" : ""

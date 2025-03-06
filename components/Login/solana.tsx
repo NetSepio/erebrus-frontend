@@ -78,7 +78,7 @@ export const useSolWallet = (setshowsignbutton) => {
       
         let signaturewallet = response.signature;
 
-        const signatureHex = Array.from(Array.from(signaturewallet)).map(byte => ('0' + byte.toString()).slice(-2)).join('');
+        const signatureHex = Array.from(Array.from(signaturewallet)).map(byte => ('0' + byte?.toString()).slice(-2)).join('');
 
 
         const authenticationData = {
