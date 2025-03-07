@@ -19,7 +19,9 @@ import { metaMask } from "wagmi/connectors";
 
 const erebrus_wallet = Cookies.get("erebrus_wallet");
 const queryClient = new QueryClient();
-const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
+// const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
+const projectId = '7264f470d93e9bb00e567cd95f3b3482';
+
 
 const metadata = {
   name: "Erebrus",
