@@ -66,7 +66,9 @@ export default function SingleSignerTransaction({
     const response = await signMessage(payload);
     console.log(response);
 
-    let signaturewallet = response.signature;
+    let signaturewallet = Array.isArray(response.signature)
+    ? response.signature.join("")
+    : String(response.signature);
 
       if(signaturewallet.length === 128)
       {

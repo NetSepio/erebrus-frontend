@@ -6,13 +6,16 @@ export const useAptosWallet = () => {
   const { account, connected, network, signMessage } = useWallet();
 
   const isSendableNetwork = (connected, network) => {
-    return connected && network?.toLowerCase() === process.env.NEXT_PUBLIC_NETWORK.toLowerCase();
+    return (
+      connected &&
+      network?.toLowerCase() === process.env.NEXT_PUBLIC_NETWORK?.toLowerCase()
+    );
   };
 
   const sendableApt = isSendableNetwork(connected, network?.name);
 
   const getchainsym = () => {
-    return Cookies.get("Chain_symbol") ;
+    return Cookies.get("Chain_symbol");
   };
 
   const onSignMessage = async (setshowsignbuttonaptos) => {
@@ -20,7 +23,7 @@ export const useAptosWallet = () => {
     if (sendableApt) {
       try {
         const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
-        console.log("aptos", REACT_APP_GATEWAY_URL)
+        console.log("aptos", REACT_APP_GATEWAY_URL);
         const { data } = await axios.get(
           `${REACT_APP_GATEWAY_URL}api/v1.0/flowid?walletAddress=${account?.address}&chain=${chainsym}`
         );
@@ -35,7 +38,10 @@ export const useAptosWallet = () => {
         };
         const response = await signMessage(payload);
 
-        let signaturewallet = response.signature;
+        let signaturewallet = Array.isArray(response.signature)
+          ? response.signature.join("")
+          : String(response.signature);
+
         if (signaturewallet.length === 128) {
           signaturewallet = `0x${signaturewallet}`;
         }
@@ -44,7 +50,7 @@ export const useAptosWallet = () => {
           flowId: nonce,
           signature: `${signaturewallet}`,
           pubKey: publicKey,
-          chainName : "aptos"
+          chainName: "aptos",
         };
 
         const authenticateApiUrl = `${REACT_APP_GATEWAY_URL}api/v1.0/authenticate?chain=${chainsym}`;

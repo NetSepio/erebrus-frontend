@@ -3,26 +3,26 @@ import { useState, useEffect, useContext } from "react";
 
 import axios from "axios";
 import Cookies from "js-cookie";
-import { motion } from "framer-motion";
+// import { motion } from "framer-motion";
 import { AuthContext } from "../AuthContext";
 // import { useWallet } from "@aptos-labs/wallet-adapter-react";
 // import { WalletConnector } from "@aptos-labs/wallet-adapter-mui-design";
 import dynamic from "next/dynamic";
-import { Network } from "@aptos-labs/ts-sdk";
+// import { Network } from "@aptos-labs/ts-sdk";
 import Button from "../components/Button";
 import { useRouter } from "next/router";
-import SingleSignerTransaction from "../components/transactionFlow/SingleSigner";
+// import SingleSignerTransaction from "../components/transactionFlow/SingleSigner";
 const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
 const mynetwork = process.env.NEXT_PUBLIC_NETWORK;
 const networkSui = process.env.NEXT_PUBLIC_SUI_NETWORK_SUI;
-import { useAccount, useSignMessage } from "wagmi";
+// import { useAccount, useSignMessage } from "wagmi";
 import {
   ConnectButton,
   useWallet,
   addressEllipsis,
 } from "@suiet/wallet-kit";
 
-import { useWallet as solUseWallet } from "@solana/wallet-adapter-react";
+// import { useWallet as solUseWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { useAptosWallet } from "./Login/aptos";

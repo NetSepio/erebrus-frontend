@@ -11,6 +11,31 @@ import Future from "../components/futureawait.tsx";
 import WinnersPage from "../components/winners.tsx";
 
 export default function Home() {
+  const imageNames = [
+    "Solana",
+    "peaq",
+    "aptos",
+    "eclipse",
+    "Fracton",
+    "soonami",
+    "akindo",
+    "filecoin",
+    "unilend",
+    "spheron",
+    "u2u",
+    "denet",
+    "numa",
+    "radar-drop",
+    "wootzapp",
+    "alibaba",
+    "deanslist",
+    "superteam",
+    "flow",
+    "islanddao",
+    "lucknowdao",
+    "aydo",
+  ];
+
   useEffect(() => {
     parseAuthorizationCode();
   }, []);
@@ -117,7 +142,7 @@ export default function Home() {
         />
       </Head>
 
-      <div className="min-h-screen relative overflow-hidden ">
+      <div className="relative overflow-hidden ">
         {/* <video
     className=" absolute top-0 left-0 w-full h-full object-cover  "
     autoPlay
@@ -131,11 +156,33 @@ export default function Home() {
 
         {/* <iframe className=" absolute top-0 left-0 w-full h-full object-cover" src="https://www.youtube.com/embed/y6X1RbZ9ssE?autoplay=1&loop=1&playlist=y6X1RbZ9ssE" frameborder="0" allowfullscreen></iframe> */}
 
-        <div className="hero-background">
-          <video autoPlay loop muted playsInline className="hero-video">
-            <source src="/background.mp4" type="video/mp4" />
+        <div className="relative w-full background" >
+          <video autoPlay loop muted playsInline src="/background.mp4">
             Your browser does not support the video tag.
           </video>
+        </div>
+
+        <div className="partners-icons">
+          <div
+            style={{
+              backgroundImage: "url('/Frame.png')",
+              padding: "1rem 0",
+              backgroundRepeat: "no-repeat",
+              backgroundSize: "cover",
+            }}
+          >
+            <div className="partners-container">
+              {imageNames.map((name, index) => (
+                <div key={index} className="partner-logo">
+                  <img
+                    src={`/partners/${index + 1}.${name}.webp`}
+                    alt={name}
+                    className="partner-image"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div
@@ -156,12 +203,12 @@ export default function Home() {
               target="_blank"
               rel="noreferrer"
             >
-              <button className="px-6 py-4 lg:px-12 lg:py-4 bg-[#5696FF] text-white rounded-lg text-base font-bold cursor-pointer">
+              <button className="px-4 py-2 lg:px-12 lg:py-4 bg-[#5696FF] text-white rounded-lg text-base font-bold cursor-pointer">
                 Explore VPN
               </button>
             </a>
             <a href="https://erebrus.io/dwifi" target="_blank" rel="noreferrer">
-              <button className="px-6 py-4 lg:px-12 lg:py-4 bg-[#5696FF] text-white rounded-lg text-base font-bold cursor-pointer">
+              <button className="px-4 py-2 lg:px-12 lg:py-4 bg-[#5696FF] text-white rounded-lg text-base font-bold cursor-pointer">
                 Explore Wifi
               </button>
             </a>

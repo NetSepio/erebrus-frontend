@@ -9,13 +9,13 @@ import dynamic from "next/dynamic";
 import crypto from "crypto";
 import { lib, enc } from "crypto-js";
 import { generateKeyPair } from "curve25519-js";
-import { Network } from "@aptos-labs/ts-sdk";
+// import { Network } from "@aptos-labs/ts-sdk";
 import Button from "../components/Button";
 import { useRouter } from "next/router";
 import Image from "next/image";
-import SingleSignerTransaction from "../components/transactionFlow/SingleSigner";
+// import SingleSignerTransaction from "../components/transactionFlow/SingleSigner";
 import SaveToWalrusButton from "../components/walrus/SaveToWalrusButton";
-import DownloadFromWalrusButton from "../components/walrus/DownloadFromWalrusButton";
+// import DownloadFromWalrusButton from "../components/walrus/DownloadFromWalrusButton";
 import FileStorage from "../components/walrus/FileStorage";
 const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
 const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_BASE_URL;
@@ -24,8 +24,8 @@ import QRCode from "qrcode.react";
 import { saveAs } from "file-saver";
 const envcollectionid = process.env.NEXT_PUBLIC_COLLECTIONID;
 const graphqlaptos = process.env.NEXT_PUBLIC_GRAPHQL_APTOS;
-import Login from "../components/loginComponent";
-import UserNFTs from "../components/UserNFTs";
+// import Login from "../components/loginComponent";
+// import UserNFTs from "../components/UserNFTs";
 import fetchUserNFTs from "../components/UserNFTs";
 import Mintbox from "../components/Mintbox";
 
@@ -58,7 +58,7 @@ const WalletSelectorAntDesign = dynamic(
 );
 
 const isSendableNetwork = (connected, network) => {
-  return connected && network?.toLowerCase() === mynetwork.toLowerCase();
+  return connected && network?.toLowerCase() === mynetwork?.toLowerCase();
 };
 
 const Subscription = () => {
@@ -77,13 +77,13 @@ const Subscription = () => {
   const [valueFromChild2, setValueFromChild2] = useState<string>("");
   const [note, setnote] = useState<boolean>(true);
   const [trialsubscriptiondata, settrialsubscriptiondata] = useState<any>(null);
-  const [selectedIndex, setSelectedIndex] = useState(null);
+  const [selectedIndex, setSelectedIndex] = useState<any>(null);
   const { account, connected, network, signMessage } = useWallet();
   const router = useRouter();
   const [clientUUID, setClientUUID] = useState<string>("");
 
   const [nftLoading, setNftLoading] = useState(true);
-  const [nftError, setNftError] = useState(null);
+  const [nftError, setNftError] = useState<any>(null);
   let sendable = isSendableNetwork(connected, network?.name);
 
   const bg = {
@@ -501,7 +501,9 @@ const Subscription = () => {
         });
         console.log("sign", signature, "full message", fullMessage);
 
-        let signaturewallet = signature;
+        let signaturewallet = Array.isArray(response.signature)
+        ? response.signature.join("")
+        : String(response.signature);
 
         if (signaturewallet.length === 128) {
           signaturewallet = `0x${signaturewallet}`;
@@ -567,7 +569,9 @@ const Subscription = () => {
         const response = await signMessage(payload);
         console.log(response);
 
-        let signaturewallet = response.signature;
+        let signaturewallet = Array.isArray(response.signature)
+        ? response.signature.join("")
+        : String(response.signature);
 
         if (signaturewallet.length === 128) {
           signaturewallet = `0x${signaturewallet}`;
@@ -656,7 +660,6 @@ const Subscription = () => {
 
   const [nodesdata, setNodesData] = useState([]);
   const [activeNodesData, setActiveNodesData] = useState([]);
-  const [uniqueRegions, setUniqueRegions] = useState([]);
 
   useEffect(() => {
     const fetchNodesData = async () => {
@@ -690,7 +693,6 @@ const Subscription = () => {
           const regions = Array.from(
             new Set(filteredNodes.map((node) => node.region))
           );
-          setUniqueRegions(regions);
 
           console.log("erebrus nodes", payload);
         }
@@ -769,7 +771,7 @@ const Subscription = () => {
   ];
   //form
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(null);
+  const [selectedOption, setSelectedOption] = useState<any>(null);
   const handleOptionClick = (option) => {
     setSelectedOption(option); // Ensuring option is an object
     setFormData((prevData) => ({ ...prevData, region: option.id }));
@@ -796,7 +798,7 @@ const Subscription = () => {
   // Log activeNodesData and filtered result
   console.log("Current activeNodesData:", activeNodesData);
   const filteredNodes = activeNodesData.filter(
-    (node) => node.region === regionname
+    (node: any) => node.region === regionname
   );
   console.log("Filtered nodes based on region:", filteredNodes, regionname);
 
@@ -1200,10 +1202,10 @@ const Subscription = () => {
                                               </div>
                                               {activeNodesData
                                                 .filter(
-                                                  (node) =>
+                                                  (node: any) =>
                                                     node.region === regionname
                                                 )
-                                                .map((option, index) => (
+                                                .map((option: any, index) => (
                                                   <div
                                                     key={option.id}
                                                     className="grid grid-cols-4 p-2 cursor-pointer hover:bg-gray-100 transition duration-150 ease-in-out"

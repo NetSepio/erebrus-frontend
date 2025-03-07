@@ -43,7 +43,9 @@ const connectWallet = async () => {
       });
       console.log("sign", signature, "full message", fullMessage);
 
-      let signaturewallet = signature;
+      let signaturewallet = Array.isArray(response.signature)
+      ? response.signature.join("")
+      : String(response.signature);
 
       if(signaturewallet.length === 128)
       {

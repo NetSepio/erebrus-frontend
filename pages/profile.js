@@ -2,7 +2,6 @@
 import Cookies from "js-cookie";
 import axios from "axios";
 import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
-import { NFTStorage } from "nft.storage";
 const API_KEY = process.env.NEXT_PUBLIC_STORAGE_API;
 const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_GATEWAY_URL;
 

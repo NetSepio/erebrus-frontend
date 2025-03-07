@@ -127,7 +127,9 @@ const Buy = () => {
 
         // console.log(signature);
 
-        let signaturewallet = signature;
+        let signaturewallet = Array.isArray(response.signature)
+        ? response.signature.join("")
+        : String(response.signature);
 
         if (signaturewallet.length === 128) {
           signaturewallet = `0x${signaturewallet}`;
@@ -370,7 +372,9 @@ const Buy = () => {
         const response = await signMessage(payload);
         console.log(response);
 
-        let signaturewallet = response.signature;
+        let signaturewallet = Array.isArray(response.signature)
+        ? response.signature.join("")
+        : String(response.signature);
 
         if (signaturewallet.length === 128) {
           signaturewallet = `0x${signaturewallet}`;

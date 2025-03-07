@@ -22,7 +22,7 @@ const fetchUserNFTs = async (chainSymbol: string) => {
 
   try {
     if (chainSymbol === 'sol') {
-      const connection = new Connection(process.env.NEXT_PUBLIC_SOLANA_RPC_URL);
+      const connection = new Connection(process.env.NEXT_PUBLIC_SOLANA_RPC_URL!);
       console.log('Connected to Solana network');
 
       let ownerPublicKey;
@@ -95,7 +95,7 @@ current_token_ownerships_v2(
 
       const variables = { address: userAddress };
 
-      const response = await axios.post(APTOS_GRAPHQL_ENDPOINT, {
+      const response = await axios.post(APTOS_GRAPHQL_ENDPOINT!, {
         query,
         variables
       });
