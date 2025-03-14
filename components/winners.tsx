@@ -61,7 +61,7 @@ const Winners: React.FC = () => {
                 href={item.url}
                 target="_blank"
                 rel="noreferrer"
-                className="no-underline text-white flex items-center gap-2 hover:text-gray-300" 
+                className="no-underline text-white flex items-center gap-2 hover:text-gray-300"
               >
                 <h2 className="text-xl lg:text-2xl flex items-center gap-2 mb-4">
                   {item.text}{" "}
@@ -74,7 +74,7 @@ const Winners: React.FC = () => {
               </a>
             ))}
             <br />
-            <h2 className="text-lg lg:text-3xl">+ many more!!</h2>
+            <h2 className="text-lg lg:text-2xl">+ many more!!</h2>
           </div>
         </div>
       </div>

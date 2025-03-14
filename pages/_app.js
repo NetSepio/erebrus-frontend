@@ -1,6 +1,5 @@
 import "../styles/globals.css";
 import { ThirdwebProvider } from "@thirdweb-dev/react";
-import { ChainId } from "@thirdweb-dev/sdk";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { AuthProvider } from "../AuthContext";
@@ -15,13 +14,13 @@ import { polygonAmoy } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MantaPacific } from "../components/manta.ts";
 import { Peaq } from "../components/peaq.ts";
-import "../styles/globals.css";
 import Link from "next/link";
 import { metaMask } from "wagmi/connectors";
 
 const erebrus_wallet = Cookies.get("erebrus_wallet");
 const queryClient = new QueryClient();
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
+
 
 const metadata = {
   name: "Erebrus",
@@ -69,6 +68,11 @@ const config = defaultWagmiConfig({
   connectors: [metaMask({ chains })],
 });
 
+console.log("--------------")
+console.log("Project ID")
+console.log("--------------")
+console.log(projectId)
+
 createWeb3Modal({
   wagmiConfig: config,
   projectId,
@@ -98,5 +102,5 @@ export default function App({ Component, pageProps }) {
         </AuthProvider>
       </ThirdwebProvider>
     </AppContext>
-  );      
+  );
 }

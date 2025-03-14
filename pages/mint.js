@@ -1,7 +1,7 @@
-import Link from "next/link";
+// import Link from "next/link";
 import { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import aptos from "aptos";
+// import aptos from "aptos";
 import Head from "next/head";
 import { motion } from "framer-motion";
 import Cookies from "js-cookie";
@@ -33,17 +33,13 @@ import {
   keypairIdentity,
   percentAmount,
 } from "@metaplex-foundation/umi";
-import UserNFTs from '../components/UserNFTs';
-
-
+// import UserNFTs from '../components/UserNFTs';
 import { walletAdapterIdentity } from '@metaplex-foundation/umi-signer-wallet-adapters';
-
-
 import { useWallet as useSolanaWallet } from '@solana/wallet-adapter-react';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+// import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { bundlrUploader } from '@metaplex-foundation/umi-uploader-bundlr';
-import { createGenericFile } from '@metaplex-foundation/umi';
-import { publicKey } from '@metaplex-foundation/umi';
+// import { createGenericFile } from '@metaplex-foundation/umi';
+// import { publicKey } from '@metaplex-foundation/umi';
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY

@@ -66,7 +66,7 @@ const NftdataCard: React.FC<ReviewCardProps> = ({
   onReviewDeleted,
   chainSymbol,
 }) => {
-  const [imageSrc, setImageSrc] = React.useState<string | null>(null);
+  const [imageSrc, setImageSrc] = React.useState<string>();
   const [attributes, setAttributes] = React.useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
