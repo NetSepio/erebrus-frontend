@@ -29,6 +29,7 @@ WORKDIR /app
 
 # Install required dependencies (in case they are needed at runtime)
 RUN apk add --no-cache git
+RUN npm install -g pnpm
 
 # Copy only necessary files from the builder stage
 COPY --from=builder /app/.next .next
