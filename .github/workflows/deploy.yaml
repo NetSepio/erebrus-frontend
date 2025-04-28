@@ -52,7 +52,7 @@ jobs:
           script: |
             pwd
             docker stop erebrus-frontend && docker rm erebrus-frontend
-            docker rmi ghcr.io/netsepio/erebrus-frontend-v1.1:main
+            docker rmi ghcr.io/netsepio/erebrus-frontend:main
             echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
-            docker pull ghcr.io/netsepio/erebrus-frontend-v1.1:main
-            docker run --name="erebrus-frontend" --restart=always -p 4040:3000 --net=bridge -d ghcr.io/netsepio/erebrus-frontend-v1.1:main
+            docker pull ghcr.io/netsepio/erebrus-frontend:main
+            docker run --name="erebrus-frontend" --restart=always -p 4040:3000 --net=bridge -d ghcr.io/netsepio/erebrus-frontend:main
