@@ -1,3 +1,20 @@
+# Node modules
 node_modules
+
+# Build output
 .next
-.github
+
+# Logs
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Local environment files (keep them outside if you want dynamic injection)
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Docker related
+Dockerfile
+.dockerignore

@@ -1,76 +1,36 @@
-<p align="center">
-  <img src="https://cloudflare-ipfs.com/ipfs/bafkreihotizw4hpmeqrtxbhqaq4xlen6eo7o33c4u2j55fpqegojmiqfti" width="80%" />
-</p>
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-# Introduction
+## Getting Started
 
-[Erebrus](https://netsepio.com/) is where decentralization meets VPN for ultimate internet security.
-Anonymous Virtual Private Network for accessing internet in stealth mode bypassing filewalls and filters.
-The Future of the Internet is Decentralized. Be a part of it.
+First, run the development server:
 
-# Features
-
-- Power of Decentralization
-- Fast Speed & Unlimited Bandwidth.
-- IP Address Protection
-- Multiple Devices
-- NFT Subscriptions
-
-## Getting started
-
-To get started, clone the repository and install the dependencies:
-
-git clone [github](https://github.com/NetSepio/erebrus-frontend.git)
-
-cd app
-
-npm install
-
-## Running the app
-
-To run the app locally, use the following command:
-
-```
+```bash
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-This will start a development server at `http://localhost:3000`.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Building the app
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-To build the app for production, use the following command:
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-```
-npm run build
-```
+## Learn More
 
-This will generate a production build in the `build` directory.
+To learn more about Next.js, take a look at the following resources:
 
-## License
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Acknowledgments
+## Deploy on Vercel
 
-This project was built using [Next](https://nextjs.org/). Special thanks to the creators and maintainers of these tools.
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-## Our Team
-
-<div>
-    <img src="https://avatars.githubusercontent.com/u/5115199" width="50px" style="border-radius:50%" />
-    <a href="https://github.com/Shachindra">Shachindra</a>
-</div>
-<br/>
-<div>
-    <img src="https://avatars.githubusercontent.com/u/74105169" width="50px" style="border-radius:50%" />
-    <a href="https://github.com/emily876">Devsi</a>
-</div>
-<br/>
-<div>
-    <img src="https://avatars.githubusercontent.com/u/51229945" width="50px" style="border-radius:50%" />
-    <a href="https://github.com/thisisommore">Om More</a>
-</div>
-<div>
-    <img src="https://avatars.githubusercontent.com/u/76100105?v=4" width="50px" style="border-radius:50%" />
-    <a href="https://github.com/Rushikeshnimkar">Rushikesh Nimkar</a>
-</div>
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
