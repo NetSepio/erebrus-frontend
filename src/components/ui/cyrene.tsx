@@ -17,7 +17,11 @@ export default function VPNandAISections() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-12">
             {/* Left side: Buttons */}
             <div className="flex flex-col space-y-5 md:w-1/3 order-2 md:order-1">
-              <button className="bg-white text-gray-900 px-8 py-3 rounded-lg font-medium w-48 hover:bg-gray-100 transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center">
+              <a
+                 href="https://play.google.com/store/apps/details?id=com.erebrus.app"
+                 target="_blank"
+                 rel="noreferrer"
+              className="bg-white text-gray-900 px-8 py-3 rounded-lg font-medium w-48 hover:bg-gray-100 transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -36,8 +40,12 @@ export default function VPNandAISections() {
                   <circle cx="11" cy="11" r="2"></circle>
                 </svg>
                 Play Store
-              </button>
-              <button className="bg-white text-gray-900 px-8 py-3 rounded-lg font-medium w-48 hover:bg-gray-100 transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center">
+              </a>
+              <a
+               href="https://testflight.apple.com/join/BvdARC75"
+               target="_blank"
+               rel="noreferrer"
+              className="bg-white text-gray-900 px-8 py-3 rounded-lg font-medium w-48 hover:bg-gray-100 transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -54,8 +62,12 @@ export default function VPNandAISections() {
                   <path d="M10 2c1 .5 2 2 2 5"></path>
                 </svg>
                 iOS Test Flight
-              </button>
-              <button className="bg-blue-600 text-white px-8 py-3 rounded-lg font-medium w-48 hover:bg-blue-500 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-600/30 flex items-center justify-center">
+              </a>
+              <a
+               href="https://erebrus.io/"
+               target="_blank"
+               rel="noreferrer"
+              className="bg-blue-600 text-white px-8 py-3 rounded-lg font-medium w-48 hover:bg-blue-500 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-600/30 flex items-center justify-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -73,7 +85,7 @@ export default function VPNandAISections() {
                   <path d="M12 16V8"></path>
                 </svg>
                 Web App
-              </button>
+              </a>
             </div>
 
             {/* Right side: Phone images */}

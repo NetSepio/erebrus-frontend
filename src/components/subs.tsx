@@ -90,27 +90,6 @@ export default function SubscriptionCard() {
               </span>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 mb-8">
-              <div className="relative">
-                <input
-                  className="w-full bg-gray-900/50 backdrop-blur-sm rounded-lg px-4 py-3 text-white placeholder:text-gray-600 border border-gray-800 focus:border-blue-500 outline-none transition-all duration-300"
-                  placeholder="Email address"
-                />
-                <div
-                  className={`absolute bottom-0 left-0 h-0.5 bg-blue-500 transition-all duration-500 ${isHovered ? "w-full" : "w-0"}`}
-                ></div>
-              </div>
-              <div className="relative">
-                <input
-                  className="w-full bg-gray-900/50 backdrop-blur-sm rounded-lg px-4 py-3 text-white placeholder:text-gray-600 border border-gray-800 focus:border-blue-500 outline-none transition-all duration-300"
-                  placeholder="Card details"
-                  type="text"
-                />
-                <div
-                  className={`absolute bottom-0 left-0 h-0.5 bg-blue-500 transition-all duration-500 delay-100 ${isHovered ? "w-full" : "w-0"}`}
-                ></div>
-              </div>
-            </div>
 
             <ul className="space-y-4 mb-8">
               {[
@@ -133,15 +112,6 @@ export default function SubscriptionCard() {
               ))}
             </ul>
 
-            <button className="group w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 relative overflow-hidden flex items-center justify-center">
-              <span className="relative z-10 group-hover:translate-x-1 transition-transform">
-                Activate Secure Access
-              </span>
-              <ChevronRight className="ml-2 relative z-10 transition-transform group-hover:translate-x-1" size={18} />
-              <div
-                className={`absolute top-0 left-0 w-full h-full bg-gradient-to-r from-blue-500 to-blue-400 transform transition-transform duration-500 ${isHovered ? "-translate-x-0 opacity-0" : "-translate-x-full opacity-0"} group-hover:opacity-30 group-hover:translate-x-0`}
-              ></div>
-            </button>
           </div>
         </div>
 
