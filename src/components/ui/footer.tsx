@@ -66,21 +66,21 @@ const DarkFooter: React.FC = () => {
             </p>
             <div className="flex space-x-5">
               <a
-                href="#"
+                href="https://www.linkedin.com/company/netsepio/"
                 className="text-gray-400 hover:text-blue-400 transition-colors duration-300"
                 aria-label="LinkedIn"
               >
                 <Linkedin size={20} />
               </a>
               <a
-                href="#"
+                href="https://discordapp.com/invite/5uaFhNpRF6"
                 className="text-gray-400 hover:text-blue-400 transition-colors duration-300"
                 aria-label="Discord"
               >
                 <MessageSquare size={20} />
               </a>
               <a
-                href="#"
+                href="https://x.com/netsepio"
                 className="text-gray-400 hover:text-blue-400 transition-colors duration-300"
                 aria-label="X (Twitter)"
               >
@@ -107,7 +107,7 @@ const DarkFooter: React.FC = () => {
                 </svg>
               </a>
               <a
-                href="#"
+                href="https://t.me/NetSepio"
                 className="text-gray-400 hover:text-blue-400 transition-colors duration-300"
                 aria-label="Telegram"
               >
@@ -127,7 +127,7 @@ const DarkFooter: React.FC = () => {
                 </svg>
               </a>
               <a
-                href="#"
+                href="https://github.com/Netsepio"
                 className="text-gray-400 hover:text-blue-400 transition-colors duration-300"
                 aria-label="GitHub"
               >
@@ -152,27 +152,27 @@ const DarkFooter: React.FC = () => {
               className={`space-y-4 overflow-hidden transition-all duration-300 ${expanded.explore ? "max-h-60" : "max-h-0 md:max-h-60"}`}
             >
               <li>
-                <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors duration-300">
+                <a href="https://netsepio.com/" className="text-gray-400 hover:text-blue-400 transition-colors duration-300">
                   About NetSepio ↗
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors duration-300">
+                <a href="https://www.cyreneai.com/" className="text-gray-400 hover:text-blue-400 transition-colors duration-300">
                   Meet CyreneAI ↗
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors duration-300">
+                <a href="https://erebrus.io/terms" className="text-gray-400 hover:text-blue-400 transition-colors duration-300">
                   Terms and Conditions ↗
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors duration-300">
+                <a href="https://erebrus.io/privacy" className="text-gray-400 hover:text-blue-400 transition-colors duration-300">
                   Privacy Policy ↗
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors duration-300">
+                <a href="https://erebrus.io/contact" className="text-gray-400 hover:text-blue-400 transition-colors duration-300">
                   Contact Us ↗
                 </a>
               </li>

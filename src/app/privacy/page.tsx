@@ -276,3 +276,4 @@ Thank you for choosing Erebrus. Your privacy and trust are our top priorities as
 };
 
 export default Privacy;
+  
