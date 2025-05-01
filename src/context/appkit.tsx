@@ -126,7 +126,7 @@ const metadata = {
   description:
     "Powering the future of AI interaction through multi-agent collaboration with self-replicating, decentralized agents. Launch agents, engage with Cyrene, and unlock new frontiers in AI, technology, and consciousness.",
   url: "https://erebrus.io/",
-  // icons: ["https://cyreneai.com/CyreneAI_logo-text.png"],
+  icons: ["https://cyreneai.com/CyreneAI_logo-text.png"],
 };
 
 // 3. Set up Solana Adapter
