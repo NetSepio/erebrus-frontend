@@ -112,7 +112,7 @@ const riseTestnet = defineChain({
 });
 
 // 1. Get projectId from https://cloud.reown.com
-export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
+export const projectId = "193ccae4f2630b59e1e7f10b785e3a0a";
 
 if (!projectId) {
   throw new Error(

@@ -1,5 +1,5 @@
 # ---- Build Stage ----
-    FROM node:23-alpine AS builder
+    FROM node:18-alpine AS builder
 
     # Install build dependencies
     RUN apk add --no-cache \
@@ -27,7 +27,7 @@
     RUN npm run build
     
     # ---- Production Stage ----
-    FROM node:23-alpine
+    FROM node:18-alpine
     
     # Set working directory
     WORKDIR /app
