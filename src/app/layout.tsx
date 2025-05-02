@@ -12,8 +12,6 @@ import AppWalletProvider from "@/components/AppWalletProvider";
 import { AuthProvider } from "../context/AuthContext";
 import CustomWagmiProvider from "@/components/WagmiProvider";
 
-
-
 export const metadata = {
   name: "Erebrus",
   description:
@@ -26,7 +24,6 @@ export const metadata = {
     title: "Erebrus",
     description:
       "Redefining digital connectivity and unleashing the future of internet with globally accessible, secure and private network through the power of DePIN.",
-    
   },
 };
 
@@ -37,16 +34,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <AuthProvider>
-{/* <CustomAptosProvider> */}
+      <body className={cn("min-h-screen flex flex-col", inter.className)}>
+        <AppKit>
+          <AuthProvider>
+            {/* <CustomAptosProvider> */}
 
-        <CustomWagmiProvider>
-
-        <AppWalletProvider>
-            <AppKit>
-              <body
-                className={cn("min-h-screen flex flex-col", inter.className)}
-              >
+            <CustomWagmiProvider>
+              <AppWalletProvider>
                 <ThemeProvider
                   attribute="class"
                   defaultTheme="dark"
@@ -58,13 +52,12 @@ export default function RootLayout({
                     <DarkFooter />
                   </div>
                 </ThemeProvider>
-              </body>
-            </AppKit>
-
-        </AppWalletProvider>
-                </CustomWagmiProvider>
-{/* </CustomAptosProvider> */}
-      </AuthProvider>
+              </AppWalletProvider>
+            </CustomWagmiProvider>
+            {/* </CustomAptosProvider> */}
+          </AuthProvider>
+        </AppKit>
+      </body>
     </html>
   );
 }
