@@ -16,11 +16,11 @@ export const metadata = {
   name: "Erebrus",
   description:
     "Redefining digital connectivity and unleashing the future of internet with globally accessible, secure and private network through the power of DePIN.",
-  url: "https://netsepio.com",
+  url: "https://erebrus.io",
   icons: ["https://avatars.githubusercontent.com/u/37784886"],
   openGraph: {
     type: "website",
-    url: "https://netsepio.com",
+    url: "https://erebrus.io",
     title: "Erebrus",
     description:
       "Redefining digital connectivity and unleashing the future of internet with globally accessible, secure and private network through the power of DePIN.",
