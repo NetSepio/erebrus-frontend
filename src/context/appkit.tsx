@@ -37,7 +37,7 @@ import { defineChain } from "@reown/appkit/networks";
 import React, { useEffect } from "react";
 import Cookies from "js-cookie";
 import axios from "axios";
-import { BrowserProvider } from "ethers";
+import { BrowserProvider, toUtf8Bytes } from "ethers";
 
 // Define Peaq network
 const peaqNetwork = defineChain({
@@ -177,8 +177,16 @@ const authenticateUser = async (walletAddress: string, walletProvider: any) => {
         `Mismatch: Signer address (${signerAddress}) !== Connected address (${walletAddress})`
       );
     }
-
-    const signature = await signer.signMessage(message);
+    const ethereumPrefix = "\x19Ethereum Signed Message:\n";
+    const fullMessage = `${message}`; // message = eula + flowId
+    const fullMessageWithPrefix = `${ethereumPrefix}${fullMessage.length}${fullMessage}`;
+    
+    // Convert to bytes
+    const messageBytes = toUtf8Bytes(fullMessageWithPrefix);
+    
+    // Hash and sign
+    const signature = await signer.signMessage(messageBytes);
+    // const signature = await signer.signMessage(message);
 
     const authResponse = await axios.post(
       `${GATEWAY_URL}api/v1.0/authenticate?&chain=evm`,
@@ -229,6 +237,8 @@ const authenticateUser = async (walletAddress: string, walletProvider: any) => {
 };
 
 // Solana Authentication
+
+
 const authenticateUserSolana = async (walletAddress: string) => {
   try {
     const GATEWAY_URL = "https://gateway.netsepio.com/";
