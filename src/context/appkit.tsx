@@ -185,7 +185,13 @@ const authenticateUser = async (walletAddress: string, walletProvider: any) => {
     const messageBytes = toUtf8Bytes(fullMessageWithPrefix);
     
     // Hash and sign
-    const signature = await signer.signMessage(messageBytes);
+// Hash and sign
+let signature = await signer.signMessage(messageBytes);
+
+// Ensure it starts with 0x
+if (!signature.startsWith("0x")) {
+  signature = "0x" + signature;
+}
     // const signature = await signer.signMessage(message);
 
     const authResponse = await axios.post(
