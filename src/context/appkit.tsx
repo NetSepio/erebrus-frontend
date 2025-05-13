@@ -150,6 +150,7 @@ const NETWORK_IDS = {
 };
 
 // EVM Authentication
+// Modified authenticateUser function to match the backend's message signing approach
 const authenticateUser = async (walletAddress: string, walletProvider: any) => {
   try {
     const GATEWAY_URL = "https://gateway.netsepio.com/";
@@ -165,6 +166,10 @@ const authenticateUser = async (walletAddress: string, walletProvider: any) => {
     console.log("EVM Message:", message);
     console.log("EVM Flow ID:", flowId);
 
+    // IMPORTANT CHANGE: Combine message and flowId like the backend does
+    const combinedMessage = `${message}${flowId}`;
+    console.log("Combined Message:", combinedMessage);
+
     const provider = new BrowserProvider(walletProvider);
     if (!walletAddress) {
       throw new Error("Wallet address is undefined");
@@ -177,29 +182,23 @@ const authenticateUser = async (walletAddress: string, walletProvider: any) => {
         `Mismatch: Signer address (${signerAddress}) !== Connected address (${walletAddress})`
       );
     }
-    const ethereumPrefix = "\x19Ethereum Signed Message:\n";
-    const fullMessage = `${message}`; // message = eula + flowId
-    const fullMessageWithPrefix = `${ethereumPrefix}${fullMessage.length}${fullMessage}`;
-    
-    // Convert to bytes
-    const messageBytes = toUtf8Bytes(fullMessageWithPrefix);
-    
-    // Hash and sign
-// Hash and sign
-let signature = await signer.signMessage(messageBytes);
 
-// Ensure it starts with 0x
-if (!signature.startsWith("0x")) {
-  signature = "0x" + signature;
-}
-    // const signature = await signer.signMessage(message);
+    // Sign the COMBINED message (message + flowId)
+    let signature = await signer.signMessage(combinedMessage);
 
+    // Remove "0x" prefix if present
+    if (signature.startsWith("0x")) {
+      signature = signature.slice(2);
+    }
+
+    // Post to auth endpoint - match the backend format exactly
     const authResponse = await axios.post(
-      `${GATEWAY_URL}api/v1.0/authenticate?&chain=evm`,
+      `${GATEWAY_URL}api/v1.0/authenticate`, // Remove chain query param to match backend
       {
+        chainName,
         flowId,
         signature,
-        chainName: "evm",
+        // walletAddress field included to match backend expectation
       },
       {
         headers: {
