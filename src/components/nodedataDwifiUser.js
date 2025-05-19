@@ -1,10 +1,10 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { ethers } from 'ethers';
-import contractABI from '../components/peaqabi/contractABI.json';
+// import contractABI from '../components/peaqabi/contractABI.json';
 
 
 const contractAddress = '0x5940445e1e8A419ebea10B45c5d1C0F603926F41';
@@ -57,7 +57,7 @@ const NodeDwifiStreamUser = () => {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
 
-      const contract = new ethers.Contract(contractAddress, contractABI, signer);
+      const contract = new ethers.Contract(contractAddress, signer);
 
       const operators = [];
       for (let i = 0; i <= 50; i++) {
@@ -110,7 +110,7 @@ const NodeDwifiStreamUser = () => {
     try {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
-      const contract = new ethers.Contract(contractAddress, contractABI, signer);
+      const contract = new ethers.Contract(contractAddress, signer);
   
       // Convert price to wei
       const priceInWei = ethers.utils.parseEther(updatedNode.pricePerMinute);

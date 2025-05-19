@@ -90,7 +90,7 @@ const ErebrusNavbar = () => {
 
   const navItems = [
     { name: "Explorer", link: "/explorer" },
-    { name: "Docs", link: "#docs" },
+    { name: "Docs", link: "https://docs.netsepio.com/erebrus/", external: true },
     { name: "Dashboard", link: "/dashboard" },
   ];
 
@@ -149,6 +149,8 @@ const ErebrusNavbar = () => {
                   key={index}
                   href={item.link}
                   className="text-white hover:text-blue-300 transition-colors duration-300 text-lg font-medium"
+                  target={item.external ? "_blank" : undefined}
+                  rel={item.external ? "noopener noreferrer" : undefined}
                 >
                   {item.name}
                 </Link>
@@ -198,6 +200,8 @@ const ErebrusNavbar = () => {
                     href={item.link}
                     className="text-white hover:text-blue-300 transition-colors duration-300 py-2 text-lg"
                     onClick={() => setIsOpen(false)}
+                    target={item.external ? "_blank" : undefined}
+                    rel={item.external ? "noopener noreferrer" : undefined}
                   >
                     {item.name}
                   </Link>

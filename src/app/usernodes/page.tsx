@@ -1,7 +1,8 @@
+"use client"
 import React from "react";
 import NodeDwifiStreamUser from "@/components/nodedataDwifiUser";
 import NodesDataStreamDvpn from "@/components/NodesDataDvpnUser";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Dwifi = () => {
   return (
@@ -17,14 +18,16 @@ const Dwifi = () => {
         >
           <motion.h1
             initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1, transition: { duration: 1 } }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 1 }}
             className="text-6xl font-semibold text-gray-300 mb-8 text-center w-full lg:w-3/5"
           >
             Manage Your ÐVPN & ÐWi-Fi Nodes
           </motion.h1>
           <motion.h1
             initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1, transition: { duration: 1 } }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 1 }}
             className="text-2xl text-white text-center"
           >
             <p>Discover data across your ÐWi-Fi network</p>
