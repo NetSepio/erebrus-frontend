@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Camera, User, MapPin, Mail, MessageSquare, AtSign, Globe, Apple, Edit, Save, X, Check } from "lucide-react"
 
 const API_KEY = process.env.NEXT_PUBLIC_STORAGE_API
-const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_GATEWAY_URL
+const REACT_APP_GATEWAY_URL = "https://gateway.netsepio.com"
 
 interface FormData {
   name: string
@@ -142,7 +142,7 @@ const Profile = () => {
       // Convert to JSON string
       const jsonData = JSON.stringify(formDataObject)
 
-      const response = await fetch(`${REACT_APP_GATEWAY_URL}api/v1.0/profile`, {
+      const response = await fetch(`${REACT_APP_GATEWAY_URL}/api/v1.0/profile`, {
         method: "PATCH",
         headers: {
           Accept: "application/json, text/plain, */*",
@@ -174,7 +174,7 @@ const Profile = () => {
       try {
         const auth = Cookies.get("erebrus_token")
 
-        const response = await axios.get(`${REACT_APP_GATEWAY_URL}api/v1.0/profile`, {
+        const response = await axios.get(`${REACT_APP_GATEWAY_URL}/api/v1.0/profile`, {
           headers: {
             Accept: "application/json, text/plain, */*",
             "Content-Type": "application/json",
