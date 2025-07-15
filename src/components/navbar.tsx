@@ -8,7 +8,6 @@ import { FloatingDock } from "@/components/ui/floating-dock";
 import { motion, AnimatePresence } from "framer-motion";
 import Cookies from "js-cookie"
 import UserDropdown from "@/components/login/UserDropdown"
-import { useAppKit } from "@reown/appkit/react";
 
 const ErebrusNavbar = () => {
   const [avatarUrl, setAvatarUrl] = useState("")
@@ -30,34 +29,6 @@ const ErebrusNavbar = () => {
     console.log("Show paseto QR code")
   }
 
-  const handleDeleteCookie = async () => {
-    try {
-      const appKit = useAppKit();
-  
-      // Disconnect the wallet
-      
-      await appKit.close();
-      console.log("AppKit connection closed");
-  
-      // Set localStorage flag for MetaMask disconnection
-      localStorage.setItem("wagmi.io.metamask.disconnected", JSON.stringify(true));
-  
-      // Remove cookies
-      Cookies.remove("erebrus_token", { path: "/" });
-      Cookies.remove("erebrus_wallet", { path: "/" });
-      Cookies.remove("erebrus_userid", { path: "/" });
-      Cookies.remove("Chain_symbol", { path: "/" });
-      console.log("Cookies cleared");
-  
-      // Redirect to homepage
-      window.location.href = "/";
-  
-      return true;
-    } catch (error) {
-      console.error("Logout error:", error);
-      return false;
-    }
-  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -139,6 +110,7 @@ const ErebrusNavbar = () => {
                 width={150}
                 height={40}
                 className="h-10 w-auto"
+                 sizes='100vw'
               />
             </Link>
 

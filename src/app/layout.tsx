@@ -4,13 +4,16 @@ import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import ErebrusNavbar from "@/components/navbar";
 import { cn } from "@/lib/utils";
-import { AppKit } from "@/context/appkit";
 const inter = Inter({ subsets: ["latin"] });
 import "./globals.css";
 import DarkFooter from "@/components/ui/footer";
-import AppWalletProvider from "@/components/AppWalletProvider";
-import { AuthProvider } from "../context/AuthContext";
-import CustomWagmiProvider from "@/components/WagmiProvider";
+import ContextProvider from '../context2'
+import { headers } from 'next/headers'
+
+const headersObj = await headers();
+const cookies = headersObj.get('cookie')
+
+
 
 export const metadata = {
   name: "Erebrus",
@@ -32,31 +35,25 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+
+
+
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn("min-h-screen flex flex-col", inter.className)}>
-        <AppKit>
-          <AuthProvider>
-            {/* <CustomAptosProvider> */}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+        >
+          <div className="flex flex-col min-h-screen">
+            <ErebrusNavbar />
+            <ContextProvider cookies={cookies}>{children}</ContextProvider>
 
-            <CustomWagmiProvider>
-              <AppWalletProvider>
-                <ThemeProvider
-                  attribute="class"
-                  defaultTheme="dark"
-                  enableSystem
-                >
-                  <div className="flex flex-col min-h-screen">
-                    <ErebrusNavbar />
-                    <main className="flex-grow">{children}</main>
-                    <DarkFooter />
-                  </div>
-                </ThemeProvider>
-              </AppWalletProvider>
-            </CustomWagmiProvider>
-            {/* </CustomAptosProvider> */}
-          </AuthProvider>
-        </AppKit>
+            <DarkFooter />
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );

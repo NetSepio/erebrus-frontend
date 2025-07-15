@@ -58,6 +58,7 @@ const DarkFooter: React.FC = () => {
                 width={150}
                 height={40}
                 className="h-auto"
+                 sizes='100vw'
               />
             </div>
             <p className="text-sm text-gray-300">

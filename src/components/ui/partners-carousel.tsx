@@ -58,6 +58,7 @@ export default function PartnersCarousel({ images, title = "Our Partners", speed
                     width={120}
                     height={50}
                     className="object-contain max-h-12 transition-all duration-300 group-hover:scale-110"
+                     sizes='100vw'
                   />
                 </div>
               </div>
@@ -81,6 +82,7 @@ export default function PartnersCarousel({ images, title = "Our Partners", speed
                     width={120}
                     height={50}
                     className="object-contain max-h-12 transition-all duration-300 group-hover:scale-110"
+                     sizes='100vw'
                   />
                 </div>
               </div>

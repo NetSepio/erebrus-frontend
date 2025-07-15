@@ -97,6 +97,7 @@ export default function VPNandAISections() {
                   className="w-full max-w-md object-contain z-10 relative"
                   width={500}
                   height={500}
+                   sizes='100vw'
                 />
                 <div className="absolute -inset-4 bg-blue-500/20 blur-3xl rounded-full -z-10"></div>
               </div>
@@ -123,6 +124,7 @@ export default function VPNandAISections() {
                   className="w-full max-w-md object-contain z-10 relative"
                   width={500}
                   height={500}
+                   sizes='100vw'
                 />
                 <div className="absolute -inset-4 bg-purple-500/20 blur-3xl rounded-full -z-10"></div>
               </div>
