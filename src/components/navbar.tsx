@@ -8,6 +8,7 @@ import { FloatingDock } from "@/components/ui/floating-dock";
 import { motion, AnimatePresence } from "framer-motion";
 import Cookies from "js-cookie"
 import UserDropdown from "@/components/login/UserDropdown"
+import { AuthButton } from "./AuthButton";
 
 const ErebrusNavbar = () => {
   const [avatarUrl, setAvatarUrl] = useState("")
@@ -140,6 +141,7 @@ const ErebrusNavbar = () => {
          />
         </>:<>
          <appkit-button />
+        <AuthButton/>
          </>}
             </div>
 
