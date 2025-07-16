@@ -1,14 +1,7 @@
 "use client";
 
-export const metadata = {
-  title: "Erebrus Dashboard",
-  description: "Manage your Erebrus VPN connections and clients.",
-  alternates: {
-    canonical: "https://erebrus.io/dashboard",
-  },
-};
-
 import { useState, useEffect, type FormEvent, type ChangeEvent } from "react";
+import Head from "next/head";
 import { Cloud, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -438,685 +431,708 @@ export default function DashboardPage() {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-950 text-white relative">
-      <div className="absolute inset-0 z-0">
-        <BackgroundBeams />
-      </div>
-      {!token ? (
-        <>
-          <NotLoggedIn />
-        </>
-      ) : (
-        <>
-          {/* Main content */}
-          <main className="relative z-10 flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 mt-16">
-            {subscriptionStatus === "notFound" ? (
-              <>
-                <div className="grid gap-4 max-w-6xl mx-auto w-full justify-center items-center">
-                  <Card className="bg-slate-900/60 border-slate-800 text-white">
-                    <CardHeader>
-                      <CardTitle>Upgrade Your Subscription</CardTitle>
-                      <CardDescription className="text-slate-400">
-                        Get access to premium features with our Quantum Tier
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="p-6">
-                      <div className="rounded-lg bg-slate-800/50 p-6">
-                        <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-blue-900/30 text-blue-400 mb-2">
-                          PREMIUM
-                        </span>
-                        <h2 className="text-gray-100 text-2xl font-bold mb-2">
-                          Quantum Tier Subscription
-                        </h2>
-                        <p className="text-gray-400 text-sm mb-6">
-                          Advanced security & networking features
-                        </p>
-
-                        <div className="flex items-baseline mb-8">
-                          <span className="text-white text-4xl font-bold">
-                            $5.99
-                          </span>
-                          <span className="text-gray-500 ml-2">/month</span>
-                          <span className="ml-3 text-xs bg-blue-900/30 text-blue-400 px-2 py-1 rounded">
-                            SAVE 40%
-                          </span>
-                        </div>
-
-                        <Button
-                          className="w-full bg-gradient-to-r from-blue-700 to-blue-600 py-3 px-4 text-center text-white font-medium shadow-lg shadow-blue-900/20 hover:shadow-blue-900/40 transition-all duration-300"
-                          onMouseEnter={() => setIsHovered(true)}
-                          onMouseLeave={() => setIsHovered(false)}
-                          onClick={async () => {
-                            const auth = Cookies.get("erebrus_token");
-                            try {
-                              const response = await fetch(
-                                `${EREBRUS_GATEWAY_URL}api/v1.0/subscription/trial`,
-                                {
-                                  method: "POST",
-                                  headers: {
-                                    Accept: "application/json, text/plain, */*",
-                                    "Content-Type": "application/json",
-                                    Authorization: `Bearer ${auth}`,
-                                  },
-                                  // body: jsonData,
-                                }
-                              );
-
-                              if (response.status === 200) {
-                                const responseData = await response.json();
-                                console.log(
-                                  "trial subsc response",
-                                  responseData
-                                );
-                                window.location.reload();
-                                // settrialbuytrue(true);
-                                // for alert
-                                setTimeout(() => {
-                                  window.location.href = "/dashboard";
-                                }, 3000);
-                              }
-                            } catch (error) {
-                              console.error("Error:", error);
-                            } finally {
-                            }
-                          }}
-                          aria-label="Start 7-day free trial"
-                        >
-                          <span
-                            className={`inline-block transition-transform duration-300 ${
-                              isHovered ? "scale-105" : ""
-                            }`}
-                          >
-                            Start 7-Day Free Trial
-                          </span>
-                        </Button>
-
-                        <ul className="space-y-4 mt-8">
-                          {[
-                            {
-                              icon: <Lock size={16} />,
-                              text: "Decentralized Zero-Trust Network",
-                            },
-                            {
-                              icon: <Shield size={16} />,
-                              text: "Multi-layer Quantum Encryption",
-                            },
-                            {
-                              icon: <Database size={16} />,
-                              text: "Real-time Threat Analysis & Prevention",
-                            },
-                            {
-                              icon: <Zap size={16} />,
-                              text: "AI-powered Security Insights",
-                            },
-                            {
-                              icon: <Smartphone size={16} />,
-                              text: "Cross-platform Secure Access",
-                            },
-                          ].map((item, index) => (
-                            <li
-                              key={index}
-                              className={`flex items-center text-gray-400 transition-all duration-300 ${
-                                isHovered ? "translate-x-1" : ""
-                              }`}
-                              style={{ transitionDelay: `${index * 50}ms` }}
-                            >
-                              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-900/30 text-blue-400 mr-3">
-                                {item.icon}
-                              </div>
-                              {item.text}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </>
-            ) : (
-              <>
-                {showClients ? (
-                  <div className="max-w-6xl w-full mx-auto">
-                    <div className="flex justify-between items-center mb-6">
-                      <h1 className="text-2xl font-bold">My VPN Clients</h1>
-                      <div className="flex gap-2">
-                        {/* 1. View Subscriptions Button */}
-                        <Button
-                          variant="outline"
-                          className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
-                          onClick={() => setShowClients(false)}
-                          aria-label="View subscription details"
-                        >
-                          View Subscriptions
-                        </Button>
-
-                        {/* 2. Add More Clients Button */}
-                        <Button
-                          onClick={() => {
-                            setbuttonset(true);
-                          }}
-                          className="bg-blue-600 hover:bg-blue-700"
-                          aria-label="Add new VPN client"
-                        >
-                          <Plus className="mr-2 h-4 w-4" />
-                          Add More Clients
-                        </Button>
-                      </div>
-                    </div>
-
+    <>
+      <Head>
+        <title>Erebrus Dashboard</title>
+        <meta
+          name="description"
+          content="Manage your Erebrus VPN connections and clients."
+        />
+        <link rel="canonical" href="https://erebrus.io/dashboard" />
+      </Head>
+      <div className="flex min-h-screen flex-col bg-slate-950 text-white relative">
+        <div className="absolute inset-0 z-0">
+          <BackgroundBeams />
+        </div>
+        {!token ? (
+          <>
+            <NotLoggedIn />
+          </>
+        ) : (
+          <>
+            {/* Main content */}
+            <main className="relative z-10 flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 mt-16">
+              {subscriptionStatus === "notFound" ? (
+                <>
+                  <div className="grid gap-4 max-w-6xl mx-auto w-full justify-center items-center">
                     <Card className="bg-slate-900/60 border-slate-800 text-white">
                       <CardHeader>
-                        <div className="flex items-center gap-4">
-                          {imageSrc ? (
-                            <img
-                              src={`${"https://nftstorage.link/ipfs"}/${imageSrc}`}
-                              className="w-14 h-14 rounded-full"
-                            />
-                          ) : (
-                            <img
-                              src="subscriptionprofile.webp"
-                              className="w-14 h-14 rounded-full"
-                            />
-                          )}{" "}
-                          <div>
-                            <CardTitle>
-                              {subscription
-                                ? `${subscription.type.toUpperCase()} Subscription`
-                                : "Loading..."}
-                            </CardTitle>
-                          </div>
-                        </div>
-                        <appkit-button />
-                      </CardHeader>
-                      <CardContent>
-                        {projectsData && projectsData?.length !== 0 ? (
-                          <>
-                            {projectsData.map((metaData, index) => (
-                              <div key={index} className="flex">
-                                <MyVpnCard metaData={metaData} />
-                              </div>
-                            ))}{" "}
-                          </>
-                        ) : (
-                          <>
-                            <div className="text-center text-slate-400">
-                              Add Client
-                            </div>
-                          </>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </div>
-                ) : (
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2 max-w-6xl mx-auto w-full">
-                    <Card className="bg-slate-900/60 border-slate-800 text-white">
-                      <CardHeader>
-                        <CardTitle>Subscription</CardTitle>
+                        <CardTitle>Upgrade Your Subscription</CardTitle>
                         <CardDescription className="text-slate-400">
-                          Your current plan and usage
+                          Get access to premium features with our Quantum Tier
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="p-6">
-                        {loading ? (
-                          <p className="text-slate-300">
-                            Loading subscription...
+                        <div className="rounded-lg bg-slate-800/50 p-6">
+                          <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-blue-900/30 text-blue-400 mb-2">
+                            PREMIUM
+                          </span>
+                          <h2 className="text-gray-100 text-2xl font-bold mb-2">
+                            Quantum Tier Subscription
+                          </h2>
+                          <p className="text-gray-400 text-sm mb-6">
+                            Advanced security & networking features
                           </p>
-                        ) : error ? (
-                          <p className="text-red-400">{error}</p>
-                        ) : subscription ? (
-                          <div className="rounded-lg bg-slate-800/50 p-6">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <h3 className="text-xl font-bold">
-                                  {subscription.type.toUpperCase()} SUBSCRIPTION
-                                </h3>
-                                <p className="text-sm text-slate-400">
-                                  (
-                                  {subscriptionStatus === "expired"
-                                    ? "Expired"
-                                    : "Valid for 7 days"}
-                                  )
-                                </p>
-                              </div>
-                              {/* 4. Upgrade/Renew Plan Button */}
-                              <Button
-                                className="bg-blue-600 hover:bg-blue-700"
-                                aria-label={
-                                  subscriptionStatus === "expired"
-                                    ? "Renew subscription plan"
-                                    : "Upgrade subscription plan"
-                                }
-                              >
-                                {subscriptionStatus === "expired"
-                                  ? "Renew Plan"
-                                  : "Upgrade Plan"}
-                              </Button>
-                            </div>
-                            <div className="mt-6 space-y-2">
-                              <div className="flex justify-between text-sm">
-                                <span className="text-slate-400">
-                                  Start time:
-                                </span>
-                                <span>
-                                  {formatDate(subscription.startTime)}
-                                </span>
-                              </div>
-                              <div className="flex justify-between text-sm">
-                                <span className="text-slate-400">
-                                  End time:
-                                </span>
-                                <span>{formatDate(subscription.endTime)}</span>
-                              </div>
-                              <div className="flex justify-between text-sm">
-                                <span className="text-slate-400">Status:</span>
-                                <span>{subscriptionStatus.toUpperCase()}</span>
-                              </div>
-                            </div>
-                          </div>
-                        ) : (
-                          <p className="text-slate-300">
-                            No subscription found
-                          </p>
-                        )}
-                        <div className="mt-6 flex gap-3">
-                          {/* 5. Create Clients Button */}
-                          <Button
-                            variant="outline"
-                            className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
-                            onClick={() => setShowClients(true)}
-                            aria-label="Create new VPN clients"
-                          >
-                            <Plus className="mr-2 h-4 w-4" />
-                            Create Clients
-                          </Button>
-                          {/* 6. File Storage Button */}
-                          <Button
-                            variant="outline"
-                            className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
-                            onClick={() => setShowFileStorage(true)}
-                            aria-label="Access file storage"
-                          >
-                            <Cloud className="mr-2 h-4 w-4" />
-                            File Storage
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
 
-                    <Card className="bg-slate-900/60 border-slate-800 text-white">
-                      <CardHeader>
-                        <CardTitle>Mint</CardTitle>
-                        <CardDescription className="text-slate-400">
-                          Create and manage your digital assets
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="flex items-center justify-center p-6">
-                        <div
-                          className="rounded-lg border border-dashed border-blue-500 bg-slate-800/30 p-10 text-center w-full cursor-pointer"
-                          onClick={() => (window.location.href = "/mint")}
-                        >
-                          <div className="flex flex-col items-center justify-center">
-                            <Plus className="h-10 w-10 text-blue-500 mb-4" />
-                            <p className="text-slate-300">
-                              Click to navigate to Mint page
-                            </p>
+                          <div className="flex items-baseline mb-8">
+                            <span className="text-white text-4xl font-bold">
+                              $5.99
+                            </span>
+                            <span className="text-gray-500 ml-2">/month</span>
+                            <span className="ml-3 text-xs bg-blue-900/30 text-blue-400 px-2 py-1 rounded">
+                              SAVE 40%
+                            </span>
                           </div>
+
+                          <Button
+                            className="w-full bg-gradient-to-r from-blue-700 to-blue-600 py-3 px-4 text-center text-white font-medium shadow-lg shadow-blue-900/20 hover:shadow-blue-900/40 transition-all duration-300"
+                            onMouseEnter={() => setIsHovered(true)}
+                            onMouseLeave={() => setIsHovered(false)}
+                            onClick={async () => {
+                              const auth = Cookies.get("erebrus_token");
+                              try {
+                                const response = await fetch(
+                                  `${EREBRUS_GATEWAY_URL}api/v1.0/subscription/trial`,
+                                  {
+                                    method: "POST",
+                                    headers: {
+                                      Accept:
+                                        "application/json, text/plain, */*",
+                                      "Content-Type": "application/json",
+                                      Authorization: `Bearer ${auth}`,
+                                    },
+                                    // body: jsonData,
+                                  }
+                                );
+
+                                if (response.status === 200) {
+                                  const responseData = await response.json();
+                                  console.log(
+                                    "trial subsc response",
+                                    responseData
+                                  );
+                                  window.location.reload();
+                                  // settrialbuytrue(true);
+                                  // for alert
+                                  setTimeout(() => {
+                                    window.location.href = "/dashboard";
+                                  }, 3000);
+                                }
+                              } catch (error) {
+                                console.error("Error:", error);
+                              } finally {
+                              }
+                            }}
+                            aria-label="Start 7-day free trial"
+                          >
+                            <span
+                              className={`inline-block transition-transform duration-300 ${
+                                isHovered ? "scale-105" : ""
+                              }`}
+                            >
+                              Start 7-Day Free Trial
+                            </span>
+                          </Button>
+
+                          <ul className="space-y-4 mt-8">
+                            {[
+                              {
+                                icon: <Lock size={16} />,
+                                text: "Decentralized Zero-Trust Network",
+                              },
+                              {
+                                icon: <Shield size={16} />,
+                                text: "Multi-layer Quantum Encryption",
+                              },
+                              {
+                                icon: <Database size={16} />,
+                                text: "Real-time Threat Analysis & Prevention",
+                              },
+                              {
+                                icon: <Zap size={16} />,
+                                text: "AI-powered Security Insights",
+                              },
+                              {
+                                icon: <Smartphone size={16} />,
+                                text: "Cross-platform Secure Access",
+                              },
+                            ].map((item, index) => (
+                              <li
+                                key={index}
+                                className={`flex items-center text-gray-400 transition-all duration-300 ${
+                                  isHovered ? "translate-x-1" : ""
+                                }`}
+                                style={{ transitionDelay: `${index * 50}ms` }}
+                              >
+                                <div className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-900/30 text-blue-400 mr-3">
+                                  {item.icon}
+                                </div>
+                                {item.text}
+                              </li>
+                            ))}
+                          </ul>
                         </div>
                       </CardContent>
                     </Card>
                   </div>
-                )}
-                {buttonset && (
-                  <>
-                    <div
-                      style={{ backgroundColor: "#222944E5" }}
-                      className="flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full"
-                      id="popupmodal"
-                    >
-                      <div className="relative p-4 w-full max-w-2xl max-h-full">
+                </>
+              ) : (
+                <>
+                  {showClients ? (
+                    <div className="max-w-6xl w-full mx-auto">
+                      <div className="flex justify-between items-center mb-6">
+                        <h1 className="text-2xl font-bold">My VPN Clients</h1>
+                        <div className="flex gap-2">
+                          {/* 1. View Subscriptions Button */}
+                          <Button
+                            variant="outline"
+                            className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
+                            onClick={() => setShowClients(false)}
+                            aria-label="View subscription details"
+                          >
+                            View Subscriptions
+                          </Button>
+
+                          {/* 2. Add More Clients Button */}
+                          <Button
+                            onClick={() => {
+                              setbuttonset(true);
+                            }}
+                            className="bg-blue-600 hover:bg-blue-700"
+                            aria-label="Add new VPN client"
+                          >
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add More Clients
+                          </Button>
+                        </div>
+                      </div>
+
+                      <Card className="bg-slate-900/60 border-slate-800 text-white">
+                        <CardHeader>
+                          <div className="flex items-center gap-4">
+                            {imageSrc ? (
+                              <img
+                                src={`${"https://nftstorage.link/ipfs"}/${imageSrc}`}
+                                className="w-14 h-14 rounded-full"
+                              />
+                            ) : (
+                              <img
+                                src="subscriptionprofile.webp"
+                                className="w-14 h-14 rounded-full"
+                              />
+                            )}{" "}
+                            <div>
+                              <CardTitle>
+                                {subscription
+                                  ? `${subscription.type.toUpperCase()} Subscription`
+                                  : "Loading..."}
+                              </CardTitle>
+                            </div>
+                          </div>
+                          <appkit-button />
+                        </CardHeader>
+                        <CardContent>
+                          {projectsData && projectsData?.length !== 0 ? (
+                            <>
+                              {projectsData.map((metaData, index) => (
+                                <div key={index} className="flex">
+                                  <MyVpnCard metaData={metaData} />
+                                </div>
+                              ))}{" "}
+                            </>
+                          ) : (
+                            <>
+                              <div className="text-center text-slate-400">
+                                Add Client
+                              </div>
+                            </>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </div>
+                  ) : (
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2 max-w-6xl mx-auto w-full">
+                      <Card className="bg-slate-900/60 border-slate-800 text-white">
+                        <CardHeader>
+                          <CardTitle>Subscription</CardTitle>
+                          <CardDescription className="text-slate-400">
+                            Your current plan and usage
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="p-6">
+                          {loading ? (
+                            <p className="text-slate-300">
+                              Loading subscription...
+                            </p>
+                          ) : error ? (
+                            <p className="text-red-400">{error}</p>
+                          ) : subscription ? (
+                            <div className="rounded-lg bg-slate-800/50 p-6">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <h3 className="text-xl font-bold">
+                                    {subscription.type.toUpperCase()}{" "}
+                                    SUBSCRIPTION
+                                  </h3>
+                                  <p className="text-sm text-slate-400">
+                                    (
+                                    {subscriptionStatus === "expired"
+                                      ? "Expired"
+                                      : "Valid for 7 days"}
+                                    )
+                                  </p>
+                                </div>
+                                {/* 4. Upgrade/Renew Plan Button */}
+                                <Button
+                                  className="bg-blue-600 hover:bg-blue-700"
+                                  aria-label={
+                                    subscriptionStatus === "expired"
+                                      ? "Renew subscription plan"
+                                      : "Upgrade subscription plan"
+                                  }
+                                >
+                                  {subscriptionStatus === "expired"
+                                    ? "Renew Plan"
+                                    : "Upgrade Plan"}
+                                </Button>
+                              </div>
+                              <div className="mt-6 space-y-2">
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-slate-400">
+                                    Start time:
+                                  </span>
+                                  <span>
+                                    {formatDate(subscription.startTime)}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-slate-400">
+                                    End time:
+                                  </span>
+                                  <span>
+                                    {formatDate(subscription.endTime)}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-slate-400">
+                                    Status:
+                                  </span>
+                                  <span>
+                                    {subscriptionStatus.toUpperCase()}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-slate-300">
+                              No subscription found
+                            </p>
+                          )}
+                          <div className="mt-6 flex gap-3">
+                            {/* 5. Create Clients Button */}
+                            <Button
+                              variant="outline"
+                              className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
+                              onClick={() => setShowClients(true)}
+                              aria-label="Create new VPN clients"
+                            >
+                              <Plus className="mr-2 h-4 w-4" />
+                              Create Clients
+                            </Button>
+                            {/* 6. File Storage Button */}
+                            <Button
+                              variant="outline"
+                              className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
+                              onClick={() => setShowFileStorage(true)}
+                              aria-label="Access file storage"
+                            >
+                              <Cloud className="mr-2 h-4 w-4" />
+                              File Storage
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-slate-900/60 border-slate-800 text-white">
+                        <CardHeader>
+                          <CardTitle>Mint</CardTitle>
+                          <CardDescription className="text-slate-400">
+                            Create and manage your digital assets
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex items-center justify-center p-6">
+                          <div
+                            className="rounded-lg border border-dashed border-blue-500 bg-slate-800/30 p-10 text-center w-full cursor-pointer"
+                            onClick={() => (window.location.href = "/mint")}
+                          >
+                            <div className="flex flex-col items-center justify-center">
+                              <Plus className="h-10 w-10 text-blue-500 mb-4" />
+                              <p className="text-slate-300">
+                                Click to navigate to Mint page
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
+                  {buttonset && (
+                    <>
+                      <div
+                        style={{ backgroundColor: "#222944E5" }}
+                        className="flex overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full max-h-full"
+                        id="popupmodal"
+                      >
+                        <div className="relative p-4 w-full max-w-2xl max-h-full">
+                          <div
+                            className="relative rounded-3xl shadow dark:bg-gray-700 mx-auto w-full lg:w-3/4"
+                            style={{
+                              backgroundColor: "#202333",
+                              border: "1px solid #0162FF",
+                            }}
+                          >
+                            <div className="flex items-center justify-end p-4 md:p-5 rounded-t dark:border-gray-600">
+                              {/* 3. Modal Close Button */}
+                              <button
+                                onClick={() => {
+                                  setbuttonset(false);
+                                }}
+                                type="button"
+                                className="text-white bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                                aria-label="Close modal"
+                              >
+                                <svg
+                                  className="w-3 h-3"
+                                  aria-hidden="true"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 14 14"
+                                >
+                                  <path
+                                    stroke="currentColor"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+                                  />
+                                </svg>
+                                <span className="sr-only">Close modal</span>
+                              </button>
+                            </div>
+                            <section>
+                              <div className="mx-auto max-w-3xl">
+                                <div className="w-full mx-auto text-left px-6 md:px-10 pb-6 md:pb-10">
+                                  <div className="flex justify-between items-center mb-6">
+                                    <h2 className="text-3xl font-bold">
+                                      Create your client
+                                    </h2>
+                                  </div>
+
+                                  <form onSubmit={handleSubmit}>
+                                    <div className="space-y-6">
+                                      {/* Client Name Input */}
+                                      <div>
+                                        <label
+                                          htmlFor="name"
+                                          className="block text-sm font-medium text-gray-300 mb-2"
+                                        >
+                                          Client Name
+                                        </label>
+                                        <input
+                                          type="text"
+                                          id="name"
+                                          className="w-full bg-gray-800 border border-gray-700 rounded-full py-3 px-6 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                          placeholder="Enter Client Name (Max 8 characters)"
+                                          value={formData.name}
+                                          onChange={handleInputChange}
+                                          maxLength={8}
+                                          required
+                                        />
+                                      </div>
+
+                                      {/* Region Selector */}
+                                      <div className="relative">
+                                        <label
+                                          htmlFor="regionname"
+                                          className="block text-sm font-medium text-gray-300 mb-2"
+                                        >
+                                          Region
+                                        </label>
+                                        <select
+                                          id="regionname"
+                                          className="w-full bg-gray-800 border border-gray-700 rounded-full py-3 px-6 text-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                          value={regionname}
+                                          onChange={handleRegionChange}
+                                          required
+                                        >
+                                          <option value="" disabled>
+                                            Select Region
+                                          </option>
+                                          {regiondata.map((node) => (
+                                            <option
+                                              key={node.id}
+                                              value={node.id}
+                                            >
+                                              {node.region}
+                                            </option>
+                                          ))}
+                                        </select>
+                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                                          <svg
+                                            className="w-5 h-5 text-gray-400"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                          >
+                                            <path
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              strokeWidth="2"
+                                              d="M19 9l-7 7-7-7"
+                                            />
+                                          </svg>
+                                        </div>
+                                      </div>
+
+                                      {/* Node Selector */}
+                                      <div className="relative">
+                                        <div
+                                          className="w-full bg-gray-800 border border-gray-700 rounded-full py-3 px-6 text-white cursor-pointer flex items-center justify-between"
+                                          onClick={handleDropdownToggle}
+                                        >
+                                          {selectedOption ? (
+                                            <div className="flex items-center">
+                                              <span className="mr-2">
+                                                {generateSerialNumber(
+                                                  regionname,
+                                                  selectedIndex
+                                                )}
+                                                -
+                                              </span>
+                                              <span>
+                                                {sliceNodeId(selectedOption.id)}
+                                              </span>
+                                            </div>
+                                          ) : (
+                                            <span className="text-gray-400">
+                                              Select Node ID
+                                            </span>
+                                          )}
+                                          <svg
+                                            className={`w-5 h-5 transition-transform duration-200 ${
+                                              isOpen ? "rotate-180" : ""
+                                            }`}
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                          >
+                                            <path
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              strokeWidth="2"
+                                              d="M19 9l-7 7-7-7"
+                                            />
+                                          </svg>
+                                        </div>
+
+                                        {isOpen && (
+                                          <div className="absolute w-full mt-2 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto">
+                                            <div className="grid grid-cols-4 p-3 font-medium text-gray-300 border-b border-gray-700 sticky top-0 bg-gray-800">
+                                              <div>S.No</div>
+                                              <div>Node ID</div>
+                                              <div>Wallet Address</div>
+                                              <div>Chain</div>
+                                            </div>
+
+                                            {activeNodesData
+                                              .filter(
+                                                (node) =>
+                                                  !regionname ||
+                                                  node.region === regionname
+                                              )
+                                              .map((option, index) => (
+                                                <div
+                                                  key={option.id}
+                                                  className="grid grid-cols-4 p-3 hover:bg-gray-700 cursor-pointer border-b border-gray-700 last:border-b-0"
+                                                  onClick={() => {
+                                                    handleOptionClick(option);
+                                                    setSelectedIndex(index);
+                                                  }}
+                                                >
+                                                  <div>
+                                                    {generateSerialNumber(
+                                                      regionname,
+                                                      index
+                                                    )}
+                                                  </div>
+                                                  <div>
+                                                    {sliceNodeId(option.id)}
+                                                  </div>
+                                                  <div>
+                                                    {sliceWalletAddress(
+                                                      option.walletAddress
+                                                    )}
+                                                  </div>
+                                                  <div>{option.chainName}</div>
+                                                </div>
+                                              ))}
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      {/* Submit Button */}
+                                      <div className="mt-8">
+                                        <button
+                                          type="submit"
+                                          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-full transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                                          aria-label="Create new VPN client"
+                                        >
+                                          Create Client
+                                        </button>
+                                        {msg && (
+                                          <p
+                                            className={`mt-3 text-center ${
+                                              msg.includes("successful")
+                                                ? "text-green-400"
+                                                : "text-red-400"
+                                            }`}
+                                          >
+                                            {msg}
+                                          </p>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </form>
+                                </div>
+                              </div>
+                            </section>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {showQrCodeModal && ConfigFile && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
+                      <div className="relative w-full max-w-md mx-4">
                         <div
-                          className="relative rounded-3xl shadow dark:bg-gray-700 mx-auto w-full lg:w-3/4"
+                          className="relative rounded-xl shadow-lg p-6"
                           style={{
                             backgroundColor: "#202333",
                             border: "1px solid #0162FF",
                           }}
                         >
-                          <div className="flex items-center justify-end p-4 md:p-5 rounded-t dark:border-gray-600">
-                            {/* 3. Modal Close Button */}
+                          <div className="py-4 space-y-4 mt-4">
+                            {/* Add cross icon */}
                             <button
                               onClick={() => {
-                                setbuttonset(false);
+                                setShowQrCodeModal(false);
                               }}
-                              type="button"
-                              className="text-white bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                              aria-label="Close modal"
+                              className="absolute top-4 right-4 text-white hover:text-gray-300"
+                              aria-label="Close QR code modal"
                             >
                               <svg
-                                className="w-3 h-3"
-                                aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg"
+                                className="w-6 h-6"
                                 fill="none"
-                                viewBox="0 0 14 14"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
                               >
                                 <path
-                                  stroke="currentColor"
                                   strokeLinecap="round"
                                   strokeLinejoin="round"
                                   strokeWidth="2"
-                                  d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+                                  d="M6 18L18 6M6 6l12 12"
                                 />
                               </svg>
-                              <span className="sr-only">Close modal</span>
                             </button>
-                          </div>
-                          <section>
-                            <div className="mx-auto max-w-3xl">
-                              <div className="w-full mx-auto text-left px-6 md:px-10 pb-6 md:pb-10">
-                                <div className="flex justify-between items-center mb-6">
-                                  <h2 className="text-3xl font-bold">
-                                    Create your client
-                                  </h2>
+
+                            <p className="text-3xl text-center font-semibold text-white mb-10">
+                              Download Configuration
+                            </p>
+
+                            <div className="flex w-full flex-col items-center justify-center">
+                              <div className="bg-white lg:mx-auto lg:my-4 lg:w-1/2 lg:p-0 p-3 justify-center flex h-60 rounded-3xl">
+                                <div className="my-auto">
+                                  <QRCodeSVG value={ConfigFile} size={200} />
                                 </div>
+                              </div>
 
-                                <form onSubmit={handleSubmit}>
-                                  <div className="space-y-6">
-                                    {/* Client Name Input */}
-                                    <div>
-                                      <label
-                                        htmlFor="name"
-                                        className="block text-sm font-medium text-gray-300 mb-2"
-                                      >
-                                        Client Name
-                                      </label>
-                                      <input
-                                        type="text"
-                                        id="name"
-                                        className="w-full bg-gray-800 border border-gray-700 rounded-full py-3 px-6 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        placeholder="Enter Client Name (Max 8 characters)"
-                                        value={formData.name}
-                                        onChange={handleInputChange}
-                                        maxLength={8}
-                                        required
-                                      />
-                                    </div>
+                              <div className="text-center text-white text-xs font-light w-2/3 mt-2">
+                                Open{" "}
+                                <a
+                                  href="https://www.wireguard.com/"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={{ color: "#5696FF" }}
+                                >
+                                  WireGuard
+                                </a>
+                                &nbsp;app on mobile, scan the QR code <br /> to
+                                add a new connection, and instantly connect to
+                                Erebrus VPN.
+                              </div>
 
-                                    {/* Region Selector */}
-                                    <div className="relative">
-                                      <label
-                                        htmlFor="regionname"
-                                        className="block text-sm font-medium text-gray-300 mb-2"
-                                      >
-                                        Region
-                                      </label>
-                                      <select
-                                        id="regionname"
-                                        className="w-full bg-gray-800 border border-gray-700 rounded-full py-3 px-6 text-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        value={regionname}
-                                        onChange={handleRegionChange}
-                                        required
-                                      >
-                                        <option value="" disabled>
-                                          Select Region
-                                        </option>
-                                        {regiondata.map((node) => (
-                                          <option key={node.id} value={node.id}>
-                                            {node.region}
-                                          </option>
-                                        ))}
-                                      </select>
-                                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
-                                        <svg
-                                          className="w-5 h-5 text-gray-400"
-                                          fill="none"
-                                          stroke="currentColor"
-                                          viewBox="0 0 24 24"
-                                        >
-                                          <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth="2"
-                                            d="M19 9l-7 7-7-7"
-                                          />
-                                        </svg>
-                                      </div>
-                                    </div>
-
-                                    {/* Node Selector */}
-                                    <div className="relative">
-                                      <div
-                                        className="w-full bg-gray-800 border border-gray-700 rounded-full py-3 px-6 text-white cursor-pointer flex items-center justify-between"
-                                        onClick={handleDropdownToggle}
-                                      >
-                                        {selectedOption ? (
-                                          <div className="flex items-center">
-                                            <span className="mr-2">
-                                              {generateSerialNumber(
-                                                regionname,
-                                                selectedIndex
-                                              )}
-                                              -
-                                            </span>
-                                            <span>
-                                              {sliceNodeId(selectedOption.id)}
-                                            </span>
-                                          </div>
-                                        ) : (
-                                          <span className="text-gray-400">
-                                            Select Node ID
-                                          </span>
-                                        )}
-                                        <svg
-                                          className={`w-5 h-5 transition-transform duration-200 ${
-                                            isOpen ? "rotate-180" : ""
-                                          }`}
-                                          fill="none"
-                                          stroke="currentColor"
-                                          viewBox="0 0 24 24"
-                                        >
-                                          <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth="2"
-                                            d="M19 9l-7 7-7-7"
-                                          />
-                                        </svg>
-                                      </div>
-
-                                      {isOpen && (
-                                        <div className="absolute w-full mt-2 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto">
-                                          <div className="grid grid-cols-4 p-3 font-medium text-gray-300 border-b border-gray-700 sticky top-0 bg-gray-800">
-                                            <div>S.No</div>
-                                            <div>Node ID</div>
-                                            <div>Wallet Address</div>
-                                            <div>Chain</div>
-                                          </div>
-
-                                          {activeNodesData
-                                            .filter(
-                                              (node) =>
-                                                !regionname ||
-                                                node.region === regionname
-                                            )
-                                            .map((option, index) => (
-                                              <div
-                                                key={option.id}
-                                                className="grid grid-cols-4 p-3 hover:bg-gray-700 cursor-pointer border-b border-gray-700 last:border-b-0"
-                                                onClick={() => {
-                                                  handleOptionClick(option);
-                                                  setSelectedIndex(index);
-                                                }}
-                                              >
-                                                <div>
-                                                  {generateSerialNumber(
-                                                    regionname,
-                                                    index
-                                                  )}
-                                                </div>
-                                                <div>
-                                                  {sliceNodeId(option.id)}
-                                                </div>
-                                                <div>
-                                                  {sliceWalletAddress(
-                                                    option.walletAddress
-                                                  )}
-                                                </div>
-                                                <div>{option.chainName}</div>
-                                              </div>
-                                            ))}
-                                        </div>
-                                      )}
-                                    </div>
-
-                                    {/* Submit Button */}
-                                    <div className="mt-8">
-                                      <button
-                                        type="submit"
-                                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-full transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                                        aria-label="Create new VPN client"
-                                      >
-                                        Create Client
-                                      </button>
-                                      {msg && (
-                                        <p
-                                          className={`mt-3 text-center ${
-                                            msg.includes("successful")
-                                              ? "text-green-400"
-                                              : "text-red-400"
-                                          }`}
-                                        >
-                                          {msg}
-                                        </p>
-                                      )}
+                              <div className="flex gap-4 w-3/4 mt-4">
+                                <button
+                                  className="text-md rounded-lg text-white flex btn bg-blue-gray-700 flex-1"
+                                  onClick={() => {
+                                    const blob = new Blob([ConfigFile], {
+                                      type: "text/plain;charSet=utf-8",
+                                    });
+                                    saveAs(blob, `${VpnName}.conf`);
+                                  }}
+                                  aria-label="Download VPN configuration file"
+                                >
+                                  <div
+                                    className="flex cursor-pointer p-2 rounded-full gap-2 justify-center w-full hover:opacity-80 mb-5"
+                                    style={{
+                                      backgroundColor: "#0162FF",
+                                    }}
+                                  >
+                                    <div style={{ color: "white" }}>
+                                      Download
                                     </div>
                                   </div>
-                                </form>
+                                </button>
                               </div>
-                            </div>
-                          </section>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {showQrCodeModal && ConfigFile && (
-                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
-                    <div className="relative w-full max-w-md mx-4">
-                      <div
-                        className="relative rounded-xl shadow-lg p-6"
-                        style={{
-                          backgroundColor: "#202333",
-                          border: "1px solid #0162FF",
-                        }}
-                      >
-                        <div className="py-4 space-y-4 mt-4">
-                          {/* Add cross icon */}
-                          <button
-                            onClick={() => {
-                              setShowQrCodeModal(false);
-                            }}
-                            className="absolute top-4 right-4 text-white hover:text-gray-300"
-                            aria-label="Close QR code modal"
-                          >
-                            <svg
-                              className="w-6 h-6"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M6 18L18 6M6 6l12 12"
-                              />
-                            </svg>
-                          </button>
-
-                          <p className="text-3xl text-center font-semibold text-white mb-10">
-                            Download Configuration
-                          </p>
-
-                          <div className="flex w-full flex-col items-center justify-center">
-                            <div className="bg-white lg:mx-auto lg:my-4 lg:w-1/2 lg:p-0 p-3 justify-center flex h-60 rounded-3xl">
-                              <div className="my-auto">
-                                <QRCodeSVG value={ConfigFile} size={200} />
-                              </div>
-                            </div>
-
-                            <div className="text-center text-white text-xs font-light w-2/3 mt-2">
-                              Open{" "}
-                              <a
-                                href="https://www.wireguard.com/"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{ color: "#5696FF" }}
-                              >
-                                WireGuard
-                              </a>
-                              &nbsp;app on mobile, scan the QR code <br /> to
-                              add a new connection, and instantly connect to
-                              Erebrus VPN.
-                            </div>
-
-                            <div className="flex gap-4 w-3/4 mt-4">
-                              <button
-                                className="text-md rounded-lg text-white flex btn bg-blue-gray-700 flex-1"
-                                onClick={() => {
-                                  const blob = new Blob([ConfigFile], {
-                                    type: "text/plain;charSet=utf-8",
-                                  });
-                                  saveAs(blob, `${VpnName}.conf`);
-                                }}
-                                aria-label="Download VPN configuration file"
-                              >
-                                <div
-                                  className="flex cursor-pointer p-2 rounded-full gap-2 justify-center w-full hover:opacity-80 mb-5"
-                                  style={{
-                                    backgroundColor: "#0162FF",
-                                  }}
-                                >
-                                  <div style={{ color: "white" }}>Download</div>
-                                </div>
-                              </button>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {showFileStorage && !showClients && (
-                  <Card className="bg-slate-900/60 border-slate-800 text-white mt-4 max-w-6xl mx-auto w-full">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                      <div>
-                        <CardTitle>File Storage</CardTitle>
-                        <CardDescription className="text-slate-400">
-                          Securely store files on the decentralized network
-                        </CardDescription>
-                      </div>
-                      {/* 7. Close File Storage Button */}
-                      <Button
-                        variant="outline"
-                        className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
-                        onClick={() => setShowFileStorage(false)}
-                        aria-label="Close file storage section"
-                      >
-                        Close
-                      </Button>
-                    </CardHeader>
-                    <CardContent>
-                      <FileUploadDemo />
-                    </CardContent>
-                  </Card>
-                )}
-              </>
-            )}
-          </main>
-        </>
-      )}
-    </div>
+                  {showFileStorage && !showClients && (
+                    <Card className="bg-slate-900/60 border-slate-800 text-white mt-4 max-w-6xl mx-auto w-full">
+                      <CardHeader className="flex flex-row items-center justify-between">
+                        <div>
+                          <CardTitle>File Storage</CardTitle>
+                          <CardDescription className="text-slate-400">
+                            Securely store files on the decentralized network
+                          </CardDescription>
+                        </div>
+                        {/* 7. Close File Storage Button */}
+                        <Button
+                          variant="outline"
+                          className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
+                          onClick={() => setShowFileStorage(false)}
+                          aria-label="Close file storage section"
+                        >
+                          Close
+                        </Button>
+                      </CardHeader>
+                      <CardContent>
+                        <FileUploadDemo />
+                      </CardContent>
+                    </Card>
+                  )}
+                </>
+              )}
+            </main>
+          </>
+        )}
+      </div>
+    </>
   );
 }

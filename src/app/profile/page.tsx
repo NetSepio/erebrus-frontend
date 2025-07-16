@@ -1,14 +1,7 @@
 "use client";
 
-export const metadata = {
-  title: "Erebrus Profile",
-  description: "Manage your Erebrus profile and account settings.",
-  alternates: {
-    canonical: "https://erebrus.io/profile",
-  },
-};
-
 import React from "react";
+import Head from "next/head";
 import Cookies from "js-cookie";
 import axios from "axios";
 import { useEffect, useState, ChangeEvent } from "react";
@@ -445,57 +438,288 @@ const Profile = () => {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-3xl mx-auto">
-          {/* Success/Error Messages */}
-          {msg === "success" && (
-            <div className="fixed top-4 right-4 z-50 bg-green-500/90 text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2 animate-in fade-in slide-in-from-top-5 duration-300">
-              <Check className="h-5 w-5" />
-              <span>Changes saved successfully!</span>
-            </div>
-          )}
+    <>
+      <Head>
+        <title>Erebrus Profile</title>
+        <meta
+          name="description"
+          content="Manage your Erebrus profile and account settings."
+        />
+        <link rel="canonical" href="https://erebrus.io/profile" />
+      </Head>
+      <main className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
+        <div className="container mx-auto px-4 py-12">
+          <div className="max-w-3xl mx-auto">
+            {/* Success/Error Messages */}
+            {msg === "success" && (
+              <div className="fixed top-4 right-4 z-50 bg-green-500/90 text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2 animate-in fade-in slide-in-from-top-5 duration-300">
+                <Check className="h-5 w-5" />
+                <span>Changes saved successfully!</span>
+              </div>
+            )}
 
-          {msg === "error" && (
-            <div className="fixed top-4 right-4 z-50 bg-red-500/90 text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2 animate-in fade-in slide-in-from-top-5 duration-300">
-              <X className="h-5 w-5" />
-              <span>Error saving changes. Please try again.</span>
-            </div>
-          )}
+            {msg === "error" && (
+              <div className="fixed top-4 right-4 z-50 bg-red-500/90 text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2 animate-in fade-in slide-in-from-top-5 duration-300">
+                <X className="h-5 w-5" />
+                <span>Error saving changes. Please try again.</span>
+              </div>
+            )}
 
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-              Profile Information
-            </h1>
-            <div className="flex items-center space-x-2">
-              <Badge
-                variant="outline"
-                className="bg-blue-900/30 text-blue-300 border-blue-800 px-3 py-1"
-              >
-                <span className="mr-1.5 h-2 w-2 rounded-full bg-blue-400"></span>
-                {chainDetails.name}
-              </Badge>
-              <Badge
-                variant="outline"
-                className="bg-gray-800 text-gray-300 border-gray-700 font-mono"
-              >
-                {walletaddr
-                  ? `${walletaddr.slice(0, 4)}...${walletaddr.slice(-4)}`
-                  : "Not Connected"}
-              </Badge>
+            <div className="flex justify-between items-center mb-8">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                Profile Information
+              </h1>
+              <div className="flex items-center space-x-2">
+                <Badge
+                  variant="outline"
+                  className="bg-blue-900/30 text-blue-300 border-blue-800 px-3 py-1"
+                >
+                  <span className="mr-1.5 h-2 w-2 rounded-full bg-blue-400"></span>
+                  {chainDetails.name}
+                </Badge>
+                <Badge
+                  variant="outline"
+                  className="bg-gray-800 text-gray-300 border-gray-700 font-mono"
+                >
+                  {walletaddr
+                    ? `${walletaddr.slice(0, 4)}...${walletaddr.slice(-4)}`
+                    : "Not Connected"}
+                </Badge>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Profile Image Section */}
+              <Card className="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden shadow-xl">
+                <CardContent className="p-6 flex flex-col items-center">
+                  <div className="relative mb-6 mt-4 group cursor-pointer">
+                    <div className="w-40 h-40 rounded-full overflow-hidden bg-gradient-to-br from-blue-800/80 to-purple-800/80 border-4 border-gray-700 flex items-center justify-center">
+                      {formData.profilePictureUrl ? (
+                        <img
+                          alt="Profile"
+                          src={`https://ipfs.myriadflow.com/ipfs/${formData.profilePictureUrl}`}
+                          className="w-full h-full object-cover"
+                          onError={(
+                            e: React.SyntheticEvent<HTMLImageElement>
+                          ) => {
+                            const img = e.currentTarget;
+                            img.onerror = null;
+                            img.src =
+                              "https://thumbs.dreamstime.com/b/female-user-profile-avatar-woman-character-screen-saver-emotions-website-mobile-app-design-vector-199001739.jpg";
+                          }}
+                        />
+                      ) : formData.name ? (
+                        <div className="flex items-center justify-center w-full h-full text-4xl font-bold text-white">
+                          {formData.name.charAt(0)}
+                        </div>
+                      ) : (
+                        <User size={64} className="text-gray-400" />
+                      )}
+                    </div>
+                  </div>
+
+                  <h2 className="text-2xl font-bold mb-1">
+                    {formData.name || "Your Name"}
+                  </h2>
+                  <p className="text-gray-400 text-sm mb-6 flex items-center">
+                    <MapPin size={14} className="mr-1" />
+                    {formData.country || "Your Location"}
+                  </p>
+
+                  <div className="w-full">
+                    {/* Edit Profile Button */}
+                    <Button
+                      onClick={openEditDialog}
+                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white transition-all duration-300"
+                      aria-label="Edit your profile information"
+                    >
+                      <Edit size={16} className="mr-2" /> Edit Profile
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Profile Details Section */}
+              <Card className="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden shadow-xl md:col-span-2">
+                <CardContent className="p-8">
+                  <h2 className="text-xl font-semibold mb-6 text-blue-400">
+                    Account Information
+                  </h2>
+
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                      {/* Name */}
+                      <div className="space-y-1">
+                        <Label htmlFor="name" className="text-gray-400 text-sm">
+                          Name
+                        </Label>
+                        <div className="flex items-center">
+                          <User size={16} className="mr-2 text-blue-400" />
+                          <p className="text-white">
+                            {formData.name || "Not set"}
+                          </p>
+                        </div>
+                      </div>
+                      {/* Country */}
+                      <div className="space-y-1">
+                        <Label
+                          htmlFor="country"
+                          className="text-gray-400 text-sm"
+                        >
+                          Country
+                        </Label>
+                        <div className="flex items-center">
+                          <MapPin size={16} className="mr-2 text-blue-400" />
+                          <p className="text-white">
+                            {formData.country || "Not set"}
+                          </p>
+                        </div>
+                      </div>
+                      {/* Email */}
+                      <div className="space-y-1">
+                        <Label
+                          htmlFor="emailId"
+                          className="text-gray-400 text-sm"
+                        >
+                          Email
+                        </Label>
+                        <div className="flex items-center">
+                          <Mail size={16} className="mr-2 text-blue-400" />
+                          <p className="text-white">
+                            {formData.emailId || "Not set"}
+                          </p>
+                        </div>
+                      </div>
+                      {/* Discord */}
+                      <div className="space-y-1">
+                        <Label
+                          htmlFor="discord"
+                          className="text-gray-400 text-sm"
+                        >
+                          Discord
+                        </Label>
+                        <div className="flex items-center">
+                          <MessageSquare
+                            size={16}
+                            className="mr-2 text-blue-400"
+                          />
+                          <p className="text-white">
+                            {formData.discord || "Not set"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-gray-800">
+                      <h2 className="text-xl font-semibold mb-4 text-blue-400">
+                        Social Accounts
+                      </h2>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                        {/* Twitter */}
+                        <div className="space-y-1">
+                          <Label
+                            htmlFor="twitter"
+                            className="text-gray-400 text-sm"
+                          >
+                            Twitter
+                          </Label>
+                          <div className="flex items-center">
+                            <AtSign size={16} className="mr-2 text-blue-400" />
+                            <p className="text-white">
+                              {formData.twitter || "Not set"}
+                            </p>
+                          </div>
+                        </div>
+                        {/* Telegram */}
+                        <div className="space-y-1">
+                          <Label
+                            htmlFor="telegram"
+                            className="text-gray-400 text-sm"
+                          >
+                            Telegram
+                          </Label>
+                          <div className="flex items-center">
+                            {/* ...existing svg... */}
+                            <p className="text-white">
+                              {formData.telegram || "Not set"}
+                            </p>
+                          </div>
+                        </div>
+                        {/* Farcaster */}
+                        <div className="space-y-1">
+                          <Label
+                            htmlFor="farcaster"
+                            className="text-gray-400 text-sm"
+                          >
+                            Farcaster
+                          </Label>
+                          <div className="flex items-center">
+                            <Globe size={16} className="mr-2 text-blue-400" />
+                            <p className="text-white">
+                              {formData.farcaster || "Not set"}
+                            </p>
+                          </div>
+                        </div>
+                        {/* Google */}
+                        <div className="space-y-1">
+                          <Label
+                            htmlFor="google"
+                            className="text-gray-400 text-sm"
+                          >
+                            Google
+                          </Label>
+                          <div className="flex items-center">
+                            {/* ...existing svg... */}
+                            <p className="text-white">
+                              {formData.google || "Not set"}
+                            </p>
+                          </div>
+                        </div>
+                        {/* Apple */}
+                        <div className="space-y-1">
+                          <Label
+                            htmlFor="apple"
+                            className="text-gray-400 text-sm"
+                          >
+                            Apple
+                          </Label>
+                          <div className="flex items-center">
+                            <Apple size={16} className="mr-2 text-blue-400" />
+                            <p className="text-white">
+                              {formData.apple || "Not set"}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Profile Image Section */}
-            <Card className="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden shadow-xl">
-              <CardContent className="p-6 flex flex-col items-center">
-                <div className="relative mb-6 mt-4 group cursor-pointer">
-                  <div className="w-40 h-40 rounded-full overflow-hidden bg-gradient-to-br from-blue-800/80 to-purple-800/80 border-4 border-gray-700 flex items-center justify-center">
-                    {formData.profilePictureUrl ? (
+        {/* Edit Profile Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="bg-gray-900 border border-gray-800 text-white max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                Edit Profile
+              </DialogTitle>
+              <DialogDescription className="text-gray-400">
+                Update your profile information below
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+              {/* Profile Picture */}
+              <div className="md:col-span-2 flex justify-center">
+                <div className="relative group">
+                  <div className="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-br from-blue-800/80 to-purple-800/80 border-4 border-gray-700 flex items-center justify-center">
+                    {tempFormData.profilePictureUrl ? (
                       <img
                         alt="Profile"
-                        src={`https://ipfs.myriadflow.com/ipfs/${formData.profilePictureUrl}`}
+                        src={`https://ipfs.myriadflow.com/ipfs/${tempFormData.profilePictureUrl}`}
                         className="w-full h-full object-cover"
                         onError={(
                           e: React.SyntheticEvent<HTMLImageElement>
@@ -506,469 +730,253 @@ const Profile = () => {
                             "https://thumbs.dreamstime.com/b/female-user-profile-avatar-woman-character-screen-saver-emotions-website-mobile-app-design-vector-199001739.jpg";
                         }}
                       />
-                    ) : formData.name ? (
-                      <div className="flex items-center justify-center w-full h-full text-4xl font-bold text-white">
-                        {formData.name.charAt(0)}
+                    ) : tempFormData.name ? (
+                      <div className="flex items-center justify-center w-full h-full text-3xl font-bold text-white">
+                        {tempFormData.name.charAt(0)}
                       </div>
                     ) : (
-                      <User size={64} className="text-gray-400" />
+                      <User size={48} className="text-gray-400" />
                     )}
                   </div>
-                </div>
-
-                <h2 className="text-2xl font-bold mb-1">
-                  {formData.name || "Your Name"}
-                </h2>
-                <p className="text-gray-400 text-sm mb-6 flex items-center">
-                  <MapPin size={14} className="mr-1" />
-                  {formData.country || "Your Location"}
-                </p>
-
-                <div className="w-full">
-                  {/* Edit Profile Button */}
-                  <Button
-                    onClick={openEditDialog}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white transition-all duration-300"
-                    aria-label="Edit your profile information"
-                  >
-                    <Edit size={16} className="mr-2" /> Edit Profile
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Profile Details Section */}
-            <Card className="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden shadow-xl md:col-span-2">
-              <CardContent className="p-8">
-                <h2 className="text-xl font-semibold mb-6 text-blue-400">
-                  Account Information
-                </h2>
-
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                    {/* Name */}
-                    <div className="space-y-1">
-                      <Label htmlFor="name" className="text-gray-400 text-sm">
-                        Name
-                      </Label>
-                      <div className="flex items-center">
-                        <User size={16} className="mr-2 text-blue-400" />
-                        <p className="text-white">
-                          {formData.name || "Not set"}
-                        </p>
-                      </div>
-                    </div>
-                    {/* Country */}
-                    <div className="space-y-1">
-                      <Label
-                        htmlFor="country"
-                        className="text-gray-400 text-sm"
-                      >
-                        Country
-                      </Label>
-                      <div className="flex items-center">
-                        <MapPin size={16} className="mr-2 text-blue-400" />
-                        <p className="text-white">
-                          {formData.country || "Not set"}
-                        </p>
-                      </div>
-                    </div>
-                    {/* Email */}
-                    <div className="space-y-1">
-                      <Label
-                        htmlFor="emailId"
-                        className="text-gray-400 text-sm"
-                      >
-                        Email
-                      </Label>
-                      <div className="flex items-center">
-                        <Mail size={16} className="mr-2 text-blue-400" />
-                        <p className="text-white">
-                          {formData.emailId || "Not set"}
-                        </p>
-                      </div>
-                    </div>
-                    {/* Discord */}
-                    <div className="space-y-1">
-                      <Label
-                        htmlFor="discord"
-                        className="text-gray-400 text-sm"
-                      >
-                        Discord
-                      </Label>
-                      <div className="flex items-center">
-                        <MessageSquare
-                          size={16}
-                          className="mr-2 text-blue-400"
-                        />
-                        <p className="text-white">
-                          {formData.discord || "Not set"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t border-gray-800">
-                    <h2 className="text-xl font-semibold mb-4 text-blue-400">
-                      Social Accounts
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                      {/* Twitter */}
-                      <div className="space-y-1">
-                        <Label
-                          htmlFor="twitter"
-                          className="text-gray-400 text-sm"
-                        >
-                          Twitter
-                        </Label>
-                        <div className="flex items-center">
-                          <AtSign size={16} className="mr-2 text-blue-400" />
-                          <p className="text-white">
-                            {formData.twitter || "Not set"}
-                          </p>
-                        </div>
-                      </div>
-                      {/* Telegram */}
-                      <div className="space-y-1">
-                        <Label
-                          htmlFor="telegram"
-                          className="text-gray-400 text-sm"
-                        >
-                          Telegram
-                        </Label>
-                        <div className="flex items-center">
-                          {/* ...existing svg... */}
-                          <p className="text-white">
-                            {formData.telegram || "Not set"}
-                          </p>
-                        </div>
-                      </div>
-                      {/* Farcaster */}
-                      <div className="space-y-1">
-                        <Label
-                          htmlFor="farcaster"
-                          className="text-gray-400 text-sm"
-                        >
-                          Farcaster
-                        </Label>
-                        <div className="flex items-center">
-                          <Globe size={16} className="mr-2 text-blue-400" />
-                          <p className="text-white">
-                            {formData.farcaster || "Not set"}
-                          </p>
-                        </div>
-                      </div>
-                      {/* Google */}
-                      <div className="space-y-1">
-                        <Label
-                          htmlFor="google"
-                          className="text-gray-400 text-sm"
-                        >
-                          Google
-                        </Label>
-                        <div className="flex items-center">
-                          {/* ...existing svg... */}
-                          <p className="text-white">
-                            {formData.google || "Not set"}
-                          </p>
-                        </div>
-                      </div>
-                      {/* Apple */}
-                      <div className="space-y-1">
-                        <Label
-                          htmlFor="apple"
-                          className="text-gray-400 text-sm"
-                        >
-                          Apple
-                        </Label>
-                        <div className="flex items-center">
-                          <Apple size={16} className="mr-2 text-blue-400" />
-                          <p className="text-white">
-                            {formData.apple || "Not set"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 rounded-full flex items-center justify-center transition-opacity">
+                    <label htmlFor="profile-upload" className="cursor-pointer">
+                      {/* Profile Upload Input */}
+                      <input
+                        id="profile-upload"
+                        type="file"
+                        className="hidden"
+                        onChange={uploadImage}
+                        accept="image/*"
+                        aria-label="Upload profile picture"
+                      />
+                      <Camera className="h-8 w-8 text-white" />
+                    </label>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
+              </div>
 
-      {/* Edit Profile Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="bg-gray-900 border border-gray-800 text-white max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-              Edit Profile
-            </DialogTitle>
-            <DialogDescription className="text-gray-400">
-              Update your profile information below
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-            {/* Profile Picture */}
-            <div className="md:col-span-2 flex justify-center">
-              <div className="relative group">
-                <div className="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-br from-blue-800/80 to-purple-800/80 border-4 border-gray-700 flex items-center justify-center">
-                  {tempFormData.profilePictureUrl ? (
-                    <img
-                      alt="Profile"
-                      src={`https://ipfs.myriadflow.com/ipfs/${tempFormData.profilePictureUrl}`}
-                      className="w-full h-full object-cover"
-                      onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
-                        const img = e.currentTarget;
-                        img.onerror = null;
-                        img.src =
-                          "https://thumbs.dreamstime.com/b/female-user-profile-avatar-woman-character-screen-saver-emotions-website-mobile-app-design-vector-199001739.jpg";
-                      }}
-                    />
-                  ) : tempFormData.name ? (
-                    <div className="flex items-center justify-center w-full h-full text-3xl font-bold text-white">
-                      {tempFormData.name.charAt(0)}
-                    </div>
-                  ) : (
-                    <User size={48} className="text-gray-400" />
-                  )}
-                </div>
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 rounded-full flex items-center justify-center transition-opacity">
-                  <label htmlFor="profile-upload" className="cursor-pointer">
-                    {/* Profile Upload Input */}
-                    <input
-                      id="profile-upload"
-                      type="file"
-                      className="hidden"
-                      onChange={uploadImage}
-                      accept="image/*"
-                      aria-label="Upload profile picture"
-                    />
-                    <Camera className="h-8 w-8 text-white" />
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            {/* Basic Information */}
-            <div className="space-y-4">
-              {/* Name */}
-              <div className="flex flex-col space-y-1.5">
-                <Label
-                  htmlFor="name"
-                  className="flex items-center text-gray-300"
-                >
-                  <User size={16} className="mr-2 text-blue-400" /> Name
-                </Label>
-                <Input
-                  id="name"
-                  value={tempFormData.name}
-                  onChange={handleInputChange}
-                  placeholder="Your name"
-                  className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
-                  aria-label="Enter your name"
-                />
-              </div>
-              {/* Country */}
-              <div className="flex flex-col space-y-1.5">
-                <Label
-                  htmlFor="country"
-                  className="flex items-center text-gray-300"
-                >
-                  <MapPin size={16} className="mr-2 text-blue-400" /> Country
-                </Label>
-                <Input
-                  id="country"
-                  value={tempFormData.country}
-                  onChange={handleInputChange}
-                  placeholder="Your country"
-                  className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
-                  aria-label="Enter your country"
-                />
-              </div>
-              {/* Email */}
-              <div className="flex flex-col space-y-1.5">
-                <Label
-                  htmlFor="emailId"
-                  className="flex items-center text-gray-300"
-                >
-                  <Mail size={16} className="mr-2 text-blue-400" /> Email
-                </Label>
-                <Input
-                  id="emailId"
-                  type="email"
-                  value={tempFormData.emailId}
-                  onChange={handleInputChange}
-                  placeholder="Your email"
-                  className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
-                  aria-label="Enter your email address"
-                />
-              </div>
-              {/* Discord */}
-              <div className="flex flex-col space-y-1.5">
-                <Label
-                  htmlFor="discord"
-                  className="flex items-center text-gray-300"
-                >
-                  <MessageSquare size={16} className="mr-2 text-blue-400" />{" "}
-                  Discord
-                </Label>
-                <Input
-                  id="discord"
-                  value={tempFormData.discord}
-                  onChange={handleInputChange}
-                  placeholder="Your Discord username"
-                  className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
-                  aria-label="Enter your Discord username"
-                />
-              </div>
-            </div>
-
-            {/* Social Media */}
-            <div className="space-y-4">
-              {/* Twitter */}
-              <div className="flex flex-col space-y-1.5">
-                <Label
-                  htmlFor="twitter"
-                  className="flex items-center text-gray-300"
-                >
-                  <AtSign size={16} className="mr-2 text-blue-400" /> Twitter
-                </Label>
-                <Input
-                  id="twitter"
-                  value={tempFormData.twitter}
-                  onChange={handleInputChange}
-                  placeholder="Your Twitter handle"
-                  className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
-                  aria-label="Enter your Twitter handle"
-                />
-              </div>
-              {/* Telegram */}
-              <div className="flex flex-col space-y-1.5">
-                <Label
-                  htmlFor="telegram"
-                  className="flex items-center text-gray-300"
-                >
-                  {/* ...existing svg... */} Telegram
-                </Label>
-                <Input
-                  id="telegram"
-                  value={tempFormData.telegram}
-                  onChange={handleInputChange}
-                  placeholder="Your Telegram username"
-                  className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
-                  aria-label="Enter your Telegram username"
-                />
-              </div>
-              {/* Farcaster */}
-              <div className="flex flex-col space-y-1.5">
-                <Label
-                  htmlFor="farcaster"
-                  className="flex items-center text-gray-300"
-                >
-                  <Globe size={16} className="mr-2 text-blue-400" /> Farcaster
-                </Label>
-                <Input
-                  id="farcaster"
-                  value={tempFormData.farcaster}
-                  onChange={handleInputChange}
-                  placeholder="Your Farcaster handle"
-                  className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
-                  aria-label="Enter your Farcaster handle"
-                />
-              </div>
-              {/* Google */}
-              <div className="flex flex-col space-y-1.5">
-                <Label
-                  htmlFor="google"
-                  className="flex items-center text-gray-300"
-                >
-                  {/* ...existing svg... */} Google
-                </Label>
-                <Input
-                  id="google"
-                  value={tempFormData.google}
-                  onChange={handleInputChange}
-                  placeholder="Your Google account"
-                  className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
-                  aria-label="Enter your Google account"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Apple Account */}
-          <div className="mt-2">
-            <Label htmlFor="apple" className="flex items-center text-gray-300">
-              <Apple size={16} className="mr-2 text-blue-400" /> Apple
-            </Label>
-            <Input
-              id="apple"
-              value={tempFormData.apple}
-              onChange={handleInputChange}
-              placeholder="Your Apple ID"
-              className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
-              aria-label="Enter your Apple ID"
-            />
-          </div>
-
-          <div className="flex justify-end space-x-4 mt-6">
-            {/* Dialog Close Button */}
-            <Button
-              variant="outline"
-              onClick={() => setIsEditDialogOpen(false)}
-              className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
-              disabled={loading}
-              aria-label="Cancel profile changes"
-            >
-              <X size={16} className="mr-2" /> Cancel
-            </Button>
-            {/* Save Changes Button */}
-            <Button
-              onClick={handleSubmit}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500"
-              disabled={loading}
-              aria-label={
-                loading ? "Saving profile changes..." : "Save profile changes"
-              }
-            >
-              {loading ? (
-                <div className="flex items-center">
-                  <svg
-                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                    role="status"
+              {/* Basic Information */}
+              <div className="space-y-4">
+                {/* Name */}
+                <div className="flex flex-col space-y-1.5">
+                  <Label
+                    htmlFor="name"
+                    className="flex items-center text-gray-300"
                   >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Saving...
+                    <User size={16} className="mr-2 text-blue-400" /> Name
+                  </Label>
+                  <Input
+                    id="name"
+                    value={tempFormData.name}
+                    onChange={handleInputChange}
+                    placeholder="Your name"
+                    className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
+                    aria-label="Enter your name"
+                  />
                 </div>
-              ) : (
-                <>
-                  <Save size={16} className="mr-2" /> Save Changes
-                </>
-              )}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </main>
+                {/* Country */}
+                <div className="flex flex-col space-y-1.5">
+                  <Label
+                    htmlFor="country"
+                    className="flex items-center text-gray-300"
+                  >
+                    <MapPin size={16} className="mr-2 text-blue-400" /> Country
+                  </Label>
+                  <Input
+                    id="country"
+                    value={tempFormData.country}
+                    onChange={handleInputChange}
+                    placeholder="Your country"
+                    className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
+                    aria-label="Enter your country"
+                  />
+                </div>
+                {/* Email */}
+                <div className="flex flex-col space-y-1.5">
+                  <Label
+                    htmlFor="emailId"
+                    className="flex items-center text-gray-300"
+                  >
+                    <Mail size={16} className="mr-2 text-blue-400" /> Email
+                  </Label>
+                  <Input
+                    id="emailId"
+                    type="email"
+                    value={tempFormData.emailId}
+                    onChange={handleInputChange}
+                    placeholder="Your email"
+                    className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
+                    aria-label="Enter your email address"
+                  />
+                </div>
+                {/* Discord */}
+                <div className="flex flex-col space-y-1.5">
+                  <Label
+                    htmlFor="discord"
+                    className="flex items-center text-gray-300"
+                  >
+                    <MessageSquare size={16} className="mr-2 text-blue-400" />{" "}
+                    Discord
+                  </Label>
+                  <Input
+                    id="discord"
+                    value={tempFormData.discord}
+                    onChange={handleInputChange}
+                    placeholder="Your Discord username"
+                    className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
+                    aria-label="Enter your Discord username"
+                  />
+                </div>
+              </div>
+
+              {/* Social Media */}
+              <div className="space-y-4">
+                {/* Twitter */}
+                <div className="flex flex-col space-y-1.5">
+                  <Label
+                    htmlFor="twitter"
+                    className="flex items-center text-gray-300"
+                  >
+                    <AtSign size={16} className="mr-2 text-blue-400" /> Twitter
+                  </Label>
+                  <Input
+                    id="twitter"
+                    value={tempFormData.twitter}
+                    onChange={handleInputChange}
+                    placeholder="Your Twitter handle"
+                    className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
+                    aria-label="Enter your Twitter handle"
+                  />
+                </div>
+                {/* Telegram */}
+                <div className="flex flex-col space-y-1.5">
+                  <Label
+                    htmlFor="telegram"
+                    className="flex items-center text-gray-300"
+                  >
+                    {/* ...existing svg... */} Telegram
+                  </Label>
+                  <Input
+                    id="telegram"
+                    value={tempFormData.telegram}
+                    onChange={handleInputChange}
+                    placeholder="Your Telegram username"
+                    className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
+                    aria-label="Enter your Telegram username"
+                  />
+                </div>
+                {/* Farcaster */}
+                <div className="flex flex-col space-y-1.5">
+                  <Label
+                    htmlFor="farcaster"
+                    className="flex items-center text-gray-300"
+                  >
+                    <Globe size={16} className="mr-2 text-blue-400" /> Farcaster
+                  </Label>
+                  <Input
+                    id="farcaster"
+                    value={tempFormData.farcaster}
+                    onChange={handleInputChange}
+                    placeholder="Your Farcaster handle"
+                    className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
+                    aria-label="Enter your Farcaster handle"
+                  />
+                </div>
+                {/* Google */}
+                <div className="flex flex-col space-y-1.5">
+                  <Label
+                    htmlFor="google"
+                    className="flex items-center text-gray-300"
+                  >
+                    {/* ...existing svg... */} Google
+                  </Label>
+                  <Input
+                    id="google"
+                    value={tempFormData.google}
+                    onChange={handleInputChange}
+                    placeholder="Your Google account"
+                    className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
+                    aria-label="Enter your Google account"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Apple Account */}
+            <div className="mt-2">
+              <Label
+                htmlFor="apple"
+                className="flex items-center text-gray-300"
+              >
+                <Apple size={16} className="mr-2 text-blue-400" /> Apple
+              </Label>
+              <Input
+                id="apple"
+                value={tempFormData.apple}
+                onChange={handleInputChange}
+                placeholder="Your Apple ID"
+                className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
+                aria-label="Enter your Apple ID"
+              />
+            </div>
+
+            <div className="flex justify-end space-x-4 mt-6">
+              {/* Dialog Close Button */}
+              <Button
+                variant="outline"
+                onClick={() => setIsEditDialogOpen(false)}
+                className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
+                disabled={loading}
+                aria-label="Cancel profile changes"
+              >
+                <X size={16} className="mr-2" /> Cancel
+              </Button>
+              {/* Save Changes Button */}
+              <Button
+                onClick={handleSubmit}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500"
+                disabled={loading}
+                aria-label={
+                  loading ? "Saving profile changes..." : "Save profile changes"
+                }
+              >
+                {loading ? (
+                  <div className="flex items-center">
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                      role="status"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Saving...
+                  </div>
+                ) : (
+                  <>
+                    <Save size={16} className="mr-2" /> Save Changes
+                  </>
+                )}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </main>
+    </>
   );
 };
 
