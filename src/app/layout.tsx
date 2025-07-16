@@ -8,15 +8,7 @@ const inter = Inter({ subsets: ["latin"] });
 import "./globals.css";
 import DarkFooter from "@/components/ui/footer";
 import { AppKit } from '../context2/appkit';
-
-import { headers } from 'next/headers'
 import AppWalletProvider from "@/components/AppWalletProvider";
-
-const headersObj = await headers();
-const cookies = headersObj.get('cookie')
-
-
-
 export const metadata = {
   name: "Erebrus",
   description:
