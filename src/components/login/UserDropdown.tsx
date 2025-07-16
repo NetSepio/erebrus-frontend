@@ -63,7 +63,13 @@ const UserDropdown: React.FC<UserDropdownProps> = ({
               <MenuItem href="/usernodes">My Nodes</MenuItem>
             </Menu.Item>
           </div>
-     
+          {paseto && (
+            <div className="px-1 py-1 ">
+              <Menu.Item>
+                <MenuItem onClick={handlePasetoClick}>Mobile Auth</MenuItem>
+              </Menu.Item>
+            </div>
+          )}
           <div className="px-1 py-1 ">
             <Menu.Item>
               <MenuItem onClick={async ()=>{

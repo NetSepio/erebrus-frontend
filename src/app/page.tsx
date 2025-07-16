@@ -1,20 +1,19 @@
-"use client";
-import HeroSection from "../components/HeroSection";
-import DePINRevolutionComponent from "@/components/ui/map";
-import SubscriptionCard from "@/components/subs";
-import CyreneAISection from "@/components/ui/cyrene";
-import VPNContentSection from "@/components/ui/vpnContent";
-import PartnersMarquee from "@/components/ui/PartnersMarquee";
-import Image from "next/image";
-import Link from "next/link";
-import { ScrollProgress } from "@/components/ui/scroll-progress";
+"use client"
+import HeroSection from "../components/HeroSection"
+import DePINRevolutionComponent from "@/components/ui/map"
+import SubscriptionCard from "@/components/subs"
+import CyreneAISection from "@/components/ui/cyrene"
+import VPNContentSection from "@/components/ui/vpnContent"
+import PartnersMarquee from "@/components/ui/PartnersMarquee"
+import Image from "next/image"
+import { ScrollProgress } from "@/components/ui/scroll-progress"
 
 function Page() {
   return (
     <div className="bg-gradient-to-b from-black to-gray-900 min-h-screen">
       {/* <ErebrusNavbar /> */}
-      <ScrollProgress color="#3b82f6" height={4} />
-
+            <ScrollProgress color="#3b82f6" height={4} />
+      
       <HeroSection />
       <div className="pt-12">
         <PartnersMarquee />
@@ -30,12 +29,7 @@ function Page() {
             Decentralized for Speed and Privacy
           </h2>
           <div className="relative w-full max-w-md mx-auto h-64 md:h-96 mb-8">
-            <Image
-              src="/Uncensored.webp"
-              alt="Uncensored Globe"
-              fill
-              className="object-contain"
-            />
+            <Image src="/Uncensored.webp" alt="Uncensored Globe" fill className="object-contain" />
           </div>
         </div>
       </section>
@@ -71,30 +65,18 @@ function Page() {
             </div>
             <div className="flex items-center justify-center col-span-2 md:col-span-1 p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
               <div className="text-left space-y-3">
-                <a
-                  href="https://arena.colosseum.org/projects/explore/netsepio?previous=L3Byb2plY3RzL2V4cGxvcmU_c2VlZD1iNGI0ZTYwYzViNGE0NzkwJnNlYXJjaD1uZXRzZXA"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center group hover:text-blue-300 transition-colors"
-                >
-                  <span className="mr-2">4th Place Solana Radarhack DePIN</span>
-                  <span className="group-hover:translate-x-1 transition-transform">
-                    ↗
+                <div className="flex items-center group">
+                  <span className="mr-2 group-hover:text-blue-300 transition-colors">
+                    4th Place Solana Radarhack DePIN
                   </span>
-                </a>
-                <a
-                  href="https://netsepio.substack.com/p/erebrus-protocol-by-netsepio-wins"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center group hover:text-blue-300 transition-colors"
-                >
-                  <span className="mr-2">
+                  <span className="group-hover:translate-x-1 transition-transform">↗</span>
+                </div>
+                <div className="flex items-center group">
+                  <span className="mr-2 group-hover:text-blue-300 transition-colors">
                     Grand Prize at ETH SEA Demoday, Bali
                   </span>
-                  <span className="group-hover:translate-x-1 transition-transform">
-                    ↗
-                  </span>
-                </a>
+                  <span className="group-hover:translate-x-1 transition-transform">↗</span>
+                </div>
               </div>
             </div>
 
@@ -119,32 +101,18 @@ function Page() {
             </div>
             <div className="flex items-center justify-center col-span-2 md:col-span-1 p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
               <div className="text-left space-y-3">
-                <a
-                  href="https://x.com/NetSepio/status/1810538904186982587"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center group hover:text-blue-300 transition-colors"
-                >
-                  <span className="mr-2">
+                <div className="flex items-center group">
+                  <span className="mr-2 group-hover:text-blue-300 transition-colors">
                     Grand Prize at IVS Crypto Demoday, Japan
                   </span>
-                  <span className="group-hover:translate-x-1 transition-transform">
-                    ↗
-                  </span>
-                </a>
-                <a
-                  href="https://x.com/overmind_xyz/status/1701980625128071375"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center group hover:text-blue-300 transition-colors"
-                >
-                  <span className="mr-2">
+                  <span className="group-hover:translate-x-1 transition-transform">↗</span>
+                </div>
+                <div className="flex items-center group">
+                  <span className="mr-2 group-hover:text-blue-300 transition-colors">
                     Grand Prize at Aptos Hackathon, Singapore
                   </span>
-                  <span className="group-hover:translate-x-1 transition-transform">
-                    ↗
-                  </span>
-                </a>
+                  <span className="group-hover:translate-x-1 transition-transform">↗</span>
+                </div>
               </div>
             </div>
 
@@ -169,32 +137,18 @@ function Page() {
             </div>
             <div className="flex items-center justify-center col-span-2 md:col-span-1 p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
               <div className="text-left space-y-3">
-                <a
-                  href="https://soonami.io/post/soonami-cohort-4-winners"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center group hover:text-blue-300 transition-colors"
-                >
-                  <span className="mr-2">
+                <div className="flex items-center group">
+                  <span className="mr-2 group-hover:text-blue-300 transition-colors">
                     On the Fast Track Prize at Soonaml Ventureshare
                   </span>
-                  <span className="group-hover:translate-x-1 transition-transform">
-                    ↗
-                  </span>
-                </a>
-                <a
-                  href="https://app.akindo.io/communities/0n1VBlaXvCRPQVDG/products/La4OvOMglhWdMwjp"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center group hover:text-blue-300 transition-colors"
-                >
-                  <span className="mr-2">
+                  <span className="group-hover:translate-x-1 transition-transform">↗</span>
+                </div>
+                <div className="flex items-center group">
+                  <span className="mr-2 group-hover:text-blue-300 transition-colors">
                     Several Prizes at Akindo WaveCheck
                   </span>
-                  <span className="group-hover:translate-x-1 transition-transform">
-                    ↗
-                  </span>
-                </a>
+                  <span className="group-hover:translate-x-1 transition-transform">↗</span>
+                </div>
               </div>
             </div>
           </div>
@@ -212,25 +166,17 @@ function Page() {
             />
           </div>
 
-          <div className="text-2xl font-medium text-blue-100 mb-8">
-            Join the Movement. Get Started Now.
-          </div>
+          <div className="text-2xl font-medium text-blue-100 mb-8">Join the Movement. Get Started Now.</div>
 
-          
-          <a
-            href="https://discordapp.com/invite/5uaFhNpRF6"
-            target="_blank"
-            rel="noreferrer"
-            className="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-medium transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/30"
-          >
+          <button className="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-medium transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/30">
             Get Started
-          </a>
+          </button>
         </div>
       </section>
 
       {/* <DarkFooter /> */}
     </div>
-  );
+  )
 }
 
-export default Page;
+export default Page

@@ -12,18 +12,21 @@ import AppWalletProvider from "@/components/AppWalletProvider";
 import { AuthProvider } from "../context/AuthContext";
 import CustomWagmiProvider from "@/components/WagmiProvider";
 
+
+
 export const metadata = {
   name: "Erebrus",
   description:
     "Redefining digital connectivity and unleashing the future of internet with globally accessible, secure and private network through the power of DePIN.",
-  url: "https://erebrus.io",
+  url: "https://netsepio.com",
   icons: ["https://avatars.githubusercontent.com/u/37784886"],
   openGraph: {
     type: "website",
-    url: "https://erebrus.io",
+    url: "https://netsepio.com",
     title: "Erebrus",
     description:
       "Redefining digital connectivity and unleashing the future of internet with globally accessible, secure and private network through the power of DePIN.",
+    
   },
 };
 
@@ -34,13 +37,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn("min-h-screen flex flex-col", inter.className)}>
-        <AppKit>
-          <AuthProvider>
-            {/* <CustomAptosProvider> */}
+      <AuthProvider>
+{/* <CustomAptosProvider> */}
 
-            <CustomWagmiProvider>
-              <AppWalletProvider>
+        <CustomWagmiProvider>
+
+        <AppWalletProvider>
+            <AppKit>
+              <body
+                className={cn("min-h-screen flex flex-col", inter.className)}
+              >
                 <ThemeProvider
                   attribute="class"
                   defaultTheme="dark"
@@ -52,12 +58,13 @@ export default function RootLayout({
                     <DarkFooter />
                   </div>
                 </ThemeProvider>
-              </AppWalletProvider>
-            </CustomWagmiProvider>
-            {/* </CustomAptosProvider> */}
-          </AuthProvider>
-        </AppKit>
-      </body>
+              </body>
+            </AppKit>
+
+        </AppWalletProvider>
+                </CustomWagmiProvider>
+{/* </CustomAptosProvider> */}
+      </AuthProvider>
     </html>
   );
 }

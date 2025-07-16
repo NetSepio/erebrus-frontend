@@ -276,53 +276,53 @@ const DvpnMap = ({ nodes }: { nodes: Node[] }) => {
         })
 
         // Attempt to load GeoJSON data
-        // try {
-        //   const response = await fetch("/countries.json")
-        //   const geojsonData = await response.json()
+        try {
+          const response = await fetch("/countries.json")
+          const geojsonData = await response.json()
 
-        //   L.geoJSON(geojsonData, {
-        //     style: (feature) => {
-        //       if (!feature?.properties) return {}
+          L.geoJSON(geojsonData, {
+            style: (feature) => {
+              if (!feature?.properties) return {}
 
-        //       const country = feature.properties.ISO_A2
-        //       const count = nodes.filter((node) => node.ipinfocountry === country).length
+              const country = feature.properties.ISO_A2
+              const count = nodes.filter((node) => node.ipinfocountry === country).length
 
-        //       return {
-        //         fillColor:
-        //           count > 3
-        //             ? "#4f46e5" // indigo-600
-        //             : count > 2
-        //               ? "#6366f1" // indigo-500
-        //               : count > 1
-        //                 ? "#818cf8" // indigo-400
-        //                 : count > 0
-        //                   ? "#a5b4fc" // indigo-300
-        //                   : "#1e293b", // slate-800
-        //         weight: 1,
-        //         opacity: 0.8,
-        //         color: "#334155", // slate-700
-        //         dashArray: "3",
-        //         fillOpacity: count > 0 ? 0.6 : 0.2,
-        //       }
-        //     },
-        //     onEachFeature: (feature, layer) => {
-        //       if (!feature.properties) return
+              return {
+                fillColor:
+                  count > 3
+                    ? "#4f46e5" // indigo-600
+                    : count > 2
+                      ? "#6366f1" // indigo-500
+                      : count > 1
+                        ? "#818cf8" // indigo-400
+                        : count > 0
+                          ? "#a5b4fc" // indigo-300
+                          : "#1e293b", // slate-800
+                weight: 1,
+                opacity: 0.8,
+                color: "#334155", // slate-700
+                dashArray: "3",
+                fillOpacity: count > 0 ? 0.6 : 0.2,
+              }
+            },
+            onEachFeature: (feature, layer) => {
+              if (!feature.properties) return
 
-        //       const country = feature.properties.ISO_A2
-        //       const count = nodes.filter((node) => node.ipinfocountry === country).length
+              const country = feature.properties.ISO_A2
+              const count = nodes.filter((node) => node.ipinfocountry === country).length
 
-        //       if (count > 0) {
-        //         layer.bindTooltip(`${feature.properties.ADMIN}: ${count} nodes`, {
-        //           permanent: false,
-        //           direction: "center",
-        //           className: "country-tooltip",
-        //         })
-        //       }
-        //     },
-        //   }).addTo(map)
-        // } catch (error) {
-        //   console.error("Failed to load GeoJSON data:", error)
-        // }
+              if (count > 0) {
+                layer.bindTooltip(`${feature.properties.ADMIN}: ${count} nodes`, {
+                  permanent: false,
+                  direction: "center",
+                  className: "country-tooltip",
+                })
+              }
+            },
+          }).addTo(map)
+        } catch (error) {
+          console.error("Failed to load GeoJSON data:", error)
+        }
 
         // Add custom CSS for styling
         const style = document.createElement("style")

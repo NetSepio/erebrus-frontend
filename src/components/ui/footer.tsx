@@ -66,21 +66,21 @@ const DarkFooter: React.FC = () => {
             </p>
             <div className="flex space-x-5">
               <a
-                href="https://www.linkedin.com/company/netsepio/"
+                href="#"
                 className="text-gray-400 hover:text-blue-400 transition-colors duration-300"
                 aria-label="LinkedIn"
               >
                 <Linkedin size={20} />
               </a>
               <a
-                href="https://discordapp.com/invite/5uaFhNpRF6"
+                href="#"
                 className="text-gray-400 hover:text-blue-400 transition-colors duration-300"
                 aria-label="Discord"
               >
                 <MessageSquare size={20} />
               </a>
               <a
-                href="https://x.com/netsepio"
+                href="#"
                 className="text-gray-400 hover:text-blue-400 transition-colors duration-300"
                 aria-label="X (Twitter)"
               >
@@ -107,7 +107,7 @@ const DarkFooter: React.FC = () => {
                 </svg>
               </a>
               <a
-                href="https://t.me/NetSepio"
+                href="#"
                 className="text-gray-400 hover:text-blue-400 transition-colors duration-300"
                 aria-label="Telegram"
               >
@@ -127,7 +127,7 @@ const DarkFooter: React.FC = () => {
                 </svg>
               </a>
               <a
-                href="https://github.com/Netsepio"
+                href="#"
                 className="text-gray-400 hover:text-blue-400 transition-colors duration-300"
                 aria-label="GitHub"
               >
@@ -152,27 +152,27 @@ const DarkFooter: React.FC = () => {
               className={`space-y-4 overflow-hidden transition-all duration-300 ${expanded.explore ? "max-h-60" : "max-h-0 md:max-h-60"}`}
             >
               <li>
-                <a href="https://netsepio.com/" className="text-gray-400 hover:text-blue-400 transition-colors duration-300">
+                <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors duration-300">
                   About NetSepio ↗
                 </a>
               </li>
               <li>
-                <a href="https://www.cyreneai.com/" className="text-gray-400 hover:text-blue-400 transition-colors duration-300">
+                <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors duration-300">
                   Meet CyreneAI ↗
                 </a>
               </li>
               <li>
-                <a href="https://erebrus.io/terms" className="text-gray-400 hover:text-blue-400 transition-colors duration-300">
+                <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors duration-300">
                   Terms and Conditions ↗
                 </a>
               </li>
               <li>
-                <a href="https://erebrus.io/privacy" className="text-gray-400 hover:text-blue-400 transition-colors duration-300">
+                <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors duration-300">
                   Privacy Policy ↗
                 </a>
               </li>
               <li>
-                <a href="https://erebrus.io/contact" className="text-gray-400 hover:text-blue-400 transition-colors duration-300">
+                <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors duration-300">
                   Contact Us ↗
                 </a>
               </li>
@@ -195,12 +195,12 @@ const DarkFooter: React.FC = () => {
               className={`space-y-4 overflow-hidden transition-all duration-300 ${expanded.getErebrus ? "max-h-60" : "max-h-0 md:max-h-60"}`}
             >
               <li>
-                <a href="https://play.google.com/store/apps/details?id=com.erebrus.app" className="text-gray-400 hover:text-blue-400 transition-colors duration-300">
+                <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors duration-300">
                   Play Store ↗
                 </a>
               </li>
               <li>
-                <a href="https://testflight.apple.com/join/BvdARC75" className="text-gray-400 hover:text-blue-400 transition-colors duration-300">
+                <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors duration-300">
                   App Store ↗
                 </a>
               </li>
@@ -241,7 +241,26 @@ const DarkFooter: React.FC = () => {
           </div>
         </div>
 
-      
+        {/* Divider */}
+        <div className="border-t border-gray-800 my-10"></div>
+
+        {/* Bottom section */}
+        <div className="flex flex-col md:flex-row justify-between items-center">
+          <div className="text-sm mb-4 md:mb-0 text-gray-400">
+            © {new Date().getFullYear()} Erebrus. All rights reserved.
+          </div>
+          <div className="flex space-x-8">
+            <a href="#" className="text-sm text-gray-400 hover:text-blue-400 transition-colors duration-300">
+              Privacy Policy
+            </a>
+            <a href="#" className="text-sm text-gray-400 hover:text-blue-400 transition-colors duration-300">
+              Terms of Service
+            </a>
+            <a href="#" className="text-sm text-gray-400 hover:text-blue-400 transition-colors duration-300">
+              Cookies
+            </a>
+          </div>
+        </div>
       </div>
     </footer>
                  </div>

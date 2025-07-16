@@ -37,7 +37,7 @@ import { defineChain } from "@reown/appkit/networks";
 import React, { useEffect } from "react";
 import Cookies from "js-cookie";
 import axios from "axios";
-import { BrowserProvider, toUtf8Bytes } from "ethers";
+import { BrowserProvider } from "ethers";
 
 // Define Peaq network
 const peaqNetwork = defineChain({
@@ -112,7 +112,7 @@ const riseTestnet = defineChain({
 });
 
 // 1. Get projectId from https://cloud.reown.com
-export const projectId = "193ccae4f2630b59e1e7f10b785e3a0a";
+export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
 
 if (!projectId) {
   throw new Error(
@@ -125,7 +125,7 @@ const metadata = {
   name: "Erebrus",
   description:
     "Powering the future of AI interaction through multi-agent collaboration with self-replicating, decentralized agents. Launch agents, engage with Cyrene, and unlock new frontiers in AI, technology, and consciousness.",
-  url: "https://erebrus.io/",
+  url: "http://localhost:3000/",
   icons: ["https://cyreneai.com/CyreneAI_logo-text.png"],
 };
 
@@ -150,7 +150,6 @@ const NETWORK_IDS = {
 };
 
 // EVM Authentication
-// Modified authenticateUser function to match the backend's message signing approach
 const authenticateUser = async (walletAddress: string, walletProvider: any) => {
   try {
     const GATEWAY_URL = "https://gateway.netsepio.com/";
@@ -166,10 +165,6 @@ const authenticateUser = async (walletAddress: string, walletProvider: any) => {
     console.log("EVM Message:", message);
     console.log("EVM Flow ID:", flowId);
 
-    // IMPORTANT CHANGE: Combine message and flowId like the backend does
-    const combinedMessage = `${message}${flowId}`;
-    console.log("Combined Message:", combinedMessage);
-
     const provider = new BrowserProvider(walletProvider);
     if (!walletAddress) {
       throw new Error("Wallet address is undefined");
@@ -183,22 +178,14 @@ const authenticateUser = async (walletAddress: string, walletProvider: any) => {
       );
     }
 
-    // Sign the COMBINED message (message + flowId)
-    let signature = await signer.signMessage(combinedMessage);
+    const signature = await signer.signMessage(message);
 
-    // Remove "0x" prefix if present
-    if (signature.startsWith("0x")) {
-      signature = signature.slice(2);
-    }
-
-    // Post to auth endpoint - match the backend format exactly
     const authResponse = await axios.post(
-      `${GATEWAY_URL}api/v1.0/authenticate`, // Remove chain query param to match backend
+      `${GATEWAY_URL}api/v1.0/authenticate?&chain=evm`,
       {
-        chainName,
         flowId,
         signature,
-        // walletAddress field included to match backend expectation
+        chainName: "evm",
       },
       {
         headers: {
@@ -242,8 +229,6 @@ const authenticateUser = async (walletAddress: string, walletProvider: any) => {
 };
 
 // Solana Authentication
-
-
 const authenticateUserSolana = async (walletAddress: string) => {
   try {
     const GATEWAY_URL = "https://gateway.netsepio.com/";
