@@ -64,7 +64,7 @@
     "date-fns": "4.1.0",
     "dotted-map": "^2.2.3",
     "embla-carousel-react": "8.5.1",
-    "ethers": "^6.13.5",
+    "ethers": "^6.15.0",
     "file-saver": "^2.0.5",
     "framer-motion": "^12.6.5",
     "input-otp": "1.4.1",
