@@ -1,4 +1,13 @@
 "use client";
+
+export const metadata = {
+  title: "Erebrus Profile",
+  description: "Manage your Erebrus profile and account settings.",
+  alternates: {
+    canonical: "https://erebrus.io/profile",
+  },
+};
+
 import React from "react";
 import Cookies from "js-cookie";
 import axios from "axios";

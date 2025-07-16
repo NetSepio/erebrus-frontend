@@ -1,5 +1,13 @@
 "use client";
 
+export const metadata = {
+  title: "Erebrus Dashboard",
+  description: "Manage your Erebrus VPN connections and clients.",
+  alternates: {
+    canonical: "https://erebrus.io/dashboard",
+  },
+};
+
 import { useState, useEffect, type FormEvent, type ChangeEvent } from "react";
 import { Cloud, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -1053,25 +1061,25 @@ export default function DashboardPage() {
                             </div>
 
                             <div className="flex gap-4 w-3/4 mt-4">
-                                <button
+                              <button
                                 className="text-md rounded-lg text-white flex btn bg-blue-gray-700 flex-1"
                                 onClick={() => {
                                   const blob = new Blob([ConfigFile], {
-                                  type: "text/plain;charSet=utf-8",
+                                    type: "text/plain;charSet=utf-8",
                                   });
                                   saveAs(blob, `${VpnName}.conf`);
                                 }}
                                 aria-label="Download VPN configuration file"
-                                >
+                              >
                                 <div
                                   className="flex cursor-pointer p-2 rounded-full gap-2 justify-center w-full hover:opacity-80 mb-5"
                                   style={{
-                                  backgroundColor: "#0162FF",
+                                    backgroundColor: "#0162FF",
                                   }}
                                 >
                                   <div style={{ color: "white" }}>Download</div>
                                 </div>
-                                </button>
+                              </button>
                             </div>
                           </div>
                         </div>

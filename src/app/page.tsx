@@ -1,4 +1,14 @@
 "use client";
+
+export const metadata = {
+  title: "Erebrus - Decentralized VPN Network",
+  description:
+    "Redefining digital connectivity and unleashing the future of internet with globally accessible, secure and private network through the power of DePIN.",
+  alternates: {
+    canonical: "https://erebrus.io",
+  },
+};
+
 import HeroSection from "../components/HeroSection";
 import DePINRevolutionComponent from "@/components/ui/map";
 import SubscriptionCard from "@/components/subs";
@@ -216,7 +226,6 @@ function Page() {
             Join the Movement. Get Started Now.
           </div>
 
-          
           <a
             href="https://discordapp.com/invite/5uaFhNpRF6"
             target="_blank"

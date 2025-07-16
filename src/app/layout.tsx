@@ -25,6 +25,9 @@ export const metadata = {
     description:
       "Redefining digital connectivity and unleashing the future of internet with globally accessible, secure and private network through the power of DePIN.",
   },
+  alternates: {
+    canonical: "https://erebrus.io",
+  },
 };
 
 export default function RootLayout({

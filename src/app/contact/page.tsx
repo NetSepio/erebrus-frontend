@@ -1,4 +1,13 @@
 "use client";
+
+export const metadata = {
+  title: "Contact Erebrus",
+  description: "Get in touch with the Erebrus team for support or inquiries.",
+  alternates: {
+    canonical: "https://erebrus.io/contact",
+  },
+};
+
 import React, { useState } from "react";
 import Footer from "../../components/ui/footer";
 
@@ -135,7 +144,8 @@ const Contact = () => {
 
           <button
             type="submit"
-            className="w-full bg-[#0162FF] text-white py-3 rounded-lg text-lg font-semibold hover:bg-[#0152cc] transition-colors" aria-label="Submit support request form"
+            className="w-full bg-[#0162FF] text-white py-3 rounded-lg text-lg font-semibold hover:bg-[#0152cc] transition-colors"
+            aria-label="Submit support request form"
           >
             Submit
           </button>
@@ -154,7 +164,8 @@ const Contact = () => {
               </p>
               <button
                 onClick={() => setShowPopup(false)}
-                className="bg-[#0162FF] text-white px-6 py-2 rounded-lg hover:bg-[#0152cc] transition-colors " aria-label="Close confirmation popup"
+                className="bg-[#0162FF] text-white px-6 py-2 rounded-lg hover:bg-[#0152cc] transition-colors "
+                aria-label="Close confirmation popup"
               >
                 Close
               </button>

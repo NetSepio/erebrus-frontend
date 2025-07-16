@@ -1,14 +1,23 @@
-"use client"
+"use client";
 
-import { useEffect, useState, useRef } from "react"
-import Link from "next/link"
-import NodesData from "@/components/nodes-data"
-import dynamic from "next/dynamic"
-import { motion, AnimatePresence } from "framer-motion"
-import { MapPin, Server, Globe, Activity } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Skeleton } from "@/components/ui/skeleton"
+import { useEffect, useState, useRef } from "react";
+import Link from "next/link";
+import NodesData from "@/components/nodes-data";
+import dynamic from "next/dynamic";
+import { motion, AnimatePresence } from "framer-motion";
+import { MapPin, Server, Globe, Activity } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+
+export const metadata = {
+  title: "Erebrus Explorer",
+  description:
+    "Explore the Erebrus decentralized VPN network with our interactive map.",
+  alternates: {
+    canonical: "https://erebrus.io/explorer",
+  },
+};
 
 // Dynamically import the map component with no SSR
 const DvpnMap = dynamic(() => import("@/components/dvpn-map"), {
@@ -21,82 +30,91 @@ const DvpnMap = dynamic(() => import("@/components/dvpn-map"), {
       </div>
     </div>
   ),
-})
+});
 
 export default function Explorer() {
-  const [nodes, setNodes] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [shouldRenderMap, setShouldRenderMap] = useState(false)
-  const mapRef = useRef<HTMLDivElement>(null)
+  const [nodes, setNodes] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [shouldRenderMap, setShouldRenderMap] = useState(false);
+  const mapRef = useRef<HTMLDivElement>(null);
   const [stats, setStats] = useState({
     total: 0,
     active: 0,
     regions: 0,
-  })
+  });
 
   // Handle initial load
   useEffect(() => {
     // Delay rendering the map to ensure proper client-side hydration
     const timer = setTimeout(() => {
-      setShouldRenderMap(true)
-    }, 500)
+      setShouldRenderMap(true);
+    }, 500);
 
     return () => {
-      clearTimeout(timer)
-    }
-  }, [])
+      clearTimeout(timer);
+    };
+  }, []);
 
   // Fetch nodes data
   useEffect(() => {
     async function fetchNodes() {
-      setIsLoading(true)
+      setIsLoading(true);
       try {
-        const response = await fetch(`https://gateway.erebrus.io/api/v1.0/nodes/all`)
-        const data = await response.json()
+        const response = await fetch(
+          `https://gateway.erebrus.io/api/v1.0/nodes/all`
+        );
+        const data = await response.json();
         if (data && Array.isArray(data.payload)) {
-          setNodes(data.payload)
+          setNodes(data.payload);
 
           // Calculate stats
-          const activeNodes = data.payload.filter((node: { status: string }) => node.status === "active").length
-          const uniqueRegions = new Set(data.payload.map((node: { ipinfocountry: any; region: any }) => node.ipinfocountry || node.region)).size
+          const activeNodes = data.payload.filter(
+            (node: { status: string }) => node.status === "active"
+          ).length;
+          const uniqueRegions = new Set(
+            data.payload.map(
+              (node: { ipinfocountry: any; region: any }) =>
+                node.ipinfocountry || node.region
+            )
+          ).size;
 
           setStats({
             total: data.payload.length,
             active: activeNodes,
             regions: uniqueRegions,
-          })
+          });
         } else {
-          setNodes([])
-          console.warn("Received invalid data payload from API.")
+          setNodes([]);
+          console.warn("Received invalid data payload from API.");
         }
       } catch (error) {
-        console.error("Error fetching nodes data:", error)
-        setNodes([])
+        console.error("Error fetching nodes data:", error);
+        setNodes([]);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
     }
 
-    fetchNodes()
+    fetchNodes();
 
     // Handle route changes
     const handleRouteChange = () => {
       // Toggle the map rendering state to force a remount
-      setShouldRenderMap(false)
+      setShouldRenderMap(false);
       setTimeout(() => {
-        setShouldRenderMap(true)
-      }, 500)
-    }
+        setShouldRenderMap(true);
+      }, 500);
+    };
 
-    window.addEventListener("popstate", handleRouteChange)
+    window.addEventListener("popstate", handleRouteChange);
     return () => {
-      window.removeEventListener("popstate", handleRouteChange)
-    }
-  }, [])
+      window.removeEventListener("popstate", handleRouteChange);
+    };
+  }, []);
 
   const scrollToMap = () => {
-    mapRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
+    mapRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   return (
     <div className="explorer-page">
@@ -125,7 +143,9 @@ export default function Explorer() {
                 Erebrus ÐVPN
               </span>
             </h1>
-            <p className="text-xl md:text-2xl text-slate-200 mb-10">Unrestricted Uncensored Web Access</p>
+            <p className="text-xl md:text-2xl text-slate-200 mb-10">
+              Unrestricted Uncensored Web Access
+            </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <motion.div
@@ -133,7 +153,11 @@ export default function Explorer() {
                 whileTap={{ scale: 0.95 }}
                 className="rounded-full bg-white text-slate-900 font-bold py-3 px-10 text-lg"
               >
-                <Link href="https://discord.com/invite/5uaFhNpRF6" target="_blank" rel="noopener noreferrer">
+                <Link
+                  href="https://discord.com/invite/5uaFhNpRF6"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   Run Your Node
                 </Link>
               </motion.div>
@@ -143,7 +167,8 @@ export default function Explorer() {
                 className="rounded-full bg-indigo-600 text-white font-bold py-3 px-10 text-lg cursor-pointer"
                 onClick={scrollToMap}
               >
-                <MapPin className="inline-block mr-2 animate-bounce duration-1000 ease-in-out" /> Active Node Map
+                <MapPin className="inline-block mr-2 animate-bounce duration-1000 ease-in-out" />{" "}
+                Active Node Map
               </motion.div>
             </div>
           </motion.div>
@@ -165,7 +190,9 @@ export default function Explorer() {
                   {isLoading ? (
                     <Skeleton className="h-8 w-16 bg-slate-700" />
                   ) : (
-                    <p className="text-2xl font-bold text-white">{stats.total}</p>
+                    <p className="text-2xl font-bold text-white">
+                      {stats.total}
+                    </p>
                   )}
                 </div>
               </CardContent>
@@ -181,7 +208,9 @@ export default function Explorer() {
                   {isLoading ? (
                     <Skeleton className="h-8 w-16 bg-slate-700" />
                   ) : (
-                    <p className="text-2xl font-bold text-white">{stats.active}</p>
+                    <p className="text-2xl font-bold text-white">
+                      {stats.active}
+                    </p>
                   )}
                 </div>
               </CardContent>
@@ -197,7 +226,9 @@ export default function Explorer() {
                   {isLoading ? (
                     <Skeleton className="h-8 w-16 bg-slate-700" />
                   ) : (
-                    <p className="text-2xl font-bold text-white">{stats.regions}</p>
+                    <p className="text-2xl font-bold text-white">
+                      {stats.regions}
+                    </p>
                   )}
                 </div>
               </CardContent>
@@ -210,13 +241,18 @@ export default function Explorer() {
       <div className="bg-gradient-to-b from-slate-900 to-[#20253A] py-16 px-4 lg:px-20">
         <div className="container mx-auto">
           <div className="mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-4" ref={mapRef}>
+            <h2
+              className="text-2xl md:text-3xl font-bold text-white mb-4"
+              ref={mapRef}
+            >
               Erebrus Decentralized VPN (ÐVPN) Network Nodes Map
             </h2>
             <p className="text-slate-300 max-w-3xl">
-              Explore the Erebrus decentralized VPN network with our interactive map. View detailed information on
-              active nodes, including their location, network performance, and status. This map provides real-time
-              insights into the global distribution and operation of our secure and private VPN infrastructure.
+              Explore the Erebrus decentralized VPN network with our interactive
+              map. View detailed information on active nodes, including their
+              location, network performance, and status. This map provides
+              real-time insights into the global distribution and operation of
+              our secure and private VPN infrastructure.
             </p>
           </div>
 
@@ -242,5 +278,5 @@ export default function Explorer() {
         </div>
       </div>
     </div>
-  )
+  );
 }
