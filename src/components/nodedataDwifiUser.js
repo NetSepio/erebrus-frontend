@@ -3,7 +3,9 @@ import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ethers, parseEther, formatUnits } from 'ethers';
+import { Web3Provider } from '@ethersproject/providers';
+import { Contract, formatUnits, parseEther } from 'ethers';
+
 
 
 
@@ -54,10 +56,10 @@ const NodeDwifiStreamUser = () => {
     }
 
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const provider = new Web3Provider(window.ethereum);
       const signer = provider.getSigner();
+      const contract = new Contract(contractAddress, signer);
 
-      const contract = new ethers.Contract(contractAddress, signer);
 
       const operators = [];
       for (let i = 0; i <= 50; i++) {

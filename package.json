@@ -12,6 +12,7 @@
     "@aptos-labs/wallet-adapter-react": "^5.0.4",
     "@coral-xyz/anchor": "^0.31.0",
     "@emotion/is-prop-valid": "latest",
+    "@ethersproject/providers": "^5.8.0",
     "@headlessui/react": "^2.2.1",
     "@hookform/resolvers": "^3.9.1",
     "@pontem/aptos-wallet-adapter": "^0.10.1",
