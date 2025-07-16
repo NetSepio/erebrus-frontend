@@ -11,7 +11,7 @@ import { ScrollProgress } from "@/components/ui/scroll-progress";
 
 function Page() {
   return (
-    <div className="bg-gradient-to-b from-black to-gray-900 min-h-screen">
+    <main className="bg-gradient-to-b from-black to-gray-900 min-h-screen">
       {/* <ErebrusNavbar /> */}
       <ScrollProgress color="#3b82f6" height={4} />
 
@@ -51,7 +51,7 @@ function Page() {
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-8 max-w-3xl mx-auto mb-16">
             {/* First row */}
-            <div className="flex items-center justify-center p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
+            <figure className="flex items-center justify-center p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
               <Image
                 src="/recognition/radarthack_white.webp"
                 alt="RADAR"
@@ -59,8 +59,8 @@ function Page() {
                 height={80}
                 className="object-contain"
               />
-            </div>
-            <div className="flex items-center justify-center p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
+            </figure>
+            <figure className="flex items-center justify-center p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
               <Image
                 src="/recognition/ethsea_white.webp"
                 alt="ETH SEA"
@@ -68,7 +68,7 @@ function Page() {
                 height={80}
                 className="object-contain"
               />
-            </div>
+            </figure>
             <div className="flex items-center justify-center col-span-2 md:col-span-1 p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
               <div className="text-left space-y-3">
                 <a
@@ -99,7 +99,7 @@ function Page() {
             </div>
 
             {/* Second row */}
-            <div className="flex items-center justify-center p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
+            <figure className="flex items-center justify-center p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
               <Image
                 src="/recognition/ivscrypto_white.webp"
                 alt="IVS"
@@ -107,8 +107,8 @@ function Page() {
                 height={80}
                 className="object-contain"
               />
-            </div>
-            <div className="flex items-center justify-center p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
+            </figure>
+            <figure className="flex items-center justify-center p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
               <Image
                 src="/recognition/aptos_white.webp"
                 alt="APTOS"
@@ -116,7 +116,7 @@ function Page() {
                 height={80}
                 className="object-contain"
               />
-            </div>
+            </figure>
             <div className="flex items-center justify-center col-span-2 md:col-span-1 p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
               <div className="text-left space-y-3">
                 <a
@@ -149,7 +149,7 @@ function Page() {
             </div>
 
             {/* Third row */}
-            <div className="flex items-center justify-center p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
+            <figure className="flex items-center justify-center p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
               <Image
                 src="/recognition/soonami_white.webp"
                 alt="soonami.io"
@@ -157,8 +157,8 @@ function Page() {
                 height={80}
                 className="object-contain"
               />
-            </div>
-            <div className="flex items-center justify-center p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
+            </figure>
+            <figure className="flex items-center justify-center p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
               <Image
                 src="/recognition/akindo_white.webp"
                 alt="AKINDO"
@@ -166,7 +166,7 @@ function Page() {
                 height={80}
                 className="object-contain"
               />
-            </div>
+            </figure>
             <div className="flex items-center justify-center col-span-2 md:col-span-1 p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
               <div className="text-left space-y-3">
                 <a
@@ -202,7 +202,7 @@ function Page() {
           <p className="text-lg mb-16 text-blue-100">+ many more!!</p>
 
           {/* Erebrus Logo */}
-          <div className="flex flex-col items-center justify-center space-y-4 mb-10">
+          <figure className="flex flex-col items-center justify-center space-y-4 mb-10">
             <Image
               src="/images/Erebrus_logo_wordmark.webp"
               alt="Erebrus powered by NetSepio"
@@ -210,13 +210,15 @@ function Page() {
               height={100}
               className="object-contain"
             />
-          </div>
+            <figcaption className="sr-only">
+              Erebrus powered by NetSepio logo
+            </figcaption>
+          </figure>
 
           <div className="text-2xl font-medium text-blue-100 mb-8">
             Join the Movement. Get Started Now.
           </div>
 
-          
           <a
             href="https://discordapp.com/invite/5uaFhNpRF6"
             target="_blank"
@@ -229,7 +231,7 @@ function Page() {
       </section>
 
       {/* <DarkFooter /> */}
-    </div>
+    </main>
   );
 }
 

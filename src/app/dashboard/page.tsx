@@ -597,11 +597,13 @@ export default function DashboardPage() {
                           {imageSrc ? (
                             <img
                               src={`${"https://nftstorage.link/ipfs"}/${imageSrc}`}
+                              alt="User subscription profile picture"
                               className="w-14 h-14 rounded-full"
                             />
                           ) : (
                             <img
                               src="subscriptionprofile.webp"
+                              alt="Default subscription profile avatar"
                               className="w-14 h-14 rounded-full"
                             />
                           )}{" "}

@@ -6,58 +6,61 @@ import Image from "next/image";
 import { Menu, X, Home, FileText, LayoutDashboard } from "lucide-react";
 import { FloatingDock } from "@/components/ui/floating-dock";
 import { motion, AnimatePresence } from "framer-motion";
-import Cookies from "js-cookie"
-import UserDropdown from "@/components/login/UserDropdown"
+import Cookies from "js-cookie";
+import UserDropdown from "@/components/login/UserDropdown";
 import { useAppKit } from "@reown/appkit/react";
 
 const ErebrusNavbar = () => {
-  const [avatarUrl, setAvatarUrl] = useState("")
+  const [avatarUrl, setAvatarUrl] = useState("");
 
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showDock, setShowDock] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
-  const address = Cookies.get("erebrus_wallet")
-  const token = Cookies.get("erebrus_token")
+  const address = Cookies.get("erebrus_wallet");
+  const token = Cookies.get("erebrus_token");
   useEffect(() => {
     if (token) {
-      const getRandomNumber = () => Math.floor(Math.random() * 1000)
-      const imageUrl = `https://robohash.org/${getRandomNumber()}`
-      setAvatarUrl(imageUrl)
+      const getRandomNumber = () => Math.floor(Math.random() * 1000);
+      const imageUrl = `https://robohash.org/${getRandomNumber()}`;
+      setAvatarUrl(imageUrl);
     }
-  }, [token])
+  }, [token]);
   const handlePasetoClick = () => {
-    console.log("Show paseto QR code")
-  }
+    console.log("Show paseto QR code");
+  };
 
   const handleDeleteCookie = async () => {
     try {
       const appKit = useAppKit();
-  
+
       // Disconnect the wallet
-      
+
       await appKit.close();
       console.log("AppKit connection closed");
-  
+
       // Set localStorage flag for MetaMask disconnection
-      localStorage.setItem("wagmi.io.metamask.disconnected", JSON.stringify(true));
-  
+      localStorage.setItem(
+        "wagmi.io.metamask.disconnected",
+        JSON.stringify(true)
+      );
+
       // Remove cookies
       Cookies.remove("erebrus_token", { path: "/" });
       Cookies.remove("erebrus_wallet", { path: "/" });
       Cookies.remove("erebrus_userid", { path: "/" });
       Cookies.remove("Chain_symbol", { path: "/" });
       console.log("Cookies cleared");
-  
+
       // Redirect to homepage
       window.location.href = "/";
-  
+
       return true;
     } catch (error) {
       console.error("Logout error:", error);
       return false;
     }
-  }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -90,7 +93,11 @@ const ErebrusNavbar = () => {
 
   const navItems = [
     { name: "Explorer", link: "/explorer" },
-    { name: "Docs", link: "https://docs.netsepio.com/erebrus/", external: true },
+    {
+      name: "Docs",
+      link: "https://docs.netsepio.com/erebrus/",
+      external: true,
+    },
     { name: "Dashboard", link: "/dashboard" },
   ];
 
@@ -129,7 +136,7 @@ const ErebrusNavbar = () => {
             : "bg-transparent py-5"
         }`}
       >
-        <div className="container mx-auto px-6">
+        <header className="container mx-auto px-6">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Link href="/" className="flex items-center">
@@ -143,7 +150,10 @@ const ErebrusNavbar = () => {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
+            <nav
+              className="hidden md:flex items-center space-x-8"
+              aria-label="Main Navigation"
+            >
               {navItems.map((item, index) => (
                 <Link
                   key={index}
@@ -155,45 +165,52 @@ const ErebrusNavbar = () => {
                   {item.name}
                 </Link>
               ))}
-            </div>
+            </nav>
 
             {/* Login Button Component */}
             <div className="flex items-center">
-         {token?<>
-         <UserDropdown 
-             avatarUrl={avatarUrl}
-             handlePasetoClick={handlePasetoClick}
-             paseto={token}
-         
-         />
-        </>:<>
-         <appkit-button />
-         </>}
+              {token ? (
+                <>
+                  <UserDropdown
+                    avatarUrl={avatarUrl}
+                    handlePasetoClick={handlePasetoClick}
+                    paseto={token}
+                  />
+                </>
+              ) : (
+                <>
+                  <appkit-button />
+                </>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
-            <div className="md:hidden">
+            <nav className="md:hidden" aria-label="Mobile Navigation">
               <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="text-white focus:outline-none"
               >
                 {isOpen ? <X size={28} /> : <Menu size={28} />}
               </button>
-            </div>
+            </nav>
           </div>
-        </div>
+        </header>
 
         {/* Mobile Menu */}
         <AnimatePresence>
           {isOpen && (
-            <motion.div
+            <motion.nav
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
               className="md:hidden absolute w-full bg-black/95 backdrop-blur-md"
+              aria-label="Mobile Navigation Menu"
             >
-              <div className="container mx-auto px-6 flex flex-col space-y-4 py-6">
+              <nav
+                className="container mx-auto px-6 flex flex-col space-y-4 py-6"
+                aria-label="Mobile Navigation Links"
+              >
                 {navItems.map((item, index) => (
                   <Link
                     key={index}
@@ -209,8 +226,8 @@ const ErebrusNavbar = () => {
                 <div className="flex flex-col space-y-3 pt-4 border-t border-white/10">
                   {/* Mobile login buttons could go here if needed */}
                 </div>
-              </div>
-            </motion.div>
+              </nav>
+            </motion.nav>
           )}
         </AnimatePresence>
       </motion.nav>
