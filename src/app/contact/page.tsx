@@ -1,4 +1,5 @@
 
+"use client";
 import React, { useState } from "react";
 import Footer from "../../components/ui/footer";
 
