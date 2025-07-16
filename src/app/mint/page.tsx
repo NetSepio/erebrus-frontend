@@ -1,24 +1,29 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Shield, Users, Tag, Award, Info } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Badge } from "@/components/ui/badge"
+import { useState } from "react";
+import { Shield, Users, Tag, Award, Info } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 
 export default function MintPage() {
-  const [isHovering, setIsHovering] = useState(false)
-  const [isMinting, setIsMinting] = useState(false)
+  const [isHovering, setIsHovering] = useState(false);
+  const [isMinting, setIsMinting] = useState(false);
 
   const handleMint = async () => {
-    setIsMinting(true)
+    setIsMinting(true);
     // Simulate minting process
     setTimeout(() => {
-      setIsMinting(false)
+      setIsMinting(false);
       // Show success notification or redirect
-    }, 2000)
-  }
+    }, 2000);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
@@ -40,6 +45,8 @@ export default function MintPage() {
                 className="relative aspect-square w-full overflow-hidden"
                 onMouseEnter={() => setIsHovering(true)}
                 onMouseLeave={() => setIsHovering(false)}
+                role="img"
+                aria-label="Erebrus VPN NFT Preview"
               >
                 {/* Replace with your actual NFT image */}
                 <div className="w-full h-full bg-gradient-to-br from-blue-900 to-purple-900 flex items-center justify-center">
@@ -53,9 +60,12 @@ export default function MintPage() {
                   }`}
                 >
                   <div className="text-center">
-                    <h3 className="text-xl font-bold mb-2">Erebrus VPN Access NFT</h3>
+                    <h3 className="text-xl font-bold mb-2">
+                      Erebrus VPN Access NFT
+                    </h3>
                     <p className="text-sm text-gray-300">
-                      This NFT grants you exclusive access to our decentralized VPN service
+                      This NFT grants you exclusive access to our decentralized
+                      VPN service
                     </p>
                   </div>
                 </div>
@@ -65,7 +75,10 @@ export default function MintPage() {
               <div className="p-6 border-t border-gray-800">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-bold">Erebrus Access Pass</h3>
-                  <Badge variant="outline" className="bg-blue-900/30 text-blue-300 border-blue-800">
+                  <Badge
+                    variant="outline"
+                    className="bg-blue-900/30 text-blue-300 border-blue-800"
+                  >
                     Limited Edition
                   </Badge>
                 </div>
@@ -81,7 +94,9 @@ export default function MintPage() {
           {/* Mint Details Card */}
           <Card className="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden shadow-xl">
             <CardContent className="p-8">
-              <h2 className="text-2xl font-bold mb-6 text-center">NFT Benefits</h2>
+              <h2 className="text-2xl font-bold mb-6 text-center">
+                NFT Benefits
+              </h2>
 
               <div className="space-y-6 mb-8">
                 <div className="flex items-start">
@@ -90,7 +105,9 @@ export default function MintPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-lg">3-Month Coverage</h3>
-                    <p className="text-gray-400">Full access to our premium VPN service for 3 months</p>
+                    <p className="text-gray-400">
+                      Full access to our premium VPN service for 3 months
+                    </p>
                   </div>
                 </div>
 
@@ -100,19 +117,27 @@ export default function MintPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-lg">Unlimited Clients</h3>
-                    <p className="text-gray-400">Connect all your devices with a single NFT</p>
+                    <p className="text-gray-400">
+                      Connect all your devices with a single NFT
+                    </p>
                   </div>
                 </div>
 
-                <div className="flex items-start">
+                <div
+                  className="flex items-start"
+                  aria-label="NFT Price Information"
+                >
                   <div className="bg-blue-900/30 p-3 rounded-full mr-4">
-                    <Tag className="h-6 w-6 text-blue-400" />
+                    <Tag className="h-6 w-6 text-blue-400" aria-hidden="true" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-lg">
-                      0.035 SOL <span className="text-sm text-gray-400">($5.99)</span>
+                      0.035 SOL{" "}
+                      <span className="text-sm text-gray-400">($5.99)</span>
                     </h3>
-                    <p className="text-gray-400">One-time payment, no subscription required</p>
+                    <p className="text-gray-400">
+                      One-time payment, no subscription required
+                    </p>
                   </div>
                 </div>
 
@@ -122,15 +147,25 @@ export default function MintPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-lg">Exceptional Value</h3>
-                    <p className="text-gray-400">Unmatched security and privacy features</p>
+                    <p className="text-gray-400">
+                      Unmatched security and privacy features
+                    </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-gray-800/50 rounded-lg p-4 mb-8 flex items-center">
-                <Info className="h-5 w-5 text-amber-400 mr-3 flex-shrink-0" />
+              <div
+                className="bg-gray-800/50 rounded-lg p-4 mb-8 flex items-center"
+                role="alert"
+                aria-label="Important information about NFT minting"
+              >
+                <Info
+                  className="h-5 w-5 text-amber-400 mr-3 flex-shrink-0"
+                  aria-hidden="true"
+                />
                 <p className="text-sm text-gray-300">
-                  <span className="text-amber-400 font-medium">Note:</span> One wallet address can only mint one NFT
+                  <span className="text-amber-400 font-medium">Note:</span> One
+                  wallet address can only mint one NFT
                 </p>
               </div>
 
@@ -141,6 +176,11 @@ export default function MintPage() {
                       onClick={handleMint}
                       disabled={isMinting}
                       className="w-full py-6 text-lg bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 transition-all duration-300"
+                      aria-label={
+                        isMinting
+                          ? "Minting Erebrus VPN NFT in progress"
+                          : "Mint Erebrus VPN NFT"
+                      }
                     >
                       {isMinting ? (
                         <>
@@ -149,6 +189,8 @@ export default function MintPage() {
                             xmlns="http://www.w3.org/2000/svg"
                             fill="none"
                             viewBox="0 0 24 24"
+                            aria-hidden="true"
+                            role="status"
                           >
                             <circle
                               className="opacity-25"
@@ -164,7 +206,7 @@ export default function MintPage() {
                               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                             ></path>
                           </svg>
-                          Minting...
+                          <span>Minting...</span>
                         </>
                       ) : (
                         "Mint Erebrus NFT"
@@ -182,14 +224,18 @@ export default function MintPage() {
 
         {/* Additional Information */}
         <div className="mt-16 max-w-4xl mx-auto text-center">
-          <h2 className="text-2xl font-bold mb-6">Why Choose Erebrus VPN NFT?</h2>
+          <h2 className="text-2xl font-bold mb-6">
+            Why Choose Erebrus VPN NFT?
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-gray-900/30 border border-gray-800 rounded-lg p-6 hover:bg-gray-800/30 transition-colors duration-300">
               <div className="bg-blue-900/20 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="h-6 w-6 text-blue-400" />
               </div>
               <h3 className="font-bold mb-2">Enhanced Privacy</h3>
-              <p className="text-gray-400 text-sm">Military-grade encryption and zero-knowledge protocols</p>
+              <p className="text-gray-400 text-sm">
+                Military-grade encryption and zero-knowledge protocols
+              </p>
             </div>
             <div className="bg-gray-900/30 border border-gray-800 rounded-lg p-6 hover:bg-gray-800/30 transition-colors duration-300">
               <div className="bg-blue-900/20 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -211,7 +257,9 @@ export default function MintPage() {
                 </svg>
               </div>
               <h3 className="font-bold mb-2">Tradable Asset</h3>
-              <p className="text-gray-400 text-sm">Sell or transfer your VPN access when you no longer need it</p>
+              <p className="text-gray-400 text-sm">
+                Sell or transfer your VPN access when you no longer need it
+              </p>
             </div>
             <div className="bg-gray-900/30 border border-gray-800 rounded-lg p-6 hover:bg-gray-800/30 transition-colors duration-300">
               <div className="bg-blue-900/20 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -232,11 +280,13 @@ export default function MintPage() {
                 </svg>
               </div>
               <h3 className="font-bold mb-2">Decentralized Network</h3>
-              <p className="text-gray-400 text-sm">Access a global network of nodes for optimal performance</p>
+              <p className="text-gray-400 text-sm">
+                Access a global network of nodes for optimal performance
+              </p>
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

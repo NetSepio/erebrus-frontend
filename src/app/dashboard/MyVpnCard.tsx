@@ -1,44 +1,44 @@
-"use client"
-import type React from "react"
-import { useState, useEffect } from "react"
-import { saveAs } from "file-saver"
-import { FaDownload } from "react-icons/fa"
-import axios from "axios"
-import Cookies from "js-cookie"
-import CryptoJS from "crypto-js"
-import { QRCodeSVG } from "qrcode.react"
+"use client";
+import type React from "react";
+import { useState, useEffect } from "react";
+import { saveAs } from "file-saver";
+import { FaDownload } from "react-icons/fa";
+import axios from "axios";
+import Cookies from "js-cookie";
+import CryptoJS from "crypto-js";
+import { QRCodeSVG } from "qrcode.react";
 
-const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_BASE_URL
+const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_BASE_URL;
 
 interface ReviewCardProps {
   metaData: {
-    created_at: string
-    UUID: string
-    name: string
-    region: string
-    walletAddress: number
-  } | null
+    created_at: string;
+    UUID: string;
+    name: string;
+    region: string;
+    walletAddress: number;
+  } | null;
 }
 
 const backgroundbutton = {
   backgroundColor: "#0162FF",
-}
+};
 
 const MyVpnCard: React.FC<ReviewCardProps> = ({ metaData }) => {
-  const [loading, setLoading] = useState<boolean>(false)
-  const [delvpn, setdelvpn] = useState(false)
-  const [formattedDate, setFormattedDate] = useState("")
-  const [showDownloadModal, setShowDownloadModal] = useState(false)
-  const [downloadPin, setDownloadPin] = useState("")
-  const [configFile, setConfigFile] = useState<string>("")
-  const [showQrCodeModal, setShowQrCodeModal] = useState(false)
+  const [loading, setLoading] = useState<boolean>(false);
+  const [delvpn, setdelvpn] = useState(false);
+  const [formattedDate, setFormattedDate] = useState("");
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [downloadPin, setDownloadPin] = useState("");
+  const [configFile, setConfigFile] = useState<string>("");
+  const [showQrCodeModal, setShowQrCodeModal] = useState(false);
 
   useEffect(() => {
     if (metaData) {
-      const date = new Date(metaData.created_at)
-      setFormattedDate(date.toLocaleString())
+      const date = new Date(metaData.created_at);
+      setFormattedDate(date.toLocaleString());
     }
-  }, [metaData])
+  }, [metaData]);
 
   if (!metaData) {
     return (
@@ -46,91 +46,108 @@ const MyVpnCard: React.FC<ReviewCardProps> = ({ metaData }) => {
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-400"></div>
         <p className="text-white mt-4">Loading VPN details...</p>
       </div>
-    )
+    );
   }
 
   const handleDownloadClick = () => {
-    setShowDownloadModal(true)
-    setDownloadPin("") // Reset PIN when opening modal
-  }
+    setShowDownloadModal(true);
+    setDownloadPin(""); // Reset PIN when opening modal
+  };
 
   const downloadConfig = async () => {
     if (downloadPin.length !== 6) {
-      alert("Please enter a valid 6-digit PIN")
-      return
+      alert("Please enter a valid 6-digit PIN");
+      return;
     }
 
     try {
-      setLoading(true)
-      const auth = Cookies.get("erebrus_token")
-      const walletAddress = Cookies.get("erebrus_wallet") || ""
+      setLoading(true);
+      const auth = Cookies.get("erebrus_token");
+      const walletAddress = Cookies.get("erebrus_wallet") || "";
 
       if (!walletAddress) {
-        throw new Error("Wallet address not found")
+        throw new Error("Wallet address not found");
       }
 
       // Fetch the encrypted blobId from Erebrus
-      const response = await axios.get(`${EREBRUS_GATEWAY_URL}api/v1.0/erebrus/client/${metaData.UUID}/blobId`, {
-        headers: {
-          Authorization: `Bearer ${auth}`,
-        },
-      })
+      const response = await axios.get(
+        `${EREBRUS_GATEWAY_URL}api/v1.0/erebrus/client/${metaData.UUID}/blobId`,
+        {
+          headers: {
+            Authorization: `Bearer ${auth}`,
+          },
+        }
+      );
 
       if (!response.data.payload || !response.data.payload.blobId) {
-        throw new Error("No blob ID found for this client")
+        throw new Error("No blob ID found for this client");
       }
 
-      const encryptedBlobId = response.data.payload.blobId
-      const decryptedBlobId = decryptBlobId(encryptedBlobId, walletAddress, downloadPin)
+      const encryptedBlobId = response.data.payload.blobId;
+      const decryptedBlobId = decryptBlobId(
+        encryptedBlobId,
+        walletAddress,
+        downloadPin
+      );
 
       // Fetch the config from Walrus
-      const walrusResponse = await axios.get(`https://aggregator-devnet.walrus.space/v1/${decryptedBlobId}`, {
-        responseType: "text", // Changed to text to get the config content
-      })
+      const walrusResponse = await axios.get(
+        `https://aggregator-devnet.walrus.space/v1/${decryptedBlobId}`,
+        {
+          responseType: "text", // Changed to text to get the config content
+        }
+      );
 
       // Store the config file content
-      setConfigFile(walrusResponse.data)
+      setConfigFile(walrusResponse.data);
 
       // Close the PIN modal and show the QR code modal
-      setShowDownloadModal(false)
-      setShowQrCodeModal(true)
+      setShowDownloadModal(false);
+      setShowQrCodeModal(true);
     } catch (error) {
-      console.error("Error downloading config:", error)
-      alert("Failed to download config. Please check your PIN and try again.")
+      console.error("Error downloading config:", error);
+      alert("Failed to download config. Please check your PIN and try again.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  const decryptBlobId = (encryptedBlobId: string, walletAddress: string, pin: string) => {
-    const key = `${walletAddress}-${pin}`
-    const bytes = CryptoJS.AES.decrypt(encryptedBlobId, key)
-    return bytes.toString(CryptoJS.enc.Utf8)
-  }
+  const decryptBlobId = (
+    encryptedBlobId: string,
+    walletAddress: string,
+    pin: string
+  ) => {
+    const key = `${walletAddress}-${pin}`;
+    const bytes = CryptoJS.AES.decrypt(encryptedBlobId, key);
+    return bytes.toString(CryptoJS.enc.Utf8);
+  };
 
   const deletevpn = async (id: string) => {
-    setLoading(true)
-    const auth = Cookies.get("erebrus_token")
+    setLoading(true);
+    const auth = Cookies.get("erebrus_token");
 
     try {
-      const response = await fetch(`${EREBRUS_GATEWAY_URL}api/v1.0/erebrus/client/${id}`, {
-        method: "DELETE",
-        headers: {
-          Accept: "application/json, text/plain, */*",
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${auth}`,
-        },
-      })
+      const response = await fetch(
+        `${EREBRUS_GATEWAY_URL}api/v1.0/erebrus/client/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Accept: "application/json, text/plain, */*",
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${auth}`,
+          },
+        }
+      );
 
       if (response.status === 200) {
-        setdelvpn(false)
+        setdelvpn(false);
       }
     } catch (error) {
-      console.error("Error:", error)
+      console.error("Error:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="w-full mb-2">
@@ -161,7 +178,9 @@ const MyVpnCard: React.FC<ReviewCardProps> = ({ metaData }) => {
             </div>
 
             <div className="flex items-center justify-center">
-              <div className="bg-gray-800 px-4 py-2 rounded-full text-white font-medium">{metaData.name}</div>
+              <div className="bg-gray-800 px-4 py-2 rounded-full text-white font-medium">
+                {metaData.name}
+              </div>
             </div>
 
             <div className="flex items-center justify-center">
@@ -176,18 +195,22 @@ const MyVpnCard: React.FC<ReviewCardProps> = ({ metaData }) => {
             </div>
 
             <div className="flex gap-3">
+              {/* Download Config button */}
               <button
                 className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 transition-colors p-2 rounded-full"
                 onClick={handleDownloadClick}
                 title="Download Config"
+                aria-label="Download VPN configuration"
               >
                 <FaDownload className="w-4 h-4 text-white" />
               </button>
 
+              {/* Delete VPN button */}
               <button
                 className="flex items-center justify-center bg-red-600 hover:bg-red-700 transition-colors p-2 rounded-full"
                 onClick={() => setdelvpn(true)}
                 title="Delete VPN"
+                aria-label="Delete VPN client"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -197,7 +220,11 @@ const MyVpnCard: React.FC<ReviewCardProps> = ({ metaData }) => {
                   stroke="currentColor"
                   className="w-4 h-4 text-white"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
@@ -216,17 +243,22 @@ const MyVpnCard: React.FC<ReviewCardProps> = ({ metaData }) => {
               }}
             >
               <div className="mb-6">
-                <p className="text-2xl text-center text-white font-bold">Are you sure?</p>
+                <p className="text-2xl text-center text-white font-bold">
+                  Are you sure?
+                </p>
                 <p className="text-sm text-center text-gray-400 mt-2">
-                  Do you really want to delete this client? This process cannot be undone.
+                  Do you really want to delete this client? This process cannot
+                  be undone.
                 </p>
               </div>
               <div className="flex items-center gap-4">
+                {/* Cancel Delete button */}
                 <button
                   style={{ border: "1px solid #5696FF" }}
                   onClick={() => setdelvpn(false)}
                   type="button"
                   className="w-full text-white font-medium focus:ring-4 focus:outline-none focus:ring-blue-800 rounded-full text-sm px-5 py-2.5 text-center hover:bg-blue-900 transition-colors"
+                  aria-label="Cancel VPN deletion"
                 >
                   Cancel
                 </button>
@@ -235,6 +267,7 @@ const MyVpnCard: React.FC<ReviewCardProps> = ({ metaData }) => {
                   onClick={() => deletevpn(metaData.UUID)}
                   type="button"
                   className="w-full text-white font-medium focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-sm px-5 py-2.5 text-center hover:bg-blue-700 transition-colors"
+                  aria-label="Confirm VPN deletion"
                 >
                   Delete
                 </button>
@@ -255,9 +288,15 @@ const MyVpnCard: React.FC<ReviewCardProps> = ({ metaData }) => {
               }}
             >
               <div className="mb-6">
-                <p className="text-xl text-center text-white font-bold">Enter PIN to Download</p>
+                <p className="text-xl text-center text-white font-bold">
+                  Enter PIN to Download
+                </p>
                 <div className="mt-4">
+                  <label htmlFor="download-pin" className="sr-only">
+                    Enter 6-digit PIN for download
+                  </label>
                   <input
+                    id="download-pin"
                     type="password"
                     value={downloadPin}
                     onChange={(e) => setDownloadPin(e.target.value)}
@@ -269,11 +308,13 @@ const MyVpnCard: React.FC<ReviewCardProps> = ({ metaData }) => {
                 </div>
               </div>
               <div className="flex items-center gap-4">
+                {/* Modal Cancel button */}
                 <button
                   style={{ border: "1px solid #5696FF" }}
                   onClick={() => setShowDownloadModal(false)}
                   type="button"
                   className="w-full text-white font-medium focus:ring-4 focus:outline-none focus:ring-blue-800 rounded-full text-sm px-5 py-2.5 text-center hover:bg-blue-900 transition-colors"
+                  aria-label="Cancel download"
                 >
                   Cancel
                 </button>
@@ -282,6 +323,7 @@ const MyVpnCard: React.FC<ReviewCardProps> = ({ metaData }) => {
                   onClick={downloadConfig}
                   type="button"
                   className="w-full text-white font-medium focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-sm px-5 py-2.5 text-center hover:bg-blue-700 transition-colors"
+                  aria-label="Download configuration file"
                 >
                   Download
                 </button>
@@ -305,9 +347,10 @@ const MyVpnCard: React.FC<ReviewCardProps> = ({ metaData }) => {
                 {/* Add cross icon */}
                 <button
                   onClick={() => {
-                    setShowQrCodeModal(false)
+                    setShowQrCodeModal(false);
                   }}
                   className="absolute top-4 right-4 text-white hover:text-gray-300"
+                  aria-label="Close QR code modal"
                 >
                   <svg
                     className="w-6 h-6"
@@ -316,11 +359,18 @@ const MyVpnCard: React.FC<ReviewCardProps> = ({ metaData }) => {
                     viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
 
-                <p className="text-3xl text-center font-semibold text-white mb-10">Download Configuration</p>
+                <p className="text-3xl text-center font-semibold text-white mb-10">
+                  Download Configuration
+                </p>
 
                 <div className="flex w-full flex-col items-center justify-center">
                   <div className="bg-white lg:mx-auto lg:my-4 lg:w-1/2 lg:p-0 p-3 justify-center flex h-60 rounded-3xl">
@@ -339,19 +389,21 @@ const MyVpnCard: React.FC<ReviewCardProps> = ({ metaData }) => {
                     >
                       WireGuard
                     </a>
-                    &nbsp;app on mobile, scan the QR code <br /> to add a new connection, and instantly connect to
-                    Erebrus VPN.
+                    &nbsp;app on mobile, scan the QR code <br /> to add a new
+                    connection, and instantly connect to Erebrus VPN.
                   </div>
 
                   <div className="flex gap-4 w-3/4 mt-4">
+                    {/* Download Configuration button in QR modal */}
                     <button
                       className="text-md rounded-lg text-white flex btn bg-blue-gray-700 flex-1"
                       onClick={() => {
                         const blob = new Blob([configFile], {
                           type: "text/plain;charSet=utf-8",
-                        })
-                        saveAs(blob, `${metaData.name}.conf`)
+                        });
+                        saveAs(blob, `${metaData.name}.conf`);
                       }}
+                      aria-label={`Download configuration file for ${metaData.name}`}
                     >
                       <div
                         className="flex cursor-pointer p-2 rounded-full gap-2 justify-center w-full hover:opacity-80 mb-5"
@@ -388,7 +440,7 @@ const MyVpnCard: React.FC<ReviewCardProps> = ({ metaData }) => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default MyVpnCard
+export default MyVpnCard;

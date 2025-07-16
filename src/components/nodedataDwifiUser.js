@@ -179,35 +179,63 @@ const NodeDwifiStreamUser = () => {
       <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
         <div className="bg-gray-800 p-5 rounded-lg shadow-xl">
           <h2 className="text-xl mb-4">Edit Node (ID: {node.id})</h2>
-          <input
-            name="ssid"
-            value={editedNode.ssid}
-            onChange={handleChange}
-            placeholder="SSID"
-            className="mb-2 p-2 w-full bg-gray-700 text-white rounded"
-            disabled={isSaving}
-          />
-          <input
-            name="location"
-            value={editedNode.location}
-            onChange={handleChange}
-            placeholder="Location"
-            className="mb-2 p-2 w-full bg-gray-700 text-white rounded"
-            disabled={isSaving}
-          />
-          <input
-            name="pricePerMinute"
-            value={editedNode.pricePerMinute}
-            onChange={handleChange}
-            placeholder="Price Per Minute"
-            className="mb-2 p-2 w-full bg-gray-700 text-white rounded"
-            disabled={isSaving}
-          />
+          <div className="mb-4">
+            <label
+              htmlFor="ssid"
+              className="block text-sm font-medium text-gray-300 mb-1"
+            >
+              SSID
+            </label>
+            <input
+              id="ssid"
+              name="ssid"
+              value={editedNode.ssid}
+              onChange={handleChange}
+              placeholder="SSID"
+              className="mb-2 p-2 w-full bg-gray-700 text-white rounded"
+              disabled={isSaving}
+            />
+          </div>
+          <div className="mb-4">
+            <label
+              htmlFor="location"
+              className="block text-sm font-medium text-gray-300 mb-1"
+            >
+              Location
+            </label>
+            <input
+              id="location"
+              name="location"
+              value={editedNode.location}
+              onChange={handleChange}
+              placeholder="Location"
+              className="mb-2 p-2 w-full bg-gray-700 text-white rounded"
+              disabled={isSaving}
+            />
+          </div>
+          <div className="mb-4">
+            <label
+              htmlFor="pricePerMinute"
+              className="block text-sm font-medium text-gray-300 mb-1"
+            >
+              Price Per Minute
+            </label>
+            <input
+              id="pricePerMinute"
+              name="pricePerMinute"
+              value={editedNode.pricePerMinute}
+              onChange={handleChange}
+              placeholder="Price Per Minute"
+              className="mb-2 p-2 w-full bg-gray-700 text-white rounded"
+              disabled={isSaving}
+            />
+          </div>
           <div className="flex justify-end mt-4">
             <button
               onClick={() => onSave(editedNode)}
               className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
               disabled={isSaving}
+              aria-label="Save node changes"
             >
               {isSaving ? "Saving..." : "Save"}
             </button>
@@ -215,6 +243,7 @@ const NodeDwifiStreamUser = () => {
               onClick={onCancel}
               className="bg-gray-500 text-white px-4 py-2 rounded"
               disabled={isSaving}
+              aria-label="Cancel editing node"
             >
               Cancel
             </button>
@@ -261,6 +290,7 @@ const NodeDwifiStreamUser = () => {
         <button
           onClick={checkConnection}
           className="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-500 transition duration-300"
+          aria-label="Connect your wallet"
         >
           Connect Wallet
         </button>
@@ -327,6 +357,11 @@ const NodeDwifiStreamUser = () => {
                       <button
                         onClick={() => toggleLocation(item.id)}
                         className="ml-2 text-blue-500 hover:text-blue-600"
+                        aria-label={
+                          expandedLocations[item.id]
+                            ? "Show less location details"
+                            : "Show more location details"
+                        }
                       >
                         {expandedLocations[item.id] ? "Show less" : "Show more"}
                       </button>
@@ -345,6 +380,7 @@ const NodeDwifiStreamUser = () => {
                     <button
                       onClick={() => handleEdit(item)}
                       className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition duration-300"
+                      aria-label={`Edit node with ID ${item.id}`}
                     >
                       Edit
                     </button>

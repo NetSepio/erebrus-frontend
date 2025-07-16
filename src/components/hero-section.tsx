@@ -33,7 +33,7 @@ export function HeroSection() {
           Unrestricted Uncensored Web Access
         </p>
         <div className="flex flex-col items-center justify-center gap-4 mt-10 md:flex-row">
-          <Button asChild size="lg" className="w-full md:w-auto">
+          <Button asChild size="lg" className="w-full md:w-auto" aria-label="Run your own Erebrus node">
             <Link href="/run-node">Run Your Node</Link>
           </Button>
           <Button
@@ -41,6 +41,7 @@ export function HeroSection() {
             variant="outline"
             size="lg"
             className="w-full md:w-auto"
+            aria-label="View active Erebrus node map"
           >
             <Link href="/dashboard" className="flex items-center gap-2">
               <MapPin className="w-4 h-4" />

@@ -8,10 +8,10 @@ const Privacy = () => {
 
   return (
     <div className='p-20 text-white'>
-    <div className='text-lg text-gray-200 mt-10'>Last Revised: June 21st 2024</div>  
+      <div className='text-lg text-gray-200 mt-10'>Last Revised: June 21st 2024</div>  
       <div className='text-4xl font-semibold mt-10 '>Erebrus Privacy Policy</div>
       <div className='text-lg text-gray-200 mt-10'>
-      Effective Date: June 20th 2024 <br />
+        Effective Date: June 20th 2024 <br />
         <div className='text-3xl my-10 font-semibold'>1. Introduction</div>
         Welcome to Erebrus, a platform provided by NetSepio (referred to as "we," "our," or "us"). We are committed to protecting your privacy and ensuring that your personal information is handled in a safe and responsible manner. This Privacy Policy outlines the types of information we collect, how it is used, and how you can control your information within our application. This policy has been designed to comply with global privacy laws, including the California Consumer Privacy Act (CCPA), the General Data Protection Regulation (GDPR), and other relevant data protection laws.
 

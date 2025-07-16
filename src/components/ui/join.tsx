@@ -45,7 +45,10 @@ const ErebrusSection = () => {
 
           {/* Buttons */}
           <div className="flex flex-wrap gap-6 justify-center mt-4">
-            <button className="flex items-center gap-2 px-6 py-3 rounded-lg bg-blue-500/10 border border-blue-500/30 text-white font-semibold transition-all duration-300 hover:bg-blue-500/20 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10">
+            <button
+              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-blue-500/10 border border-blue-500/30 text-white font-semibold transition-all duration-300 hover:bg-blue-500/20 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10"
+              aria-label="Join Erebrus community on Discord"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="20"
@@ -63,7 +66,10 @@ const ErebrusSection = () => {
               Discord
             </button>
 
-            <button className="flex items-center gap-2 px-6 py-3 rounded-lg bg-blue-500/10 border border-blue-500/30 text-white font-semibold transition-all duration-300 hover:bg-blue-500/20 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10">
+            <button
+              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-blue-500/10 border border-blue-500/30 text-white font-semibold transition-all duration-300 hover:bg-blue-500/20 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10"
+              aria-label="Join Erebrus community on Telegram"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="20"

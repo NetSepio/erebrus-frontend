@@ -1,13 +1,25 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Filter, SortDesc, ChevronDown } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Badge } from "@/components/ui/badge"
+import { useState, useEffect } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Filter, SortDesc, ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
 
 // Mock data based on the screenshot
 const nodes = [
@@ -155,24 +167,24 @@ const nodes = [
     uptime: "---",
     lastPing: "8 d, 4 h, 22 m, 13 s",
   },
-]
+];
 
 export function NodeTable() {
-  const [mounted, setMounted] = useState(false)
-  const [searchTerm, setSearchTerm] = useState("")
+  const [mounted, setMounted] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
-  if (!mounted) return null
+  if (!mounted) return null;
 
   const filteredNodes = nodes.filter(
     (node) =>
       node.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       node.chain.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      node.region.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+      node.region.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <motion.div
@@ -183,7 +195,11 @@ export function NodeTable() {
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:w-64">
+          <label htmlFor="node-table-search" className="sr-only">
+            Search nodes
+          </label>
           <Input
+            id="node-table-search"
             placeholder="Search nodes..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -204,13 +220,23 @@ export function NodeTable() {
           </svg>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+            aria-label="Filter node list"
+          >
             <Filter className="w-4 h-4" />
             Filter
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+                aria-label="Sort node list"
+              >
                 <SortDesc className="w-4 h-4" />
                 Sort
                 <ChevronDown className="w-4 h-4" />
@@ -246,7 +272,9 @@ export function NodeTable() {
               <TableRow key={node.id} className="hover:bg-muted/50">
                 <TableCell className="font-medium">{node.name}</TableCell>
                 <TableCell>{node.chain}</TableCell>
-                <TableCell className="font-mono text-xs">{node.wallet}</TableCell>
+                <TableCell className="font-mono text-xs">
+                  {node.wallet}
+                </TableCell>
                 <TableCell>{node.region}</TableCell>
                 <TableCell>
                   <div className="text-xs">
@@ -255,7 +283,13 @@ export function NodeTable() {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant={node.status === "active" ? "success" : "destructive"}>{node.status}</Badge>
+                  <Badge
+                    variant={
+                      node.status === "active" ? "success" : "destructive"
+                    }
+                  >
+                    {node.status}
+                  </Badge>
                 </TableCell>
                 <TableCell>{node.uptime}</TableCell>
                 <TableCell>{node.lastPing}</TableCell>
@@ -265,5 +299,5 @@ export function NodeTable() {
         </Table>
       </div>
     </motion.div>
-  )
+  );
 }

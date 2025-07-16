@@ -27,7 +27,7 @@ const HeroSection = () => {
           </p>
           <div className="flex flex-col items-center justify-center space-y-4 sm:flex-row sm:space-x-6 sm:space-y-0">
             <Link href="/explorer">
-              <button className="rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 px-10 py-4 font-medium text-white transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/50 transform hover:-translate-y-1 text-lg">
+              <button className="rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 px-10 py-4 font-medium text-white transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/50 transform hover:-translate-y-1 text-lg" aria-label="Explore Erebrus VPN network">
                 Explore VPN
               </button>
             </Link>

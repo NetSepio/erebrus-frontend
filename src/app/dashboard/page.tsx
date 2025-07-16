@@ -512,6 +512,7 @@ export default function DashboardPage() {
                             } finally {
                             }
                           }}
+                          aria-label="Start 7-day free trial"
                         >
                           <span
                             className={`inline-block transition-transform duration-300 ${
@@ -571,19 +572,23 @@ export default function DashboardPage() {
                     <div className="flex justify-between items-center mb-6">
                       <h1 className="text-2xl font-bold">My VPN Clients</h1>
                       <div className="flex gap-2">
+                        {/* 1. View Subscriptions Button */}
                         <Button
                           variant="outline"
                           className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
                           onClick={() => setShowClients(false)}
+                          aria-label="View subscription details"
                         >
                           View Subscriptions
                         </Button>
 
+                        {/* 2. Add More Clients Button */}
                         <Button
                           onClick={() => {
                             setbuttonset(true);
                           }}
                           className="bg-blue-600 hover:bg-blue-700"
+                          aria-label="Add new VPN client"
                         >
                           <Plus className="mr-2 h-4 w-4" />
                           Add More Clients
@@ -665,7 +670,15 @@ export default function DashboardPage() {
                                   )
                                 </p>
                               </div>
-                              <Button className="bg-blue-600 hover:bg-blue-700">
+                              {/* 4. Upgrade/Renew Plan Button */}
+                              <Button
+                                className="bg-blue-600 hover:bg-blue-700"
+                                aria-label={
+                                  subscriptionStatus === "expired"
+                                    ? "Renew subscription plan"
+                                    : "Upgrade subscription plan"
+                                }
+                              >
                                 {subscriptionStatus === "expired"
                                   ? "Renew Plan"
                                   : "Upgrade Plan"}
@@ -698,18 +711,22 @@ export default function DashboardPage() {
                           </p>
                         )}
                         <div className="mt-6 flex gap-3">
+                          {/* 5. Create Clients Button */}
                           <Button
                             variant="outline"
                             className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
                             onClick={() => setShowClients(true)}
+                            aria-label="Create new VPN clients"
                           >
                             <Plus className="mr-2 h-4 w-4" />
                             Create Clients
                           </Button>
+                          {/* 6. File Storage Button */}
                           <Button
                             variant="outline"
                             className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
                             onClick={() => setShowFileStorage(true)}
+                            aria-label="Access file storage"
                           >
                             <Cloud className="mr-2 h-4 w-4" />
                             File Storage
@@ -757,12 +774,14 @@ export default function DashboardPage() {
                           }}
                         >
                           <div className="flex items-center justify-end p-4 md:p-5 rounded-t dark:border-gray-600">
+                            {/* 3. Modal Close Button */}
                             <button
                               onClick={() => {
                                 setbuttonset(false);
                               }}
                               type="button"
                               className="text-white bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                              aria-label="Close modal"
                             >
                               <svg
                                 className="w-3 h-3"
@@ -795,6 +814,12 @@ export default function DashboardPage() {
                                   <div className="space-y-6">
                                     {/* Client Name Input */}
                                     <div>
+                                      <label
+                                        htmlFor="name"
+                                        className="block text-sm font-medium text-gray-300 mb-2"
+                                      >
+                                        Client Name
+                                      </label>
                                       <input
                                         type="text"
                                         id="name"
@@ -809,6 +834,12 @@ export default function DashboardPage() {
 
                                     {/* Region Selector */}
                                     <div className="relative">
+                                      <label
+                                        htmlFor="regionname"
+                                        className="block text-sm font-medium text-gray-300 mb-2"
+                                      >
+                                        Region
+                                      </label>
                                       <select
                                         id="regionname"
                                         className="w-full bg-gray-800 border border-gray-700 rounded-full py-3 px-6 text-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -933,6 +964,7 @@ export default function DashboardPage() {
                                       <button
                                         type="submit"
                                         className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-full transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                                        aria-label="Create new VPN client"
                                       >
                                         Create Client
                                       </button>
@@ -976,6 +1008,7 @@ export default function DashboardPage() {
                               setShowQrCodeModal(false);
                             }}
                             className="absolute top-4 right-4 text-white hover:text-gray-300"
+                            aria-label="Close QR code modal"
                           >
                             <svg
                               className="w-6 h-6"
@@ -1020,24 +1053,25 @@ export default function DashboardPage() {
                             </div>
 
                             <div className="flex gap-4 w-3/4 mt-4">
-                              <button
+                                <button
                                 className="text-md rounded-lg text-white flex btn bg-blue-gray-700 flex-1"
                                 onClick={() => {
                                   const blob = new Blob([ConfigFile], {
-                                    type: "text/plain;charSet=utf-8",
+                                  type: "text/plain;charSet=utf-8",
                                   });
                                   saveAs(blob, `${VpnName}.conf`);
                                 }}
-                              >
+                                aria-label="Download VPN configuration file"
+                                >
                                 <div
                                   className="flex cursor-pointer p-2 rounded-full gap-2 justify-center w-full hover:opacity-80 mb-5"
                                   style={{
-                                    backgroundColor: "#0162FF",
+                                  backgroundColor: "#0162FF",
                                   }}
                                 >
                                   <div style={{ color: "white" }}>Download</div>
                                 </div>
-                              </button>
+                                </button>
                             </div>
                           </div>
                         </div>
@@ -1055,10 +1089,12 @@ export default function DashboardPage() {
                           Securely store files on the decentralized network
                         </CardDescription>
                       </div>
+                      {/* 7. Close File Storage Button */}
                       <Button
                         variant="outline"
                         className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
                         onClick={() => setShowFileStorage(false)}
+                        aria-label="Close file storage section"
                       >
                         Close
                       </Button>

@@ -135,7 +135,7 @@ const Contact = () => {
 
           <button
             type="submit"
-            className="w-full bg-[#0162FF] text-white py-3 rounded-lg text-lg font-semibold hover:bg-[#0152cc] transition-colors"
+            className="w-full bg-[#0162FF] text-white py-3 rounded-lg text-lg font-semibold hover:bg-[#0152cc] transition-colors" aria-label="Submit support request form"
           >
             Submit
           </button>
@@ -154,7 +154,7 @@ const Contact = () => {
               </p>
               <button
                 onClick={() => setShowPopup(false)}
-                className="bg-[#0162FF] text-white px-6 py-2 rounded-lg hover:bg-[#0152cc] transition-colors"
+                className="bg-[#0162FF] text-white px-6 py-2 rounded-lg hover:bg-[#0152cc] transition-colors " aria-label="Close confirmation popup"
               >
                 Close
               </button>

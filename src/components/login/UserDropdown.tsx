@@ -1,9 +1,9 @@
 import { useDisconnect } from "@reown/appkit/react";
 
-import React from 'react';
-import { Menu, Transition } from '@headlessui/react';
-import Link from 'next/link';
-import Cookies from 'js-cookie';
+import React from "react";
+import { Menu, Transition } from "@headlessui/react";
+import Link from "next/link";
+import Cookies from "js-cookie";
 interface UserDropdownProps {
   avatarUrl: string;
   handlePasetoClick: () => void;
@@ -19,6 +19,7 @@ const MenuItem: React.FC<{
     <button
       className="group flex w-full items-center rounded-md px-2 py-2 text-md text-white hover:bg-gray-900"
       onClick={onClick}
+      aria-label="User menu item"
     >
       {children}
     </button>
@@ -36,8 +37,11 @@ const UserDropdown: React.FC<UserDropdownProps> = ({
 
   return (
     <Menu as="div" className="relative inline-block text-left z-10">
-      <Menu.Button className="inline-flex w-full justify-center rounded-md bg-black bg-opacity-20 px-4 py-2 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
-        <img src={avatarUrl} alt="Avatar" className="w-10 ml-auto" />
+      <Menu.Button
+        className="inline-flex w-full justify-center rounded-md bg-black bg-opacity-20 px-4 py-2 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
+        aria-label="Open user menu"
+      >
+        <img src={avatarUrl} alt="User avatar" className="w-10 ml-auto" />
       </Menu.Button>
 
       <Transition
@@ -52,33 +56,38 @@ const UserDropdown: React.FC<UserDropdownProps> = ({
           className="absolute right-0 mt-2 w-56 origin-top-right rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden"
           style={{
             background:
-              'linear-gradient(to bottom, rgba(32, 37, 58, 1), rgba(66, 79, 127, 1))',
+              "linear-gradient(to bottom, rgba(32, 37, 58, 1), rgba(66, 79, 127, 1))",
           }}
         >
           <div className="px-1 py-1">
             <Menu.Item>
-              <MenuItem href="/profile">Profile</MenuItem>
+              <MenuItem href="/profile" aria-label="Go to profile page">
+                Profile
+              </MenuItem>
             </Menu.Item>
             <Menu.Item>
-              <MenuItem href="/usernodes">My Nodes</MenuItem>
+              <MenuItem href="/usernodes" aria-label="View my nodes">
+                My Nodes
+              </MenuItem>
             </Menu.Item>
           </div>
-     
+
           <div className="px-1 py-1 ">
             <Menu.Item>
-              <MenuItem onClick={async ()=>{
-try {
-  
-  await disconnect();
-  console.log("Disconnected");
-  Cookies.remove("erebrus_token", { path: "/" });
-  Cookies.remove("erebrus_wallet", { path: "/" });
-  Cookies.remove("erebrus_userid", { path: "/" });
-} catch (error) {
-  
-}
-
-              }} >Logout</MenuItem>
+              <MenuItem
+                onClick={async () => {
+                  try {
+                    await disconnect();
+                    console.log("Disconnected");
+                    Cookies.remove("erebrus_token", { path: "/" });
+                    Cookies.remove("erebrus_wallet", { path: "/" });
+                    Cookies.remove("erebrus_userid", { path: "/" });
+                  } catch (error) {}
+                }}
+                aria-label="Log out of your account"
+              >
+                Logout
+              </MenuItem>
             </Menu.Item>
           </div>
         </Menu.Items>

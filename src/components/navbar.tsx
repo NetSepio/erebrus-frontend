@@ -176,6 +176,7 @@ const ErebrusNavbar = () => {
               <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="text-white focus:outline-none"
+                aria-label={isOpen ? "Close mobile navigation menu" : "Open mobile navigation menu"}
               >
                 {isOpen ? <X size={28} /> : <Menu size={28} />}
               </button>
