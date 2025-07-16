@@ -83,9 +83,9 @@ export default function VPNContentSection() {
       >
         {/* Header */}
         <div className="text-center mb-20">
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-300 to-white bg-clip-text text-transparent mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-300 to-white bg-clip-text text-transparent mb-6">
             Your Content Delivery, Uninterrupted!
-          </h1>
+          </h2>
           <p className="text-xl text-blue-100 max-w-2xl mx-auto">
             Launch your own VPN and AI agents for sovereign and private
             experience
@@ -120,10 +120,11 @@ export default function VPNContentSection() {
         {/* Buttons */}
         <div className="flex flex-wrap justify-center gap-6 mt-12">
           <a
-           href="https://docs.netsepio.com/latest/erebrus/setup"
-           target="_blank"
-           rel="noreferrer"
-          className="px-8 py-4 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-all duration-300 border border-gray-700 hover:border-gray-500 flex items-center group shadow-lg hover:shadow-blue-900/20">
+            href="https://docs.netsepio.com/latest/erebrus/setup"
+            target="_blank"
+            rel="noreferrer"
+            className="px-8 py-4 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-all duration-300 border border-gray-700 hover:border-gray-500 flex items-center group shadow-lg hover:shadow-blue-900/20"
+          >
             <span className="transform transition-transform group-hover:translate-x-1 text-lg">
               Deploy Your Node
             </span>
@@ -143,11 +144,12 @@ export default function VPNContentSection() {
               <path d="m12 5 7 7-7 7"></path>
             </svg>
           </a>
-          <a 
-               href="https://www.cyreneai.com/launch-agent"
-               target="_blank"
-               rel="noreferrer"
-           className="px-8 py-4 bg-blue-600 text-white hover:bg-blue-500 rounded-lg transition-all duration-300 shadow-lg hover:shadow-blue-600/30 flex items-center group">
+          <a
+            href="https://www.cyreneai.com/launch-agent"
+            target="_blank"
+            rel="noreferrer"
+            className="px-8 py-4 bg-blue-600 text-white hover:bg-blue-500 rounded-lg transition-all duration-300 shadow-lg hover:shadow-blue-600/30 flex items-center group"
+          >
             <span className="transform transition-transform group-hover:translate-x-1 text-lg">
               Launch Agent
             </span>
