@@ -2,7 +2,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { useWalletAuth } from '../context2/appkit';
+import { useWalletAuth } from '../context/appkit';
 import { Loader2, Shield, ShieldCheck, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 

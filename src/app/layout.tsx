@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 const inter = Inter({ subsets: ["latin"] });
 import "./globals.css";
 import DarkFooter from "@/components/ui/footer";
-import { AppKit } from '../context2/appkit';
+import { AppKit } from '../context/appkit';
 import AppWalletProvider from "@/components/AppWalletProvider";
 export const metadata = {
   name: "Erebrus",
