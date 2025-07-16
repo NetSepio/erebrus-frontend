@@ -101,6 +101,7 @@ const riseTestnet = defineChain({
 });
 
 export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
+console.log('project id',projectId)
 
 if (!projectId) {
   throw new Error('Project ID is not defined. Please set NEXT_PUBLIC_PROJECT_ID in your environment variables.');
