@@ -1,6 +1,10 @@
 # -------- Build Stage --------
 FROM node:18-alpine AS builder
 
+
+ARG NEXT_PUBLIC_PROJECT_ID
+ENV NEXT_PUBLIC_PROJECT_ID=$NEXT_PUBLIC_PROJECT_ID
+
 # Set working directory
 WORKDIR /app
 
@@ -13,9 +17,7 @@ RUN apk add --no-cache \
     linux-headers \
     eudev-dev \
     pkgconfig
-
-# Copy env file BEFORE npm install/build
-COPY .env .env    
+    
 
 # Copy package files and install dependencies
 COPY package*.json ./
