@@ -9,7 +9,7 @@ COPY .env .env
 
 # Install dependencies
 COPY package*.json ./
-RUN npm ci
+RUN npm install --force
 
 # Rebuild native bindings
 RUN npm rebuild
