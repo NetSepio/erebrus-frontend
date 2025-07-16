@@ -60,6 +60,7 @@ export function WorldMap({
         height="495"
         width="1056"
         draggable={false}
+         sizes='100vw'
       />
       <svg
         ref={svgRef}
