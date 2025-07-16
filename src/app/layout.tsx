@@ -7,8 +7,10 @@ import { cn } from "@/lib/utils";
 const inter = Inter({ subsets: ["latin"] });
 import "./globals.css";
 import DarkFooter from "@/components/ui/footer";
-import ContextProvider from '../context2'
+import { AppKit } from '../context2/appkit';
+
 import { headers } from 'next/headers'
+import AppWalletProvider from "@/components/AppWalletProvider";
 
 const headersObj = await headers();
 const cookies = headersObj.get('cookie')
@@ -42,6 +44,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn("min-h-screen flex flex-col", inter.className)}>
+        <AppWalletProvider>
+         <AppKit>
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
@@ -49,11 +53,13 @@ export default function RootLayout({
         >
           <div className="flex flex-col min-h-screen">
             <ErebrusNavbar />
-            <ContextProvider cookies={cookies}>{children}</ContextProvider>
+            <main>{children}</main>
 
             <DarkFooter />
           </div>
         </ThemeProvider>
+        </AppKit>
+        </AppWalletProvider>
       </body>
     </html>
   );

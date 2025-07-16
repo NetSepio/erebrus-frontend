@@ -51,6 +51,8 @@ export const useSolWallet = (setshowsignbutton: ((arg0: boolean) => void) | unde
  
 
   // const address = Cookies.get("erebrus_wallet");
+// 👇 Add this before using window.phantom
+
 
   const getPhantomWallet = () => {
     if (typeof window !== 'undefined' && 'phantom' in window) {
