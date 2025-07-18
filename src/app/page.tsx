@@ -46,7 +46,8 @@ function Page() {
                 alt="Uncensored Globe"
                 fill
                 className="object-contain"
-              />
+                sizes='100vw'
+            />
             </div>
           </div>
         </section>
@@ -69,7 +70,8 @@ function Page() {
                   width={150}
                   height={80}
                   className="object-contain"
-                />
+                   sizes='100vw'
+              />
               </div>
               <div className="flex items-center justify-center p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
                 <Image
@@ -78,7 +80,8 @@ function Page() {
                   width={150}
                   height={80}
                   className="object-contain"
-                />
+                   sizes='100vw'
+              />
               </div>
               <div className="flex items-center justify-center col-span-2 md:col-span-1 p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
                 <div className="text-left space-y-3">
@@ -119,7 +122,8 @@ function Page() {
                   width={150}
                   height={80}
                   className="object-contain"
-                />
+                   sizes='100vw'
+              />
               </div>
               <div className="flex items-center justify-center p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
                 <Image
@@ -128,7 +132,8 @@ function Page() {
                   width={150}
                   height={80}
                   className="object-contain"
-                />
+                   sizes='100vw'
+              />
               </div>
               <div className="flex items-center justify-center col-span-2 md:col-span-1 p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
                 <div className="text-left space-y-3">
@@ -169,7 +174,8 @@ function Page() {
                   width={150}
                   height={80}
                   className="object-contain"
-                />
+                   sizes='100vw'
+              />
               </div>
               <div className="flex items-center justify-center p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
                 <Image
@@ -178,7 +184,8 @@ function Page() {
                   width={150}
                   height={80}
                   className="object-contain"
-                />
+                   sizes='100vw'
+              />
               </div>
               <div className="flex items-center justify-center col-span-2 md:col-span-1 p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
                 <div className="text-left space-y-3">
@@ -216,13 +223,14 @@ function Page() {
 
             {/* Erebrus Logo */}
             <div className="flex flex-col items-center justify-center space-y-4 mb-10">
-              <Image
+            <Image
                 src="/images/Erebrus_logo_wordmark.webp"
                 alt="Erebrus powered by NetSepio"
                 width={300}
                 height={100}
                 className="object-contain"
-              />
+                sizes="100vw"
+            />
             </div>
 
             <div className="text-2xl font-medium text-blue-100 mb-8">
@@ -240,8 +248,8 @@ function Page() {
           </div>
         </section>
 
-        {/* <DarkFooter /> */}
-      </div>
+      {/* <DarkFooter /> */}
+      {/* Ensure all opened elements are closed properly */}
     </>
   );
 }

@@ -4,14 +4,11 @@ import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import ErebrusNavbar from "@/components/navbar";
 import { cn } from "@/lib/utils";
-import { AppKit } from "@/context/appkit";
 const inter = Inter({ subsets: ["latin"] });
 import "./globals.css";
 import DarkFooter from "@/components/ui/footer";
+import { AppKit } from '../context/appkit';
 import AppWalletProvider from "@/components/AppWalletProvider";
-import { AuthProvider } from "../context/AuthContext";
-import CustomWagmiProvider from "@/components/WagmiProvider";
-
 export const metadata = {
   name: "Erebrus",
   description:
@@ -35,31 +32,29 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+
+
+
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn("min-h-screen flex flex-col", inter.className)}>
-        <AppKit>
-          <AuthProvider>
-            {/* <CustomAptosProvider> */}
+        <AppWalletProvider>
+         <AppKit>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+        >
+          <div className="flex flex-col min-h-screen">
+            <ErebrusNavbar />
+            <main>{children}</main>
 
-            <CustomWagmiProvider>
-              <AppWalletProvider>
-                <ThemeProvider
-                  attribute="class"
-                  defaultTheme="dark"
-                  enableSystem
-                >
-                  <div className="flex flex-col min-h-screen">
-                    <ErebrusNavbar />
-                    <main className="flex-grow">{children}</main>
-                    <DarkFooter />
-                  </div>
-                </ThemeProvider>
-              </AppWalletProvider>
-            </CustomWagmiProvider>
-            {/* </CustomAptosProvider> */}
-          </AuthProvider>
+            <DarkFooter />
+          </div>
+        </ThemeProvider>
         </AppKit>
+        </AppWalletProvider>
       </body>
     </html>
   );

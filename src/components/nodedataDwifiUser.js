@@ -1,10 +1,12 @@
-"use client";
-import React, { useState, useEffect } from "react";
-import Cookies from "js-cookie";
-import { motion, AnimatePresence } from "framer-motion";
+"use client"
+import React, { useState, useEffect } from 'react';
+import Cookies from 'js-cookie';
+import { motion } from "framer-motion";
 import Link from "next/link";
-import { ethers } from "ethers";
-// import contractABI from '../components/peaqabi/contractABI.json';
+import { Web3Provider } from '@ethersproject/providers';
+import { Contract, formatUnits, parseEther } from 'ethers';
+
+
 
 const contractAddress = "0x5940445e1e8A419ebea10B45c5d1C0F603926F41";
 
@@ -53,10 +55,10 @@ const NodeDwifiStreamUser = () => {
     }
 
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const provider = new Web3Provider(window.ethereum);
       const signer = provider.getSigner();
+      const contract = new Contract(contractAddress, signer);
 
-      const contract = new ethers.Contract(contractAddress, signer);
 
       const operators = [];
       for (let i = 0; i <= 50; i++) {
@@ -69,10 +71,7 @@ const NodeDwifiStreamUser = () => {
               ssid: result.ssid,
               location: result.location,
               isActive: result.isActive,
-              pricePerMinute: ethers.utils.formatUnits(
-                result.pricePerMinute,
-                "ether"
-              ),
+              pricePerMinute: formatUnits(result.pricePerMinute, 'ether'),
               connectedAt: new Date().toISOString(),
               lastChecked: new Date().toISOString(),
             });
@@ -116,8 +115,9 @@ const NodeDwifiStreamUser = () => {
       const contract = new ethers.Contract(contractAddress, signer);
 
       // Convert price to wei
-      const priceInWei = ethers.utils.parseEther(updatedNode.pricePerMinute);
+     const priceInWei = parseEther(updatedNode.pricePerMinute);
 
+  
       // Call the smart contract function to update the node
       const tx = await contract.updateWiFiNode(
         updatedNode.id,
