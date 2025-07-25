@@ -40,7 +40,7 @@ const DarkFooter: React.FC = () => {
 
   return (
     <div className="relative">
-      <footer className="bg-transparent border-t border-gray-800 relative z-10">
+      <footer className="bg-black border-t border-gray-800 relative z-10">
         {/* Make sure the footer content is above the Vortex */}
         <div className="relative z-10 max-w-6xl mx-auto px-6 py-16">
           {/* Main footer content */}

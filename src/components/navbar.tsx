@@ -6,30 +6,64 @@ import Image from "next/image";
 import { Menu, X, Home, FileText, LayoutDashboard } from "lucide-react";
 import { FloatingDock } from "@/components/ui/floating-dock";
 import { motion, AnimatePresence } from "framer-motion";
-import Cookies from "js-cookie"
-import UserDropdown from "@/components/login/UserDropdown"
+import Cookies from "js-cookie";
+import UserDropdown from "@/components/login/UserDropdown";
 import { AuthButton } from "./AuthButton";
 
 const ErebrusNavbar = () => {
-  const [avatarUrl, setAvatarUrl] = useState("")
-
+  const [avatarUrl, setAvatarUrl] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showDock, setShowDock] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
-  const address = Cookies.get("erebrus_wallet")
-  const token = Cookies.get("erebrus_token")
+  const [showVerifyDialog, setShowVerifyDialog] = useState(false);
+  const [showSignInDialog, setShowSignInDialog] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
+  const address = Cookies.get("erebrus_wallet");
+  const token = Cookies.get("erebrus_token");
   useEffect(() => {
     if (token) {
-      const getRandomNumber = () => Math.floor(Math.random() * 1000)
-      const imageUrl = `https://robohash.org/${getRandomNumber()}`
-      setAvatarUrl(imageUrl)
+      const getRandomNumber = () => Math.floor(Math.random() * 1000);
+      const imageUrl = `https://robohash.org/${getRandomNumber()}`;
+      setAvatarUrl(imageUrl);
     }
-  }, [token])
+  }, [token]);
   const handlePasetoClick = () => {
-    console.log("Show paseto QR code")
-  }
+    console.log("Show paseto QR code");
+  };
 
+  // Dummy check for verification, replace with your logic
+  useEffect(() => {
+    // For demo, check a cookie or localStorage for verification status
+    const verified = Cookies.get("erebrus_verified") === "true";
+    setIsVerified(!!verified);
+  }, [token]);
+
+  // Handler for successful verification
+  const handleVerificationSuccess = (userData) => {
+    setIsVerified(true);
+    Cookies.set("erebrus_verified", "true");
+    setShowVerifyDialog(false);
+  };
+
+  // Handler for successful sign-in
+  const handleSignInSuccess = () => {
+    setShowSignInDialog(false);
+    // Optionally, set auth state/cookie here
+  };
+
+  // Stub for wallet registration check
+  const handleVerifyClick = async () => {
+    // TODO: Replace with backend call
+    // Example: const res = await fetch(`/api/users/check-wallet?address=${address}`)
+    // const { registered } = await res.json();
+    const registered = false; // Change to backend result
+    if (registered) {
+      setShowSignInDialog(true);
+    } else {
+      setShowVerifyDialog(true);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -62,7 +96,11 @@ const ErebrusNavbar = () => {
 
   const navItems = [
     { name: "Explorer", link: "/explorer" },
-    { name: "Docs", link: "https://docs.netsepio.com/erebrus/", external: true },
+    {
+      name: "Docs",
+      link: "https://docs.netsepio.com/erebrus/",
+      external: true,
+    },
     { name: "Dashboard", link: "/dashboard" },
   ];
 
@@ -111,7 +149,7 @@ const ErebrusNavbar = () => {
                 width={150}
                 height={40}
                 className="h-10 w-auto"
-                 sizes='100vw'
+                sizes="100vw"
               />
             </Link>
 
@@ -130,27 +168,75 @@ const ErebrusNavbar = () => {
               ))}
             </div>
 
-            {/* Login Button Component */}
+            {/* Login & Verify Button Component */}
             <div className="flex items-center">
-         {token?<>
-         <UserDropdown 
-             avatarUrl={avatarUrl}
-             handlePasetoClick={handlePasetoClick}
-             paseto={token}
-         
-         />
-        </>:<>
-         <appkit-button />
-        <AuthButton/>
-         </>}
+              {token ? (
+                <>
+                  <UserDropdown
+                    avatarUrl={avatarUrl}
+                    handlePasetoClick={handlePasetoClick}
+                    paseto={token}
+                  />
+                  {!isVerified && (
+                    <button
+                      className="ml-3 px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-lg font-medium hover:opacity-90 transition-all"
+                      onClick={handleVerifyClick}
+                    >
+                      Verify
+                    </button>
+                  )}
+                </>
+              ) : (
+                <>
+                  <appkit-button />
+                  <AuthButton />
+                </>
+              )}
             </div>
+
+            {/* Verification Dialog */}
+            {showVerifyDialog && (
+              <UserVerificationDialog
+                isOpen={showVerifyDialog}
+                onClose={() => setShowVerifyDialog(false)}
+                walletAddress={address || ""}
+                onSuccess={handleVerificationSuccess}
+              />
+            )}
+            {/* Sign-in Dialog stub (replace with your actual sign-in dialog/component) */}
+            {showSignInDialog && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                <div className="bg-[#1A1A1A] rounded-2xl border border-[#2A2A2A] max-w-md w-full max-h-[90vh] overflow-y-auto p-6">
+                  <h2 className="text-xl font-bold text-white mb-4">Sign In</h2>
+                  <p className="text-[#AAAAAA] mb-6">
+                    Wallet already registered. Please sign in.
+                  </p>
+                  <button
+                    className="w-full py-3 px-4 bg-gradient-to-r from-[#00A3FF] to-[#00F0FF] hover:opacity-90 text-white rounded-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                    onClick={handleSignInSuccess}
+                  >
+                    Sign In with Wallet
+                  </button>
+                  <button
+                    className="w-full mt-3 py-3 px-4 bg-[#333333] hover:bg-[#3A3A3A] text-white rounded-lg transition-colors"
+                    onClick={() => setShowSignInDialog(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Mobile Menu Button */}
             <div className="md:hidden">
               <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="text-white focus:outline-none"
-                aria-label={isOpen ? "Close mobile navigation menu" : "Open mobile navigation menu"}
+                aria-label={
+                  isOpen
+                    ? "Close mobile navigation menu"
+                    : "Open mobile navigation menu"
+                }
               >
                 {isOpen ? <X size={28} /> : <Menu size={28} />}
               </button>

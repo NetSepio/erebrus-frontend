@@ -1,23 +1,40 @@
-'use client'
+"use client";
 
-import { createAppKit, useAppKitAccount, useAppKitProvider, useAppKitNetworkCore } from '@reown/appkit/react';
-import { EthersAdapter } from '@reown/appkit-adapter-ethers';
-import { BaseWalletAdapter, SolanaAdapter } from '@reown/appkit-adapter-solana';
-import { mainnet, arbitrum, base, solana, solanaTestnet, solanaDevnet } from '@reown/appkit/networks';
-import { PhantomWalletAdapter, SolflareWalletAdapter } from '@solana/wallet-adapter-wallets';
-import { defineChain } from '@reown/appkit/networks';
-import React, { useEffect, useState } from 'react';
-import Cookies from 'js-cookie';
-import axios from 'axios';
-import { BrowserProvider } from 'ethers';
-import { toast } from 'sonner';
+import {
+  createAppKit,
+  useAppKitAccount,
+  useAppKitProvider,
+  useAppKitNetworkCore,
+} from "@reown/appkit/react";
+import { EthersAdapter } from "@reown/appkit-adapter-ethers";
+import { BaseWalletAdapter, SolanaAdapter } from "@reown/appkit-adapter-solana";
+import {
+  mainnet,
+  arbitrum,
+  base,
+  solana,
+  solanaTestnet,
+  solanaDevnet,
+} from "@reown/appkit/networks";
+import {
+  PhantomWalletAdapter,
+  SolflareWalletAdapter,
+} from "@solana/wallet-adapter-wallets";
+import { defineChain } from "@reown/appkit/networks";
+import React, { useEffect, useState } from "react";
+import Cookies from "js-cookie";
+import axios from "axios";
+import { BrowserProvider } from "ethers";
+import { toast } from "sonner";
 import type { Provider } from "@reown/appkit-adapter-solana/react";
 
 declare global {
   interface Window {
     phantom?: {
       solana?: {
-        signMessage: (message: Uint8Array) => Promise<{ signature: Uint8Array }>;
+        signMessage: (
+          message: Uint8Array
+        ) => Promise<{ signature: Uint8Array }>;
         isPhantom?: boolean;
       };
     };
@@ -34,86 +51,91 @@ declare global {
 // Define Peaq network
 const peaqNetwork = defineChain({
   id: 3338,
-  caipNetworkId: 'eip155:333777',
-  chainNamespace: 'eip155',
-  name: 'peaq',
+  caipNetworkId: "eip155:333777",
+  chainNamespace: "eip155",
+  name: "peaq",
   nativeCurrency: {
     decimals: 18,
-    name: 'peaq',
-    symbol: 'PEAQ',
+    name: "peaq",
+    symbol: "PEAQ",
   },
   rpcUrls: {
     default: {
-      http: ['https://peaq.api.onfinality.io/public'],
-      webSocket: ['wss://peaq.api.onfinality.io/public'],
+      http: ["https://peaq.api.onfinality.io/public"],
+      webSocket: ["wss://peaq.api.onfinality.io/public"],
     },
   },
   blockExplorers: {
-    default: { name: 'peaqScan', url: 'https://peaq.subscan.io/' },
+    default: { name: "peaqScan", url: "https://peaq.subscan.io/" },
   },
 });
 
 // Define Monad Testnet
 const monadTestnet = defineChain({
   id: 10143,
-  caipNetworkId: 'eip155:6969',
-  chainNamespace: 'eip155',
-  name: 'Monad Testnet',
+  caipNetworkId: "eip155:6969",
+  chainNamespace: "eip155",
+  name: "Monad Testnet",
   nativeCurrency: {
     decimals: 18,
-    name: 'Monad',
-    symbol: 'MON',
+    name: "Monad",
+    symbol: "MON",
   },
   rpcUrls: {
     default: {
-      http: ['https://testnet-rpc.monad.xyz'],
-      webSocket: ['wss://testnet-rpc.monad.xyz'],
+      http: ["https://testnet-rpc.monad.xyz"],
+      webSocket: ["wss://testnet-rpc.monad.xyz"],
     },
   },
   blockExplorers: {
-    default: { name: 'Monad Explorer', url: 'https://testnet-explorer.monad.xyz' },
+    default: {
+      name: "Monad Explorer",
+      url: "https://testnet-explorer.monad.xyz",
+    },
   },
 });
 
 // Define Rise Testnet
 const riseTestnet = defineChain({
   id: 11155931,
-  caipNetworkId: 'eip155:11155931',
-  chainNamespace: 'eip155',
-  name: 'RISE Testnet',
+  caipNetworkId: "eip155:11155931",
+  chainNamespace: "eip155",
+  name: "RISE Testnet",
   nativeCurrency: {
     decimals: 18,
-    name: 'Ethereum',
-    symbol: 'ETH',
+    name: "Ethereum",
+    symbol: "ETH",
   },
   rpcUrls: {
     default: {
-      http: ['https://testnet.riselabs.xyz'],
-      webSocket: ['wss://testnet.riselabs.xyz/ws'],
+      http: ["https://testnet.riselabs.xyz"],
+      webSocket: ["wss://testnet.riselabs.xyz/ws"],
     },
   },
   blockExplorers: {
     default: {
-      name: 'Rise Explorer',
-      url: 'https://testnet.explorer.riselabs.xyz',
+      name: "Rise Explorer",
+      url: "https://testnet.explorer.riselabs.xyz",
     },
   },
 });
 
 export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
-console.log('project id',projectId)
+console.log("project id", projectId);
 
 if (!projectId) {
-  throw new Error('Project ID is not defined. Please set NEXT_PUBLIC_PROJECT_ID in your environment variables.');
+  throw new Error(
+    "Project ID is not defined. Please set NEXT_PUBLIC_PROJECT_ID in your environment variables."
+  );
 }
 
 const metadata = {
-  name: 'Erebrus',
-  description: "Powering the future of AI interaction through multi-agent collaboration.",
-  url: 'https://erebrus.io/',
-  icons: ['https://cyreneai.com/Cyrene_mobile_logo.webp'],
+  name: "Erebrus",
+  description:
+    "Powering the future of AI interaction through multi-agent collaboration.",
+  url: "https://erebrus.io/",
+  icons: ["https://cyreneai.com/Cyrene_mobile_logo.webp"],
 };
-
 
 const wallets: BaseWalletAdapter[] = [
   new PhantomWalletAdapter() as unknown as BaseWalletAdapter,
@@ -132,15 +154,18 @@ const NETWORK_IDS = {
   BASE: Number(base.id),
   PEAQ: Number(peaqNetwork.id),
   MONAD: Number(monadTestnet.id),
-  RISE: Number(riseTestnet.id)
+  RISE: Number(riseTestnet.id),
 };
 
 // Helper to get chain type
-const getChainType = (chainId: string | number): 'solana' | 'evm' => {
-  const chainIdNum = typeof chainId === 'string' ? parseInt(chainId, 10) : chainId;
-  return chainIdNum === NETWORK_IDS.SOLANA || 
-         chainIdNum === Number(solanaDevnet.id) || 
-         chainIdNum === Number(solanaTestnet.id) ? 'solana' : 'evm';
+const getChainType = (chainId: string | number): "solana" | "evm" => {
+  const chainIdNum =
+    typeof chainId === "string" ? parseInt(chainId, 10) : chainId;
+  return chainIdNum === NETWORK_IDS.SOLANA ||
+    chainIdNum === Number(solanaDevnet.id) ||
+    chainIdNum === Number(solanaTestnet.id)
+    ? "solana"
+    : "evm";
 };
 
 // Helper to get cookie key with chain suffix
@@ -149,31 +174,40 @@ const getChainCookieKey = (key: string, chainType: string) => {
 };
 
 // Cookie management utilities
-const setAuthCookies = (chainType: 'solana' | 'evm', token: string, walletAddress: string, userId: string) => {
-  const options = { 
+const setAuthCookies = (
+  chainType: "solana" | "evm",
+  token: string,
+  walletAddress: string,
+  userId: string
+) => {
+  const options = {
     expires: 7,
-    path: '/',
-    sameSite: 'Strict' as const,
-    secure: process.env.NODE_ENV === 'production'
+    path: "/",
+    sameSite: "Strict" as const,
+    secure: process.env.NODE_ENV === "production",
   };
-  
+
   Cookies.set(getChainCookieKey("erebrus_token", chainType), token, options);
-  Cookies.set(getChainCookieKey("erebrus_wallet", chainType), walletAddress.toLowerCase(), options);
+  Cookies.set(
+    getChainCookieKey("erebrus_wallet", chainType),
+    walletAddress.toLowerCase(),
+    options
+  );
   Cookies.set(getChainCookieKey("erebrus_userid", chainType), userId, options);
 };
 
-const clearAuthCookies = (chainType: 'solana' | 'evm') => {
-  const options = { path: '/' };
+const clearAuthCookies = (chainType: "solana" | "evm") => {
+  const options = { path: "/" };
   Cookies.remove(getChainCookieKey("erebrus_token", chainType), options);
   Cookies.remove(getChainCookieKey("erebrus_wallet", chainType), options);
   Cookies.remove(getChainCookieKey("erebrus_userid", chainType), options);
 };
 
-const getAuthFromCookies = (chainType: 'solana' | 'evm') => {
+const getAuthFromCookies = (chainType: "solana" | "evm") => {
   return {
     token: Cookies.get(getChainCookieKey("erebrus_token", chainType)),
     wallet: Cookies.get(getChainCookieKey("erebrus_wallet", chainType)),
-    userId: Cookies.get(getChainCookieKey("erebrus_userid", chainType))
+    userId: Cookies.get(getChainCookieKey("erebrus_userid", chainType)),
   };
 };
 
@@ -217,7 +251,7 @@ const authenticateEVM = async (walletAddress: string, walletProvider: any) => {
         chainName,
         flowId,
         signature,
-        walletAddress
+        walletAddress,
       },
       {
         headers: {
@@ -227,17 +261,20 @@ const authenticateEVM = async (walletAddress: string, walletProvider: any) => {
     );
 
     const { token, userId } = authResponse.data.payload;
-    setAuthCookies('evm', token, walletAddress, userId);
+    setAuthCookies("evm", token, walletAddress, userId);
     return true;
   } catch (error) {
     console.error("EVM Authentication error:", error);
-    clearAuthCookies('evm');
+    clearAuthCookies("evm");
     return false;
   }
 };
 
 // Solana Authentication with social login support
-const authenticateSolana = async (walletAddress: string, walletProvider: Provider) => {
+const authenticateSolana = async (
+  walletAddress: string,
+  walletProvider: Provider
+) => {
   try {
     const GATEWAY_URL = "https://gateway.netsepio.com/";
     const chainName = "sol";
@@ -254,10 +291,10 @@ const authenticateSolana = async (walletAddress: string, walletProvider: Provide
 
     const encodedMessage = new TextEncoder().encode(message);
     const signature = await walletProvider.signMessage(encodedMessage);
-    
+
     const signatureHex = Array.from(new Uint8Array(signature))
-      .map((b: number) => b.toString(16).padStart(2, '0'))
-      .join('');
+      .map((b: number) => b.toString(16).padStart(2, "0"))
+      .join("");
 
     const authResponse = await axios.post(
       `${GATEWAY_URL}api/v1.0/authenticate?walletAddress=${walletAddress}&chain=sol`,
@@ -277,11 +314,11 @@ const authenticateSolana = async (walletAddress: string, walletProvider: Provide
     );
 
     const { token, userId } = authResponse.data.payload;
-    setAuthCookies('solana', token, walletAddress, userId);
+    setAuthCookies("solana", token, walletAddress, userId);
     return true;
   } catch (error) {
     console.error("Solana Authentication error:", error);
-    clearAuthCookies('solana');
+    clearAuthCookies("solana");
     return false;
   }
 };
@@ -289,18 +326,55 @@ const authenticateSolana = async (walletAddress: string, walletProvider: Provide
 // Wallet auth hook
 export function useWalletAuth() {
   const { isConnected, address } = useAppKitAccount();
-  const { walletProvider: evmWalletProvider } = useAppKitProvider<Provider>("eip155");
-  const { walletProvider: solanaWalletProvider } = useAppKitProvider<Provider>("solana");
+  const { walletProvider: evmWalletProvider } =
+    useAppKitProvider<Provider>("eip155");
+  const { walletProvider: solanaWalletProvider } =
+    useAppKitProvider<Provider>("solana");
   const { chainId, caipNetworkId } = useAppKitNetworkCore();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [authSuccess, setAuthSuccess] = useState(false);
 
+  // Set global cookies for chain and wallet on connect
+  useEffect(() => {
+    if (isConnected && address && chainId) {
+      // Set global cookies for profile page and others
+      let chainSymbol = "";
+      if (
+        caipNetworkId?.startsWith("solana:") ||
+        chainId === NETWORK_IDS.SOLANA
+      ) {
+        chainSymbol = "sol";
+      } else if (chainId === NETWORK_IDS.MAINNET) {
+        chainSymbol = "evm";
+      } else if (chainId === NETWORK_IDS.ARBITRUM) {
+        chainSymbol = "evm";
+      } else if (chainId === NETWORK_IDS.BASE) {
+        chainSymbol = "evm";
+      } else if (chainId === NETWORK_IDS.PEAQ) {
+        chainSymbol = "peaq";
+      } else if (chainId === NETWORK_IDS.MONAD) {
+        chainSymbol = "monad";
+      } else if (chainId === NETWORK_IDS.RISE) {
+        chainSymbol = "rise";
+      }
+      Cookies.set("Chain_symbol", chainSymbol, {
+        path: "/",
+        sameSite: "Strict",
+        secure: process.env.NODE_ENV === "production",
+      });
+      Cookies.set("erebrus_wallet", address, {
+        path: "/",
+        sameSite: "Strict",
+        secure: process.env.NODE_ENV === "production",
+      });
+    }
+  }, [isConnected, address, chainId, caipNetworkId]);
+
   // Get current auth status
   const getCurrentAuthStatus = () => {
     if (!isConnected || !address) return false;
-    
-    const chainType = caipNetworkId?.startsWith('solana:') ? 'solana' : 'evm';
+    const chainType = caipNetworkId?.startsWith("solana:") ? "solana" : "evm";
     const { token, wallet } = getAuthFromCookies(chainType);
     return !!(token && wallet?.toLowerCase() === address.toLowerCase());
   };
@@ -308,7 +382,7 @@ export function useWalletAuth() {
   // Authentication function
   const authenticate = async () => {
     if (!isConnected || !address) {
-      setAuthError('Wallet not connected');
+      setAuthError("Wallet not connected");
       return false;
     }
 
@@ -317,14 +391,15 @@ export function useWalletAuth() {
     setAuthSuccess(false);
 
     try {
-      const isSolanaChain = caipNetworkId?.startsWith('solana:') || 
-                           chainId === NETWORK_IDS.SOLANA || 
-                           chainId === Number(solanaDevnet.id) || 
-                           chainId === Number(solanaTestnet.id);
+      const isSolanaChain =
+        caipNetworkId?.startsWith("solana:") ||
+        chainId === NETWORK_IDS.SOLANA ||
+        chainId === Number(solanaDevnet.id) ||
+        chainId === Number(solanaTestnet.id);
 
-      const chainType = isSolanaChain ? 'solana' : 'evm';
+      const chainType = isSolanaChain ? "solana" : "evm";
       const { token, wallet } = getAuthFromCookies(chainType);
-      
+
       if (token && wallet?.toLowerCase() === address.toLowerCase()) {
         setAuthSuccess(true);
         return true;
@@ -335,29 +410,30 @@ export function useWalletAuth() {
       }
 
       let authResult = false;
-      
+
       if (isSolanaChain) {
         if (!solanaWalletProvider) {
-          throw new Error('Solana wallet provider not available');
+          throw new Error("Solana wallet provider not available");
         }
         authResult = await authenticateSolana(address, solanaWalletProvider);
       } else {
         if (!evmWalletProvider) {
-          throw new Error('EVM wallet provider not available');
+          throw new Error("EVM wallet provider not available");
         }
         authResult = await authenticateEVM(address, evmWalletProvider);
       }
 
       if (authResult) {
         setAuthSuccess(true);
-        toast.success('Authentication successful');
+        toast.success("Authentication successful");
         return true;
       } else {
-        throw new Error('Authentication failed');
+        throw new Error("Authentication failed");
       }
     } catch (error) {
-      console.error('Authentication error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Authentication failed';
+      console.error("Authentication error:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Authentication failed";
       setAuthError(errorMessage);
       toast.error(errorMessage);
       return false;
@@ -369,8 +445,8 @@ export function useWalletAuth() {
   // Cleanup on disconnection
   useEffect(() => {
     if (!isConnected) {
-      ['solana', 'evm'].forEach(chainType => {
-        clearAuthCookies(chainType as 'solana' | 'evm');
+      ["solana", "evm"].forEach((chainType) => {
+        clearAuthCookies(chainType as "solana" | "evm");
       });
       setAuthSuccess(false);
     }
@@ -402,16 +478,16 @@ createAppKit({
     analytics: true,
   },
   defaultNetwork: solana,
-  themeMode: 'dark',
+  themeMode: "dark",
   themeVariables: {
-    '--w3m-font-family': 'Inter, sans-serif',
-    '--w3m-accent': '#3B82F6',
-    '--w3m-color-mix': '#3B82F6',
-    '--w3m-color-mix-strength': 40
+    "--w3m-font-family": "Inter, sans-serif",
+    "--w3m-accent": "#3B82F6",
+    "--w3m-color-mix": "#3B82F6",
+    "--w3m-color-mix-strength": 40,
   },
   chainImages: {
-    11155931: '/rise.jpg',
-    3338: '/peaq.jpg', 
-    6969: '/monad-logo.png',
-  }
+    11155931: "/rise.jpg",
+    3338: "/peaq.jpg",
+    6969: "/monad-logo.png",
+  },
 });

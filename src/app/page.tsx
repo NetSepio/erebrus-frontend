@@ -46,7 +46,7 @@ function Page() {
                 alt="Uncensored Globe"
                 fill
                 className="object-contain"
-                sizes='100vw'
+                sizes="100vw"
               />
             </div>
           </div>
