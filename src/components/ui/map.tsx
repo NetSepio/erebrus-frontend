@@ -46,13 +46,12 @@ export default function DePINRevolutionComponent() {
       {/* Content overlay - centered both horizontally and vertically */}
       <div className="relative z-10 w-full max-w-4xl mx-auto px-6">
         <div className="bg-black bg-opacity-70 p-8 rounded-xl backdrop-blur-sm border border-gray-800">
-          <h1 className="text-4xl md:text-5xl font-bold mb-8 text-center bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent">
+          <h2 className="text-4xl md:text-5xl font-bold mb-8 text-center bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent">
             Pioneering the DePIN Revolution
-          </h1>
+          </h2>
 
           <div className="space-y-6 text-lg">
             <div className="bg-gray-900 p-6 rounded-lg">
-              
               <p>
                 Prepare to witness a groundbreaking leap in internet technology
                 with the Erebus Protocol, the vanguard in democratizing safe,

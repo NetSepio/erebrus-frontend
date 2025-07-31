@@ -76,6 +76,7 @@ const FloatingDockMobile = ({
       <button
         onClick={() => setOpen(!open)}
         className="h-10 w-10 rounded-full bg-gray-50 dark:bg-neutral-800 flex items-center justify-center"
+        aria-label={open ? "Close floating dock menu" : "Open floating dock menu"}
       >
         <IconLayoutNavbarCollapse className="h-5 w-5 text-neutral-500 dark:text-neutral-400" />
       </button>

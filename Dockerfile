@@ -1,42 +1,23 @@
-# ---- Build Stage ----
-    FROM node:18-alpine AS builder
+# -------- Build Stage --------
+FROM node:18-alpine AS builder
 
-    # Install build dependencies
-    RUN apk add --no-cache \
-        python3 \
-        make \
-        g++ \
-        libusb-dev \
-        linux-headers \
-        eudev-dev \
-        pkgconfig
-    
-    # Set working directory
-    WORKDIR /app
-    
-    # Copy package.json and package-lock.json
-    COPY package*.json ./
-    
-    # Install all dependencies (needed to build)
-    RUN npm install --force
-    
-    # Copy the rest of the app
-    COPY . .
-    
-    # Build the Next.js app
-    RUN npm run build
-    
-    # ---- Production Stage ----
-    FROM node:18-alpine
-    
-    # Set working directory
-    WORKDIR /app
-    # Copy files from the build stage
-COPY --from=builder /app /app
+ARG NEXT_PUBLIC_PROJECT_ID
+ENV NEXT_PUBLIC_PROJECT_ID=$NEXT_PUBLIC_PROJECT_ID
 
-    # Expose port
-    EXPOSE 3000
-    
-    # Start the app
-    CMD ["npm", "start"]
-    
+WORKDIR /app
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    libusb-dev \
+    linux-headers \
+    eudev-dev \
+    pkgconfig
+
+COPY package*.json ./
+RUN npm install --force
+
+COPY . .
+
+RUN echo "NEXT_PUBLIC_PROJECT_ID at build time: $NEXT_PUBLIC_PROJECT_ID"
+RUN npm run build

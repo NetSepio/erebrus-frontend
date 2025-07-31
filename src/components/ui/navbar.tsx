@@ -239,6 +239,7 @@ export const NavbarLogo = () => {
         alt="logo"
         width={30}
         height={30}
+         sizes='100vw'
       />
       <span className="font-medium text-black dark:text-white">erebrus</span>
     </Link>

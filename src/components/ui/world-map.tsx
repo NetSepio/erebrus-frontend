@@ -62,6 +62,7 @@ export default function WorldMap({ dots = [], nodes = [], lineColor = "#0ea5e9",
         height="495"
         width="1056"
         draggable={false}
+         sizes='100vw'
       />
       <svg ref={svgRef} viewBox="0 0 800 400" className="w-full h-full absolute inset-0 select-none">
         {dots.map((dot, i) => {

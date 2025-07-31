@@ -1,0 +1,67 @@
+# name: "Test Build"
+
+# on:
+#   push:
+#     branches-ignore:
+#       - main
+#       - prod
+
+# jobs:
+#   test_build:
+#     runs-on: ubuntu-latest
+#     environment: dev
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v3
+
+#       - name: Build Docker Image for Testing
+#         env:
+#           DEV_ENV_FILE: ${{ vars.DEV_EREBRUS_FRONTEND }}
+#         run: |
+#           echo "$DEV_ENV_FILE" > .env
+#           cat .env
+#           export CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
+#           export TAG=$([[ $CURRENT_BRANCH == $(basename ${{ github.ref }}) ]] && echo $CURRENT_BRANCH || echo "latest")
+#           echo $TAG
+#           export GITHUB_REF_IMAGE=ghcr.io/$GITHUB_REPOSITORY:$GITHUB_SHA
+#           export GITHUB_BRANCH_IMAGE=ghcr.io/$GITHUB_REPOSITORY:$TAG
+#           export GITHUB_REF_IMAGE=$(echo $GITHUB_REF_IMAGE | tr '[:upper:]' '[:lower:]')
+#           export GITHUB_BRANCH_IMAGE=$(echo $GITHUB_BRANCH_IMAGE | tr '[:upper:]' '[:lower:]')
+#           docker build --build-arg NEXT_PUBLIC_PROJECT_ID=${{ vars.NEXT_PUBLIC_PROJECT_ID }} --build-arg version=$GITHUB_SHA -t $GITHUB_REF_IMAGE -t $GITHUB_BRANCH_IMAGE .
+#           rm -rf .env
+
+
+
+name: "Test Build"
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - prod
+
+jobs:
+  test_build:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build Docker Image for Testing
+        run: |
+          export CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
+          export TAG=$([[ $CURRENT_BRANCH == $(basename ${{ github.ref }}) ]] && echo $CURRENT_BRANCH || echo "latest")
+          echo "Building Docker image with tag: $TAG"
+
+          export GITHUB_REF_IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}:$GITHUB_SHA
+          export GITHUB_BRANCH_IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}:$TAG
+
+          echo "Using NEXT_PUBLIC_PROJECT_ID=${{ vars.NEXT_PUBLIC_PROJECT_ID }}"
+
+          docker build \
+            --build-arg NEXT_PUBLIC_PROJECT_ID=${{ vars.NEXT_PUBLIC_PROJECT_ID }} \
+            --build-arg version=$GITHUB_SHA \
+            -t $GITHUB_REF_IMAGE \
+            -t $GITHUB_BRANCH_IMAGE .
+

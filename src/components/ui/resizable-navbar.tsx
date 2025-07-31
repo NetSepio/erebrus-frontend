@@ -188,7 +188,7 @@ export const MobileNavToggle = ({ isOpen, onClick }: { isOpen: boolean; onClick:
 export const NavbarLogo = () => {
   return (
     <Link href="/" className="relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal">
-      <Image src="/images/Erebrus_logo_wordmark.webp" alt="Erebrus" width={120} height={30} />
+      <Image src="/images/Erebrus_logo_wordmark.webp" alt="Erebrus"  sizes='100vw' width={120} height={30} />
     </Link>
   )
 }
