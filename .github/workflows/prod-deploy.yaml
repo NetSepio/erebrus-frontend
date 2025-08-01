@@ -2,8 +2,9 @@ name: "Build and Push to GHCR"
 
 on:
   push:
-    branches:
+    branches-ignore:
       - main
+      - prod
 
 jobs:
   build_push:
