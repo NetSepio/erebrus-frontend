@@ -10,8 +10,28 @@ import PartnersMarquee from "@/components/ui/PartnersMarquee";
 import Image from "next/image";
 import Link from "next/link";
 import { ScrollProgress } from "@/components/ui/scroll-progress";
+import { UserVerificationDialog } from "@/components/common/UserVerificationDialog";
+import { useState } from "react";
 
 function Page() {
+  const [showVerificationDialog, setShowVerificationDialog] = useState(false);
+  const [connectedWallet, setConnectedWallet] = useState("");
+
+  const handleWalletConnect = () => {
+    // Simulate wallet connection
+    const mockWalletAddress = "0x1234567890abcdef1234567890abcdef12345678";
+    setConnectedWallet(mockWalletAddress);
+
+    // Show verification dialog for new wallets
+    setShowVerificationDialog(true);
+  };
+
+  const handleVerificationSuccess = (userData: any) => {
+    console.log("User verified successfully:", userData);
+    setShowVerificationDialog(false);
+    // Handle success - you can redirect, update app state, etc.
+  };
+
   return (
     <>
       <Head>
@@ -26,7 +46,7 @@ function Page() {
         {/* <ErebrusNavbar /> */}
         <ScrollProgress color="#3b82f6" height={4} />
 
-        <HeroSection />
+        <HeroSection onWalletConnect={handleWalletConnect} />
         <div className="pt-12">
           <PartnersMarquee />
         </div>
@@ -249,6 +269,14 @@ function Page() {
         </section>
 
         {/* <DarkFooter /> */}
+
+        {/* User Verification Dialog */}
+        <UserVerificationDialog
+          isOpen={showVerificationDialog}
+          onClose={() => setShowVerificationDialog(false)}
+          walletAddress={connectedWallet}
+          onSuccess={handleVerificationSuccess}
+        />
       </div>
       {/* Ensure all opened elements are closed properly */}
     </>

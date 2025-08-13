@@ -1,11 +1,21 @@
-import Link from "next/link"
+import Link from "next/link";
 
-const HeroSection = () => {
+interface HeroSectionProps {
+  onWalletConnect?: () => void;
+}
+
+const HeroSection = ({ onWalletConnect }: HeroSectionProps) => {
   return (
     <div className="relative h-screen w-full overflow-hidden">
       {/* Background Video */}
       <div className="absolute inset-0 z-0">
-        <video autoPlay loop muted playsInline className="h-full w-full object-cover">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="h-full w-full object-cover"
+        >
           <source src="/background.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
@@ -23,15 +33,18 @@ const HeroSection = () => {
             </span>
           </h1>
           <p className="mb-12 text-xl text-blue-100 md:text-2xl max-w-3xl mx-auto">
-            Join the revolution reshaping how the world connects, shares, and creates value
+            Join the revolution reshaping how the world connects, shares, and
+            creates value
           </p>
           <div className="flex flex-col items-center justify-center space-y-4 sm:flex-row sm:space-x-6 sm:space-y-0">
             <Link href="/explorer">
-              <button className="rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 px-10 py-4 font-medium text-white transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/50 transform hover:-translate-y-1 text-lg" aria-label="Explore Erebrus VPN network">
+              <button
+                className="rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 px-10 py-4 font-medium text-white transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/50 transform hover:-translate-y-1 text-lg"
+                aria-label="Explore Erebrus VPN network"
+              >
                 Explore VPN
               </button>
             </Link>
-            
           </div>
         </div>
       </div>
@@ -42,7 +55,7 @@ const HeroSection = () => {
       <div className="absolute bottom-1/4 right-1/4 h-72 w-72 rounded-full bg-blue-300 opacity-10 blur-3xl"></div>
       <div className="absolute top-1/3 left-1/4 h-80 w-80 rounded-full bg-purple-400 opacity-10 blur-3xl"></div>
     </div>
-  )
-}
+  );
+};
 
-export default HeroSection
+export default HeroSection;

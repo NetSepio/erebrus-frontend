@@ -30,9 +30,13 @@ import {
   Save,
   X,
   Check,
+  Upload,
 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useWalletAuth } from "@/context/appkit";
+import { toast } from "sonner";
 
-const REACT_APP_GATEWAY_URL = "https://gateway.netsepio.com";
+const REACT_APP_GATEWAY_URL = "https://gateway.dev.netsepio.com";
 
 interface FormData {
   name: string;
@@ -57,6 +61,9 @@ interface ChainInfoMap {
 }
 
 const Profile = () => {
+  // Use the updated authentication hook
+  const { isConnected, address, isAuthenticated, isVerified } = useWalletAuth();
+
   const [tempFormData, setTempFormData] = useState<FormData>({
     name: "",
     country: "",
@@ -80,6 +87,58 @@ const Profile = () => {
   const [change, setchange] = useState(false);
   const [unlinkpopup, setunlinkpopup] = useState(false);
 
+  // Email OTP verification states
+  const [showOtpDialog, setShowOtpDialog] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [isOtpSending, setIsOtpSending] = useState(false);
+  const [isOtpVerifying, setIsOtpVerifying] = useState(false);
+  const [pendingEmailUpdate, setPendingEmailUpdate] = useState("");
+  const [otpSentEmail, setOtpSentEmail] = useState("");
+
+  // Helper function to get the correct authentication token
+  const getAuthToken = () => {
+    const solanaToken = Cookies.get("erebrus_token_solana");
+    const evmToken = Cookies.get("erebrus_token_evm");
+    return solanaToken || evmToken || null;
+  };
+
+  // Enhanced authentication check
+  const isUserAuthenticated = () => {
+    const token = getAuthToken();
+    const walletFromCookie = Cookies.get("erebrus_wallet");
+    return !!(
+      isConnected &&
+      address &&
+      token &&
+      walletFromCookie?.toLowerCase() === address.toLowerCase()
+    );
+  };
+
+  // Handle refresh button click
+  const handleRefreshPage = () => {
+    console.log("Refresh button clicked, checking auth status...");
+    const currentToken = getAuthToken();
+    const walletFromCookie = Cookies.get("erebrus_wallet");
+
+    console.log("Current state:", {
+      isConnected,
+      address,
+      currentToken: !!currentToken,
+      walletFromCookie,
+      isUserAuthenticated: isUserAuthenticated(),
+    });
+
+    if (isUserAuthenticated()) {
+      // User is authenticated, force refresh profile data
+      console.log("User is authenticated, refreshing profile data");
+      setprofileset((prev) => !prev);
+    } else {
+      // Still not authenticated, reload the page
+      console.log("User still not authenticated, reloading page");
+      window.location.reload();
+    }
+  };
+
   const walletaddr = Cookies.get("erebrus_wallet");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,6 +147,111 @@ const Profile = () => {
       ...prev,
       [id]: value,
     }));
+  };
+
+  // Function to send OTP to current email
+  const sendOtpToCurrentEmail = async () => {
+    const auth = getAuthToken();
+    if (!auth) {
+      toast.error(
+        "Authentication token not found. Please reconnect your wallet."
+      );
+      return false;
+    }
+
+    const currentEmail = formData.emailId;
+    if (!currentEmail) {
+      toast.error("No current email found. Please set an email first.");
+      return false;
+    }
+
+    setIsOtpSending(true);
+    try {
+      const response = await fetch(
+        `${REACT_APP_GATEWAY_URL}/api/v1.1/profile/email/send`,
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json, text/plain, */*",
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${auth}`,
+          },
+          body: JSON.stringify({
+            email: currentEmail,
+            purpose: "email_update",
+          }),
+        }
+      );
+
+      if (response.ok) {
+        setOtpSentEmail(currentEmail);
+        toast.success(`OTP sent to ${currentEmail}`);
+        return true;
+      } else {
+        const errorData = await response.json();
+        toast.error(
+          errorData.message || "Failed to send OTP. Please try again."
+        );
+        return false;
+      }
+    } catch (error) {
+      console.error("Error sending OTP:", error);
+      toast.error("Failed to send OTP. Please try again.");
+      return false;
+    } finally {
+      setIsOtpSending(false);
+    }
+  };
+
+  // Function to verify OTP
+  const verifyOtp = async () => {
+    const auth = getAuthToken();
+    if (!auth) {
+      toast.error(
+        "Authentication token not found. Please reconnect your wallet."
+      );
+      return false;
+    }
+
+    if (!otpCode || otpCode.length !== 6) {
+      toast.error("Please enter a valid 6-digit OTP.");
+      return false;
+    }
+
+    setIsOtpVerifying(true);
+    try {
+      const response = await fetch(
+        `${REACT_APP_GATEWAY_URL}/api/v1.1/profile/email/verify`,
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json, text/plain, */*",
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${auth}`,
+          },
+          body: JSON.stringify({
+            email: otpSentEmail,
+            otp: otpCode,
+            purpose: "email_update",
+          }),
+        }
+      );
+
+      if (response.ok) {
+        toast.success("OTP verified successfully!");
+        return true;
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || "Invalid OTP. Please try again.");
+        return false;
+      }
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
+      toast.error("Failed to verify OTP. Please try again.");
+      return false;
+    } finally {
+      setIsOtpVerifying(false);
+    }
   };
 
   const uploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -127,7 +291,46 @@ const Profile = () => {
 
   const handleSubmit = async () => {
     setLoading(true);
-    const auth = Cookies.get("erebrus_token");
+    const auth = getAuthToken();
+
+    if (!auth) {
+      toast.error(
+        "Authentication token not found. Please reconnect your wallet."
+      );
+      setLoading(false);
+      return;
+    }
+
+    // Check if email has changed
+    const emailChanged = tempFormData.emailId !== formData.emailId;
+    const hasExistingEmail = formData.emailId && formData.emailId.trim() !== "";
+
+    if (emailChanged && hasExistingEmail) {
+      // Email has changed and user has an existing email, require OTP verification
+      setPendingEmailUpdate(tempFormData.emailId);
+      setLoading(false);
+      setShowOtpDialog(true);
+      toast.info(
+        "Email change detected. Please verify with OTP sent to your current email."
+      );
+      return;
+    }
+
+    // Proceed with normal profile update
+    await updateProfile();
+  };
+
+  const updateProfile = async () => {
+    setLoading(true);
+    const auth = getAuthToken();
+
+    if (!auth) {
+      toast.error(
+        "Authentication token not found. Please reconnect your wallet."
+      );
+      setLoading(false);
+      return;
+    }
 
     try {
       const response = await fetch(
@@ -148,12 +351,15 @@ const Profile = () => {
         setMsg("success");
         setIsEditDialogOpen(false);
         setprofileset(true);
+        toast.success("Profile updated successfully!");
       } else {
         setMsg("error");
+        toast.error("Failed to update profile. Please try again.");
       }
     } catch (error) {
       console.error("Error:", error);
       setMsg("error");
+      toast.error("Failed to update profile. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -176,9 +382,34 @@ const Profile = () => {
 
   useEffect(() => {
     const fetchProfileData = async () => {
+      // Check if user is authenticated before fetching profile
+      if (!isConnected || !isUserAuthenticated()) {
+        console.log(
+          "User not connected or authenticated, skipping profile fetch"
+        );
+        setLoading(false);
+        // Reset profile data when not authenticated
+        setProfileData(null);
+        setFormData(initialFormData);
+        setTempFormData(initialFormData);
+        return;
+      }
+
       setLoading(true);
       try {
-        const auth = Cookies.get("erebrus_token");
+        const auth = getAuthToken();
+
+        if (!auth) {
+          console.log("No authentication token found");
+          setLoading(false);
+          // Reset profile data when no token
+          setProfileData(null);
+          setFormData(initialFormData);
+          setTempFormData(initialFormData);
+          return;
+        }
+
+        console.log("Fetching profile data for:", address);
 
         const response = await axios.get(
           `${REACT_APP_GATEWAY_URL}/api/v1.0/profile`,
@@ -192,6 +423,10 @@ const Profile = () => {
         );
 
         if (response.status === 200) {
+          console.log(
+            "Profile data fetched successfully:",
+            response.data.payload
+          );
           setProfileData(response.data.payload);
           const profileInfo = {
             name: response.data.payload.name || "",
@@ -213,20 +448,100 @@ const Profile = () => {
         }
       } catch (error) {
         console.error("Error fetching profile data:", error);
+        if (axios.isAxiosError(error)) {
+          if (error.response?.status === 401) {
+            toast.error(
+              "Authentication expired. Please reconnect your wallet."
+            );
+            // Clear profile data on 401
+            setProfileData(null);
+            setFormData(initialFormData);
+            setTempFormData(initialFormData);
+          } else if (error.response?.status === 404) {
+            console.log("Profile not found - new user");
+            // Clear profile data for new users
+            setProfileData(null);
+            setFormData(initialFormData);
+            setTempFormData(initialFormData);
+          } else {
+            toast.error("Failed to load profile data.");
+          }
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchProfileData();
-  }, [profileset]);
+  }, [profileset, isConnected, address, isVerified]);
 
-  // Get wallet info from cookies
+  // Additional effect to track authentication token changes
+  useEffect(() => {
+    const currentToken = getAuthToken();
+    const previousToken = localStorage.getItem("last_auth_token");
+
+    if (currentToken !== previousToken) {
+      console.log("Authentication token changed, triggering profile refresh");
+      localStorage.setItem("last_auth_token", currentToken || "");
+
+      // Force profile refresh when token changes
+      if (currentToken && isConnected && isUserAuthenticated()) {
+        // Add a small delay to ensure the authentication state is fully updated
+        setTimeout(() => {
+          setprofileset((prev) => !prev); // Toggle to trigger fetchProfileData
+        }, 100);
+      }
+    }
+  }, [isConnected, address]);
+
+  // Effect to handle immediate authentication state changes
+  useEffect(() => {
+    // When user becomes authenticated, ensure we refresh the profile
+    if (isConnected && isUserAuthenticated() && address) {
+      const currentToken = getAuthToken();
+      if (currentToken) {
+        console.log("User became authenticated, refreshing profile data");
+        // Small delay to ensure all authentication cookies are set
+        setTimeout(() => {
+          setprofileset((prev) => !prev);
+        }, 200);
+      }
+    }
+  }, [isConnected, address]);
+
+  // Polling effect to check for authentication status changes
+  useEffect(() => {
+    if (!isConnected || !address) return;
+
+    const pollInterval = setInterval(() => {
+      const wasAuthenticated = loggedin;
+      const isNowAuthenticated = isUserAuthenticated();
+
+      if (!wasAuthenticated && isNowAuthenticated) {
+        console.log("Authentication detected via polling, refreshing profile");
+        setloggedin(true);
+        setprofileset((prev) => !prev);
+        clearInterval(pollInterval);
+      }
+    }, 1000); // Check every second
+
+    // Clear interval after 30 seconds to avoid infinite polling
+    const timeout = setTimeout(() => {
+      clearInterval(pollInterval);
+    }, 30000);
+
+    return () => {
+      clearInterval(pollInterval);
+      clearTimeout(timeout);
+    };
+  }, [isConnected, address, loggedin]);
+
+  // Get wallet info from the authentication hook and cookies
   const walletInfo = {
-    address: Cookies.get("erebrus_wallet") || "",
+    address: address || Cookies.get("erebrus_wallet") || "",
     chainId: Cookies.get("Chain_symbol") || "",
-    isConnected: !!Cookies.get("erebrus_wallet"),
-    isVerified: !!Cookies.get("erebrus_token"),
+    isConnected: isConnected,
+    isVerified: isAuthenticated && isVerified,
   };
 
   const CLIENT_ID = process.env.NEXT_PUBLIC_CLIENT_ID;
@@ -291,11 +606,18 @@ const Profile = () => {
   }, []);
 
   const handleremoveClick = async () => {
-    const auth = Cookies.get("erebrus_token");
+    const auth = getAuthToken();
+
+    if (!auth) {
+      toast.error(
+        "Authentication token not found. Please reconnect your wallet."
+      );
+      return;
+    }
 
     try {
       const response = await axios.delete(
-        `${REACT_APP_GATEWAY_URL}api/v1.0/account/remove-mail`,
+        `${REACT_APP_GATEWAY_URL}/api/v1.0/account/remove-mail`,
         {
           headers: {
             Accept: "application/json, text/plain, */*",
@@ -308,21 +630,39 @@ const Profile = () => {
       const responseData = await response.data;
       console.log("Another API call response:", responseData);
       setunlinkpopup(false);
+      toast.success("Email removed successfully!");
     } catch (error) {
       console.error("Another API call error:", error);
+      toast.error("Failed to remove email. Please try again.");
     }
   };
 
   useEffect(() => {
     const handleConnectWallet = async () => {
-      const loggedin = Cookies.get("erebrus_token");
-      // const auth = Cookies.get("google_token");
-      if (loggedin) {
+      const currentToken = getAuthToken();
+      if (currentToken && isConnected && isUserAuthenticated()) {
+        console.log("User logged in, setting loggedin to true");
         setloggedin(true);
+      } else {
+        console.log("User not fully authenticated, setting loggedin to false");
+        setloggedin(false);
       }
     };
     handleConnectWallet();
-  }, [change]);
+  }, [change, isConnected, address]);
+
+  // Cleanup effect when user disconnects or logs out
+  useEffect(() => {
+    if (!isConnected || !address) {
+      console.log("Wallet disconnected, clearing profile data");
+      setProfileData(null);
+      setFormData(initialFormData);
+      setTempFormData(initialFormData);
+      setloggedin(false);
+      setauth(true);
+      localStorage.removeItem("last_auth_token");
+    }
+  }, [isConnected, address]);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -367,542 +707,828 @@ const Profile = () => {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
-      {/* Add pt-20 to push content down from navbar */}
-      <div className="pt-20 px-4 sm:px-6 md:px-8">
-        {/* Success/Error Messages */}
-        {msg === "success" && (
-          <div className="fixed top-4 right-4 z-50 bg-green-500/90 text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2 animate-in fade-in slide-in-from-top-5 duration-300">
-            <Check className="h-5 w-5" />
-            <span>Changes saved successfully!</span>
-          </div>
-        )}
-
-        {msg === "error" && (
-          <div className="fixed top-4 right-4 z-50 bg-red-500/90 text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2 animate-in fade-in slide-in-from-top-5 duration-300">
-            <X className="h-5 w-5" />
-            <span>Error saving changes. Please try again.</span>
-          </div>
-        )}
-
-        <div className="flex flex-col space-y-6">
-          {/* Header Section - Added mb-8 for more space */}
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-4xl font-extrabold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent tracking-tight">
-              Profile Information
-            </h1>
-
-            <div className="flex items-center space-x-3">
-              <Badge
-                variant="outline"
-                className="bg-blue-900/30 text-blue-300 border-blue-700 px-3 py-1 rounded-full shadow-md"
-              >
-                <span className="mr-1.5 h-2 w-2 rounded-full bg-blue-400"></span>
-                {chainDetails.name}
-              </Badge>
-              <Badge
-                variant="outline"
-                className="bg-gray-800 text-gray-300 border-gray-700 font-mono rounded-full px-3 py-1 shadow-md"
-              >
-                {walletaddr
-                  ? `${walletaddr.slice(0, 4)}...${walletaddr.slice(-4)}`
-                  : "Not Connected"}
-              </Badge>
+    <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
+      {/* Authentication Check */}
+      {!isConnected && (
+        <div className="container mx-auto px-4 py-36">
+          <div className="max-w-md mx-auto text-center">
+            <div className="bg-gray-800 rounded-lg p-8 shadow-xl border border-gray-700">
+              <User className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+              <h2 className="text-2xl font-bold mb-4">Wallet Not Connected</h2>
+              <p className="text-gray-400 mb-6">
+                Please connect your wallet to view your profile.
+              </p>
+              <div className="flex justify-center">
+                <w3m-button />
+              </div>
             </div>
           </div>
+        </div>
+      )}
 
-          {/* Main Content Grid - Adjusted gap and added min-height */}
-          <div className="grid grid-cols-12 gap-8 min-h-[calc(100vh-12rem)]">
-            {/* Profile Card - Left Side */}
-            <Card className="col-span-12 md:col-span-3 bg-gradient-to-br from-gray-900/70 to-gray-900/40 border border-gray-800 rounded-2xl overflow-hidden shadow-2xl hover:shadow-purple-500/10 transition-all duration-300 h-fit sticky top-24">
-              <CardContent className="p-8 flex flex-col items-center">
-                {/* Avatar */}
-                <div className="relative mb-6 mt-4 group">
-                  <div className="w-40 h-40 rounded-full overflow-hidden bg-gradient-to-br from-blue-800/80 to-purple-800/80 border-4 border-gray-700 shadow-lg flex items-center justify-center hover:scale-105 transition-transform">
-                    {formData.profilePictureUrl ? (
-                      <img
-                        alt="Profile"
-                        src={`https://ipfs.myriadflow.com/ipfs/${formData.profilePictureUrl}`}
-                        className="w-full h-full object-cover"
-                        onError={(
-                          e: React.SyntheticEvent<HTMLImageElement>
-                        ) => {
-                          const img = e.currentTarget;
-                          img.onerror = null;
-                          img.src =
-                            "https://thumbs.dreamstime.com/b/female-user-profile-avatar-woman-character-screen-saver-emotions-website-mobile-app-design-vector-199001739.jpg";
-                        }}
-                      />
-                    ) : formData.name ? (
-                      <div className="flex items-center justify-center w-full h-full text-5xl font-bold text-white">
-                        {formData.name.charAt(0)}
-                      </div>
-                    ) : (
-                      <User size={64} className="text-gray-400" />
-                    )}
-                  </div>
+      {isConnected && !isUserAuthenticated() && (
+        <div className="container mx-auto px-4 py-36">
+          <div className="max-w-md mx-auto text-center">
+            <div className="bg-gray-800 rounded-lg p-8 shadow-xl border border-gray-700">
+              <User className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+              <h2 className="text-2xl font-bold mb-4">
+                Authentication Required
+              </h2>
+              <p className="text-gray-400 mb-6">
+                Please sign the message with your wallet to access your profile.
+              </p>
+              <Button
+                onClick={handleRefreshPage}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                Refresh Page
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Show profile content only when connected and authenticated */}
+      {isConnected && isUserAuthenticated() && (
+        <>
+          {/* Success/Error Messages */}
+          {msg === "success" && (
+            <div className="fixed top-4 right-4 z-50 bg-green-500/90 text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2 animate-in fade-in slide-in-from-top-5 duration-300">
+              <Check className="h-5 w-5" />
+              <span>Changes saved successfully!</span>
+            </div>
+          )}
+
+          {msg === "error" && (
+            <div className="fixed top-4 right-4 z-50 bg-red-500/90 text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2 animate-in fade-in slide-in-from-top-5 duration-300">
+              <X className="h-5 w-5" />
+              <span>Error saving changes. Please try again.</span>
+            </div>
+          )}
+
+          <div className="container mx-auto px-4 py-36">
+            <div className="max-w-4xl mx-auto">
+              <div className="flex flex-col md:flex-row justify-between items-center md:items-center mb-8">
+                <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent text-center md:text-left">
+                  Profile Information
+                </h1>
+                <div className="flex items-center space-x-3 mt-4 md:mt-0">
+                  <Badge
+                    variant="outline"
+                    className="bg-blue-900/30 text-blue-300 border-blue-800 px-4 py-2 text-base"
+                  >
+                    <span className="mr-2 h-3 w-3 rounded-full bg-blue-400"></span>
+                    {chainDetails.name}
+                  </Badge>
+                  <Badge
+                    variant="outline"
+                    className="bg-gray-800 text-gray-300 border-gray-700 font-mono px-4 py-2 text-base"
+                  >
+                    {walletaddr
+                      ? `${walletaddr.slice(0, 6)}...${walletaddr.slice(-6)}`
+                      : "Not Connected"}
+                  </Badge>
                 </div>
+              </div>
 
-                {/* Name & Location */}
-                <h2 className="text-2xl font-semibold mb-1 text-white">
-                  {formData.name || "Your Name"}
-                </h2>
-                <p className="text-gray-400 text-sm mb-6 flex items-center">
-                  <MapPin size={14} className="mr-1 text-purple-400" />
-                  {formData.country || "Your Location"}
-                </p>
+              <Tabs defaultValue="profile" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-8 bg-gray-800/50 border border-gray-700">
+                  <TabsTrigger
+                    value="profile"
+                    className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-gray-400 hover:text-white transition-all duration-200"
+                  >
+                    Profile Details
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="nfts"
+                    className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-gray-400 hover:text-white transition-all duration-200"
+                  >
+                    My NFTs
+                  </TabsTrigger>
+                </TabsList>
 
-                {/* Edit Button */}
-                <Button
-                  onClick={openEditDialog}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white rounded-lg font-medium py-2 transition-all shadow-md hover:shadow-lg"
-                  aria-label="Edit your profile information"
-                >
-                  <Edit size={16} className="mr-2" /> Edit Profile
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Details Card - Right Side */}
-            <Card className="col-span-12 md:col-span-9 bg-gradient-to-br from-gray-900/70 to-gray-900/40 border border-gray-800 rounded-2xl overflow-hidden shadow-2xl hover:shadow-purple-500/10 transition-all duration-300">
-              <CardContent className="p-8">
-                {/* Account Info */}
-                <h2 className="text-xl font-semibold mb-6 text-blue-400 tracking-wide">
-                  Account Information
-                </h2>
-
-                <div className="space-y-6">
-                  {/* Fields */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-4">
-                    {/* Name */}
-                    <div className="space-y-1">
-                      <Label htmlFor="name" className="text-gray-400 text-sm">
-                        Name
-                      </Label>
-                      <div className="flex items-center">
-                        <User size={16} className="mr-2 text-blue-400" />
-                        <p className="text-white">
-                          {formData.name || "Not set"}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Country */}
-                    <div className="space-y-1">
-                      <Label
-                        htmlFor="country"
-                        className="text-gray-400 text-sm"
-                      >
-                        Country
-                      </Label>
-                      <div className="flex items-center">
-                        <MapPin size={16} className="mr-2 text-blue-400" />
-                        <p className="text-white">
-                          {formData.country || "Not set"}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Email */}
-                    <div className="space-y-1">
-                      <Label
-                        htmlFor="emailId"
-                        className="text-gray-400 text-sm"
-                      >
-                        Email
-                      </Label>
-                      <div className="flex items-center">
-                        <Mail size={16} className="mr-2 text-blue-400" />
-                        <p className="text-white">
-                          {formData.emailId || "Not set"}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Discord */}
-                    <div className="space-y-1">
-                      <Label
-                        htmlFor="discord"
-                        className="text-gray-400 text-sm"
-                      >
-                        Discord
-                      </Label>
-                      <div className="flex items-center">
-                        <MessageSquare
-                          size={16}
-                          className="mr-2 text-blue-400"
-                        />
-                        <p className="text-white">
-                          {formData.discord || "Not set"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Social Accounts */}
-                  <div className="pt-6 border-t border-gray-800">
-                    <h2 className="text-xl font-semibold mb-4 text-blue-400 tracking-wide">
-                      Social Accounts
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-4">
-                      {/* Twitter */}
-                      <div className="space-y-1">
-                        <Label
-                          htmlFor="twitter"
-                          className="text-gray-400 text-sm"
-                        >
-                          Twitter
-                        </Label>
-                        <div className="flex items-center">
-                          <AtSign size={16} className="mr-2 text-blue-400" />
-                          <p className="text-white">
-                            {formData.twitter || "Not set"}
-                          </p>
+                <TabsContent value="profile">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {/* Profile Image Section */}
+                    <Card className="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden shadow-xl">
+                      <CardContent className="p-6 flex flex-col items-center">
+                        <div className="relative mb-6 mt-4">
+                          <div className="w-40 h-40 rounded-full overflow-hidden bg-gray-800 border-4 border-gray-700 flex items-center justify-center">
+                            {formData.profilePictureUrl ? (
+                              <img
+                                alt="Profile"
+                                src={`https://ipfs.myriadflow.com/ipfs/${formData.profilePictureUrl}`}
+                                className="w-full h-full object-cover"
+                                onError={(
+                                  e: React.SyntheticEvent<HTMLImageElement>
+                                ) => {
+                                  const img = e.currentTarget;
+                                  img.onerror = null;
+                                  img.src =
+                                    "https://thumbs.dreamstime.com/b/female-user-profile-avatar-woman-character-screen-saver-emotions-website-mobile-app-design-vector-199001739.jpg";
+                                }}
+                              />
+                            ) : formData.name ? (
+                              <div className="flex items-center justify-center w-full h-full text-5xl font-bold text-white">
+                                {formData.name.charAt(0)}
+                              </div>
+                            ) : (
+                              <User size={64} className="text-gray-400" />
+                            )}
+                          </div>
                         </div>
-                      </div>
 
-                      {/* Telegram */}
-                      <div className="space-y-1">
-                        <Label
-                          htmlFor="telegram"
-                          className="text-gray-400 text-sm"
-                        >
-                          Telegram
-                        </Label>
-                        <div className="flex items-center">
-                          <p className="text-white">
-                            {formData.telegram || "Not set"}
-                          </p>
+                        <h2 className="text-xl font-bold mb-1">
+                          {formData.name || "Your Name"}
+                        </h2>
+                        <p className="text-gray-400 text-sm mb-4">
+                          {formData.country || "Your Location"}
+                        </p>
+
+                        <div className="w-full mt-4">
+                          <Button
+                            onClick={openEditDialog}
+                            className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400"
+                          >
+                            <Edit size={16} className="mr-2" /> Edit Profile
+                          </Button>
                         </div>
-                      </div>
+                      </CardContent>
+                    </Card>
 
-                      {/* Farcaster */}
-                      <div className="space-y-1">
-                        <Label
-                          htmlFor="farcaster"
-                          className="text-gray-400 text-sm"
-                        >
-                          Farcaster
-                        </Label>
-                        <div className="flex items-center">
-                          <Globe size={16} className="mr-2 text-blue-400" />
-                          <p className="text-white">
-                            {formData.farcaster || "Not set"}
-                          </p>
+                    {/* Profile Form Section */}
+                    <Card className="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden shadow-xl md:col-span-2">
+                      <CardContent className="p-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {/* Basic Information */}
+                          <div className="space-y-4">
+                            <div>
+                              <Label
+                                htmlFor="name"
+                                className="flex items-center text-gray-300 mb-2"
+                              >
+                                <User
+                                  size={16}
+                                  className="mr-2 text-blue-400"
+                                />{" "}
+                                Name
+                              </Label>
+                              <p className="text-white pl-6">
+                                {formData.name || "Not set"}
+                              </p>
+                            </div>
+
+                            <div>
+                              <Label
+                                htmlFor="country"
+                                className="flex items-center text-gray-300 mb-2"
+                              >
+                                <MapPin
+                                  size={16}
+                                  className="mr-2 text-blue-400"
+                                />{" "}
+                                Country
+                              </Label>
+                              <p className="text-white pl-6">
+                                {formData.country || "Not set"}
+                              </p>
+                            </div>
+
+                            <div>
+                              <Label
+                                htmlFor="email"
+                                className="flex items-center text-gray-300 mb-2"
+                              >
+                                <Mail
+                                  size={16}
+                                  className="mr-2 text-blue-400"
+                                />{" "}
+                                Email
+                              </Label>
+                              <p className="text-white pl-6">
+                                {formData.emailId || "Not set"}
+                              </p>
+                            </div>
+
+                            <div>
+                              <Label
+                                htmlFor="discord"
+                                className="flex items-center text-gray-300 mb-2"
+                              >
+                                <MessageSquare
+                                  size={16}
+                                  className="mr-2 text-blue-400"
+                                />{" "}
+                                Discord
+                              </Label>
+                              <p className="text-white pl-6">
+                                {formData.discord || "Not set"}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Social Media */}
+                          <div className="space-y-4">
+                            <div>
+                              <Label
+                                htmlFor="twitter"
+                                className="flex items-center text-gray-300 mb-2"
+                              >
+                                <AtSign
+                                  size={16}
+                                  className="mr-2 text-blue-400"
+                                />{" "}
+                                Twitter
+                              </Label>
+                              <p className="text-white pl-6">
+                                {formData.twitter || "Not set"}
+                              </p>
+                            </div>
+
+                            <div>
+                              <Label
+                                htmlFor="telegram"
+                                className="flex items-center text-gray-300 mb-2"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  className="mr-2 text-blue-400"
+                                >
+                                  <path d="m22 3-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 3"></path>
+                                  <path d="M2 3v18h20V3"></path>
+                                  <path d="M12 11v5"></path>
+                                  <path d="m10 13 2 2 2-2"></path>
+                                </svg>
+                                Telegram
+                              </Label>
+                              <p className="text-white pl-6">
+                                {formData.telegram || "Not set"}
+                              </p>
+                            </div>
+
+                            <div>
+                              <Label
+                                htmlFor="farcaster"
+                                className="flex items-center text-gray-300 mb-2"
+                              >
+                                <Globe
+                                  size={16}
+                                  className="mr-2 text-blue-400"
+                                />{" "}
+                                Farcaster
+                              </Label>
+                              <p className="text-white pl-6">
+                                {formData.farcaster || "Not set"}
+                              </p>
+                            </div>
+
+                            <div>
+                              <Label
+                                htmlFor="google"
+                                className="flex items-center text-gray-300 mb-2"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  className="mr-2 text-blue-400"
+                                >
+                                  <circle cx="12" cy="12" r="10"></circle>
+                                  <path d="M12 8v8"></path>
+                                  <path d="M8 12h8"></path>
+                                </svg>
+                                Google
+                              </Label>
+                              <p className="text-white pl-6">
+                                {formData.google || "Not set"}
+                              </p>
+                            </div>
+                          </div>
                         </div>
-                      </div>
 
-                      {/* Google */}
-                      <div className="space-y-1">
-                        <Label
-                          htmlFor="google"
-                          className="text-gray-400 text-sm"
-                        >
-                          Google
-                        </Label>
-                        <div className="flex items-center">
-                          <p className="text-white">
-                            {formData.google || "Not set"}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Apple */}
-                      <div className="space-y-1">
-                        <Label
-                          htmlFor="apple"
-                          className="text-gray-400 text-sm"
-                        >
-                          Apple
-                        </Label>
-                        <div className="flex items-center">
-                          <Apple size={16} className="mr-2 text-blue-400" />
-                          <p className="text-white">
+                        {/* Apple Account */}
+                        <div className="mt-6">
+                          <Label
+                            htmlFor="apple"
+                            className="flex items-center text-gray-300 mb-2"
+                          >
+                            <Apple size={16} className="mr-2 text-blue-400" />{" "}
+                            Apple
+                          </Label>
+                          <p className="text-white pl-6">
                             {formData.apple || "Not set"}
                           </p>
                         </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="nfts">
+                  <Card className="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden shadow-xl">
+                    <CardContent className="p-8">
+                      <div className="text-center">
+                        <h2 className="text-2xl font-bold mb-4">
+                          Your NFT Collection
+                        </h2>
+                        <p className="text-gray-400 mb-8">
+                          View and manage your Erebrus NFTs
+                        </p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          {/* NFT Card Example */}
+                          <div className="bg-gray-800/50 border border-gray-700 rounded-lg overflow-hidden hover:border-blue-500 transition-all duration-300">
+                            <div className="aspect-square w-full bg-gradient-to-br from-blue-900 to-purple-900 flex items-center justify-center">
+                              <p className="text-sm text-center px-4">
+                                vpn-nft-image.webp
+                              </p>
+                            </div>
+                            <div className="p-4">
+                              <h3 className="font-bold">Erebrus VPN Access</h3>
+                              <p className="text-sm text-gray-400">
+                                Valid until: Dec 31, 2023
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Empty NFT Card */}
+                          <div className="bg-gray-800/20 border border-dashed border-gray-700 rounded-lg overflow-hidden flex flex-col items-center justify-center p-6 hover:bg-gray-800/30 transition-all duration-300">
+                            <Upload className="h-12 w-12 text-gray-600 mb-4" />
+                            <p className="text-gray-500 text-center">
+                              Mint a new NFT to add to your collection
+                            </p>
+                            <Button
+                              variant="outline"
+                              className="mt-4 border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
+                            >
+                              Go to Mint Page
+                            </Button>
+                          </div>
+                        </div>
                       </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            </div>
+          </div>
+
+          {/* Edit Profile Dialog */}
+          <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+            <DialogContent className="bg-gray-900 border border-gray-800 text-white max-w-2xl">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                  Edit Profile
+                </DialogTitle>
+                <DialogDescription className="text-gray-400">
+                  Update your profile information below
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                {/* Profile Picture */}
+                <div className="md:col-span-2 flex justify-center">
+                  <div className="relative group">
+                    <div className="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-br from-blue-800/80 to-purple-800/80 border-4 border-gray-700 flex items-center justify-center">
+                      {tempFormData.profilePictureUrl ? (
+                        <img
+                          alt="Profile"
+                          src={`https://ipfs.myriadflow.com/ipfs/${tempFormData.profilePictureUrl}`}
+                          className="w-full h-full object-cover"
+                          onError={(
+                            e: React.SyntheticEvent<HTMLImageElement>
+                          ) => {
+                            const img = e.currentTarget;
+                            img.onerror = null;
+                            img.src =
+                              "https://thumbs.dreamstime.com/b/female-user-profile-avatar-woman-character-screen-saver-emotions-website-mobile-app-design-vector-199001739.jpg";
+                          }}
+                        />
+                      ) : tempFormData.name ? (
+                        <div className="flex items-center justify-center w-full h-full text-3xl font-bold text-white">
+                          {tempFormData.name.charAt(0)}
+                        </div>
+                      ) : (
+                        <User size={48} className="text-gray-400" />
+                      )}
+                    </div>
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 rounded-full flex items-center justify-center transition-opacity">
+                      <label
+                        htmlFor="profile-upload"
+                        className="cursor-pointer"
+                      >
+                        {/* Profile Upload Input */}
+                        <input
+                          id="profile-upload"
+                          type="file"
+                          className="hidden"
+                          onChange={uploadImage}
+                          accept="image/*"
+                          aria-label="Upload profile picture"
+                        />
+                        <Camera className="h-8 w-8 text-white" />
+                      </label>
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
 
-      {/* Edit Profile Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="bg-gray-900 border border-gray-800 text-white max-w-2xl">
+                {/* Basic Information */}
+                <div className="space-y-4">
+                  {/* Name */}
+                  <div className="flex flex-col space-y-1.5">
+                    <Label
+                      htmlFor="name"
+                      className="flex items-center text-gray-300"
+                    >
+                      <User size={16} className="mr-2 text-blue-400" /> Name
+                    </Label>
+                    <Input
+                      id="name"
+                      value={tempFormData.name}
+                      onChange={handleInputChange}
+                      placeholder="Your name"
+                      className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
+                      aria-label="Enter your name"
+                    />
+                  </div>
+                  {/* Country */}
+                  <div className="flex flex-col space-y-1.5">
+                    <Label
+                      htmlFor="country"
+                      className="flex items-center text-gray-300"
+                    >
+                      <MapPin size={16} className="mr-2 text-blue-400" />{" "}
+                      Country
+                    </Label>
+                    <Input
+                      id="country"
+                      value={tempFormData.country}
+                      onChange={handleInputChange}
+                      placeholder="Your country"
+                      className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
+                      aria-label="Enter your country"
+                    />
+                  </div>
+                  {/* Email */}
+                  <div className="flex flex-col space-y-1.5">
+                    <Label
+                      htmlFor="emailId"
+                      className="flex items-center text-gray-300"
+                    >
+                      <Mail size={16} className="mr-2 text-blue-400" /> Email
+                    </Label>
+                    <Input
+                      id="emailId"
+                      type="email"
+                      value={tempFormData.emailId}
+                      onChange={handleInputChange}
+                      placeholder="Your email"
+                      className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
+                      aria-label="Enter your email address"
+                    />
+                    {formData.emailId && formData.emailId.trim() !== "" && (
+                      <p className="text-xs text-gray-400 mt-1">
+                        💡 Changing your email will require OTP verification
+                        sent to your current email
+                      </p>
+                    )}
+                    {(!formData.emailId || formData.emailId.trim() === "") && (
+                      <p className="text-xs text-gray-400 mt-1">
+                        📧 You can add your email without verification for the
+                        first time
+                      </p>
+                    )}
+                  </div>
+                  {/* Discord */}
+                  <div className="flex flex-col space-y-1.5">
+                    <Label
+                      htmlFor="discord"
+                      className="flex items-center text-gray-300"
+                    >
+                      <MessageSquare size={16} className="mr-2 text-blue-400" />{" "}
+                      Discord
+                    </Label>
+                    <Input
+                      id="discord"
+                      value={tempFormData.discord}
+                      onChange={handleInputChange}
+                      placeholder="Your Discord username"
+                      className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
+                      aria-label="Enter your Discord username"
+                    />
+                  </div>
+                </div>
+
+                {/* Social Media */}
+                <div className="space-y-4">
+                  {/* Twitter */}
+                  <div className="flex flex-col space-y-1.5">
+                    <Label
+                      htmlFor="twitter"
+                      className="flex items-center text-gray-300"
+                    >
+                      <AtSign size={16} className="mr-2 text-blue-400" />{" "}
+                      Twitter
+                    </Label>
+                    <Input
+                      id="twitter"
+                      value={tempFormData.twitter}
+                      onChange={handleInputChange}
+                      placeholder="Your Twitter handle"
+                      className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
+                      aria-label="Enter your Twitter handle"
+                    />
+                  </div>
+                  {/* Telegram */}
+                  <div className="flex flex-col space-y-1.5">
+                    <Label
+                      htmlFor="telegram"
+                      className="flex items-center text-gray-300"
+                    >
+                      {/* ...existing svg... */} Telegram
+                    </Label>
+                    <Input
+                      id="telegram"
+                      value={tempFormData.telegram}
+                      onChange={handleInputChange}
+                      placeholder="Your Telegram username"
+                      className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
+                      aria-label="Enter your Telegram username"
+                    />
+                  </div>
+                  {/* Farcaster */}
+                  <div className="flex flex-col space-y-1.5">
+                    <Label
+                      htmlFor="farcaster"
+                      className="flex items-center text-gray-300"
+                    >
+                      <Globe size={16} className="mr-2 text-blue-400" />{" "}
+                      Farcaster
+                    </Label>
+                    <Input
+                      id="farcaster"
+                      value={tempFormData.farcaster}
+                      onChange={handleInputChange}
+                      placeholder="Your Farcaster handle"
+                      className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
+                      aria-label="Enter your Farcaster handle"
+                    />
+                  </div>
+                  {/* Google */}
+                  <div className="flex flex-col space-y-1.5">
+                    <Label
+                      htmlFor="google"
+                      className="flex items-center text-gray-300"
+                    >
+                      {/* ...existing svg... */} Google
+                    </Label>
+                    <Input
+                      id="google"
+                      value={tempFormData.google}
+                      onChange={handleInputChange}
+                      placeholder="Your Google account"
+                      className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
+                      aria-label="Enter your Google account"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Apple Account */}
+              <div className="mt-2">
+                <Label
+                  htmlFor="apple"
+                  className="flex items-center text-gray-300"
+                >
+                  <Apple size={16} className="mr-2 text-blue-400" /> Apple
+                </Label>
+                <Input
+                  id="apple"
+                  value={tempFormData.apple}
+                  onChange={handleInputChange}
+                  placeholder="Your Apple ID"
+                  className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
+                  aria-label="Enter your Apple ID"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-4 mt-6">
+                {/* Dialog Close Button */}
+                <Button
+                  variant="outline"
+                  onClick={() => setIsEditDialogOpen(false)}
+                  className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
+                  disabled={loading}
+                  aria-label="Cancel profile changes"
+                >
+                  <X size={16} className="mr-2" /> Cancel
+                </Button>
+                {/* Save Changes Button */}
+                <Button
+                  onClick={handleSubmit}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500"
+                  disabled={loading}
+                  aria-label={
+                    loading
+                      ? "Saving profile changes..."
+                      : "Save profile changes"
+                  }
+                >
+                  {loading ? (
+                    <div className="flex items-center">
+                      <svg
+                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                        role="status"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Saving...
+                    </div>
+                  ) : (
+                    <>
+                      <Save size={16} className="mr-2" /> Save Changes
+                    </>
+                  )}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
+
+      {/* OTP Verification Dialog */}
+      <Dialog open={showOtpDialog} onOpenChange={setShowOtpDialog}>
+        <DialogContent className="bg-gray-900 border-gray-800 text-white max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-              Edit Profile
+            <DialogTitle className="text-xl font-bold text-center">
+              Verify Email Change
             </DialogTitle>
-            <DialogDescription className="text-gray-400">
-              Update your profile information below
+            <DialogDescription className="text-gray-400 text-center">
+              To change your email from{" "}
+              <span className="text-blue-400">{formData.emailId}</span> to{" "}
+              <span className="text-blue-400">{pendingEmailUpdate}</span>,
+              please enter the OTP sent to your current email.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-            {/* Profile Picture */}
-            <div className="md:col-span-2 flex justify-center">
-              <div className="relative group">
-                <div className="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-br from-blue-800/80 to-purple-800/80 border-4 border-gray-700 flex items-center justify-center">
-                  {tempFormData.profilePictureUrl ? (
-                    <img
-                      alt="Profile"
-                      src={`https://ipfs.myriadflow.com/ipfs/${tempFormData.profilePictureUrl}`}
-                      className="w-full h-full object-cover"
-                      onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
-                        const img = e.currentTarget;
-                        img.onerror = null;
-                        img.src =
-                          "https://thumbs.dreamstime.com/b/female-user-profile-avatar-woman-character-screen-saver-emotions-website-mobile-app-design-vector-199001739.jpg";
-                      }}
-                    />
-                  ) : tempFormData.name ? (
-                    <div className="flex items-center justify-center w-full h-full text-3xl font-bold text-white">
-                      {tempFormData.name.charAt(0)}
+          <div className="space-y-6 p-4">
+            {!otpSentEmail ? (
+              // Step 1: Send OTP
+              <div className="text-center space-y-4">
+                <p className="text-gray-300">
+                  We'll send a verification code to your current email:
+                </p>
+                <p className="font-semibold text-blue-400">
+                  {formData.emailId}
+                </p>
+                <Button
+                  onClick={async () => {
+                    const success = await sendOtpToCurrentEmail();
+                    if (success) {
+                      setOtpCode("");
+                    }
+                  }}
+                  disabled={isOtpSending}
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  {isOtpSending ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                      Sending OTP...
                     </div>
                   ) : (
-                    <User size={48} className="text-gray-400" />
+                    "Send Verification Code"
                   )}
+                </Button>
+              </div>
+            ) : (
+              // Step 2: Enter OTP
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="otpCode" className="text-gray-300">
+                    Enter 6-digit verification code
+                  </Label>
+                  <Input
+                    id="otpCode"
+                    type="text"
+                    value={otpCode}
+                    onChange={(e) => {
+                      const value = e.target.value
+                        .replace(/\D/g, "")
+                        .slice(0, 6);
+                      setOtpCode(value);
+                    }}
+                    placeholder="000000"
+                    className="bg-gray-800/50 border-gray-700 focus:border-blue-500 text-center text-lg tracking-widest"
+                    maxLength={6}
+                  />
+                  <p className="text-sm text-gray-400 mt-1">
+                    Code sent to: {otpSentEmail}
+                  </p>
                 </div>
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 rounded-full flex items-center justify-center transition-opacity">
-                  <label htmlFor="profile-upload" className="cursor-pointer">
-                    {/* Profile Upload Input */}
-                    <input
-                      id="profile-upload"
-                      type="file"
-                      className="hidden"
-                      onChange={uploadImage}
-                      accept="image/*"
-                      aria-label="Upload profile picture"
-                    />
-                    <Camera className="h-8 w-8 text-white" />
-                  </label>
-                </div>
-              </div>
-            </div>
 
-            {/* Basic Information */}
-            <div className="space-y-4">
-              {/* Name */}
-              <div className="flex flex-col space-y-1.5">
-                <Label
-                  htmlFor="name"
-                  className="flex items-center text-gray-300"
-                >
-                  <User size={16} className="mr-2 text-blue-400" /> Name
-                </Label>
-                <Input
-                  id="name"
-                  value={tempFormData.name}
-                  onChange={handleInputChange}
-                  placeholder="Your name"
-                  className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
-                  aria-label="Enter your name"
-                />
-              </div>
-              {/* Country */}
-              <div className="flex flex-col space-y-1.5">
-                <Label
-                  htmlFor="country"
-                  className="flex items-center text-gray-300"
-                >
-                  <MapPin size={16} className="mr-2 text-blue-400" /> Country
-                </Label>
-                <Input
-                  id="country"
-                  value={tempFormData.country}
-                  onChange={handleInputChange}
-                  placeholder="Your country"
-                  className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
-                  aria-label="Enter your country"
-                />
-              </div>
-              {/* Email */}
-              <div className="flex flex-col space-y-1.5">
-                <Label
-                  htmlFor="emailId"
-                  className="flex items-center text-gray-300"
-                >
-                  <Mail size={16} className="mr-2 text-blue-400" /> Email
-                </Label>
-                <Input
-                  id="emailId"
-                  type="email"
-                  value={tempFormData.emailId}
-                  onChange={handleInputChange}
-                  placeholder="Your email"
-                  className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
-                  aria-label="Enter your email address"
-                />
-              </div>
-              {/* Discord */}
-              <div className="flex flex-col space-y-1.5">
-                <Label
-                  htmlFor="discord"
-                  className="flex items-center text-gray-300"
-                >
-                  <MessageSquare size={16} className="mr-2 text-blue-400" />{" "}
-                  Discord
-                </Label>
-                <Input
-                  id="discord"
-                  value={tempFormData.discord}
-                  onChange={handleInputChange}
-                  placeholder="Your Discord username"
-                  className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
-                  aria-label="Enter your Discord username"
-                />
-              </div>
-            </div>
+                <div className="flex gap-3">
+                  <Button
+                    onClick={async () => {
+                      const success = await verifyOtp();
+                      if (success) {
+                        // OTP verified, proceed with profile update
+                        setShowOtpDialog(false);
+                        setTempFormData((prev) => ({
+                          ...prev,
+                          emailId: pendingEmailUpdate,
+                        }));
+                        await updateProfile();
 
-            {/* Social Media */}
-            <div className="space-y-4">
-              {/* Twitter */}
-              <div className="flex flex-col space-y-1.5">
-                <Label
-                  htmlFor="twitter"
-                  className="flex items-center text-gray-300"
-                >
-                  <AtSign size={16} className="mr-2 text-blue-400" /> Twitter
-                </Label>
-                <Input
-                  id="twitter"
-                  value={tempFormData.twitter}
-                  onChange={handleInputChange}
-                  placeholder="Your Twitter handle"
-                  className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
-                  aria-label="Enter your Twitter handle"
-                />
-              </div>
-              {/* Telegram */}
-              <div className="flex flex-col space-y-1.5">
-                <Label
-                  htmlFor="telegram"
-                  className="flex items-center text-gray-300"
-                >
-                  {/* ...existing svg... */} Telegram
-                </Label>
-                <Input
-                  id="telegram"
-                  value={tempFormData.telegram}
-                  onChange={handleInputChange}
-                  placeholder="Your Telegram username"
-                  className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
-                  aria-label="Enter your Telegram username"
-                />
-              </div>
-              {/* Farcaster */}
-              <div className="flex flex-col space-y-1.5">
-                <Label
-                  htmlFor="farcaster"
-                  className="flex items-center text-gray-300"
-                >
-                  <Globe size={16} className="mr-2 text-blue-400" /> Farcaster
-                </Label>
-                <Input
-                  id="farcaster"
-                  value={tempFormData.farcaster}
-                  onChange={handleInputChange}
-                  placeholder="Your Farcaster handle"
-                  className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
-                  aria-label="Enter your Farcaster handle"
-                />
-              </div>
-              {/* Google */}
-              <div className="flex flex-col space-y-1.5">
-                <Label
-                  htmlFor="google"
-                  className="flex items-center text-gray-300"
-                >
-                  {/* ...existing svg... */} Google
-                </Label>
-                <Input
-                  id="google"
-                  value={tempFormData.google}
-                  onChange={handleInputChange}
-                  placeholder="Your Google account"
-                  className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
-                  aria-label="Enter your Google account"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Apple Account */}
-          <div className="mt-2">
-            <Label htmlFor="apple" className="flex items-center text-gray-300">
-              <Apple size={16} className="mr-2 text-blue-400" /> Apple
-            </Label>
-            <Input
-              id="apple"
-              value={tempFormData.apple}
-              onChange={handleInputChange}
-              placeholder="Your Apple ID"
-              className="bg-gray-800/50 border-gray-700 focus:border-blue-500"
-              aria-label="Enter your Apple ID"
-            />
-          </div>
-
-          <div className="flex justify-end space-x-4 mt-6">
-            {/* Dialog Close Button */}
-            <Button
-              variant="outline"
-              onClick={() => setIsEditDialogOpen(false)}
-              className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
-              disabled={loading}
-              aria-label="Cancel profile changes"
-            >
-              <X size={16} className="mr-2" /> Cancel
-            </Button>
-            {/* Save Changes Button */}
-            <Button
-              onClick={handleSubmit}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500"
-              disabled={loading}
-              aria-label={
-                loading ? "Saving profile changes..." : "Save profile changes"
-              }
-            >
-              {loading ? (
-                <div className="flex items-center">
-                  <svg
-                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                    role="status"
+                        // Reset OTP states
+                        setOtpCode("");
+                        setOtpSentEmail("");
+                        setPendingEmailUpdate("");
+                      }
+                    }}
+                    disabled={isOtpVerifying || otpCode.length !== 6}
+                    className="flex-1 bg-green-600 hover:bg-green-700"
                   >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Saving...
+                    {isOtpVerifying ? (
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                        Verifying...
+                      </div>
+                    ) : (
+                      "Verify & Update Email"
+                    )}
+                  </Button>
+
+                  <Button
+                    onClick={async () => {
+                      const success = await sendOtpToCurrentEmail();
+                      if (success) {
+                        setOtpCode("");
+                      }
+                    }}
+                    disabled={isOtpSending}
+                    variant="outline"
+                    className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                  >
+                    {isOtpSending ? "Sending..." : "Resend"}
+                  </Button>
                 </div>
-              ) : (
-                <>
-                  <Save size={16} className="mr-2" /> Save Changes
-                </>
-              )}
-            </Button>
+              </div>
+            )}
+
+            <div className="flex justify-center">
+              <Button
+                onClick={() => {
+                  setShowOtpDialog(false);
+                  setOtpCode("");
+                  setOtpSentEmail("");
+                  setPendingEmailUpdate("");
+                  // Reset email in form to original value
+                  setTempFormData((prev) => ({
+                    ...prev,
+                    emailId: formData.emailId,
+                  }));
+                }}
+                variant="outline"
+                className="border-gray-700 text-gray-300 hover:bg-gray-800"
+              >
+                Cancel Email Change
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
-    </main>
+    </div>
   );
 };
 

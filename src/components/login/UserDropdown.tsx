@@ -70,6 +70,11 @@ const UserDropdown: React.FC<UserDropdownProps> = ({
                 My Nodes
               </MenuItem>
             </Menu.Item>
+            <Menu.Item>
+              <MenuItem href="/mobile-auth" aria-label="Mobile authentication">
+                Mobile Auth
+              </MenuItem>
+            </Menu.Item>
           </div>
 
           <div className="px-1 py-1 ">
@@ -79,10 +84,22 @@ const UserDropdown: React.FC<UserDropdownProps> = ({
                   try {
                     await disconnect();
                     console.log("Disconnected");
+                    // Clear all authentication cookies
                     Cookies.remove("erebrus_token", { path: "/" });
+                    Cookies.remove("erebrus_token_solana", { path: "/" });
+                    Cookies.remove("erebrus_token_evm", { path: "/" });
                     Cookies.remove("erebrus_wallet", { path: "/" });
+                    Cookies.remove("erebrus_wallet_solana", { path: "/" });
+                    Cookies.remove("erebrus_wallet_evm", { path: "/" });
                     Cookies.remove("erebrus_userid", { path: "/" });
-                  } catch (error) {}
+                    Cookies.remove("erebrus_userid_solana", { path: "/" });
+                    Cookies.remove("erebrus_userid_evm", { path: "/" });
+                    Cookies.remove("erebrus_verified_solana", { path: "/" });
+                    Cookies.remove("erebrus_verified_evm", { path: "/" });
+                    Cookies.remove("Chain_symbol", { path: "/" });
+                  } catch (error) {
+                    console.error("Logout error:", error);
+                  }
                 }}
                 aria-label="Log out of your account"
               >

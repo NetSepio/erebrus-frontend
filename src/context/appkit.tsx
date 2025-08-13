@@ -201,6 +201,7 @@ const clearAuthCookies = (chainType: "solana" | "evm") => {
   Cookies.remove(getChainCookieKey("erebrus_token", chainType), options);
   Cookies.remove(getChainCookieKey("erebrus_wallet", chainType), options);
   Cookies.remove(getChainCookieKey("erebrus_userid", chainType), options);
+  Cookies.remove(`erebrus_verified_${chainType}`, options);
 };
 
 const getAuthFromCookies = (chainType: "solana" | "evm") => {
@@ -214,17 +215,31 @@ const getAuthFromCookies = (chainType: "solana" | "evm") => {
 // EVM Authentication
 const authenticateEVM = async (walletAddress: string, walletProvider: any) => {
   try {
-    const GATEWAY_URL = "https://gateway.netsepio.com/";
+    const GATEWAY_URL = "https://gateway.dev.netsepio.com/";
     const chainName = "evm";
+
+    console.log(
+      "🔄 Step 1: Getting FlowId and EULA for EVM wallet:",
+      walletAddress
+    );
 
     const { data } = await axios.get(
       `${GATEWAY_URL}api/v1.0/flowid?walletAddress=${walletAddress}&chain=evm`
     );
 
+    console.log("✅ Step 2: FlowId response:", {
+      status: data.status,
+      message: data.message,
+      flowId: data.payload?.flowId,
+      eula: data.payload?.eula?.substring(0, 50) + "...",
+    });
+
     const message = data.payload.eula;
     const flowId = data.payload.flowId;
 
     const combinedMessage = `${message}${flowId}`;
+
+    console.log("🔏 Step 3: Requesting wallet signature for message...");
 
     const provider = new BrowserProvider(walletProvider);
     if (!walletAddress) {
@@ -245,6 +260,13 @@ const authenticateEVM = async (walletAddress: string, walletProvider: any) => {
       signature = signature.slice(2);
     }
 
+    console.log(
+      "✅ Step 4: Signature generated:",
+      signature.substring(0, 20) + "..."
+    );
+
+    console.log("🚀 Step 5: Sending authentication request to backend...");
+
     const authResponse = await axios.post(
       `${GATEWAY_URL}api/v1.0/authenticate`,
       {
@@ -260,13 +282,33 @@ const authenticateEVM = async (walletAddress: string, walletProvider: any) => {
       }
     );
 
-    const { token, userId } = authResponse.data.payload;
+    console.log("✅ Step 6: Authentication successful!", {
+      status: authResponse.status,
+      hasToken: !!authResponse.data.payload?.token,
+      hasUserId: !!authResponse.data.payload?.userId,
+      hasVerify: !!authResponse.data.payload?.verify,
+    });
+
+    const { token, userId, verify } = authResponse.data.payload;
     setAuthCookies("evm", token, walletAddress, userId);
-    return true;
+
+    // Store verification status in cookie for use by other components
+    Cookies.set("erebrus_verified_evm", verify ? "true" : "false", {
+      expires: 7,
+      path: "/",
+      sameSite: "Strict",
+      secure: process.env.NODE_ENV === "production",
+    });
+
+    return { success: true, isVerified: verify };
   } catch (error) {
-    console.error("EVM Authentication error:", error);
+    console.error("❌ EVM Authentication error:", error);
+    if (axios.isAxiosError(error)) {
+      console.error("Response data:", error.response?.data);
+      console.error("Response status:", error.response?.status);
+    }
     clearAuthCookies("evm");
-    return false;
+    return { success: false, isVerified: false };
   }
 };
 
@@ -276,8 +318,13 @@ const authenticateSolana = async (
   walletProvider: Provider
 ) => {
   try {
-    const GATEWAY_URL = "https://gateway.netsepio.com/";
+    const GATEWAY_URL = "https://gateway.dev.netsepio.com/";
     const chainName = "sol";
+
+    console.log(
+      "🔄 Step 1: Getting FlowId and EULA for Solana wallet:",
+      walletAddress
+    );
 
     const { data } = await axios.get(`${GATEWAY_URL}api/v1.0/flowid`, {
       params: {
@@ -286,8 +333,17 @@ const authenticateSolana = async (
       },
     });
 
+    console.log("✅ Step 2: FlowId response:", {
+      status: data.status,
+      message: data.message,
+      flowId: data.payload?.flowId,
+      eula: data.payload?.eula?.substring(0, 50) + "...",
+    });
+
     const message = data.payload.eula;
     const flowId = data.payload.flowId;
+
+    console.log("🔏 Step 3: Requesting wallet signature for message...");
 
     const encodedMessage = new TextEncoder().encode(message);
     const signature = await walletProvider.signMessage(encodedMessage);
@@ -295,6 +351,13 @@ const authenticateSolana = async (
     const signatureHex = Array.from(new Uint8Array(signature))
       .map((b: number) => b.toString(16).padStart(2, "0"))
       .join("");
+
+    console.log(
+      "✅ Step 4: Signature generated:",
+      signatureHex.substring(0, 20) + "..."
+    );
+
+    console.log("🚀 Step 5: Sending authentication request to backend...");
 
     const authResponse = await axios.post(
       `${GATEWAY_URL}api/v1.0/authenticate?walletAddress=${walletAddress}&chain=sol`,
@@ -313,13 +376,33 @@ const authenticateSolana = async (
       }
     );
 
-    const { token, userId } = authResponse.data.payload;
+    console.log("✅ Step 6: Authentication successful!", {
+      status: authResponse.status,
+      hasToken: !!authResponse.data.payload?.token,
+      hasUserId: !!authResponse.data.payload?.userId,
+      hasVerify: !!authResponse.data.payload?.verify,
+    });
+
+    const { token, userId, verify } = authResponse.data.payload;
     setAuthCookies("solana", token, walletAddress, userId);
-    return true;
+
+    // Store verification status in cookie for use by other components
+    Cookies.set("erebrus_verified_solana", verify ? "true" : "false", {
+      expires: 7,
+      path: "/",
+      sameSite: "Strict",
+      secure: process.env.NODE_ENV === "production",
+    });
+
+    return { success: true, isVerified: verify };
   } catch (error) {
-    console.error("Solana Authentication error:", error);
+    console.error("❌ Solana Authentication error:", error);
+    if (axios.isAxiosError(error)) {
+      console.error("Response data:", error.response?.data);
+      console.error("Response status:", error.response?.status);
+    }
     clearAuthCookies("solana");
-    return false;
+    return { success: false, isVerified: false };
   }
 };
 
@@ -334,6 +417,8 @@ export function useWalletAuth() {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [authSuccess, setAuthSuccess] = useState(false);
+  const [isVerified, setIsVerified] = useState<boolean | null>(null);
+  const [previousAddress, setPreviousAddress] = useState<string | null>(null);
 
   // Set global cookies for chain and wallet on connect
   useEffect(() => {
@@ -379,11 +464,22 @@ export function useWalletAuth() {
     return !!(token && wallet?.toLowerCase() === address.toLowerCase());
   };
 
+  // Get current verification status
+  const getCurrentVerificationStatus = () => {
+    if (!isConnected || !address) return false;
+    const chainType = caipNetworkId?.startsWith("solana:") ? "solana" : "evm";
+    const verifiedCookie = Cookies.get(`erebrus_verified_${chainType}`);
+    return verifiedCookie === "true";
+  };
+
   // Authentication function
-  const authenticate = async () => {
+  const authenticate = async (): Promise<{
+    success: boolean;
+    isVerified: boolean;
+  }> => {
     if (!isConnected || !address) {
       setAuthError("Wallet not connected");
-      return false;
+      return { success: false, isVerified: false };
     }
 
     setIsAuthenticating(true);
@@ -402,14 +498,19 @@ export function useWalletAuth() {
 
       if (token && wallet?.toLowerCase() === address.toLowerCase()) {
         setAuthSuccess(true);
-        return true;
+        // Get verification status from cookie
+        const chainType = isSolanaChain ? "solana" : "evm";
+        const verifiedCookie = Cookies.get(`erebrus_verified_${chainType}`);
+        const verified = verifiedCookie === "true";
+        setIsVerified(verified);
+        return { success: true, isVerified: verified };
       }
 
       if (wallet && wallet.toLowerCase() !== address.toLowerCase()) {
         clearAuthCookies(chainType);
       }
 
-      let authResult = false;
+      let authResult: { success: boolean; isVerified: boolean };
 
       if (isSolanaChain) {
         if (!solanaWalletProvider) {
@@ -423,10 +524,11 @@ export function useWalletAuth() {
         authResult = await authenticateEVM(address, evmWalletProvider);
       }
 
-      if (authResult) {
+      if (authResult.success) {
         setAuthSuccess(true);
+        setIsVerified(authResult.isVerified);
         toast.success("Authentication successful");
-        return true;
+        return { success: true, isVerified: authResult.isVerified };
       } else {
         throw new Error("Authentication failed");
       }
@@ -436,7 +538,7 @@ export function useWalletAuth() {
         error instanceof Error ? error.message : "Authentication failed";
       setAuthError(errorMessage);
       toast.error(errorMessage);
-      return false;
+      return { success: false, isVerified: false };
     } finally {
       setIsAuthenticating(false);
     }
@@ -447,15 +549,53 @@ export function useWalletAuth() {
     if (!isConnected) {
       ["solana", "evm"].forEach((chainType) => {
         clearAuthCookies(chainType as "solana" | "evm");
+        // Also clear verification cookies
+        Cookies.remove(`erebrus_verified_${chainType}`, { path: "/" });
       });
       setAuthSuccess(false);
+      setIsVerified(null);
+      setPreviousAddress(null);
     }
   }, [isConnected]);
+
+  // Detect wallet address changes (wallet switching)
+  useEffect(() => {
+    if (isConnected && address) {
+      if (previousAddress && previousAddress !== address) {
+        console.log("🔄 Wallet address changed:", {
+          previous: previousAddress,
+          current: address,
+        });
+
+        // Clear all authentication data when wallet changes
+        ["solana", "evm"].forEach((chainType) => {
+          clearAuthCookies(chainType as "solana" | "evm");
+          Cookies.remove(`erebrus_verified_${chainType}`, { path: "/" });
+        });
+
+        // Reset authentication state
+        setAuthSuccess(false);
+        setIsVerified(null);
+        setAuthError(null);
+
+        // Show notification about wallet change
+        toast.info("Wallet changed. Please authenticate with the new wallet.");
+
+        // Reload the page to refresh all data
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      }
+
+      setPreviousAddress(address);
+    }
+  }, [isConnected, address, previousAddress]);
 
   return {
     isConnected,
     address,
     isAuthenticated: getCurrentAuthStatus(),
+    isVerified: isVerified ?? getCurrentVerificationStatus(),
     isAuthenticating,
     authError,
     authSuccess,

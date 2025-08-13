@@ -25,6 +25,7 @@ import Cookies from "js-cookie";
 import axios from "axios";
 import React from "react";
 import MyVpnCard from "./MyVpnCard";
+import { useWalletAuth } from "@/context/appkit";
 export interface FlowIdResponse {
   eula: string;
   flowId: string;
@@ -40,8 +41,22 @@ interface FormData {
 }
 export default function DashboardPage() {
   const EREBRUS_GATEWAY_URL = "https://gateway.erebrus.io/";
-  const token = Cookies.get("erebrus_token");
+
+  // Use the updated authentication hook
+  const { isConnected, address, isAuthenticated, isVerified } = useWalletAuth();
+
+  // Helper function to get the correct authentication token
+  const getAuthToken = () => {
+    const solanaToken = Cookies.get("erebrus_token_solana");
+    const evmToken = Cookies.get("erebrus_token_evm");
+    return solanaToken || evmToken || null;
+  };
+
+  const token = getAuthToken();
   console.log("Token from cookies:", token);
+
+  // Check if user is both authenticated and verified
+  const isUserVerified = isConnected && isAuthenticated && isVerified && token;
   const [showClients, setShowClients] = useState(false);
   const [showFileStorage, setShowFileStorage] = useState(false);
   const [clients, setClients] = useState([
@@ -111,7 +126,6 @@ export default function DashboardPage() {
   const [subscriptionStatus, setSubscriptionStatus] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { address, isConnected } = useAppKitAccount();
   const [ConfigFile, setConfigFile] = useState<string>("");
   const [VpnName, setVpnName] = useState<string>("");
   // Fetch subscription data
@@ -444,7 +458,7 @@ export default function DashboardPage() {
         <div className="absolute inset-0 z-0">
           <BackgroundBeams />
         </div>
-        {!token ? (
+        {!isUserVerified ? (
           <>
             <NotLoggedIn />
           </>
