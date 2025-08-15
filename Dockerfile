@@ -1,9 +1,6 @@
 # -------- Build Stage --------
 FROM node:18-alpine AS builder
 
-ARG NEXT_PUBLIC_PROJECT_ID
-ENV NEXT_PUBLIC_PROJECT_ID=$NEXT_PUBLIC_PROJECT_ID
-
 WORKDIR /app
 RUN apk add --no-cache \
     python3 \
@@ -19,7 +16,7 @@ RUN npm install --force
 
 COPY . .
 
-RUN echo "NEXT_PUBLIC_PROJECT_ID at build time: $NEXT_PUBLIC_PROJECT_ID"
+# Build the application
 RUN npm run build
 
 # -------- Production Stage --------
@@ -43,7 +40,7 @@ USER nextjs
 
 EXPOSE 3000
 
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
 CMD ["node", "server.js"]

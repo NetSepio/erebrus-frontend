@@ -1,10 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
+  output: "standalone",
   images: {
-    domains: ['assets.aceternity.com'],
+    domains: ["assets.aceternity.com"],
   },
-  webpack: (config: { externals: string[]; }) => {
+  webpack: (config: { externals: string[] }) => {
     config.externals = config.externals || [];
     config.externals.push("pino-pretty", "lokijs", "encoding");
     return config;
