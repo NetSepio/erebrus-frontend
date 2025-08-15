@@ -53,9 +53,11 @@ jobs:
           script: |
             pwd
             export BRANCH_NAME=${GITHUB_REF#refs/heads/}
-            export IMAGE_TAG=$([ "$BRANCH_NAME" = "main" ] && echo "main" || echo "$BRANCH_NAME")
-            docker stop erebrus-frontend-dev && docker rm erebrus-frontend-dev
+            export IMAGE_TAG=$(echo "$BRANCH_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9.-]/-/g')
+            echo "Branch: $BRANCH_NAME, Image Tag: $IMAGE_TAG"
+            docker stop erebrus-frontend-dev && docker rm erebrus-frontend-dev || true
             docker rmi ghcr.io/netsepio/erebrus-frontend:$IMAGE_TAG || true
             echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
             docker pull ghcr.io/netsepio/erebrus-frontend:$IMAGE_TAG
+            docker run --name="erebrus-frontend-dev" --restart=always -p 4041:3000 --net=bridge -d ghcr.io/netsepio/erebrus-frontend:$IMAGE_TAG
             docker run --name="erebrus-frontend-dev" --restart=always -p 4041:3000 --net=bridge -d ghcr.io/netsepio/erebrus-frontend:$IMAGE_TAG
