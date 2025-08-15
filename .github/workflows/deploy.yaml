@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - pranj-branch  # Added your branch
 
 jobs:
   build_push:
@@ -23,7 +24,7 @@ jobs:
         env:
           DEV_ENV_FILE: ${{ secrets.DEV_ENV_FILE }}
         run: |
-          echo "$DEV_ENV_FILE" > .env
+          echo "$DEV_ENV_FILE" > .env.local
           export CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
           export TAG=$([[ $CURRENT_BRANCH == $(basename ${{ github.ref }}) ]] && echo $CURRENT_BRANCH || echo "latest")
           echo $TAG
@@ -35,14 +36,14 @@ jobs:
           echo "Pushing Image to GitHub Container Registry"
           docker push $GITHUB_REF_IMAGE
           docker push $GITHUB_BRANCH_IMAGE
-          rm -rf .env
+          rm -rf .env.local
 
   deploy_dev:
     needs: build_push
     runs-on: ubuntu-latest
     steps:
       - name: Deploy on DEV server
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/pranj-branch'
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.PROD_REMOTE_SERVER_ADDRESS }}
@@ -51,8 +52,10 @@ jobs:
           port: ${{ secrets.PROD_SSH_PORT }}
           script: |
             pwd
+            export BRANCH_NAME=${GITHUB_REF#refs/heads/}
+            export IMAGE_TAG=$([ "$BRANCH_NAME" = "main" ] && echo "main" || echo "$BRANCH_NAME")
             docker stop erebrus-frontend-dev && docker rm erebrus-frontend-dev
-            docker rmi ghcr.io/netsepio/erebrus-frontend:main
+            docker rmi ghcr.io/netsepio/erebrus-frontend:$IMAGE_TAG || true
             echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
-            docker pull netSepio/erebrus-frontend:main
-            docker run --name="erebrus-frontend-dev" --restart=always -p 4041:3000 --net=bridge -d ghcr.io/netsepio/erebrus-frontend:main
+            docker pull ghcr.io/netsepio/erebrus-frontend:$IMAGE_TAG
+            docker run --name="erebrus-frontend-dev" --restart=always -p 4041:3000 --net=bridge -d ghcr.io/netsepio/erebrus-frontend:$IMAGE_TAG

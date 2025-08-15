@@ -25,7 +25,7 @@ jobs:
         env:
           DEV_ENV_FILE: ${{ secrets.DEV_ENV_FILE }}
         run: |
-          echo "$DEV_ENV_FILE" > .env
+          echo "$DEV_ENV_FILE" > .env.local
           export CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
           export TAG=$([[ $CURRENT_BRANCH == $(basename ${{ github.ref }}) ]] && echo $CURRENT_BRANCH || echo "latest")
           echo $TAG
@@ -34,4 +34,4 @@ jobs:
           export GITHUB_REF_IMAGE=$(echo $GITHUB_REF_IMAGE | tr '[:upper:]' '[:lower:]')
           export GITHUB_BRANCH_IMAGE=$(echo $GITHUB_BRANCH_IMAGE | tr '[:upper:]' '[:lower:]')
           docker build --build-arg version=$GITHUB_SHA -t $GITHUB_REF_IMAGE -t $GITHUB_BRANCH_IMAGE .
-          rm -rf .env
+          rm -rf .env.local
