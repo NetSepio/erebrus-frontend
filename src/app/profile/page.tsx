@@ -60,6 +60,34 @@ interface ChainInfoMap {
   [key: string]: ChainInfo;
 }
 
+// NFT interfaces for Magic Eden API
+interface SolanaNFT {
+  mintAddress: string;
+  name: string;
+  collectionName?: string;
+  image: string;
+  description?: string;
+  attributes?: Array<{
+    trait_type: string;
+    value: string | number;
+  }>;
+  owner: string;
+  tokenStandard?: string;
+  isCompressed?: boolean;
+}
+
+interface MagicEdenNFTResponse {
+  symbol: string;
+  tokenMint: string;
+  collection: string;
+  name: string;
+  image: string;
+  attributes: Array<{
+    trait_type: string;
+    value: string | number;
+  }>;
+}
+
 const Profile = () => {
   // Use the updated authentication hook
   const { isConnected, address, isAuthenticated, isVerified } = useWalletAuth();
@@ -95,6 +123,11 @@ const Profile = () => {
   const [pendingEmailUpdate, setPendingEmailUpdate] = useState("");
   const [otpSentEmail, setOtpSentEmail] = useState("");
 
+  // NFT states
+  const [userNFTs, setUserNFTs] = useState<SolanaNFT[]>([]);
+  const [isLoadingNFTs, setIsLoadingNFTs] = useState(false);
+  const [nftError, setNftError] = useState<string | null>(null);
+
   // Helper function to get the correct authentication token
   const getAuthToken = () => {
     const solanaToken = Cookies.get("erebrus_token_solana");
@@ -112,6 +145,138 @@ const Profile = () => {
       token &&
       walletFromCookie?.toLowerCase() === address.toLowerCase()
     );
+  };
+
+  // Magic Eden API functions for fetching Solana NFTs
+  const fetchUserNFTsFromMagicEden = async (
+    walletAddress: string
+  ): Promise<SolanaNFT[]> => {
+    try {
+      // First, let's try the Magic Eden v2 API for getting wallet NFTs
+      const response = await fetch(
+        `https://api-mainnet.magiceden.dev/v2/wallets/${walletAddress}/tokens`,
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Magic Eden API error: ${response.status} ${response.statusText}`
+        );
+      }
+
+      const nftData: MagicEdenNFTResponse[] = await response.json();
+
+      // Transform the Magic Eden response to our NFT format
+      const transformedNFTs: SolanaNFT[] = nftData.map((nft) => ({
+        mintAddress: nft.tokenMint,
+        name: nft.name || "Unnamed NFT",
+        collectionName: nft.collection || nft.symbol,
+        image: nft.image || "", // Magic Eden provides direct image URLs
+        description: "", // Magic Eden v2 API doesn't include description in wallet endpoint
+        attributes: nft.attributes || [],
+        owner: walletAddress,
+        tokenStandard: "NonFungible",
+        isCompressed: false,
+      }));
+
+      return transformedNFTs;
+    } catch (error) {
+      console.error("Error fetching NFTs from Magic Eden:", error);
+      throw error;
+    }
+  };
+
+  // Alternative: Use Helius/Metaplex for more comprehensive NFT data
+  const fetchUserNFTsFromHelius = async (
+    walletAddress: string
+  ): Promise<SolanaNFT[]> => {
+    try {
+      // You can replace with your Helius API key if you have one
+      const HELIUS_API_KEY = process.env.NEXT_PUBLIC_HELIUS_API_KEY || "demo";
+
+      const response = await fetch(
+        `https://api.helius.xyz/v0/addresses/${walletAddress}/nfts?api-key=${HELIUS_API_KEY}`,
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Helius API error: ${response.status} ${response.statusText}`
+        );
+      }
+
+      const nftData = await response.json();
+
+      // Transform Helius response to our format
+      const transformedNFTs: SolanaNFT[] = nftData.map((nft: any) => ({
+        mintAddress: nft.id,
+        name: nft.content?.metadata?.name || "Unnamed NFT",
+        collectionName: nft.grouping?.[0]?.group_value || "Unknown Collection",
+        image: nft.content?.links?.image || nft.content?.files?.[0]?.uri || "",
+        description: nft.content?.metadata?.description || "",
+        attributes: nft.content?.metadata?.attributes || [],
+        owner: walletAddress,
+        tokenStandard: nft.interface || "NonFungible",
+        isCompressed: nft.compression?.compressed || false,
+      }));
+
+      return transformedNFTs;
+    } catch (error) {
+      console.error("Error fetching NFTs from Helius:", error);
+      throw error;
+    }
+  };
+
+  // Main function to fetch user's NFTs (tries multiple sources)
+  const fetchUserNFTs = async (walletAddress: string): Promise<void> => {
+    setIsLoadingNFTs(true);
+    setNftError(null);
+
+    try {
+      let nfts: SolanaNFT[] = [];
+
+      // Try Magic Eden first (free and reliable for basic data)
+      try {
+        console.log("Fetching NFTs from Magic Eden for wallet:", walletAddress);
+        nfts = await fetchUserNFTsFromMagicEden(walletAddress);
+        console.log(`Found ${nfts.length} NFTs from Magic Eden`);
+      } catch (magicEdenError) {
+        console.warn("Magic Eden failed, trying Helius:", magicEdenError);
+
+        // Fallback to Helius if Magic Eden fails
+        try {
+          nfts = await fetchUserNFTsFromHelius(walletAddress);
+          console.log(`Found ${nfts.length} NFTs from Helius`);
+        } catch (heliusError) {
+          console.error("Both Magic Eden and Helius failed:", heliusError);
+          throw new Error("Unable to fetch NFTs from any provider");
+        }
+      }
+
+      setUserNFTs(nfts);
+
+      if (nfts.length === 0) {
+        console.log("No NFTs found for this wallet");
+      }
+    } catch (error) {
+      console.error("Error fetching user NFTs:", error);
+      setNftError(
+        error instanceof Error ? error.message : "Failed to load NFTs"
+      );
+      setUserNFTs([]);
+    } finally {
+      setIsLoadingNFTs(false);
+    }
   };
 
   // Handle refresh button click
@@ -660,9 +825,32 @@ const Profile = () => {
       setTempFormData(initialFormData);
       setloggedin(false);
       setauth(true);
+      setUserNFTs([]); // Clear NFTs when wallet disconnects
       localStorage.removeItem("last_auth_token");
     }
   }, [isConnected, address]);
+
+  // Effect to fetch NFTs when wallet is connected (for Solana wallets)
+  useEffect(() => {
+    const shouldFetchNFTs = isConnected && address && isUserAuthenticated();
+    const isSolanaWallet = Cookies.get("Chain_symbol")?.toLowerCase() === "sol";
+
+    if (shouldFetchNFTs && isSolanaWallet) {
+      console.log("Fetching NFTs for Solana wallet:", address);
+      fetchUserNFTs(address);
+    } else {
+      // Clear NFTs if not Solana or not connected
+      setUserNFTs([]);
+      setNftError(null);
+    }
+  }, [isConnected, address, isUserAuthenticated()]);
+
+  // Refresh NFTs function
+  const refreshNFTs = async () => {
+    if (address && isUserAuthenticated()) {
+      await fetchUserNFTs(address);
+    }
+  };
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -1042,43 +1230,207 @@ const Profile = () => {
                   <Card className="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden shadow-xl">
                     <CardContent className="p-8">
                       <div className="text-center">
-                        <h2 className="text-2xl font-bold mb-4">
+                        <h2 className="text-2xl font-bold text-purple-400 mb-4">
                           Your NFT Collection
                         </h2>
-                        <p className="text-gray-400 mb-8">
-                          View and manage your Erebrus NFTs
-                        </p>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                          {/* NFT Card Example */}
-                          <div className="bg-gray-800/50 border border-gray-700 rounded-lg overflow-hidden hover:border-blue-500 transition-all duration-300">
-                            <div className="aspect-square w-full bg-gradient-to-br from-blue-900 to-purple-900 flex items-center justify-center">
-                              <p className="text-sm text-center px-4">
-                                vpn-nft-image.webp
-                              </p>
-                            </div>
-                            <div className="p-4">
-                              <h3 className="font-bold">Erebrus VPN Access</h3>
-                              <p className="text-sm text-gray-400">
-                                Valid until: Dec 31, 2023
-                              </p>
-                            </div>
-                          </div>
+                        {/* Chain indicator */}
+                        <div className="mb-6">
+                          <Badge
+                            variant="outline"
+                            className="bg-blue-900/30 text-blue-300 border-blue-800"
+                          >
+                            {Cookies.get("Chain_symbol")?.toUpperCase() ||
+                              "Unknown"}{" "}
+                            Network
+                          </Badge>
+                        </div>
 
-                          {/* Empty NFT Card */}
-                          <div className="bg-gray-800/20 border border-dashed border-gray-700 rounded-lg overflow-hidden flex flex-col items-center justify-center p-6 hover:bg-gray-800/30 transition-all duration-300">
-                            <Upload className="h-12 w-12 text-gray-600 mb-4" />
-                            <p className="text-gray-500 text-center">
-                              Mint a new NFT to add to your collection
+                        {/* Loading state */}
+                        {isLoadingNFTs && (
+                          <div className="text-center py-12">
+                            <div className="animate-spin h-8 w-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-4" />
+                            <p className="text-gray-400">
+                              Loading your NFTs...
                             </p>
+                          </div>
+                        )}
+
+                        {/* Error state */}
+                        {nftError && !isLoadingNFTs && (
+                          <div className="text-center py-12">
+                            <X className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                            <p className="text-red-400 mb-2">
+                              Failed to load NFTs
+                            </p>
+                            <p className="text-gray-500 text-sm">{nftError}</p>
                             <Button
+                              onClick={refreshNFTs}
                               variant="outline"
                               className="mt-4 border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
                             >
-                              Go to Mint Page
+                              Try Again
                             </Button>
                           </div>
-                        </div>
+                        )}
+
+                        {/* NFT Grid */}
+                        {!isLoadingNFTs && !nftError && (
+                          <>
+                            {userNFTs.length > 0 ? (
+                              <>
+                                <p className="text-gray-400 mb-8">
+                                  Found {userNFTs.length} NFT
+                                  {userNFTs.length !== 1 ? "s" : ""} in your
+                                  wallet
+                                </p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                  {userNFTs.map((nft, index) => (
+                                    <div
+                                      key={nft.mintAddress || index}
+                                      className="bg-gray-800/50 border border-gray-700 rounded-lg overflow-hidden hover:border-blue-500 transition-all duration-300 transform hover:scale-105"
+                                    >
+                                      {/* NFT Image */}
+                                      <div className="aspect-square w-full bg-gradient-to-br from-blue-900 to-purple-900 flex items-center justify-center relative">
+                                        {nft.image ? (
+                                          <img
+                                            src={nft.image}
+                                            alt={nft.name}
+                                            className="w-full h-full object-cover"
+                                            onError={(e) => {
+                                              const img = e.currentTarget;
+                                              img.style.display = "none";
+                                              // Show fallback
+                                              const fallback =
+                                                img.nextElementSibling as HTMLElement;
+                                              if (fallback)
+                                                fallback.style.display = "flex";
+                                            }}
+                                          />
+                                        ) : null}
+                                        {/* Fallback for missing images */}
+                                        <div
+                                          className="absolute inset-0 flex items-center justify-center text-center px-4"
+                                          style={{
+                                            display: nft.image
+                                              ? "none"
+                                              : "flex",
+                                          }}
+                                        >
+                                          <div>
+                                            <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                                            <p className="text-sm text-gray-400">
+                                              {nft.name}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      {/* NFT Details */}
+                                      <div className="p-4">
+                                        <h3
+                                          className="font-bold text-white truncate"
+                                          title={nft.name}
+                                        >
+                                          {nft.name}
+                                        </h3>
+                                        {nft.collectionName && (
+                                          <p
+                                            className="text-sm text-blue-400 truncate"
+                                            title={nft.collectionName}
+                                          >
+                                            {nft.collectionName}
+                                          </p>
+                                        )}
+                                        {nft.description && (
+                                          <p className="text-xs text-gray-400 mt-2 max-h-8 overflow-hidden">
+                                            {nft.description.length > 80
+                                              ? `${nft.description.substring(
+                                                  0,
+                                                  80
+                                                )}...`
+                                              : nft.description}
+                                          </p>
+                                        )}
+
+                                        {/* Attributes preview */}
+                                        {nft.attributes &&
+                                          nft.attributes.length > 0 && (
+                                            <div className="mt-3 flex flex-wrap gap-1">
+                                              {nft.attributes
+                                                .slice(0, 2)
+                                                .map((attr, attrIndex) => (
+                                                  <span
+                                                    key={attrIndex}
+                                                    className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded"
+                                                    title={`${attr.trait_type}: ${attr.value}`}
+                                                  >
+                                                    {attr.trait_type}:{" "}
+                                                    {attr.value}
+                                                  </span>
+                                                ))}
+                                              {nft.attributes.length > 2 && (
+                                                <span className="text-xs text-gray-500">
+                                                  +{nft.attributes.length - 2}{" "}
+                                                  more
+                                                </span>
+                                              )}
+                                            </div>
+                                          )}
+
+                                        {/* Token details */}
+                                        <div className="mt-3 text-xs text-gray-500">
+                                          <p title={nft.mintAddress}>
+                                            Mint: {nft.mintAddress.slice(0, 8)}
+                                            ...{nft.mintAddress.slice(-4)}
+                                          </p>
+                                          {nft.isCompressed && (
+                                            <span className="text-yellow-400">
+                                              Compressed NFT
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </>
+                            ) : (
+                              // Empty state
+                              <div className="text-center py-12">
+                                <Upload className="h-16 w-16 text-gray-600 mx-auto mb-4" />
+                                <h3 className="text-xl font-semibold text-gray-300 mb-2">
+                                  No NFTs Found
+                                </h3>
+                                <p className="text-gray-500 mb-6">
+                                  {Cookies.get(
+                                    "Chain_symbol"
+                                  )?.toLowerCase() === "sol"
+                                    ? "You don't have any NFTs in your Solana wallet yet."
+                                    : "Connect a Solana wallet to view your NFTs."}
+                                </p>
+                                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                                  <Button
+                                    onClick={() =>
+                                      window.open("/mint", "_blank")
+                                    }
+                                    variant="outline"
+                                    className="border-gray-700 text-black-300 hover:bg-gray-800 hover:text-white"
+                                  >
+                                    Go to Mint Page
+                                  </Button>
+                                  <Button
+                                    onClick={refreshNFTs}
+                                    variant="outline"
+                                    className="border-gray-700 text-black-300 hover:bg-gray-800 hover:text-white"
+                                  >
+                                    Refresh Collection
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )}
                       </div>
                     </CardContent>
                   </Card>

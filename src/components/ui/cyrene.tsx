@@ -93,7 +93,7 @@ export default function VPNandAISections() {
               <div className="relative">
                 <Image
                   src="/Erebrus_Mobile.webp"
-                  alt="Erebus Mobile App"
+                  alt="Erebrus Mobile App"
                   className="w-full max-w-md object-contain z-10 relative"
                   width={500}
                   height={500}
@@ -135,7 +135,7 @@ export default function VPNandAISections() {
               <h3 className="text-3xl font-bold mb-6 text-blue-100">Your Cosmic Guide into the Agentic Future</h3>
 
               <p className="text-gray-300 mb-8 text-lg">
-                Chat with Cyrene, our advanced AI assistant integrated into Erebus applications, ready to answer your
+                Chat with Cyrene, our advanced AI assistant integrated into Erebrus applications, ready to answer your
                 questions and provide instant assistance, across space and time.
               </p>
 

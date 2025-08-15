@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Web3Provider } from '@ethersproject/providers';
+import { BrowserProvider } from 'ethers';
 import { Contract, formatUnits, parseEther } from 'ethers';
 
 
@@ -55,8 +55,8 @@ const NodeDwifiStreamUser = () => {
     }
 
     try {
-      const provider = new Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
+      const provider = new BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
       const contract = new Contract(contractAddress, signer);
 
 
@@ -110,9 +110,9 @@ const NodeDwifiStreamUser = () => {
     setError(null);
     setIsSaving(true);
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const contract = new ethers.Contract(contractAddress, signer);
+      const provider = new BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new Contract(contractAddress, signer);
 
       // Convert price to wei
      const priceInWei = parseEther(updatedNode.pricePerMinute);

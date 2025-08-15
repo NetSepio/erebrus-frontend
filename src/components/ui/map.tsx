@@ -54,10 +54,10 @@ export default function DePINRevolutionComponent() {
             <div className="bg-gray-900 p-6 rounded-lg">
               <p>
                 Prepare to witness a groundbreaking leap in internet technology
-                with the Erebus Protocol, the vanguard in democratizing safe,
+                with the Erebrus Protocol, the vanguard in democratizing safe,
                 private, and accessible internet through DePIN. By seamlessly
                 integrating decentralized VPN (DVPN) and decentralized WIFI
-                (DWIFI) within a robust infrastructure, Erebus is set to
+                (DWIFI) within a robust infrastructure, Erebrus is set to
                 redefine digital connectivity with a focus on privacy and
                 sovereignty.
               </p>
