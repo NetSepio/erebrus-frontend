@@ -14,11 +14,7 @@ RUN apk add --no-cache \
 COPY package*.json ./
 RUN npm install --force
 
-# Copy all files including .env.local (if it exists)
 COPY . .
-
-# Check if .env.local exists and show its content for debugging
-RUN if [ -f .env.local ]; then echo ".env.local found:"; cat .env.local; else echo ".env.local not found"; fi
 
 # Build the application
 RUN npm run build

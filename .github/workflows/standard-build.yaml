@@ -1,14 +1,18 @@
-name: "Build and Push to GHCR"
+name: "Build Check"
 
 on:
   push:
     branches-ignore:
       - main
       - prod
+  pull_request:
+    branches:
+      - pranjbranch
 
 jobs:
   build_push:
     runs-on: ubuntu-latest
+    environment: DEV
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -33,7 +37,4 @@ jobs:
           export GITHUB_REF_IMAGE=$(echo $GITHUB_REF_IMAGE | tr '[:upper:]' '[:lower:]')
           export GITHUB_BRANCH_IMAGE=$(echo $GITHUB_BRANCH_IMAGE | tr '[:upper:]' '[:lower:]')
           docker build --build-arg version=$GITHUB_SHA -t $GITHUB_REF_IMAGE -t $GITHUB_BRANCH_IMAGE .
-          echo "Pushing Image to GitHub Container Registry"
-          docker push $GITHUB_REF_IMAGE
-          docker push $GITHUB_BRANCH_IMAGE
-          rm -rf .env
+          rm -rf .env.local

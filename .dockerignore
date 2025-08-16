@@ -10,7 +10,7 @@ yarn-debug.log
 yarn-error.log
 
 # Local environment files (keep them outside if you want dynamic injection)
-.env.local
+# .env.local
 .env.development.local
 .env.test.local
 .env.production.local
