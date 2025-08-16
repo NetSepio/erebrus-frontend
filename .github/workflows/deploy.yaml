@@ -26,8 +26,8 @@ jobs:
         run: |
           echo "$DEV_ENV_FILE" > .env.local
           export CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
-          export TAG=$([[ $CURRENT_BRANCH == $(basename ${{ github.ref }}) ]] && echo $CURRENT_BRANCH || echo "latest")
-          echo $TAG
+          export TAG=$(echo "$CURRENT_BRANCH" | tr '[:upper:]' '[:lower:]')
+          echo "Building with tag: $TAG"
           export GITHUB_REF_IMAGE=ghcr.io/$GITHUB_REPOSITORY:$GITHUB_SHA
           export GITHUB_BRANCH_IMAGE=ghcr.io/$GITHUB_REPOSITORY:$TAG
           export GITHUB_REF_IMAGE=$(echo $GITHUB_REF_IMAGE | tr '[:upper:]' '[:lower:]')
@@ -53,7 +53,8 @@ jobs:
           script: |
             pwd
             export BRANCH_NAME=${GITHUB_REF#refs/heads/}
-            export IMAGE_TAG=$([ "$BRANCH_NAME" = "main" ] && echo "main" || echo "$BRANCH_NAME")
+            export IMAGE_TAG=$(echo "$BRANCH_NAME" | tr '[:upper:]' '[:lower:]')
+            echo "Using image tag: $IMAGE_TAG"
             docker stop erebrus-frontend-dev && docker rm erebrus-frontend-dev
             docker rmi ghcr.io/netsepio/erebrus-frontend:$IMAGE_TAG || true
             echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
