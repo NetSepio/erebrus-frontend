@@ -122,6 +122,9 @@ const Profile = () => {
   const [isOtpVerifying, setIsOtpVerifying] = useState(false);
   const [pendingEmailUpdate, setPendingEmailUpdate] = useState("");
   const [otpSentEmail, setOtpSentEmail] = useState("");
+  const [emailValidationError, setEmailValidationError] = useState<
+    string | null
+  >(null);
 
   // NFT states
   const [userNFTs, setUserNFTs] = useState<SolanaNFT[]>([]);
@@ -314,24 +317,74 @@ const Profile = () => {
     }));
   };
 
-  // Function to send OTP to current email
-  const sendOtpToCurrentEmail = async () => {
+  // Function to check if email already exists in database
+  const checkEmailExists = async (email: string) => {
     const auth = getAuthToken();
     if (!auth) {
-      toast.error(
-        "Authentication token not found. Please reconnect your wallet."
-      );
+      console.error("No auth token for email check");
       return false;
     }
 
-    const currentEmail = formData.emailId;
-    if (!currentEmail) {
-      toast.error("No current email found. Please set an email first.");
+    try {
+      console.log("Checking email existence for:", email);
+
+      const response = await fetch(
+        `${REACT_APP_GATEWAY_URL}/api/v1.1/profile/email/check`,
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json, text/plain, */*",
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${auth}`,
+          },
+          body: JSON.stringify({
+            email: email,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Email check response:", data);
+        return data.exists || false;
+      } else {
+        console.warn("Email check endpoint returned error:", response.status);
+        // If the endpoint doesn't exist or returns error, we'll skip the check
+        // and let the OTP sending handle the validation
+        return false;
+      }
+    } catch (error) {
+      console.error("Error checking email existence:", error);
+      // If there's an error, we'll allow the process to continue
+      // and let the OTP endpoint handle the validation
+      return false;
+    }
+  };
+
+  // Function to send OTP to new email address
+  const sendOtpToNewEmail = async (newEmail: string) => {
+    const auth = getAuthToken();
+    if (!auth) {
+      const errorMsg =
+        "Authentication token not found. Please reconnect your wallet.";
+      setEmailValidationError(errorMsg);
+      toast.error(errorMsg);
+      return false;
+    }
+
+    if (!newEmail || !newEmail.trim()) {
+      const errorMsg = "Please provide a valid email address.";
+      setEmailValidationError(errorMsg);
+      toast.error(errorMsg);
       return false;
     }
 
     setIsOtpSending(true);
+    setEmailValidationError(null); // Clear any previous errors
+
     try {
+      console.log("Sending OTP to:", newEmail);
+
       const response = await fetch(
         `${REACT_APP_GATEWAY_URL}/api/v1.1/profile/email/send`,
         {
@@ -342,26 +395,55 @@ const Profile = () => {
             Authorization: `Bearer ${auth}`,
           },
           body: JSON.stringify({
-            email: currentEmail,
+            email: newEmail,
             purpose: "email_update",
           }),
         }
       );
 
+      const responseData = await response.json();
+      console.log("OTP send response:", {
+        status: response.status,
+        data: responseData,
+      });
+
       if (response.ok) {
-        setOtpSentEmail(currentEmail);
-        toast.success(`OTP sent to ${currentEmail}`);
+        setOtpSentEmail(newEmail);
+        setEmailValidationError(null); // Clear any errors on success
+        toast.success(`OTP sent to ${newEmail}`);
         return true;
       } else {
-        const errorData = await response.json();
-        toast.error(
-          errorData.message || "Failed to send OTP. Please try again."
-        );
-        return false;
+        console.error("OTP send failed:", responseData);
+
+        // Check for different types of email existence errors
+        const errorMessage = responseData.message || "";
+        const isEmailExistsError =
+          errorMessage.toLowerCase().includes("already exists") ||
+          errorMessage.toLowerCase().includes("already registered") ||
+          errorMessage.toLowerCase().includes("email exists") ||
+          response.status === 409; // Conflict status code
+
+        if (isEmailExistsError) {
+          const emailExistsMsg =
+            "This email address is already registered to another account. Please use a different email.";
+          setEmailValidationError(emailExistsMsg);
+          toast.error(emailExistsMsg);
+          // Don't close dialog immediately, let user see the error in the dialog
+          return false;
+        } else {
+          const errorMsg =
+            errorMessage || "Failed to send OTP. Please try again.";
+          setEmailValidationError(errorMsg);
+          toast.error(errorMsg);
+          return false;
+        }
       }
     } catch (error) {
       console.error("Error sending OTP:", error);
-      toast.error("Failed to send OTP. Please try again.");
+      const errorMsg =
+        "Failed to send OTP. Please check your connection and try again.";
+      setEmailValidationError(errorMsg);
+      toast.error(errorMsg);
       return false;
     } finally {
       setIsOtpSending(false);
@@ -372,18 +454,23 @@ const Profile = () => {
   const verifyOtp = async () => {
     const auth = getAuthToken();
     if (!auth) {
-      toast.error(
-        "Authentication token not found. Please reconnect your wallet."
-      );
+      const errorMsg =
+        "Authentication token not found. Please reconnect your wallet.";
+      setEmailValidationError(errorMsg);
+      toast.error(errorMsg);
       return false;
     }
 
     if (!otpCode || otpCode.length !== 6) {
-      toast.error("Please enter a valid 6-digit OTP.");
+      const errorMsg = "Please enter a valid 6-digit OTP.";
+      setEmailValidationError(errorMsg);
+      toast.error(errorMsg);
       return false;
     }
 
     setIsOtpVerifying(true);
+    setEmailValidationError(null); // Clear any previous errors
+
     try {
       const response = await fetch(
         `${REACT_APP_GATEWAY_URL}/api/v1.1/profile/email/verify`,
@@ -403,16 +490,21 @@ const Profile = () => {
       );
 
       if (response.ok) {
+        setEmailValidationError(null); // Clear any errors on success
         toast.success("OTP verified successfully!");
         return true;
       } else {
         const errorData = await response.json();
-        toast.error(errorData.message || "Invalid OTP. Please try again.");
+        const errorMsg = errorData.message || "Invalid OTP. Please try again.";
+        setEmailValidationError(errorMsg);
+        toast.error(errorMsg);
         return false;
       }
     } catch (error) {
       console.error("Error verifying OTP:", error);
-      toast.error("Failed to verify OTP. Please try again.");
+      const errorMsg = "Failed to verify OTP. Please try again.";
+      setEmailValidationError(errorMsg);
+      toast.error(errorMsg);
       return false;
     } finally {
       setIsOtpVerifying(false);
@@ -466,22 +558,35 @@ const Profile = () => {
       return;
     }
 
-    // Check if email has changed
+    // Check if email has changed or is being added for the first time
     const emailChanged = tempFormData.emailId !== formData.emailId;
-    const hasExistingEmail = formData.emailId && formData.emailId.trim() !== "";
+    const newEmail = tempFormData.emailId?.trim();
+    const hasNewEmail = newEmail && newEmail !== "";
+    const isFirstTimeEmail =
+      !formData.emailId || formData.emailId.trim() === "";
 
-    if (emailChanged && hasExistingEmail) {
-      // Email has changed and user has an existing email, require OTP verification
-      setPendingEmailUpdate(tempFormData.emailId);
+    if (emailChanged && hasNewEmail) {
+      console.log(
+        "Email changed, proceeding with OTP verification for:",
+        newEmail
+      );
+
+      // Proceed directly with OTP verification - let the OTP endpoint handle email existence validation
+      setPendingEmailUpdate(newEmail);
       setLoading(false);
       setShowOtpDialog(true);
-      toast.info(
-        "Email change detected. Please verify with OTP sent to your current email."
-      );
+
+      if (isFirstTimeEmail) {
+        toast.info("Please verify your email address with OTP.");
+      } else {
+        toast.info(
+          "Email change detected. Please verify the new email address with OTP."
+        );
+      }
       return;
     }
 
-    // Proceed with normal profile update
+    // Proceed with normal profile update (no email change)
     await updateProfile();
   };
 
@@ -1555,13 +1660,12 @@ const Profile = () => {
                     {formData.emailId && formData.emailId.trim() !== "" && (
                       <p className="text-xs text-gray-400 mt-1">
                         💡 Changing your email will require OTP verification
-                        sent to your current email
+                        sent to your new email address
                       </p>
                     )}
                     {(!formData.emailId || formData.emailId.trim() === "") && (
                       <p className="text-xs text-gray-400 mt-1">
-                        📧 You can add your email without verification for the
-                        first time
+                        📧 Adding your email will require verification via OTP
                       </p>
                     )}
                   </div>
@@ -1743,31 +1847,61 @@ const Profile = () => {
         <DialogContent className="bg-gray-900 border-gray-800 text-white max-w-md">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-center">
-              Verify Email Change
+              Verify New Email Address
             </DialogTitle>
             <DialogDescription className="text-gray-400 text-center">
-              To change your email from{" "}
-              <span className="text-blue-400">{formData.emailId}</span> to{" "}
-              <span className="text-blue-400">{pendingEmailUpdate}</span>,
-              please enter the OTP sent to your current email.
+              {formData.emailId ? (
+                <>
+                  To change your email from{" "}
+                  <span className="text-blue-400">{formData.emailId}</span> to{" "}
+                  <span className="text-blue-400">{pendingEmailUpdate}</span>,
+                  please verify the new email address.
+                </>
+              ) : (
+                <>
+                  Please verify your new email address:{" "}
+                  <span className="text-blue-400">{pendingEmailUpdate}</span>
+                </>
+              )}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-6 p-4">
+            {/* Error display section */}
+            {emailValidationError && (
+              <div className="bg-red-900/30 border border-red-800 rounded-lg p-3 mb-4">
+                <div className="flex items-center space-x-2">
+                  <X className="h-5 w-5 text-red-400 flex-shrink-0" />
+                  <p className="text-red-400 text-sm">{emailValidationError}</p>
+                </div>
+              </div>
+            )}
+
             {!otpSentEmail ? (
-              // Step 1: Send OTP
+              // Step 1: Send OTP to new email
               <div className="text-center space-y-4">
                 <p className="text-gray-300">
-                  We'll send a verification code to your current email:
+                  We'll send a verification code to your new email:
                 </p>
                 <p className="font-semibold text-blue-400">
-                  {formData.emailId}
+                  {pendingEmailUpdate}
                 </p>
                 <Button
                   onClick={async () => {
-                    const success = await sendOtpToCurrentEmail();
+                    console.log(
+                      "Attempting to send OTP to:",
+                      pendingEmailUpdate
+                    );
+                    setEmailValidationError(null); // Clear any previous errors
+
+                    const success = await sendOtpToNewEmail(pendingEmailUpdate);
                     if (success) {
                       setOtpCode("");
+                    } else {
+                      // If sending OTP failed, the error should now be visible in the dialog
+                      console.log(
+                        "OTP sending failed, error should be visible in dialog"
+                      );
                     }
                   }}
                   disabled={isOtpSending}
@@ -1776,7 +1910,7 @@ const Profile = () => {
                   {isOtpSending ? (
                     <div className="flex items-center gap-2">
                       <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
-                      Sending OTP...
+                      Checking email and sending OTP...
                     </div>
                   ) : (
                     "Send Verification Code"
@@ -1812,6 +1946,7 @@ const Profile = () => {
                 <div className="flex gap-3">
                   <Button
                     onClick={async () => {
+                      setEmailValidationError(null); // Clear any previous errors
                       const success = await verifyOtp();
                       if (success) {
                         // OTP verified, proceed with profile update
@@ -1843,7 +1978,10 @@ const Profile = () => {
 
                   <Button
                     onClick={async () => {
-                      const success = await sendOtpToCurrentEmail();
+                      setEmailValidationError(null); // Clear any previous errors
+                      const success = await sendOtpToNewEmail(
+                        pendingEmailUpdate
+                      );
                       if (success) {
                         setOtpCode("");
                       }
@@ -1861,10 +1999,12 @@ const Profile = () => {
             <div className="flex justify-center">
               <Button
                 onClick={() => {
+                  console.log("Canceling email change, resetting states");
                   setShowOtpDialog(false);
                   setOtpCode("");
                   setOtpSentEmail("");
                   setPendingEmailUpdate("");
+                  setEmailValidationError(null);
                   // Reset email in form to original value
                   setTempFormData((prev) => ({
                     ...prev,

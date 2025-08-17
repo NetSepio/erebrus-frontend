@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - pranjbranch # Added your branch
 
 jobs:
   build_push:
