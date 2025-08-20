@@ -28,11 +28,6 @@ export function AuthButton() {
   // Check if user exists without authentication (fallback for canceled signings)
   const checkUserExistsWithoutAuth = async (walletAddress: string) => {
     try {
-      console.log(
-        "Checking if user exists in system without auth:",
-        walletAddress
-      );
-
       // Try both Solana and EVM chains to check if user exists
       const chains = ["sol", "evm"];
 
@@ -50,26 +45,19 @@ export function AuthButton() {
 
           if (response.ok) {
             const result = await response.json();
-            console.log(`🔍 FlowId check result for ${chain}:`, result);
 
             // If we can get a flowId, the user exists in the system
             if (result.payload?.flowId) {
-              console.log(
-                `✅ User exists in system on ${chain} chain - they just need to sign to authenticate`
-              );
               return true;
             }
           }
         } catch (chainError) {
-          console.log(`Failed to check ${chain} chain:`, chainError);
           continue;
         }
       }
 
-      console.log("❌ User not found on any supported chain");
       return false;
     } catch (error) {
-      console.error("Error checking user existence:", error);
       return false;
     }
   };
@@ -77,18 +65,12 @@ export function AuthButton() {
   // Check if user exists and needs verification when wallet connects
   const checkUserExists = async (walletAddress: string) => {
     try {
-      console.log("Checking user exists for wallet:", walletAddress);
       setUserStatus("checking");
 
       // Try to authenticate to determine user status
       const authResult = await authenticate();
 
       if (authResult.success) {
-        console.log("🔍 Authentication result:", {
-          success: authResult.success,
-          isVerified: authResult.isVerified,
-        });
-
         if (authResult.isVerified) {
           // User is authenticated and verified - get profile data
           const solanaToken = document.cookie
@@ -119,13 +101,12 @@ export function AuthButton() {
               if (response.ok) {
                 const result = await response.json();
                 const userData = result.data || result;
-                console.log("✅ Verified user profile:", userData);
                 setUserData(userData);
                 setUserStatus("existing");
                 return true;
               }
             } catch (profileError) {
-              console.error("Profile fetch error:", profileError);
+              // Handle profile fetch error silently
             }
           }
 
@@ -134,35 +115,24 @@ export function AuthButton() {
           return true;
         } else {
           // User is authenticated but not verified - show verification dialog
-          console.log(
-            "⚠️ User authenticated but not verified - showing verification dialog"
-          );
           setUserStatus("new");
           return false;
         }
       } else {
         // Authentication failed - check if user exists without auth (they might have canceled signing)
-        console.log(
-          "🔄 Authentication failed, checking if user exists in system..."
-        );
         const userExists = await checkUserExistsWithoutAuth(walletAddress);
 
         if (userExists) {
-          console.log(
-            "✅ User exists but not authenticated - showing sign button"
-          );
           setUserStatus("existing");
           setUserData(null);
           return false; // Not authenticated yet, but they exist
         } else {
-          console.log("❌ User does not exist - new user");
           setUserStatus("new");
           setUserData(null);
           return false;
         }
       }
     } catch (error) {
-      console.error("Error checking user exists:", error);
       setUserStatus("new");
       setUserData(null);
       return false;
@@ -174,17 +144,14 @@ export function AuthButton() {
     if (!address) return;
 
     try {
-      console.log("Opening registration dialog for new user...");
       setShowVerificationDialog(true);
     } catch (error) {
-      console.error("Error opening verification dialog:", error);
       toast.error("Failed to open verification dialog. Please try again.");
     }
   };
 
   // Handle successful verification (after user registration)
   const handleVerificationSuccess = async (newUserData: any) => {
-    console.log("User registration successful:", newUserData);
     setUserData(newUserData);
 
     // Update verification status in cookies after successful verification
@@ -217,7 +184,6 @@ export function AuthButton() {
 
     try {
       setUserStatus("signing");
-      console.log("🔄 Existing user attempting to authenticate...");
 
       const authResult = await authenticate();
 
@@ -262,7 +228,6 @@ export function AuthButton() {
                 toast.success("Welcome back!");
               }
             } catch (profileError) {
-              console.error("Profile fetch error:", profileError);
               toast.success("Welcome back!");
             }
           } else {
@@ -274,20 +239,15 @@ export function AuthButton() {
           }, 3000);
         } else {
           // User authenticated but not verified - should not happen for existing users
-          console.log(
-            "⚠️ Existing user authenticated but not verified - showing verification dialog"
-          );
           setUserStatus("new");
           setShowVerificationDialog(true);
         }
       } else {
         // Authentication failed - user canceled or error occurred
-        console.log("❌ Authentication failed for existing user");
         setUserStatus("existing");
         toast.error("Authentication failed. Please try again.");
       }
     } catch (error) {
-      console.error("Login error:", error);
       setUserStatus("existing");
       toast.error("Login failed. Please try again.");
     }
@@ -304,10 +264,8 @@ export function AuthButton() {
   // Check user status when wallet connects/disconnects
   useEffect(() => {
     if (isConnected && address) {
-      console.log("Wallet connected, checking user status for:", address);
       checkUserExists(address);
     } else {
-      console.log("Wallet disconnected, resetting auth state");
       resetAuthState();
     }
   }, [isConnected, address]);
@@ -315,9 +273,6 @@ export function AuthButton() {
   // Auto-show verification dialog for authenticated but unverified users
   useEffect(() => {
     if (isAuthenticated && isVerified === false && userStatus === "new") {
-      console.log(
-        "User is authenticated but not verified - showing verification dialog"
-      );
       setShowVerificationDialog(true);
     }
   }, [isAuthenticated, isVerified, userStatus]);

@@ -79,18 +79,25 @@ export const UserVerificationDialog: React.FC<UserVerificationDialogProps> = ({
 
   const uploadToIPFS = async (file: File): Promise<string> => {
     try {
-      // Simulate upload delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const formData = new FormData();
+      formData.append("file", file, file.name);
 
-      // Generate mock IPFS hash for UI testing
-      const mockHash = `Qm${Math.random()
-        .toString(36)
-        .substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
+      const res = await fetch("/api/uploadToIPFS", {
+        method: "POST",
+        body: formData,
+      });
 
-      return mockHash;
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `Upload failed with ${res.status}`);
+      }
+
+      const data = await res.json();
+      // data should contain { Hash, Url }
+      if (!data?.Hash) throw new Error("Invalid response from IPFS upload");
+      return data.Hash as string;
     } catch (error) {
-      // console.error("IPFS upload error:", error);
-      toast.error("Failed to upload image to IPFS");
+      toast.error("We couldn't upload the image. Please try again.");
       throw error;
     }
   };
@@ -107,7 +114,7 @@ export const UserVerificationDialog: React.FC<UserVerificationDialogProps> = ({
       };
       reader.readAsDataURL(file);
 
-      // Upload to IPFS
+      // Upload to IPFS via server proxy
       try {
         const hash = await uploadToIPFS(file);
         setAvatarHash(hash);
@@ -170,7 +177,7 @@ export const UserVerificationDialog: React.FC<UserVerificationDialogProps> = ({
   const sendEmail = async () => {
     // Validate only username and email before sending OTP
     if (!validateFieldsForOtp()) {
-      toast.error("Please fill in username and email before sending OTP");
+      toast.error("Add your username and email to get an OTP.");
       return;
     }
 
@@ -192,9 +199,7 @@ export const UserVerificationDialog: React.FC<UserVerificationDialogProps> = ({
       const pasetoToken = solanaToken || evmToken;
 
       if (!pasetoToken) {
-        toast.error(
-          "Authentication token not found. Please sign in with your wallet first."
-        );
+        toast.error("Please connect and sign in with your wallet first.");
         setIsSendingOtp(false);
         return;
       }
@@ -225,7 +230,7 @@ export const UserVerificationDialog: React.FC<UserVerificationDialogProps> = ({
         setIsOtpSent(true);
         setCanResendOtp(false);
         setOtpCountdown(30); // 30 second countdown
-        toast.success("OTP sent to your email address");
+        toast.success("We’ve sent an OTP to your email.");
         // console.log("✅ OTP sent successfully:", result);
 
         // Store any OTP reference if provided by API
@@ -250,9 +255,9 @@ export const UserVerificationDialog: React.FC<UserVerificationDialogProps> = ({
             ...prev,
             email: errorMessage,
           }));
-          toast.error(`Email already in use: ${errorMessage}`);
+          toast.error("That email is already registered.");
         } else {
-          toast.error(`Failed to send OTP: ${errorMessage}`);
+          toast.error(`We couldn’t send the OTP. ${errorMessage}`);
         }
 
         // console.error("❌ Send OTP API error:", {
@@ -263,10 +268,13 @@ export const UserVerificationDialog: React.FC<UserVerificationDialogProps> = ({
       }
     } catch (error) {
       // console.error("Send OTP error:", error);
-      if (error instanceof TypeError && error.message.includes("fetch")) {
+      if (
+        error instanceof TypeError &&
+        (error as any).message.includes("fetch")
+      ) {
         toast.error("Network error. Please check your internet connection.");
       } else {
-        toast.error("Failed to send OTP. Please try again.");
+        toast.error("We couldn’t send the OTP. Please try again.");
       }
     } finally {
       setIsSendingOtp(false);
@@ -276,12 +284,12 @@ export const UserVerificationDialog: React.FC<UserVerificationDialogProps> = ({
   // Verify OTP with backend - REAL API CALL
   const verifyOtp = async () => {
     if (!otp.trim()) {
-      toast.error("Please enter the OTP");
+      toast.error("Enter the OTP code.");
       return;
     }
 
     if (otp.length !== 6) {
-      toast.error("OTP must be 6 digits");
+      toast.error("OTP should be 6 digits.");
       return;
     }
 
@@ -302,14 +310,10 @@ export const UserVerificationDialog: React.FC<UserVerificationDialogProps> = ({
       const pasetoToken = solanaToken || evmToken;
 
       if (!pasetoToken) {
-        toast.error(
-          "Authentication token not found. Please reconnect your wallet."
-        );
+        toast.error("Please reconnect your wallet to continue.");
         setIsVerifyingOtp(false);
         return;
       }
-
-      console.log("Verifying OTP:", otp);
 
       // Make real API call to verify OTP
       const response = await fetch(
@@ -328,17 +332,13 @@ export const UserVerificationDialog: React.FC<UserVerificationDialogProps> = ({
       );
 
       const result = await response.json();
-      console.log("🔍 Verify OTP API Response:", {
-        status: response.status,
-        result,
-      });
 
       if (response.ok) {
         setIsOtpVerified(true);
         // Stop the countdown immediately
         setOtpCountdown(0);
         setCanResendOtp(true);
-        toast.success("Email verified successfully!");
+        toast.success("Your email is verified.");
         // Clear any email-related errors
         setErrors((prev) => {
           const newErrors = { ...prev };
@@ -347,16 +347,20 @@ export const UserVerificationDialog: React.FC<UserVerificationDialogProps> = ({
           return newErrors;
         });
       } else {
-        const errorMessage = result.message || result.error || "Invalid OTP";
+        const errorMessage =
+          result.message ||
+          result.error ||
+          "That OTP didn’t work. Please try again.";
         toast.error(errorMessage);
-        console.error("❌ Verify OTP API error:", result);
       }
     } catch (error) {
-      console.error("Verify OTP error:", error);
-      if (error instanceof TypeError && error.message.includes("fetch")) {
+      if (
+        error instanceof TypeError &&
+        (error as any).message.includes("fetch")
+      ) {
         toast.error("Network error. Please check your internet connection.");
       } else {
-        toast.error("Failed to verify OTP. Please try again.");
+        toast.error("We couldn’t verify the OTP. Please try again.");
       }
     } finally {
       setIsVerifyingOtp(false);
@@ -387,25 +391,14 @@ export const UserVerificationDialog: React.FC<UserVerificationDialogProps> = ({
       const pasetoToken = solanaToken || evmToken;
 
       if (!pasetoToken) {
-        toast.error(
-          "Authentication token not found. Please reconnect your wallet."
-        );
+        toast.error("Please reconnect your wallet to continue.");
         setIsSubmitting(false);
         return;
       }
 
-      console.log("Creating user profile with data:", {
-        username: formData.username,
-        email: formData.email + " (already verified via OTP)",
-        wallet_address: formData.wallet_address,
-        x_account: formData.x_account,
-        avatar_url: avatarHash || formData.avatar_url,
-        note: "Email not sent to API as it's already verified",
-      });
-
       // Create user profile using the profile update API (email already verified, so only update name and other fields)
       const response = await fetch(
-        "https://gateway.dev.netsepio.com/api/v1.0/profile  ",
+        "https://gateway.dev.netsepio.com/api/v1.0/profile",
         {
           method: "PATCH",
           headers: {
@@ -422,10 +415,6 @@ export const UserVerificationDialog: React.FC<UserVerificationDialogProps> = ({
       );
 
       const result = await response.json();
-      console.log("🔍 Profile Creation API Response:", {
-        status: response.status,
-        result,
-      });
 
       if (response.ok) {
         // Profile created successfully
@@ -449,11 +438,9 @@ export const UserVerificationDialog: React.FC<UserVerificationDialogProps> = ({
         // Handle API errors
         const errorMessage =
           result.message || result.error || "Failed to create profile";
-        toast.error(`Failed to create account: ${errorMessage}`);
-        console.error("❌ Profile Creation API error:", result);
+        toast.error(`We couldn't create your account: ${errorMessage}`);
       }
     } catch (error) {
-      console.error("Registration error:", error);
       if (error instanceof TypeError && error.message.includes("fetch")) {
         toast.error("Network error. Please check your internet connection.");
       } else {
@@ -484,9 +471,10 @@ export const UserVerificationDialog: React.FC<UserVerificationDialogProps> = ({
   };
 
   const handleInputChange = (field: string, value: string) => {
-    // Prevent changes to username if email is verified
     if (field === "username" && isOtpVerified) {
-      toast.warning("Username cannot be changed after email verification");
+      toast.warning(
+        "You can’t change the username after verifying your email."
+      );
       return;
     }
 
@@ -511,7 +499,9 @@ export const UserVerificationDialog: React.FC<UserVerificationDialogProps> = ({
       setGeneratedOtp("");
       setOtpCountdown(0);
       setCanResendOtp(true);
-      toast.info("Please send OTP again after updating username or email");
+      toast.info(
+        "Please send a new OTP after changing your username or email."
+      );
     }
 
     // Clear email errors when email field is being modified
@@ -589,7 +579,7 @@ export const UserVerificationDialog: React.FC<UserVerificationDialogProps> = ({
               {isOtpVerified && (
                 <p className="text-green-400 text-sm mt-1 flex items-center gap-1">
                   <CheckCircle2 className="h-4 w-4" />
-                  Username locked after email verification
+                  Username
                 </p>
               )}
             </div>

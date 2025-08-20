@@ -1,10 +1,6 @@
 import Link from "next/link";
 
-interface HeroSectionProps {
-  onWalletConnect?: () => void;
-}
-
-const HeroSection = ({ onWalletConnect }: HeroSectionProps) => {
+const HeroSection = () => {
   return (
     <div className="relative h-screen w-full overflow-hidden">
       {/* Background Video */}

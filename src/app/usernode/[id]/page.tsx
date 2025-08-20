@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CheckCircle, XCircle, Globe, Download, Upload, Clock, Server, Users, MapPin, Cpu } from "lucide-react"
 
-const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_BASE_URL 
+const EREBRUS_GATEWAY_URL = "https://gateway.dev.netsepio.com/"
 
 interface Node {
   id: string

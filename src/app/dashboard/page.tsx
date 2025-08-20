@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, useEffect, type FormEvent, type ChangeEvent } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  type FormEvent,
+  type ChangeEvent,
+} from "react";
 import Head from "next/head";
 import { Cloud, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,13 +25,11 @@ import { QRCodeSVG } from "qrcode.react";
 import { saveAs } from "file-saver";
 import { BackgroundBeams } from "@/components/ui/background-beams";
 import FileUploadDemo from "@/components/file-upload-demo";
-import { useAppKitAccount } from "@reown/appkit/react";
-import NotLoggedIn from "./notLoggedin";
 import Cookies from "js-cookie";
 import axios from "axios";
-import React from "react";
 import MyVpnCard from "./MyVpnCard";
 import { useWalletAuth } from "@/context/appkit";
+import { useAppKitNetworkCore } from "@reown/appkit/react";
 export interface FlowIdResponse {
   eula: string;
   flowId: string;
@@ -40,23 +44,36 @@ interface FormData {
   region: string;
 }
 export default function DashboardPage() {
-  const EREBRUS_GATEWAY_URL = "https://gateway.erebrus.io/";
+  const EREBRUS_GATEWAY_URL = "https://gateway.dev.netsepio.com/";
 
   // Use the updated authentication hook
-  const { isConnected, address, isAuthenticated, isVerified } = useWalletAuth();
+  const { isConnected, isAuthenticating } = useWalletAuth();
+
+  // Get network information
+  const { caipNetworkId } = useAppKitNetworkCore();
 
   // Helper function to get the correct authentication token
   const getAuthToken = () => {
-    const solanaToken = Cookies.get("erebrus_token_solana");
-    const evmToken = Cookies.get("erebrus_token_evm");
-    return solanaToken || evmToken || null;
+    // Determine chain type based on network
+    const isSolanaChain = caipNetworkId?.startsWith("solana:");
+    const chainType = isSolanaChain ? "solana" : "evm";
+
+    // Get chain-specific token
+    const chainToken = Cookies.get(`erebrus_token_${chainType}`);
+
+    // Fallback to basic token for backward compatibility
+    const basicToken = Cookies.get("erebrus_token");
+
+    // Return the first available token (no debug logging)
+    return chainToken || basicToken || null;
   };
 
   const token = getAuthToken();
-  console.log("Token from cookies:", token);
 
-  // Check if user is both authenticated and verified
-  const isUserVerified = isConnected && isAuthenticated && isVerified && token;
+  // Show dashboard as soon as wallet is connected; API sections will gracefully no-op without token
+  const canViewDashboard = isConnected;
+
+  // Note: Do not auto-authenticate here to avoid double signing.
   const [showClients, setShowClients] = useState(false);
   const [showFileStorage, setShowFileStorage] = useState(false);
   const [clients, setClients] = useState([
@@ -102,23 +119,26 @@ export default function DashboardPage() {
   const handleChildValue = (value: string) => {
     // Callback function to update the state in the parent component
     setValueFromChild2(value);
-    console.log("valueFromChild2", value);
   };
 
-  const [imageSrc, setImageSrc] = React.useState<string | null>(null);
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
   useEffect(() => {
     const fetchMetaData = async () => {
-      console.log("collectionImage", collectionImage);
       const ipfsCid = collectionImage?.replace("ipfs://", "");
 
-      // Fetching metadata from IPFS
+      // Guard against undefined/empty CID
+      if (!ipfsCid) {
+        setImageSrc(null);
+        return;
+      }
+
+      // Fetching metadata from IPFS via Erebrus gateway
       const metadataResponse = await axios.get(
-        `https://ipfs.io/ipfs/${ipfsCid}`
+        `https://ipfs.erebrus.io/ipfs/${ipfsCid}`
       );
       const metadata = metadataResponse.data;
-
-      console.log("Metadata:", metadata);
-      setImageSrc(metadata?.image.replace("ipfs://", ""));
+      const imagePath = metadata?.image?.replace?.("ipfs://", "");
+      setImageSrc(imagePath || null);
     };
     fetchMetaData();
   }, [collectionImage]);
@@ -128,6 +148,8 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [ConfigFile, setConfigFile] = useState<string>("");
   const [VpnName, setVpnName] = useState<string>("");
+  // Track last token used to fetch subscription (prevents StrictMode double-call)
+  const subscriptionFetchTokenRef = useRef<string | null>(null);
   // Fetch subscription data
   useEffect(() => {
     const fetchSubscription = async () => {
@@ -136,37 +158,77 @@ export default function DashboardPage() {
         return;
       }
 
-      try {
-        const EREBRUS_GATEWAY_URL = "https://gateway.erebrus.io/";
-        const response = await fetch(
-          `${EREBRUS_GATEWAY_URL}api/v1.0/subscription`,
-          {
-            method: "GET",
-            headers: {
-              Accept: "application/json, text/plain, */*",
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+      // Skip if we've already fetched for this exact token (dev StrictMode calls effects twice)
+      if (subscriptionFetchTokenRef.current === token) {
+        return;
+      }
+      subscriptionFetchTokenRef.current = token;
 
+      try {
+        const url = `${EREBRUS_GATEWAY_URL}api/v1.0/subscription`;
+
+        const response = await fetch(url, {
+          headers: {
+            Accept: "application/json, text/plain, */*",
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.status === 404) {
+          setSubscriptionStatus("notFound");
+          setLoading(false);
+          return;
+        }
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          const errorText = await response.text();
+          let errorData;
+          try {
+            errorData = JSON.parse(errorText);
+          } catch (e) {
+            errorData = { error: errorText };
+          }
+
+          if (
+            response.status === 400 &&
+            typeof errorData.error === "string" &&
+            errorData.error.toLowerCase().includes("authorization")
+          ) {
+            setError("Authentication failed. Please reconnect your wallet.");
+            setLoading(false);
+            return;
+          }
+
+          if (
+            errorData.error === "subscription not found" ||
+            errorData.status === "subscription not found"
+          ) {
+            setSubscriptionStatus("notFound");
+            setLoading(false);
+            return;
+          }
+
+          throw new Error(
+            `HTTP error! status: ${response.status}, message: ${errorText}`
+          );
         }
 
         const data = await response.json();
-        console.log("Subscription data:", data);
-        if (data.status === "notFound") {
+
+        if (
+          data.status === "notFound" ||
+          data.status === "subscription not found"
+        ) {
           setSubscriptionStatus("notFound");
-        } else {
+        } else if (data.subscription) {
           setSubscription(data.subscription);
           setSubscriptionStatus(data.status);
+        } else {
+          setSubscriptionStatus("notFound");
         }
 
         setLoading(false);
-      } catch (err) {
-        console.error("Error fetching subscription:", err);
-        setError("Failed to load subscription details");
+      } catch (error) {
         setLoading(false);
       }
     };
@@ -188,7 +250,7 @@ export default function DashboardPage() {
   const fetchProjectsData = async () => {
     setLoading(true);
     try {
-      const auth = Cookies.get("erebrus_token");
+      const auth = getAuthToken();
 
       const response = await axios.get(
         `${EREBRUS_GATEWAY_URL}api/v1.0/erebrus/clients`,
@@ -201,22 +263,21 @@ export default function DashboardPage() {
         }
       );
 
-      console.log("vpn decentralized", response);
-
       if (response.status === 200) {
         // Filter the data based on the domain ID
         const wallet = Cookies.get("erebrus_userid");
         const payload: any[] = response.data.payload;
-        const filteredData = payload.filter((item) => item?.userId === wallet);
+        const filteredData = payload.filter(
+          (item: any) => item?.userId === wallet
+        );
         filteredData.sort(
           (a, b) =>
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
         setprojectsData(filteredData);
-        console.log("decentralized", filteredData);
       }
     } catch (error) {
-      console.error("Error fetching profile data:", error);
+      // Error fetching profile data
     } finally {
       setLoading(false);
     }
@@ -275,10 +336,14 @@ export default function DashboardPage() {
   const [activeNodesData, setActiveNodesData] = useState<Node[]>([]);
   const [nodesdata, setNodesData] = useState([]);
 
+  // Prevent duplicate fetches in StrictMode using a guard
+  const nodesFetchedRef = useRef(false);
   useEffect(() => {
+    if (nodesFetchedRef.current) return;
+    nodesFetchedRef.current = true;
     const fetchNodesData = async () => {
       try {
-        const auth = Cookies.get("erebrus_token");
+        const auth = getAuthToken();
 
         const response = await axios.get(
           `${EREBRUS_GATEWAY_URL}api/v1.0/nodes/all`,
@@ -314,10 +379,10 @@ export default function DashboardPage() {
             new Set(filteredNodes.map((node: Node) => node.region))
           );
 
-          console.log("erebrus nodes", payload);
+          // nodes payload fetched
         }
       } catch (error) {
-        console.error("Error fetching nodes data:", error);
+        // Error fetching nodes data
       } finally {
       }
     };
@@ -373,8 +438,7 @@ export default function DashboardPage() {
 
     setLoading(true);
 
-    const auth = Cookies.get("erebrus_token");
-    console.log("clicked");
+    const auth = getAuthToken();
     try {
       const keys = genKeys();
       const formDataObj = new FormData();
@@ -409,7 +473,6 @@ export default function DashboardPage() {
         setVpnName(responseData.payload.client.Name);
         setClientUUID(responseData.payload.client.UUID);
         setFormData(initialFormData);
-        console.log("vpn data", responseData);
 
         const configFile = `
         [Interface]
@@ -436,7 +499,6 @@ export default function DashboardPage() {
         setMsg("Failed to create VPN. Try with unique name.");
       }
     } catch (error) {
-      console.error("Error:", error);
       setMsg("Failed to create VPN. Try with unique name.");
     } finally {
       setLoading(false);
@@ -458,10 +520,19 @@ export default function DashboardPage() {
         <div className="absolute inset-0 z-0">
           <BackgroundBeams />
         </div>
-        {!isUserVerified ? (
-          <>
-            <NotLoggedIn />
-          </>
+        {!canViewDashboard ? (
+          <div className="flex min-h-screen items-center justify-center">
+            <div className="text-center text-gray-300 px-4">
+              <h2 className="text-2xl font-semibold">
+                {isAuthenticating ? "Signing message…" : "Connect Your Wallet"}
+              </h2>
+              <p className="mt-2 text-sm">
+                {isAuthenticating
+                  ? "Please approve the signature in your wallet to continue."
+                  : "Please use the Connect / Sign In button in the navbar to access the dashboard."}
+              </p>
+            </div>
+          </div>
         ) : (
           <>
             {/* Main content */}
@@ -503,7 +574,7 @@ export default function DashboardPage() {
                             onMouseEnter={() => setIsHovered(true)}
                             onMouseLeave={() => setIsHovered(false)}
                             onClick={async () => {
-                              const auth = Cookies.get("erebrus_token");
+                              const auth = getAuthToken();
                               try {
                                 const response = await fetch(
                                   `${EREBRUS_GATEWAY_URL}api/v1.0/subscription/trial`,
@@ -521,10 +592,6 @@ export default function DashboardPage() {
 
                                 if (response.status === 200) {
                                   const responseData = await response.json();
-                                  console.log(
-                                    "trial subsc response",
-                                    responseData
-                                  );
                                   window.location.reload();
                                   // settrialbuytrue(true);
                                   // for alert
@@ -533,7 +600,6 @@ export default function DashboardPage() {
                                   }, 3000);
                                 }
                               } catch (error) {
-                                console.error("Error:", error);
                               } finally {
                               }
                             }}
@@ -626,7 +692,7 @@ export default function DashboardPage() {
                           <div className="flex items-center gap-4">
                             {imageSrc ? (
                               <img
-                                src={`${"https://nftstorage.link/ipfs"}/${imageSrc}`}
+                                src={`https://ipfs.erebrus.io/ipfs/${imageSrc}`}
                                 className="w-14 h-14 rounded-full"
                               />
                             ) : (
@@ -682,6 +748,14 @@ export default function DashboardPage() {
                             <p className="text-red-400">{error}</p>
                           ) : subscription ? (
                             <div className="rounded-lg bg-slate-800/50 p-6">
+                              <div className="flex items-center justify-between mb-4">
+                                <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-blue-900/30 text-blue-400">
+                                  ACTIVE
+                                </span>
+                                {/* Debug fetch button removed for production */}
+                              </div>
+
+                              {/* Debug section removed for production */}
                               <div className="flex items-center justify-between">
                                 <div>
                                   <h3 className="text-xl font-bold">

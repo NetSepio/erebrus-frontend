@@ -10,27 +10,8 @@ import PartnersMarquee from "@/components/ui/PartnersMarquee";
 import Image from "next/image";
 import Link from "next/link";
 import { ScrollProgress } from "@/components/ui/scroll-progress";
-import { UserVerificationDialog } from "@/components/common/UserVerificationDialog";
-import { useState } from "react";
 
 function Page() {
-  const [showVerificationDialog, setShowVerificationDialog] = useState(false);
-  const [connectedWallet, setConnectedWallet] = useState("");
-
-  const handleWalletConnect = () => {
-    // Simulate wallet connection
-    const mockWalletAddress = "0x1234567890abcdef1234567890abcdef12345678";
-    setConnectedWallet(mockWalletAddress);
-
-    // Show verification dialog for new wallets
-    setShowVerificationDialog(true);
-  };
-
-  const handleVerificationSuccess = (userData: any) => {
-    console.log("User verified successfully:", userData);
-    setShowVerificationDialog(false);
-    // Handle success - you can redirect, update app state, etc.
-  };
 
   return (
     <>
@@ -43,10 +24,9 @@ function Page() {
         <link rel="canonical" href="https://erebrus.io" />
       </Head>
       <div className="bg-gradient-to-b from-black to-gray-900 min-h-screen">
-        {/* <ErebrusNavbar /> */}
         <ScrollProgress color="#3b82f6" height={4} />
 
-        <HeroSection onWalletConnect={handleWalletConnect} />
+        <HeroSection />
         <div className="pt-12">
           <PartnersMarquee />
         </div>
@@ -54,7 +34,6 @@ function Page() {
         <CyreneAISection />
         <VPNContentSection />
 
-        {/* New Uncensored Section - Improved spacing and layout */}
         <section className="w-full py-20 flex flex-col items-center justify-center text-white">
           <div className="container max-w-6xl mx-auto px-4 text-center">
             <h2 className="text-4xl md:text-5xl font-bold mb-12 bg-gradient-to-r from-blue-300 to-white bg-clip-text text-transparent">
@@ -74,7 +53,6 @@ function Page() {
 
         <SubscriptionCard />
 
-        {/* Recognition Section - Improved spacing and layout */}
         <section className="w-full py-24 flex flex-col items-center justify-center text-white bg-gradient-to-b from-gray-900 to-black">
           <div className="container max-w-6xl mx-auto px-4 text-center">
             <h2 className="text-4xl md:text-5xl font-bold mb-16 bg-gradient-to-r from-blue-300 to-white bg-clip-text text-transparent">
@@ -82,7 +60,6 @@ function Page() {
             </h2>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-8 max-w-3xl mx-auto mb-16">
-              {/* First row */}
               <div className="flex items-center justify-center p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
                 <Image
                   src="/recognition/radarthack_white.webp"
@@ -134,7 +111,6 @@ function Page() {
                 </div>
               </div>
 
-              {/* Second row */}
               <div className="flex items-center justify-center p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
                 <Image
                   src="/recognition/ivscrypto_white.webp"
@@ -186,7 +162,6 @@ function Page() {
                 </div>
               </div>
 
-              {/* Third row */}
               <div className="flex items-center justify-center p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
                 <Image
                   src="/recognition/soonami_white.webp"
@@ -241,7 +216,6 @@ function Page() {
 
             <p className="text-lg mb-16 text-blue-100">+ many more!!</p>
 
-            {/* Erebrus Logo */}
             <div className="flex flex-col items-center justify-center space-y-4 mb-10">
               <Image
                 src="/images/Erebrus_logo_wordmark.webp"
@@ -267,18 +241,7 @@ function Page() {
             </a>
           </div>
         </section>
-
-        {/* <DarkFooter /> */}
-
-        {/* User Verification Dialog */}
-        <UserVerificationDialog
-          isOpen={showVerificationDialog}
-          onClose={() => setShowVerificationDialog(false)}
-          walletAddress={connectedWallet}
-          onSuccess={handleVerificationSuccess}
-        />
       </div>
-      {/* Ensure all opened elements are closed properly */}
     </>
   );
 }

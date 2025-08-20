@@ -41,7 +41,13 @@ const UserDropdown: React.FC<UserDropdownProps> = ({
         className="inline-flex w-full justify-center rounded-md bg-black bg-opacity-20 px-4 py-2 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
         aria-label="Open user menu"
       >
-        <img src={avatarUrl} alt="User avatar" className="w-10 ml-auto" />
+        {avatarUrl ? (
+          <img src={avatarUrl} alt="User avatar" className="w-10 ml-auto" />
+        ) : (
+          <div className="w-10 h-10 ml-auto bg-gray-600 rounded-full flex items-center justify-center">
+            <span className="text-white text-sm">👤</span>
+          </div>
+        )}
       </Menu.Button>
 
       <Transition
@@ -83,7 +89,6 @@ const UserDropdown: React.FC<UserDropdownProps> = ({
                 onClick={async () => {
                   try {
                     await disconnect();
-                    console.log("Disconnected");
                     // Clear all authentication cookies
                     Cookies.remove("erebrus_token", { path: "/" });
                     Cookies.remove("erebrus_token_solana", { path: "/" });
@@ -98,7 +103,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({
                     Cookies.remove("erebrus_verified_evm", { path: "/" });
                     Cookies.remove("Chain_symbol", { path: "/" });
                   } catch (error) {
-                    console.error("Logout error:", error);
+                    // Handle logout error silently
                   }
                 }}
                 aria-label="Log out of your account"

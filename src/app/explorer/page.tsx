@@ -53,7 +53,7 @@ export default function Explorer() {
       setIsLoading(true);
       try {
         const response = await fetch(
-          `https://gateway.erebrus.io/api/v1.0/nodes/all`
+          `https://gateway.dev.netsepio.com/api/v1.0/nodes/all`
         );
         const data = await response.json();
         if (data && Array.isArray(data.payload)) {

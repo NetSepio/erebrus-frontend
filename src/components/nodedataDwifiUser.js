@@ -29,7 +29,6 @@ const NodeDwifiStreamUser = () => {
         setIsConnected(true);
         fetchOperators();
       } catch (error) {
-        console.error("Failed to connect:", error);
         setIsConnected(false);
         setError("Failed to connect to MetaMask. Please try again.");
       }
@@ -74,7 +73,7 @@ const NodeDwifiStreamUser = () => {
             });
           }
         } catch (error) {
-          console.error(`Error querying index ${i}:`, error);
+          // Skip failed queries
         }
       }
 
@@ -84,7 +83,6 @@ const NodeDwifiStreamUser = () => {
         setNoData(true);
       }
     } catch (error) {
-      console.error("Error fetching operators:", error);
       setError(
         "An error occurred while fetching operators. Please try again later."
       );
@@ -141,7 +139,6 @@ const NodeDwifiStreamUser = () => {
       // Close the popup after successful update
       setEditingNode(null);
     } catch (error) {
-      console.error("Error updating node:", error);
       if (
         error.data &&
         error.data.message &&

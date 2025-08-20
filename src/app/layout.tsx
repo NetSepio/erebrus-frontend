@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 const inter = Inter({ subsets: ["latin"] });
 import "./globals.css";
 import DarkFooter from "@/components/ui/footer";
-import { AppKit } from '../context/appkit';
+import { AppKit } from "../context/appkit";
 import AppWalletProvider from "@/components/AppWalletProvider";
 export const metadata = {
   name: "Erebrus",
@@ -32,28 +32,23 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-
-
-
-
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/favicon.ico" />
+      </head>
       <body className={cn("min-h-screen flex flex-col", inter.className)}>
         <AppWalletProvider>
-         <AppKit>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-        >
-          <div className="flex flex-col min-h-screen">
-            <ErebrusNavbar />
-            <main>{children}</main>
+          <AppKit>
+            <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+              <div className="flex flex-col min-h-screen">
+                <ErebrusNavbar />
+                <main>{children}</main>
 
-            <DarkFooter />
-          </div>
-        </ThemeProvider>
-        </AppKit>
+                <DarkFooter />
+              </div>
+            </ThemeProvider>
+          </AppKit>
         </AppWalletProvider>
       </body>
     </html>

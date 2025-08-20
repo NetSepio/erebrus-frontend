@@ -155,9 +155,9 @@ const Profile = () => {
     walletAddress: string
   ): Promise<SolanaNFT[]> => {
     try {
-      // First, let's try the Magic Eden v2 API for getting wallet NFTs
+      // Use our internal API route to avoid CORS issues
       const response = await fetch(
-        `https://api-mainnet.magiceden.dev/v2/wallets/${walletAddress}/tokens`,
+        `/api/nfts?wallet=${encodeURIComponent(walletAddress)}`,
         {
           method: "GET",
           headers: {
@@ -168,7 +168,7 @@ const Profile = () => {
 
       if (!response.ok) {
         throw new Error(
-          `Magic Eden API error: ${response.status} ${response.statusText}`
+          `NFT API error: ${response.status} ${response.statusText}`
         );
       }
 
@@ -189,7 +189,6 @@ const Profile = () => {
 
       return transformedNFTs;
     } catch (error) {
-      console.error("Error fetching NFTs from Magic Eden:", error);
       throw error;
     }
   };
@@ -235,7 +234,6 @@ const Profile = () => {
 
       return transformedNFTs;
     } catch (error) {
-      console.error("Error fetching NFTs from Helius:", error);
       throw error;
     }
   };
@@ -248,31 +246,22 @@ const Profile = () => {
     try {
       let nfts: SolanaNFT[] = [];
 
-      // Try Magic Eden first (free and reliable for basic data)
+      // Try our internal API route first (avoids CORS issues)
       try {
-        console.log("Fetching NFTs from Magic Eden for wallet:", walletAddress);
         nfts = await fetchUserNFTsFromMagicEden(walletAddress);
-        console.log(`Found ${nfts.length} NFTs from Magic Eden`);
       } catch (magicEdenError) {
-        console.warn("Magic Eden failed, trying Helius:", magicEdenError);
-
         // Fallback to Helius if Magic Eden fails
         try {
           nfts = await fetchUserNFTsFromHelius(walletAddress);
-          console.log(`Found ${nfts.length} NFTs from Helius`);
         } catch (heliusError) {
-          console.error("Both Magic Eden and Helius failed:", heliusError);
-          throw new Error("Unable to fetch NFTs from any provider");
+          throw new Error(
+            "Unable to fetch NFTs from any provider. This might be due to CORS restrictions on the deployed environment."
+          );
         }
       }
 
       setUserNFTs(nfts);
-
-      if (nfts.length === 0) {
-        console.log("No NFTs found for this wallet");
-      }
     } catch (error) {
-      console.error("Error fetching user NFTs:", error);
       setNftError(
         error instanceof Error ? error.message : "Failed to load NFTs"
       );
@@ -284,25 +273,14 @@ const Profile = () => {
 
   // Handle refresh button click
   const handleRefreshPage = () => {
-    console.log("Refresh button clicked, checking auth status...");
     const currentToken = getAuthToken();
     const walletFromCookie = Cookies.get("erebrus_wallet");
 
-    console.log("Current state:", {
-      isConnected,
-      address,
-      currentToken: !!currentToken,
-      walletFromCookie,
-      isUserAuthenticated: isUserAuthenticated(),
-    });
-
     if (isUserAuthenticated()) {
       // User is authenticated, force refresh profile data
-      console.log("User is authenticated, refreshing profile data");
       setprofileset((prev) => !prev);
     } else {
       // Still not authenticated, reload the page
-      console.log("User still not authenticated, reloading page");
       window.location.reload();
     }
   };
@@ -321,13 +299,10 @@ const Profile = () => {
   const checkEmailExists = async (email: string) => {
     const auth = getAuthToken();
     if (!auth) {
-      console.error("No auth token for email check");
       return false;
     }
 
     try {
-      console.log("Checking email existence for:", email);
-
       const response = await fetch(
         `${REACT_APP_GATEWAY_URL}/api/v1.1/profile/email/check`,
         {
@@ -345,16 +320,13 @@ const Profile = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("Email check response:", data);
         return data.exists || false;
       } else {
-        console.warn("Email check endpoint returned error:", response.status);
         // If the endpoint doesn't exist or returns error, we'll skip the check
         // and let the OTP sending handle the validation
         return false;
       }
     } catch (error) {
-      console.error("Error checking email existence:", error);
       // If there's an error, we'll allow the process to continue
       // and let the OTP endpoint handle the validation
       return false;
@@ -383,8 +355,6 @@ const Profile = () => {
     setEmailValidationError(null); // Clear any previous errors
 
     try {
-      console.log("Sending OTP to:", newEmail);
-
       const response = await fetch(
         `${REACT_APP_GATEWAY_URL}/api/v1.1/profile/email/send`,
         {
@@ -402,10 +372,6 @@ const Profile = () => {
       );
 
       const responseData = await response.json();
-      console.log("OTP send response:", {
-        status: response.status,
-        data: responseData,
-      });
 
       if (response.ok) {
         setOtpSentEmail(newEmail);
@@ -413,8 +379,6 @@ const Profile = () => {
         toast.success(`OTP sent to ${newEmail}`);
         return true;
       } else {
-        console.error("OTP send failed:", responseData);
-
         // Check for different types of email existence errors
         const errorMessage = responseData.message || "";
         const isEmailExistsError =
@@ -439,7 +403,6 @@ const Profile = () => {
         }
       }
     } catch (error) {
-      console.error("Error sending OTP:", error);
       const errorMsg =
         "Failed to send OTP. Please check your connection and try again.";
       setEmailValidationError(errorMsg);
@@ -501,7 +464,6 @@ const Profile = () => {
         return false;
       }
     } catch (error) {
-      console.error("Error verifying OTP:", error);
       const errorMsg = "Failed to verify OTP. Please try again.";
       setEmailValidationError(errorMsg);
       toast.error(errorMsg);
@@ -524,22 +486,35 @@ const Profile = () => {
       const formData = new FormData();
       formData.append("file", file);
 
+      // Upload via server-side proxy to avoid CORS
       const response = await fetch("/api/uploadToIPFS", {
         method: "POST",
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error(`Upload failed: ${response.statusText}`);
+        throw new Error(
+          `Upload failed: ${response.status} ${response.statusText}`
+        );
       }
 
-      const data = await response.json();
+      // Our proxy returns JSON with Hash and Url
+      const { Hash: cidHash } = await response.json();
+
+      if (!cidHash) {
+        throw new Error("Upload succeeded but CID was not returned");
+      }
+
       setTempFormData((prevData) => ({
         ...prevData,
-        profilePictureUrl: `${data.Hash}`,
+        profilePictureUrl: cidHash,
+      }));
+      // Show the new avatar immediately in the UI
+      setFormData((prev) => ({
+        ...prev,
+        profilePictureUrl: cidHash,
       }));
     } catch (error) {
-      console.error("Error uploading file:", error);
       setMsg("error");
     } finally {
       setLoading(false);
@@ -566,11 +541,6 @@ const Profile = () => {
       !formData.emailId || formData.emailId.trim() === "";
 
     if (emailChanged && hasNewEmail) {
-      console.log(
-        "Email changed, proceeding with OTP verification for:",
-        newEmail
-      );
-
       // Proceed directly with OTP verification - let the OTP endpoint handle email existence validation
       setPendingEmailUpdate(newEmail);
       setLoading(false);
@@ -627,7 +597,6 @@ const Profile = () => {
         toast.error("Failed to update profile. Please try again.");
       }
     } catch (error) {
-      console.error("Error:", error);
       setMsg("error");
       toast.error("Failed to update profile. Please try again.");
     } finally {
@@ -654,9 +623,6 @@ const Profile = () => {
     const fetchProfileData = async () => {
       // Check if user is authenticated before fetching profile
       if (!isConnected || !isUserAuthenticated()) {
-        console.log(
-          "User not connected or authenticated, skipping profile fetch"
-        );
         setLoading(false);
         // Reset profile data when not authenticated
         setProfileData(null);
@@ -670,7 +636,6 @@ const Profile = () => {
         const auth = getAuthToken();
 
         if (!auth) {
-          console.log("No authentication token found");
           setLoading(false);
           // Reset profile data when no token
           setProfileData(null);
@@ -678,8 +643,6 @@ const Profile = () => {
           setTempFormData(initialFormData);
           return;
         }
-
-        console.log("Fetching profile data for:", address);
 
         const response = await axios.get(
           `${REACT_APP_GATEWAY_URL}/api/v1.0/profile`,
@@ -693,10 +656,6 @@ const Profile = () => {
         );
 
         if (response.status === 200) {
-          console.log(
-            "Profile data fetched successfully:",
-            response.data.payload
-          );
           setProfileData(response.data.payload);
           const profileInfo = {
             name: response.data.payload.name || "",
@@ -717,7 +676,6 @@ const Profile = () => {
           }
         }
       } catch (error) {
-        console.error("Error fetching profile data:", error);
         if (axios.isAxiosError(error)) {
           if (error.response?.status === 401) {
             toast.error(
@@ -728,7 +686,6 @@ const Profile = () => {
             setFormData(initialFormData);
             setTempFormData(initialFormData);
           } else if (error.response?.status === 404) {
-            console.log("Profile not found - new user");
             // Clear profile data for new users
             setProfileData(null);
             setFormData(initialFormData);
@@ -743,7 +700,7 @@ const Profile = () => {
     };
 
     fetchProfileData();
-  }, [profileset, isConnected, address, isVerified]);
+  }, [profileset, isConnected, address]);
 
   // Additional effect to track authentication token changes
   useEffect(() => {
@@ -751,7 +708,6 @@ const Profile = () => {
     const previousToken = localStorage.getItem("last_auth_token");
 
     if (currentToken !== previousToken) {
-      console.log("Authentication token changed, triggering profile refresh");
       localStorage.setItem("last_auth_token", currentToken || "");
 
       // Force profile refresh when token changes
@@ -770,7 +726,6 @@ const Profile = () => {
     if (isConnected && isUserAuthenticated() && address) {
       const currentToken = getAuthToken();
       if (currentToken) {
-        console.log("User became authenticated, refreshing profile data");
         // Small delay to ensure all authentication cookies are set
         setTimeout(() => {
           setprofileset((prev) => !prev);
@@ -788,7 +743,6 @@ const Profile = () => {
       const isNowAuthenticated = isUserAuthenticated();
 
       if (!wasAuthenticated && isNowAuthenticated) {
-        console.log("Authentication detected via polling, refreshing profile");
         setloggedin(true);
         setprofileset((prev) => !prev);
         clearInterval(pollInterval);
@@ -831,7 +785,6 @@ const Profile = () => {
     if (code) {
       localStorage?.setItem("code", code);
       exchangeCodeForToken(code);
-      console.log("code", code);
     }
   };
 
@@ -861,9 +814,8 @@ const Profile = () => {
       const idToken = tokenData.id_token;
       setidtoken(idToken);
       handleTokenData(tokenData);
-      console.log("token", tokenData);
     } catch (error) {
-      console.error("Token exchange error:", error);
+      // Handle token exchange error silently
     }
   };
 
@@ -898,11 +850,9 @@ const Profile = () => {
       );
 
       const responseData = await response.data;
-      console.log("Another API call response:", responseData);
       setunlinkpopup(false);
       toast.success("Email removed successfully!");
     } catch (error) {
-      console.error("Another API call error:", error);
       toast.error("Failed to remove email. Please try again.");
     }
   };
@@ -911,10 +861,8 @@ const Profile = () => {
     const handleConnectWallet = async () => {
       const currentToken = getAuthToken();
       if (currentToken && isConnected && isUserAuthenticated()) {
-        console.log("User logged in, setting loggedin to true");
         setloggedin(true);
       } else {
-        console.log("User not fully authenticated, setting loggedin to false");
         setloggedin(false);
       }
     };
@@ -924,7 +872,6 @@ const Profile = () => {
   // Cleanup effect when user disconnects or logs out
   useEffect(() => {
     if (!isConnected || !address) {
-      console.log("Wallet disconnected, clearing profile data");
       setProfileData(null);
       setFormData(initialFormData);
       setTempFormData(initialFormData);
@@ -941,7 +888,6 @@ const Profile = () => {
     const isSolanaWallet = Cookies.get("Chain_symbol")?.toLowerCase() === "sol";
 
     if (shouldFetchNFTs && isSolanaWallet) {
-      console.log("Fetching NFTs for Solana wallet:", address);
       fetchUserNFTs(address);
     } else {
       // Clear NFTs if not Solana or not connected
@@ -997,6 +943,39 @@ const Profile = () => {
   const openEditDialog = () => {
     setTempFormData({ ...formData });
     setIsEditDialogOpen(true);
+  };
+
+  // Normalize profile picture into a displayable URL
+  const getProfileImageUrl = (value: string) => {
+    if (!value) return "";
+    const v = value.trim();
+    // Absolute URLs
+    if (/^https?:\/\//i.test(v)) {
+      try {
+        const u = new URL(v);
+        // If it's an IPFS-style gateway URL, standardize to Erebrus gateway
+        if (
+          u.pathname.startsWith("/ipfs/") ||
+          u.pathname.startsWith("/ipns/")
+        ) {
+          return `https://ipfs.erebrus.io${u.pathname}`;
+        }
+        return v; // Non-IPFS absolute URL, use as-is
+      } catch {
+        return v;
+      }
+    }
+    // ipfs://CID or ipfs://ipfs/CID
+    if (v.startsWith("ipfs://")) {
+      const path = v.slice(7).replace(/^ipfs\//i, "");
+      return `https://ipfs.erebrus.io/ipfs/${path}`;
+    }
+    // /ipfs/CID or similar
+    if (v.startsWith("/ipfs/")) {
+      return `https://ipfs.erebrus.io${v}`;
+    }
+    // Fallback: treat as CID or CID/path
+    return `https://ipfs.erebrus.io/ipfs/${v}`;
   };
 
   return (
@@ -1110,7 +1089,9 @@ const Profile = () => {
                             {formData.profilePictureUrl ? (
                               <img
                                 alt="Profile"
-                                src={`https://ipfs.myriadflow.com/ipfs/${formData.profilePictureUrl}`}
+                                src={getProfileImageUrl(
+                                  formData.profilePictureUrl
+                                )}
                                 className="w-full h-full object-cover"
                                 onError={(
                                   e: React.SyntheticEvent<HTMLImageElement>
@@ -1888,20 +1869,11 @@ const Profile = () => {
                 </p>
                 <Button
                   onClick={async () => {
-                    console.log(
-                      "Attempting to send OTP to:",
-                      pendingEmailUpdate
-                    );
                     setEmailValidationError(null); // Clear any previous errors
 
                     const success = await sendOtpToNewEmail(pendingEmailUpdate);
                     if (success) {
                       setOtpCode("");
-                    } else {
-                      // If sending OTP failed, the error should now be visible in the dialog
-                      console.log(
-                        "OTP sending failed, error should be visible in dialog"
-                      );
                     }
                   }}
                   disabled={isOtpSending}
@@ -1946,7 +1918,6 @@ const Profile = () => {
                 <div className="flex gap-3">
                   <Button
                     onClick={async () => {
-                      setEmailValidationError(null); // Clear any previous errors
                       const success = await verifyOtp();
                       if (success) {
                         // OTP verified, proceed with profile update
@@ -1978,7 +1949,6 @@ const Profile = () => {
 
                   <Button
                     onClick={async () => {
-                      setEmailValidationError(null); // Clear any previous errors
                       const success = await sendOtpToNewEmail(
                         pendingEmailUpdate
                       );
@@ -1999,7 +1969,6 @@ const Profile = () => {
             <div className="flex justify-center">
               <Button
                 onClick={() => {
-                  console.log("Canceling email change, resetting states");
                   setShowOtpDialog(false);
                   setOtpCode("");
                   setOtpSentEmail("");

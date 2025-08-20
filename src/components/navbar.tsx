@@ -38,7 +38,7 @@ const ErebrusNavbar = () => {
   }, [token, isAuthenticated]);
 
   const handlePasetoClick = () => {
-    console.log("Show paseto QR code");
+    // Handle paseto QR code display
   };
 
   useEffect(() => {

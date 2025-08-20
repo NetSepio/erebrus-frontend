@@ -64,7 +64,7 @@ interface Node {
 }
 
 const EREBRUS_GATEWAY_URL =
-  process.env.NEXT_PUBLIC_EREBRUS_BASE_URL || "https://gateway.erebrus.io";
+  process.env.NEXT_PUBLIC_GATEWAY_URL || "https://gateway.dev.netsepio.com/";
 
 export default function NodesData() {
   const router = useRouter();
@@ -115,10 +115,8 @@ export default function NodesData() {
           });
         } else {
           setNodes([]);
-          console.warn("Received invalid data payload from API.");
         }
       } catch (error) {
-        console.error("Error fetching nodes data:", error);
         setNodes([]);
       } finally {
         setLoading(false);
@@ -623,7 +621,9 @@ export default function NodesData() {
                                 e.stopPropagation();
                                 handleNodeClick(node.id);
                               }}
-                              aria-label={`View details for node ${node.nodename || node.name}`}
+                              aria-label={`View details for node ${
+                                node.nodename || node.name
+                              }`}
                             >
                               <ExternalLink className="h-4 w-4" />
                               <span className="sr-only">View details</span>

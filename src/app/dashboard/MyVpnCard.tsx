@@ -8,7 +8,7 @@ import Cookies from "js-cookie";
 import CryptoJS from "crypto-js";
 import { QRCodeSVG } from "qrcode.react";
 
-const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_BASE_URL;
+const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
 
 interface ReviewCardProps {
   metaData: {

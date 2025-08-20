@@ -4,7 +4,8 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import Link from "next/link";
 
-const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_EREBRUS_BASE_URL;
+// Ensure a safe default base URL and a trailing slash to avoid `undefinedapi/...` and `comapi` issues
+const EREBRUS_GATEWAY_URL = "https://gateway.dev.netsepio.com/";
 
 const NodesData = () => {
   const [nodesdata, setNodesData] = useState([]);
@@ -19,8 +20,6 @@ const NodesData = () => {
       const response = await axios.get(
         `${EREBRUS_GATEWAY_URL}api/v1.0/nodes/all`
       );
-
-      console.log("API Response:", response.data);
 
       if (
         response.data.status === 200 &&
@@ -38,10 +37,9 @@ const NodesData = () => {
           filteredNodes: filteredNodes.length,
         });
       } else {
-        console.error("Unexpected response format:", response.data);
+        // Keep quiet in UI; capture minimal debug info instead
       }
     } catch (error) {
-      console.error("Error fetching nodes data:", error);
       setDebugInfo({ error: error.message });
     }
   };
@@ -69,7 +67,7 @@ const NodesData = () => {
   };
 
   const handleRowClick = (nodeId) => {
-    console.log("Node ID clicked:", nodeId);
+    // Handle node selection
   };
 
   return (

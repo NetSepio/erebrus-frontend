@@ -120,9 +120,8 @@ const riseTestnet = defineChain({
   },
 });
 
-export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
-console.log("project id", projectId);
-
+export const projectId =
+  process.env.NEXT_PUBLIC_PROJECT_ID || "193ccae4f2630b59e1e7f10b785e3a0a";
 if (!projectId) {
   throw new Error(
     "Project ID is not defined. Please set NEXT_PUBLIC_PROJECT_ID in your environment variables."
@@ -218,28 +217,14 @@ const authenticateEVM = async (walletAddress: string, walletProvider: any) => {
     const GATEWAY_URL = "https://gateway.dev.netsepio.com/";
     const chainName = "evm";
 
-    console.log(
-      "🔄 Step 1: Getting FlowId and EULA for EVM wallet:",
-      walletAddress
-    );
-
     const { data } = await axios.get(
       `${GATEWAY_URL}api/v1.0/flowid?walletAddress=${walletAddress}&chain=evm`
     );
-
-    console.log("✅ Step 2: FlowId response:", {
-      status: data.status,
-      message: data.message,
-      flowId: data.payload?.flowId,
-      eula: data.payload?.eula?.substring(0, 50) + "...",
-    });
 
     const message = data.payload.eula;
     const flowId = data.payload.flowId;
 
     const combinedMessage = `${message}${flowId}`;
-
-    console.log("🔏 Step 3: Requesting wallet signature for message...");
 
     const provider = new BrowserProvider(walletProvider);
     if (!walletAddress) {
@@ -260,13 +245,6 @@ const authenticateEVM = async (walletAddress: string, walletProvider: any) => {
       signature = signature.slice(2);
     }
 
-    console.log(
-      "✅ Step 4: Signature generated:",
-      signature.substring(0, 20) + "..."
-    );
-
-    console.log("🚀 Step 5: Sending authentication request to backend...");
-
     const authResponse = await axios.post(
       `${GATEWAY_URL}api/v1.0/authenticate`,
       {
@@ -282,13 +260,6 @@ const authenticateEVM = async (walletAddress: string, walletProvider: any) => {
       }
     );
 
-    console.log("✅ Step 6: Authentication successful!", {
-      status: authResponse.status,
-      hasToken: !!authResponse.data.payload?.token,
-      hasUserId: !!authResponse.data.payload?.userId,
-      hasVerify: !!authResponse.data.payload?.verify,
-    });
-
     const { token, userId, verify } = authResponse.data.payload;
     setAuthCookies("evm", token, walletAddress, userId);
 
@@ -302,10 +273,8 @@ const authenticateEVM = async (walletAddress: string, walletProvider: any) => {
 
     return { success: true, isVerified: verify };
   } catch (error) {
-    console.error("❌ EVM Authentication error:", error);
     if (axios.isAxiosError(error)) {
-      console.error("Response data:", error.response?.data);
-      console.error("Response status:", error.response?.status);
+      // Handle axios errors silently
     }
     clearAuthCookies("evm");
     return { success: false, isVerified: false };
@@ -321,11 +290,6 @@ const authenticateSolana = async (
     const GATEWAY_URL = "https://gateway.dev.netsepio.com/";
     const chainName = "sol";
 
-    console.log(
-      "🔄 Step 1: Getting FlowId and EULA for Solana wallet:",
-      walletAddress
-    );
-
     const { data } = await axios.get(`${GATEWAY_URL}api/v1.0/flowid`, {
       params: {
         walletAddress,
@@ -333,17 +297,8 @@ const authenticateSolana = async (
       },
     });
 
-    console.log("✅ Step 2: FlowId response:", {
-      status: data.status,
-      message: data.message,
-      flowId: data.payload?.flowId,
-      eula: data.payload?.eula?.substring(0, 50) + "...",
-    });
-
     const message = data.payload.eula;
     const flowId = data.payload.flowId;
-
-    console.log("🔏 Step 3: Requesting wallet signature for message...");
 
     const encodedMessage = new TextEncoder().encode(message);
     const signature = await walletProvider.signMessage(encodedMessage);
@@ -351,13 +306,6 @@ const authenticateSolana = async (
     const signatureHex = Array.from(new Uint8Array(signature))
       .map((b: number) => b.toString(16).padStart(2, "0"))
       .join("");
-
-    console.log(
-      "✅ Step 4: Signature generated:",
-      signatureHex.substring(0, 20) + "..."
-    );
-
-    console.log("🚀 Step 5: Sending authentication request to backend...");
 
     const authResponse = await axios.post(
       `${GATEWAY_URL}api/v1.0/authenticate?walletAddress=${walletAddress}&chain=sol`,
@@ -376,13 +324,6 @@ const authenticateSolana = async (
       }
     );
 
-    console.log("✅ Step 6: Authentication successful!", {
-      status: authResponse.status,
-      hasToken: !!authResponse.data.payload?.token,
-      hasUserId: !!authResponse.data.payload?.userId,
-      hasVerify: !!authResponse.data.payload?.verify,
-    });
-
     const { token, userId, verify } = authResponse.data.payload;
     setAuthCookies("solana", token, walletAddress, userId);
 
@@ -396,10 +337,8 @@ const authenticateSolana = async (
 
     return { success: true, isVerified: verify };
   } catch (error) {
-    console.error("❌ Solana Authentication error:", error);
     if (axios.isAxiosError(error)) {
-      console.error("Response data:", error.response?.data);
-      console.error("Response status:", error.response?.status);
+      // Handle axios errors silently
     }
     clearAuthCookies("solana");
     return { success: false, isVerified: false };
@@ -533,7 +472,6 @@ export function useWalletAuth() {
         throw new Error("Authentication failed");
       }
     } catch (error) {
-      console.error("Authentication error:", error);
       const errorMessage =
         error instanceof Error ? error.message : "Authentication failed";
       setAuthError(errorMessage);
@@ -562,11 +500,6 @@ export function useWalletAuth() {
   useEffect(() => {
     if (isConnected && address) {
       if (previousAddress && previousAddress !== address) {
-        console.log("🔄 Wallet address changed:", {
-          previous: previousAddress,
-          current: address,
-        });
-
         // Clear all authentication data when wallet changes
         ["solana", "evm"].forEach((chainType) => {
           clearAuthCookies(chainType as "solana" | "evm");
