@@ -51,7 +51,6 @@ jobs:
           username: ${{ secrets.DEV_SERVER_USERNAME }}
           key: ${{ secrets.DEV_REMOTE_SERVER_KEY }}
           port: ${{ secrets.DEV_SSH_PORT }}
-          envs: BRANCH_NAME
           script: |
             pwd
             export IMAGE_TAG=$(echo "$BRANCH_NAME" | tr '[:upper:]' '[:lower:]')
