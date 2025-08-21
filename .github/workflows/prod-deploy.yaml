@@ -21,9 +21,9 @@ jobs:
 
       - name: Build and Push Docker Image
         env:
-          DEV_ENV_FILE: ${{ secrets.PROD_ENV_FILE }}
+          PROD_ENV_FILE: ${{ secrets.PROD_ENV_FILE }}
         run: |
-          echo "$DEV_ENV_FILE" > .env
+          echo "$PROD_ENV_FILE" > .env
           export CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
           export TAG=$([[ $CURRENT_BRANCH == $(basename ${{ github.ref }}) ]] && echo $CURRENT_BRANCH || echo "latest")
           echo $TAG
@@ -55,4 +55,4 @@ jobs:
             docker rmi ghcr.io/netsepio/erebrus-frontend:prod
             echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
             docker pull netSepio/erebrus-frontend:prod
-            docker run --name="erebrus-frontend-dev" --restart=always -p 4041:3000 --net=bridge -d ghcr.io/netsepio/erebrus-frontend:prod
+            docker run --name="erebrus-frontend" --restart=always -p 4040:3000 --net=bridge -d ghcr.io/netsepio/erebrus-frontend:prod
