@@ -208,7 +208,7 @@ export const UserVerificationDialog: React.FC<UserVerificationDialogProps> = ({
 
       // Try using the same endpoint as authentication for consistency
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_GATEWAY_URL}/api/v1.1/profile/email/send`,
+        `${process.env.NEXT_PUBLIC_GATEWAY_URL}api/v1.1/profile/email/send`,
         {
           method: "POST",
           headers: {
@@ -317,7 +317,7 @@ export const UserVerificationDialog: React.FC<UserVerificationDialogProps> = ({
 
       // Make real API call to verify OTP
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_GATEWAY_URL}/api/v1.1/profile/email/verify`,
+        `${process.env.NEXT_PUBLIC_GATEWAY_URL}api/v1.1/profile/email/verify`,
         {
           method: "POST",
           headers: {

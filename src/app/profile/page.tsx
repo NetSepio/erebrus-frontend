@@ -304,7 +304,7 @@ const Profile = () => {
 
     try {
       const response = await fetch(
-        `${REACT_APP_GATEWAY_URL}/api/v1.1/profile/email/check`,
+        `${REACT_APP_GATEWAY_URL}api/v1.1/profile/email/check`,
         {
           method: "POST",
           headers: {
@@ -356,7 +356,7 @@ const Profile = () => {
 
     try {
       const response = await fetch(
-        `${REACT_APP_GATEWAY_URL}/api/v1.1/profile/email/send`,
+        `${REACT_APP_GATEWAY_URL}api/v1.1/profile/email/send`,
         {
           method: "POST",
           headers: {
@@ -436,7 +436,7 @@ const Profile = () => {
 
     try {
       const response = await fetch(
-        `${REACT_APP_GATEWAY_URL}/api/v1.1/profile/email/verify`,
+        `${REACT_APP_GATEWAY_URL}api/v1.1/profile/email/verify`,
         {
           method: "POST",
           headers: {
@@ -839,7 +839,7 @@ const Profile = () => {
 
     try {
       const response = await axios.delete(
-        `${REACT_APP_GATEWAY_URL}/api/v1.0/account/remove-mail`,
+        `${REACT_APP_GATEWAY_URL}api/v1.0/account/remove-mail`,
         {
           headers: {
             Accept: "application/json, text/plain, */*",
