@@ -44,7 +44,7 @@ interface FormData {
   region: string;
 }
 export default function DashboardPage() {
-  const EREBRUS_GATEWAY_URL = "https://gateway.dev.netsepio.com/";
+  const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL
 
   // Use the updated authentication hook
   const { isConnected, isAuthenticating } = useWalletAuth();

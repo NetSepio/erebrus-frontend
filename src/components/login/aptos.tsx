@@ -76,7 +76,7 @@ export const useAptosWallet = () => {
     }
 
     try {
-      const REACT_APP_GATEWAY_URL = "https://gateway.dev.netsepio.com/"
+      const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL
 
       const { data } = await axios.get(
         `${REACT_APP_GATEWAY_URL}api/v1.0/flowid?walletAddress=${account?.address}&chain=aptos`,

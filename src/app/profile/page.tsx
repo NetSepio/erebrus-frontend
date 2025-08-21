@@ -36,7 +36,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useWalletAuth } from "@/context/appkit";
 import { toast } from "sonner";
 
-const REACT_APP_GATEWAY_URL = "https://gateway.dev.netsepio.com";
+const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL
 
 interface FormData {
   name: string;
