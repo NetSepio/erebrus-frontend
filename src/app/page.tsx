@@ -12,7 +12,6 @@ import Link from "next/link";
 import { ScrollProgress } from "@/components/ui/scroll-progress";
 
 function Page() {
-
   return (
     <>
       <Head>
@@ -35,18 +34,36 @@ function Page() {
         <VPNContentSection />
 
         <section className="w-full py-20 flex flex-col items-center justify-center text-white">
-          <div className="container max-w-6xl mx-auto px-4 text-center">
-            <h2 className="text-4xl md:text-5xl font-bold mb-12 bg-gradient-to-r from-blue-300 to-white bg-clip-text text-transparent">
+          <div className="container max-w-6xl mx-auto px-4">
+            <h2 className="text-4xl md:text-5xl font-bold mb-12 bg-gradient-to-r from-blue-300 to-white bg-clip-text text-transparent text-center">
               Decentralized for Speed and Privacy
             </h2>
-            <div className="relative w-full max-w-md mx-auto h-64 md:h-96 mb-8">
-              <Image
-                src="/Uncensored.webp"
-                alt="Uncensored Globe"
-                fill
-                className="object-contain"
-                sizes="100vw"
-              />
+
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
+              {/* Left side: Lock animation */}
+              <div className="lg:w-1/2 flex justify-center">
+                <div className="relative w-full max-w-md h-64 md:h-96">
+                  <video
+                    src="/animations/lock.mp4"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="object-contain w-full h-full rounded-lg shadow-lg"
+                  />
+                </div>
+              </div>
+
+              {/* Right side: Text content */}
+              <div className="lg:w-1/2 text-center lg:text-left">
+                <h3 className="text-3xl md:text-4xl font-bold mb-6 text-white">
+                  Protected & Private
+                </h3>
+                <p className="text-lg md:text-xl text-gray-300 leading-relaxed">
+                  Erebrus DVPN encrypts your connection, hides your activity,
+                  and keeps speeds lightning fast.
+                </p>
+              </div>
             </div>
           </div>
         </section>

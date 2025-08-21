@@ -34,7 +34,7 @@ export function AuthButton() {
       for (const chain of chains) {
         try {
           const response = await fetch(
-            `${process.env.NEXT_PUBLIC_GATEWAY_URL}/api/v1.0/flowid?walletAddress=${walletAddress}&chain=${chain}`,
+            `${process.env.NEXT_PUBLIC_GATEWAY_URL}api/v1.0/flowid?walletAddress=${walletAddress}&chain=${chain}`,
             {
               method: "GET",
               headers: {
@@ -88,7 +88,7 @@ export function AuthButton() {
           if (pasetoToken) {
             try {
               const response = await fetch(
-                `${process.env.NEXT_PUBLIC_GATEWAY_URL}/api/v1.0/profile`,
+                `${process.env.NEXT_PUBLIC_GATEWAY_URL}api/v1.0/profile`,
                 {
                   method: "GET",
                   headers: {
@@ -209,7 +209,7 @@ export function AuthButton() {
           if (pasetoToken) {
             try {
               const response = await fetch(
-                `${process.env.NEXT_PUBLIC_GATEWAY_URL}/api/v1.0/profile`,
+                `${process.env.NEXT_PUBLIC_GATEWAY_URL}api/v1.0/profile`,
                 {
                   method: "GET",
                   headers: {

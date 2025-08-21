@@ -398,7 +398,7 @@ export const UserVerificationDialog: React.FC<UserVerificationDialogProps> = ({
 
       // Create user profile using the profile update API (email already verified, so only update name and other fields)
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_GATEWAY_URL}/api/v1.0/profile`,
+        `${process.env.NEXT_PUBLIC_GATEWAY_URL}api/v1.0/profile`,
         {
           method: "PATCH",
           headers: {
