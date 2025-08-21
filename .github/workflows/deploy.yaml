@@ -45,10 +45,10 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: appleboy/ssh-action@v0.1.7
         with:
-          host: ${{ secrets.PROD_REMOTE_SERVER_ADDRESS }}
-          username: ${{ secrets.PROD_SERVER_USERNAME }}
-          key: ${{ secrets.PROD_REMOTE_SERVER_KEY }}
-          port: ${{ secrets.PROD_SSH_PORT }}
+          host: ${{ secrets.DEV_REMOTE_SERVER_ADDRESS }}
+          username: ${{ secrets.DEV_SERVER_USERNAME }}
+          key: ${{ secrets.DEV_REMOTE_SERVER_KEY }}
+          port: ${{ secrets.DEV_SSH_PORT }}
           script: |
             pwd
             docker stop erebrus-frontend-dev && docker rm erebrus-frontend-dev
