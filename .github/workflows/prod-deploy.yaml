@@ -55,4 +55,4 @@ jobs:
             docker rmi ghcr.io/netsepio/erebrus-frontend:prod
             echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
             docker pull netSepio/erebrus-frontend:prod
-            docker run --name="erebrus-frontend" --restart=always -p 4041:3000 --net=bridge -d ghcr.io/netsepio/erebrus-frontend:prod
+            docker run --name="erebrus-frontend" --restart=always -p 4040:3000 --net=bridge -d ghcr.io/netsepio/erebrus-frontend:prod
