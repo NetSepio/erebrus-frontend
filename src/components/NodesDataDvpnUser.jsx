@@ -5,7 +5,7 @@ import Cookies from "js-cookie";
 import Link from "next/link";
 
 // Ensure a safe default base URL and a trailing slash to avoid `undefinedapi/...` and `comapi` issues
-const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL
+const EREBRUS_GATEWAY_URL = "https://gateway.dev.netsepio.com/";
 
 const NodesData = () => {
   const [nodesdata, setNodesData] = useState([]);

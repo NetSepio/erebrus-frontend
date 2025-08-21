@@ -64,7 +64,7 @@ interface Node {
 }
 
 const EREBRUS_GATEWAY_URL =
-  process.env.NEXT_PUBLIC_GATEWAY_URL
+  process.env.NEXT_PUBLIC_GATEWAY_URL || "https://gateway.dev.netsepio.com/";
 
 export default function NodesData() {
   const router = useRouter();

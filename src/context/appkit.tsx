@@ -214,7 +214,7 @@ const getAuthFromCookies = (chainType: "solana" | "evm") => {
 // EVM Authentication
 const authenticateEVM = async (walletAddress: string, walletProvider: any) => {
   try {
-    const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
+    const GATEWAY_URL = "https://gateway.dev.netsepio.com/";
     const chainName = "evm";
 
     const { data } = await axios.get(
@@ -287,7 +287,7 @@ const authenticateSolana = async (
   walletProvider: Provider
 ) => {
   try {
-    const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
+    const GATEWAY_URL = "https://gateway.dev.netsepio.com/";
     const chainName = "sol";
 
     const { data } = await axios.get(`${GATEWAY_URL}api/v1.0/flowid`, {

@@ -74,7 +74,7 @@ export const useSolWallet = (
           return;
         }
         const wallet = getPhantomWallet();
-        const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
+        const REACT_APP_GATEWAY_URL = "https://gateway.dev.netsepio.com/";
 
         const { data } = await axios.get(
           `${REACT_APP_GATEWAY_URL}api/v1.0/flowid?walletAddress=${publicKey}&chain=sol`
