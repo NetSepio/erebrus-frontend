@@ -53,7 +53,7 @@ export default function Explorer() {
       setIsLoading(true);
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_GATEWAY_URL}/api/v1.0/nodes/all`
+          `${process.env.NEXT_PUBLIC_GATEWAY_URL}api/v1.0/nodes/all`
         );
         const data = await response.json();
         if (data && Array.isArray(data.payload)) {

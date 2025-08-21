@@ -574,7 +574,7 @@ const Profile = () => {
 
     try {
       const response = await fetch(
-        `${REACT_APP_GATEWAY_URL}/api/v1.0/profile`,
+        `${REACT_APP_GATEWAY_URL}api/v1.0/profile`,
         {
           method: "PATCH",
           headers: {
@@ -645,7 +645,7 @@ const Profile = () => {
         }
 
         const response = await axios.get(
-          `${REACT_APP_GATEWAY_URL}/api/v1.0/profile`,
+          `${REACT_APP_GATEWAY_URL}api/v1.0/profile`,
           {
             headers: {
               Accept: "application/json, text/plain, */*",
