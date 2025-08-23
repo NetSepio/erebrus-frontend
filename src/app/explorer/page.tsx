@@ -119,7 +119,7 @@ export default function Explorer() {
         <link rel="canonical" href="https://erebrus.io/explorer" />
       </Head>
       <div className="explorer-page">
-        {/* Hero Section */}
+        {/* Hero Section */} 
         <div
           className="relative flex flex-col items-center justify-center min-h-[60vh] w-full bg-cover bg-center bg-no-repeat"
           style={{
