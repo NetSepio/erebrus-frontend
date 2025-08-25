@@ -4,6 +4,7 @@ import {
   useState,
   useEffect,
   useRef,
+  useMemo,
   type FormEvent,
   type ChangeEvent,
 } from "react";
@@ -300,17 +301,21 @@ export default function DashboardPage() {
       hour12: true,
     });
   };
-  const regiondata = [
+  // Known mapping for country code -> full name
+  const knownRegions = [
     { id: "SG", region: "Singapore" },
     { id: "IN", region: "India" },
+    { id: "IT", region: "Italy" },
     { id: "US", region: "United States" },
     { id: "JP", region: "Japan" },
     { id: "CA", region: "Canada" },
     { id: "GB", region: "United Kingdom" },
     { id: "AU", region: "Australia" },
     { id: "DE", region: "Germany" },
-    // Add more nodes as needed
+    // Add more known mappings as needed
   ];
+
+  // regionOptions is derived from activeNodesData (defined later)
   const handleRegionChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -335,6 +340,38 @@ export default function DashboardPage() {
   }
   const [activeNodesData, setActiveNodesData] = useState<Node[]>([]);
   const [nodesdata, setNodesData] = useState([]);
+
+  // Derive region options from active nodes so only regions with active nodes are shown.
+  const regionOptions = useMemo(() => {
+    // Extract first token before comma from node.region (handles 'IT, Milan', 'NO, Oslo')
+    const normalizedRegions = activeNodesData
+      .map((n) => (n.region || "").toString().trim())
+      .map((r) => (r.includes(",") ? r.split(",")[0].trim() : r))
+      .filter((r) => r && r.length > 0);
+
+    const uniques = Array.from(new Set(normalizedRegions));
+
+    const opts = uniques.map((r) => {
+      const token = r.toString().trim();
+      const maybeCode = token.length === 2 ? token.toUpperCase() : null;
+      if (maybeCode) {
+        const known = knownRegions.find((x) => x.id === maybeCode);
+        return { id: maybeCode, region: known ? known.region : maybeCode };
+      }
+
+      const knownByName = knownRegions.find(
+        (x) => x.region.toLowerCase() === token.toLowerCase()
+      );
+      if (knownByName) {
+        return { id: knownByName.id, region: knownByName.region };
+      }
+
+      return { id: token, region: token };
+    });
+
+    opts.sort((a, b) => a.region.localeCompare(b.region));
+    return opts;
+  }, [activeNodesData]);
 
   // Prevent duplicate fetches in StrictMode using a guard
   const nodesFetchedRef = useRef(false);
@@ -433,12 +470,16 @@ export default function DashboardPage() {
     if (!regionname) return true;
     const selectedCode = (regionname || "").toString().trim().toLowerCase();
     const selectedFull = (
-      regiondata.find((r) => r.id === regionname)?.region || ""
-    ).toString()
+      knownRegions.find((r) => r.id === regionname)?.region || ""
+    )
+      .toString()
       .trim()
       .toLowerCase();
 
-    const nr = (nodeRegion || "").toString().trim().toLowerCase();
+    // compare using the token before any comma (handles 'IT, Milan' => 'IT')
+    const nrRaw = (nodeRegion || "").toString().trim();
+    const nr = (nrRaw.includes(",") ? nrRaw.split(",")[0].trim() : nrRaw)
+      .toLowerCase();
     // Match when node region is already a code, or when it is the full name,
     // or when it contains the full name (some payloads may include extra text).
     return (
@@ -979,7 +1020,10 @@ export default function DashboardPage() {
                                           <option value="" disabled>
                                             Select Region
                                           </option>
-                                          {regiondata.map((node) => (
+                                          {(regionOptions && regionOptions.length > 0
+                                            ? regionOptions
+                                            : knownRegions
+                                          ).map((node) => (
                                             <option
                                               key={node.id}
                                               value={node.id}
