@@ -18,8 +18,7 @@ export function ProfileCard({ formData, onEditClick }: ProfileCardProps) {
         {/* Avatar */}
         <div className="relative mb-6 mt-4 group">
           <div className="w-40 h-40 rounded-full overflow-hidden bg-gradient-to-br from-blue-800/80 to-purple-800/80 border-4 border-gray-700 shadow-lg flex items-center justify-center hover:scale-105 transition-transform">
-            {formData.profilePictureUrl &&
-            formData.profilePictureUrl !== "https://example.com/avatar.jpg" ? (
+            {formData.profilePictureUrl ? (
               <img
                 alt="Profile"
                 src={
@@ -31,7 +30,8 @@ export function ProfileCard({ formData, onEditClick }: ProfileCardProps) {
                 onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
                   const img = e.currentTarget;
                   img.onerror = null;
-                  img.src = "/login_logo.jpg";
+                  img.src =
+                    "https://thumbs.dreamstime.com/b/female-user-profile-avatar-woman-character-screen-saver-emotions-website-mobile-app-design-vector-199001739.jpg";
                 }}
               />
             ) : formData.name ? (

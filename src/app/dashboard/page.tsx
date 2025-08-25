@@ -426,6 +426,29 @@ export default function DashboardPage() {
     setIsOpen(false);
   };
 
+  // Helper: check if a node's region matches the selected region.
+  // Some nodes use full country names (e.g. "India") while the UI uses 2-letter codes (e.g. "IN").
+  // This function normalizes and compares both forms case-insensitively.
+  const isNodeInRegion = (nodeRegion: any) => {
+    if (!regionname) return true;
+    const selectedCode = (regionname || "").toString().trim().toLowerCase();
+    const selectedFull = (
+      regiondata.find((r) => r.id === regionname)?.region || ""
+    ).toString()
+      .trim()
+      .toLowerCase();
+
+    const nr = (nodeRegion || "").toString().trim().toLowerCase();
+    // Match when node region is already a code, or when it is the full name,
+    // or when it contains the full name (some payloads may include extra text).
+    return (
+      nr === "" ||
+      nr === selectedCode ||
+      nr === selectedFull ||
+      nr.includes(selectedFull)
+    );
+  };
+
   const resetForm = () => {
     setFormData(initialFormData);
     setSelectedOption(null);
@@ -1033,10 +1056,8 @@ export default function DashboardPage() {
                                             </div>
 
                                             {activeNodesData
-                                              .filter(
-                                                (node) =>
-                                                  !regionname ||
-                                                  node.region === regionname
+                                              .filter((node) =>
+                                                isNodeInRegion(node.region)
                                               )
                                               .map((option, index) => (
                                                 <div
