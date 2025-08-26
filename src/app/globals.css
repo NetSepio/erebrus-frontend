@@ -123,7 +123,7 @@ body {
 
 @layer base {
   * {
-  @apply border-border outline-ring/50;
+    @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
@@ -144,24 +144,6 @@ body {
   body {
     @apply bg-background text-foreground;
   }
-}
-
-/* Ensure AppKit connect button retains rounded style in production */
-appkit-button, appkit-button * {
-  border-radius: 9999px !important; /* rounded-full */
-}
-
-/* Prevent global outline/border rules from leaking into AppKit components */
-appkit-button *,
-.w3m-button * {
-  outline: none;
-}
-
-/* Avoid page background being dimmed incorrectly; rely on AppKit's own overlay */
-.w3m-modal,
-.w3m-overlay {
-  backdrop-filter: blur(8px);
-  z-index: 9999 !important;
 }
 
 
@@ -273,4 +255,151 @@ appkit-button *,
   font-size: 12px !important;
   font-weight: 500 !important;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* AppKit Connect Wallet Button Styles - compact rectangular blue button */
+appkit-button {
+  border-radius: 20px !important;
+  width: auto !important;
+  height: 40px !important;
+  min-width: 140px !important;
+  min-height: 40px !important;
+  padding: 8px 20px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #3b82f6 !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  pointer-events: auto !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  color: white !important;
+}
+
+/* Hover/active apply to the full custom element */
+appkit-button:hover,
+appkit-button:active {
+  background: #2563eb !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25) !important;
+}
+
+/* Ensure inner native button follows parent size and is interactive */
+appkit-button button,
+appkit-button > * {
+  border-radius: 20px !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: transparent !important; /* inherit parent's background */
+  border: none !important;
+  color: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  pointer-events: auto !important;
+}
+
+/* Remove pseudo content if any */
+appkit-button::before {
+  content: none !important;
+}
+
+/* AppKit Modal Overlay */
+w3m-modal {
+  z-index: 9999 !important;
+}
+
+/* AppKit Modal Content - Dark Theme */
+
+w3m-modal .w3m-modal {
+  border-radius: 16px !important;
+  background: #1a1a1a !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid #333333 !important;
+}
+
+/* Modal backdrop: keep page visible (no large black overlay) */
+w3m-modal::part(backdrop) {
+  background: transparent !important;
+}
+
+/* Modal container - dark theme but do not force entire modal subtree to that color */
+w3m-modal::part(container) {
+  border-radius: 16px !important;
+  background: #1a1a1a !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  max-width: 400px !important;
+  width: 90vw !important;
+  border: 1px solid #333333 !important;
+}
+
+/* Limit dark styling to modal container and its known parts only so the page behind remains visible */
+w3m-modal::part(container),
+w3m-modal .w3m-modal {
+  color: #ffffff !important;
+}
+
+/* Wallet option buttons - Dark theme */
+w3m-modal ::part(wallet-button) {
+  background: #2a2a2a !important;
+  border: 1px solid #404040 !important;
+  border-radius: 12px !important;
+  transition: all 0.2s ease !important;
+  color: #ffffff !important;
+}
+
+w3m-modal ::part(wallet-button):hover {
+  background: #333333 !important;
+  border-color: #3b82f6 !important;
+}
+
+/* Override any light theme styles */
+w3m-modal .w3m-header,
+w3m-modal .w3m-content,
+w3m-modal .w3m-footer {
+  background: #1a1a1a !important;
+  color: #ffffff !important;
+}
+
+/* Search input styling */
+w3m-modal input {
+  background: #2a2a2a !important;
+  border: 1px solid #404040 !important;
+  color: #ffffff !important;
+}
+
+/* Close button */
+w3m-modal .w3m-close-button {
+  color: #ffffff !important;
+}
+
+/* Ensure AppKit buttons work properly */
+appkit-button, w3m-button, w3m-connect-button {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+appkit-button *, w3m-button *, w3m-connect-button * {
+  pointer-events: none !important;
+}
+
+/* Additional AppKit modal fixes */
+w3m-modal, w3m-modal * {
+  z-index: 9999 !important;
+}
+
+/* Override AppKit CSS variables for dark theme */
+w3m-modal {
+  --w3m-color-bg-1: #1a1a1a !important;
+  --w3m-color-bg-2: #2a2a2a !important;
+  --w3m-color-bg-3: #333333 !important;
+  --w3m-color-fg-1: #ffffff !important;
+  --w3m-color-fg-2: #e5e5e5 !important;
+  --w3m-color-fg-3: #cccccc !important;
+  --w3m-accent-color: #3b82f6 !important;
+  --w3m-accent-fill-color: #ffffff !important;
+  --w3m-border-radius-master: 16px !important;
+  --w3m-border-radius-xs: 8px !important;
+  --w3m-border-radius-sm: 12px !important;
 }
