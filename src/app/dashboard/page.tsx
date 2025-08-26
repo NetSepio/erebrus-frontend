@@ -1163,9 +1163,9 @@ export default function DashboardPage() {
                             </p>
 
                             <div className="flex w-full flex-col items-center justify-center">
-                              <div className="bg-white lg:mx-auto lg:my-4 lg:w-1/2 lg:p-0 p-3 justify-center flex h-60 rounded-3xl">
-                                <div className="my-auto">
-                                  <QRCodeSVG value={ConfigFile} size={200} />
+                              <div className="bg-white lg:mx-auto lg:my-4 lg:w-1/2 lg:p-6 p-6 justify-center flex rounded-3xl">
+                                <div className="mx-auto" style={{ padding: 8 }}>
+                                  <QRCodeSVG value={ConfigFile} size={280} className="block" />
                                 </div>
                               </div>
 

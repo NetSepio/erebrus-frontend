@@ -372,10 +372,10 @@ const MyVpnCard: React.FC<ReviewCardProps> = ({ metaData }) => {
                   Download Configuration
                 </p>
 
-                <div className="flex w-full flex-col items-center justify-center">
-                  <div className="bg-white lg:mx-auto lg:my-4 lg:w-1/2 lg:p-0 p-3 justify-center flex h-60 rounded-3xl">
-                    <div className="my-auto">
-                      <QRCodeSVG value={configFile} />
+                
+                  <div className="bg-white lg:mx-auto lg:my-4 lg:w-1/2 lg:p-6 p-6 justify-center flex rounded-3xl">
+                    <div className="mx-auto" style={{ padding: 8 }}>
+                      <QRCodeSVG value={configFile} size={300} />
                     </div>
                   </div>
 
@@ -389,7 +389,7 @@ const MyVpnCard: React.FC<ReviewCardProps> = ({ metaData }) => {
                     >
                       WireGuard
                     </a>
-                    &nbsp;app on mobile, scan the QR code <br /> to add a new
+                    &nbsp;app on mobile, scan the QR code to add a new
                     connection, and instantly connect to Erebrus VPN.
                   </div>
 
@@ -424,7 +424,6 @@ const MyVpnCard: React.FC<ReviewCardProps> = ({ metaData }) => {
                       clientUUID={metaData.UUID}
                     />
                   </div> */}
-                </div>
               </div>
             </div>
           </div>
