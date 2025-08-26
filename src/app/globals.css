@@ -123,7 +123,7 @@ body {
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+  @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
@@ -144,6 +144,24 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Ensure AppKit connect button retains rounded style in production */
+appkit-button, appkit-button * {
+  border-radius: 9999px !important; /* rounded-full */
+}
+
+/* Prevent global outline/border rules from leaking into AppKit components */
+appkit-button *,
+.w3m-button * {
+  outline: none;
+}
+
+/* Avoid page background being dimmed incorrectly; rely on AppKit's own overlay */
+.w3m-modal,
+.w3m-overlay {
+  backdrop-filter: blur(8px);
+  z-index: 9999 !important;
 }
 
 
