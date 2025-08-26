@@ -301,26 +301,27 @@ export default function DashboardPage() {
       hour12: true,
     });
   };
-  // Known mapping for country code -> full name
-  const knownRegions = [
-    { id: "SG", region: "Singapore" },
-    { id: "IN", region: "India" },
-    { id: "IT", region: "Italy" },
-    { id: "US", region: "United States" },
-    { id: "JP", region: "Japan" },
-    { id: "CA", region: "Canada" },
-    { id: "GB", region: "United Kingdom" },
-    { id: "AU", region: "Australia" },
-    { id: "DE", region: "Germany" },
-    // Add more known mappings as needed
-  ];
+  // map of known region codes to human friendly names
+  const regionNames: Record<string, string> = {
+    SG: "Singapore",
+    IN: "India",
+    US: "United States",
+    JP: "Japan",
+    CA: "Canada",
+    GB: "United Kingdom",
+    AU: "Australia",
+    DE: "Germany",
+  };
 
-  // regionOptions is derived from activeNodesData (defined later)
+  // Compute available regions from active nodes only (deduplicated and normalized)
+  
+
   const handleRegionChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    const { id, value } = e.target;
-    setregionname(value);
+    const { value } = e.target;
+    // normalize to upper case so filtering of nodes matches
+    setregionname(value ? value.toString().toUpperCase() : "");
   };
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -341,36 +342,18 @@ export default function DashboardPage() {
   const [activeNodesData, setActiveNodesData] = useState<Node[]>([]);
   const [nodesdata, setNodesData] = useState([]);
 
-  // Derive region options from active nodes so only regions with active nodes are shown.
-  const regionOptions = useMemo(() => {
-    // Extract first token before comma from node.region (handles 'IT, Milan', 'NO, Oslo')
-    const normalizedRegions = activeNodesData
-      .map((n) => (n.region || "").toString().trim())
-      .map((r) => (r.includes(",") ? r.split(",")[0].trim() : r))
-      .filter((r) => r && r.length > 0);
-
-    const uniques = Array.from(new Set(normalizedRegions));
-
-    const opts = uniques.map((r) => {
-      const token = r.toString().trim();
-      const maybeCode = token.length === 2 ? token.toUpperCase() : null;
-      if (maybeCode) {
-        const known = knownRegions.find((x) => x.id === maybeCode);
-        return { id: maybeCode, region: known ? known.region : maybeCode };
-      }
-
-      const knownByName = knownRegions.find(
-        (x) => x.region.toLowerCase() === token.toLowerCase()
-      );
-      if (knownByName) {
-        return { id: knownByName.id, region: knownByName.region };
-      }
-
-      return { id: token, region: token };
-    });
-
-    opts.sort((a, b) => a.region.localeCompare(b.region));
-    return opts;
+  // Compute available regions from active nodes only (deduplicated and normalized)
+  const availableRegions = useMemo(() => {
+    if (!activeNodesData || activeNodesData.length === 0)
+      return [] as { id: string; region: string }[];
+    const regions = Array.from(
+      new Set(
+        activeNodesData
+          .map((n: any) => (n.region || "").toString().toUpperCase().trim())
+          .filter(Boolean)
+      )
+    );
+    return regions.map((id) => ({ id, region: regionNames[id] || id }));
   }, [activeNodesData]);
 
   // Prevent duplicate fetches in StrictMode using a guard
@@ -461,33 +444,6 @@ export default function DashboardPage() {
     setSelectedOption(option); // Ensuring option is an object
     setFormData((prevData) => ({ ...prevData, region: option.id }));
     setIsOpen(false);
-  };
-
-  // Helper: check if a node's region matches the selected region.
-  // Some nodes use full country names (e.g. "India") while the UI uses 2-letter codes (e.g. "IN").
-  // This function normalizes and compares both forms case-insensitively.
-  const isNodeInRegion = (nodeRegion: any) => {
-    if (!regionname) return true;
-    const selectedCode = (regionname || "").toString().trim().toLowerCase();
-    const selectedFull = (
-      knownRegions.find((r) => r.id === regionname)?.region || ""
-    )
-      .toString()
-      .trim()
-      .toLowerCase();
-
-    // compare using the token before any comma (handles 'IT, Milan' => 'IT')
-    const nrRaw = (nodeRegion || "").toString().trim();
-    const nr = (nrRaw.includes(",") ? nrRaw.split(",")[0].trim() : nrRaw)
-      .toLowerCase();
-    // Match when node region is already a code, or when it is the full name,
-    // or when it contains the full name (some payloads may include extra text).
-    return (
-      nr === "" ||
-      nr === selectedCode ||
-      nr === selectedFull ||
-      nr.includes(selectedFull)
-    );
   };
 
   const resetForm = () => {
@@ -1020,17 +976,17 @@ export default function DashboardPage() {
                                           <option value="" disabled>
                                             Select Region
                                           </option>
-                                          {(regionOptions && regionOptions.length > 0
-                                            ? regionOptions
-                                            : knownRegions
-                                          ).map((node) => (
-                                            <option
-                                              key={node.id}
-                                              value={node.id}
-                                            >
-                                              {node.region}
+                                          {availableRegions.length === 0 ? (
+                                            <option value="" disabled>
+                                              No active regions available
                                             </option>
-                                          ))}
+                                          ) : (
+                                            availableRegions.map((node) => (
+                                              <option key={node.id} value={node.id}>
+                                                {node.region}
+                                              </option>
+                                            ))
+                                          )}
                                         </select>
                                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
                                           <svg
@@ -1100,9 +1056,11 @@ export default function DashboardPage() {
                                             </div>
 
                                             {activeNodesData
-                                              .filter((node) =>
-                                                isNodeInRegion(node.region)
-                                              )
+                                              .filter((node) => {
+                                                const nodeRegion = (node.region || "").toString().toUpperCase().trim();
+                                                const selectedRegion = (regionname || "").toString().toUpperCase().trim();
+                                                return !selectedRegion || nodeRegion === selectedRegion;
+                                              })
                                               .map((option, index) => (
                                                 <div
                                                   key={option.id}
