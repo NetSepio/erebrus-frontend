@@ -312,6 +312,15 @@ export default function DashboardPage() {
     GB: "United Kingdom",
     AU: "Australia",
     DE: "Germany",
+    NO: "Norway",
+    IT: "Italy",
+    FI: "Finland",
+    FR: "France",
+    HK: "Hong Kong",
+    KR: "South Korea",
+    NL: "Netherlands",
+    QA: "Qatar", 
+    ZA: "South Africa",
   };
 
   // Compute available regions from active nodes only (deduplicated and normalized)
