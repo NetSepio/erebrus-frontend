@@ -31,6 +31,7 @@ import axios from "axios";
 import MyVpnCard from "./MyVpnCard";
 import { useWalletAuth } from "@/context/appkit";
 import { useAppKitNetworkCore } from "@reown/appkit/react";
+import { toast } from "sonner";
 export interface FlowIdResponse {
   eula: string;
   flowId: string;
@@ -1124,22 +1125,20 @@ export default function DashboardPage() {
                   )}
 
                   {showQrCodeModal && ConfigFile && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
-                      <div className="relative w-full max-w-md mx-4">
-                        <div
-                          className="relative rounded-xl shadow-lg p-6"
-                          style={{
-                            backgroundColor: "#202333",
-                            border: "1px solid #0162FF",
-                          }}
-                        >
-                          <div className="py-4 space-y-4 mt-4">
-                            {/* Add cross icon */}
+                    <div className="fixed inset-0 z-50 flex items-center justify-center">
+                      {/* subtle backdrop so page remains visible but modal is prominent */}
+                      <div className="absolute inset-0 bg-black opacity-40" onClick={() => setShowQrCodeModal(false)} />
+
+                      <div className="relative w-full max-w-4xl mx-4">
+                        {/* Modal card with proper styling */}
+                        <div className="mx-auto bg-[#202333] border border-[#0162FF] rounded-xl shadow-2xl overflow-hidden">
+                          <div className="flex justify-between items-center p-4 border-b border-[#0162FF]/30">
+                            <h2 className="text-2xl font-semibold text-white px-2">
+                              Download Configuration
+                            </h2>
                             <button
-                              onClick={() => {
-                                setShowQrCodeModal(false);
-                              }}
-                              className="absolute top-4 right-4 text-white hover:text-gray-300"
+                              onClick={() => setShowQrCodeModal(false)}
+                              className="text-gray-300 hover:text-white"
                               aria-label="Close QR code modal"
                             >
                               <svg
@@ -1147,7 +1146,6 @@ export default function DashboardPage() {
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
                               >
                                 <path
                                   strokeLinecap="round"
@@ -1157,55 +1155,67 @@ export default function DashboardPage() {
                                 />
                               </svg>
                             </button>
+                          </div>
 
-                            <p className="text-3xl text-center font-semibold text-white mb-10">
-                              Download Configuration
-                            </p>
-
-                            <div className="flex w-full flex-col items-center justify-center">
-                              <div className="bg-white lg:mx-auto lg:my-4 lg:w-1/2 lg:p-6 p-6 justify-center flex rounded-3xl">
-                                <div className="mx-auto" style={{ padding: 8 }}>
-                                  <QRCodeSVG value={ConfigFile} size={280} className="block" />
-                                </div>
+                          <div className="p-6">
+                            <div className="flex flex-col lg:flex-row items-center gap-8">
+                              {/* QR Code section with fixed width */}
+                              <div className="bg-white p-4 rounded-lg flex-shrink-0 w-80 h-80 flex items-center justify-center">
+                                <QRCodeSVG
+                                  value={ConfigFile}
+                                  size={300}
+                                  className="block"
+                                  style={{ background: '#ffffff', display: 'block' }}
+                                />
                               </div>
 
-                              <div className="text-center text-white text-xs font-light w-2/3 mt-2">
-                                Open{" "}
-                                <a
-                                  href="https://www.wireguard.com/"
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  style={{ color: "#5696FF" }}
-                                >
-                                  WireGuard
-                                </a>
-                                &nbsp;app on mobile, scan the QR code <br /> to
-                                add a new connection, and instantly connect to
-                                Erebrus VPN.
-                              </div>
+                              {/* Instructions section with proper width constraints */}
+                              <div className="flex-1 text-white max-w-md">
+                                <div className="space-y-4">
+                                  <p className="text-lg">
+                                    Open <a href="https://www.wireguard.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 font-medium hover:underline">WireGuard</a> on your mobile device and scan the QR code to import the configuration.
+                                  </p>
 
-                              <div className="flex gap-4 w-3/4 mt-4">
-                                <button
-                                  className="text-md rounded-lg text-white flex btn bg-blue-gray-700 flex-1"
-                                  onClick={() => {
-                                    const blob = new Blob([ConfigFile], {
-                                      type: "text/plain;charSet=utf-8",
-                                    });
-                                    saveAs(blob, `${VpnName}.conf`);
-                                  }}
-                                  aria-label="Download VPN configuration file"
-                                >
-                                  <div
-                                    className="flex cursor-pointer p-2 rounded-full gap-2 justify-center w-full hover:opacity-80 mb-5"
-                                    style={{
-                                      backgroundColor: "#0162FF",
-                                    }}
-                                  >
-                                    <div style={{ color: "white" }}>
+                                  <p className="text-sm text-gray-300">
+                                    If scanning fails, you can download the configuration or copy it to your clipboard and import manually.
+                                  </p>
+
+                                  <div className="flex gap-3">
+                                    <button
+                                      onClick={() => {
+                                        const blob = new Blob([ConfigFile], { type: 'text/plain;charset=utf-8' });
+                                        saveAs(blob, `${VpnName || 'erebrus'}.conf`);
+                                      }}
+                                      className="px-6 py-2 rounded-lg bg-[#0162FF] text-white font-medium hover:bg-[#0152DD] transition-colors"
+                                      aria-label="Download VPN configuration file"
+                                    >
                                       Download
-                                    </div>
+                                    </button>
+
+                                    <button
+                                      onClick={async () => {
+                                        try {
+                                          await navigator.clipboard.writeText(ConfigFile);
+                                          toast("Configuration copied to clipboard");
+                                        } catch (e) {
+                                          toast("Copy failed — please download the file instead");
+                                        }
+                                      }}
+                                      aria-label="Copy VPN configuration to clipboard"
+                                    >
+                                      Copy
+                                    </button>
                                   </div>
-                                </button>
+
+                                  <div className="mt-4">
+                                    <p className="text-sm text-gray-400">
+                                      VPN Name: <span className="text-white font-medium">{VpnName}</span>
+                                    </p>
+                                    <p className="text-sm text-gray-400">
+                                      Client ID: <span className="text-white font-medium">{clientUUID.substring(0, 8)}...</span>
+                                    </p>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
