@@ -79,7 +79,7 @@ export default function NodesData() {
     status: string[];
     region: string[];
   }>({
-    status: [],
+    status: ["active"],
     region: [],
   });
   const [stats, setStats] = useState({
