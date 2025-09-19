@@ -35,6 +35,40 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useWalletAuth } from "@/context/appkit";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
+
+// Blockchain client imports
+import { createPublicClient, http } from 'viem';
+import { mainnet, arbitrum, base } from 'viem/chains';
+import { PublicKey, Connection } from '@solana/web3.js';
+import { Metaplex } from '@metaplex-foundation/js';
+import { Alchemy, Network } from "alchemy-sdk";
+
+// Create clients for each chain
+const ethClient = createPublicClient({
+  chain: mainnet,
+  transport: http(`https://eth-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`),
+});
+
+const arbClient = createPublicClient({
+  chain: arbitrum,
+  transport: http(`https://arb-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`),
+});
+
+const baseClient = createPublicClient({
+  chain: base,
+  transport: http(`https://base-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`),
+});
+
+// Solana connection
+const solanaConnection = new Connection(process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com');
+const metaplex = Metaplex.make(solanaConnection);
+
+// Alchemy configuration
+const alchemyConfig = {
+  apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY,
+  network: Network.ETH_MAINNET, // Default network
+};
 
 const REACT_APP_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL
 
@@ -88,11 +122,73 @@ interface MagicEdenNFTResponse {
   }>;
 }
 
+// New NFT interfaces as requested
+interface TokenBalance {
+  contractAddress: string;
+  tokenBalance: string;
+  name?: string;
+  symbol?: string;
+  decimals?: number;
+  logo?: string;
+  type: 'ERC-20' | 'ERC-721' | 'ERC-1155' | 'other' | 'SOL-NFT';
+  chain: 'ethereum' | 'arbitrum' | 'base' | 'solana';
+}
+
+interface TokenMetadataResponse {
+  name?: string;
+  symbol?: string;
+  decimals?: number;
+  logo?: string;
+}
+
+// For Solana NFTs
+interface HeliusNFTContent {
+  metadata?: {
+    name?: string;
+  };
+  files?: Array<{
+    uri?: string;
+  }>;
+}
+
+interface HeliusNFT {
+  id: string;
+  content?: HeliusNFTContent;
+}
+
+interface HeliusResponse {
+  result?: {
+    items?: HeliusNFT[];
+  };
+}
+
+// For Alchemy NFTs
+interface NftToken {
+  contract: {
+    address: string;
+    name?: string;
+    symbol?: string;
+    tokenType?: string;
+    openSea?: {
+      imageUrl?: string;
+    };
+  };
+  name?: string;
+  symbol?: string;
+  balance?: string;
+  image?: {
+    cachedUrl?: string;
+  };
+  rawMetadata?: {
+    image?: string;
+  };
+}
+
 const Profile = () => {
   // Use the updated authentication hook
   const { isConnected, address, isAuthenticated, isVerified } = useWalletAuth();
 
-  const [tempFormData, setTempFormData] = useState<FormData>({
+  const [tempFormData, setTempFormData] = useState<FormData & {manualAddress?: string}>({
     name: "",
     country: "",
     emailId: "",
@@ -103,6 +199,7 @@ const Profile = () => {
     telegram: "",
     farcaster: "",
     profilePictureUrl: "",
+    manualAddress: "",
   });
   const [loading, setLoading] = useState(false);
   const [profileset, setprofileset] = useState(true);
@@ -130,6 +227,12 @@ const Profile = () => {
   const [userNFTs, setUserNFTs] = useState<SolanaNFT[]>([]);
   const [isLoadingNFTs, setIsLoadingNFTs] = useState(false);
   const [nftError, setNftError] = useState<string | null>(null);
+  
+  // New token states
+  const [tokenBalances, setTokenBalances] = useState<TokenBalance[]>([]);
+  const [isLoadingTokens, setIsLoadingTokens] = useState(false);
+  const [tokenError, setTokenError] = useState<string | null>(null);
+  const [activeChain, setActiveChain] = useState<'ethereum' | 'arbitrum' | 'base' | 'solana'>('ethereum');
 
   // Helper function to get the correct authentication token
   const getAuthToken = () => {
@@ -150,11 +253,322 @@ const Profile = () => {
     );
   };
 
+  // Fetch token metadata (name, symbol, decimals)
+  const getTokenMetadata = async (contractAddress: string, chain: string): Promise<Partial<TokenBalance>> => {
+    try {
+      let url = '';
+      switch (chain) {
+        case 'ethereum':
+          url = `https://eth-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`;
+          break;
+        case 'arbitrum':
+          url = `https://arb-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`;
+          break;
+        case 'base':
+          url = `https://base-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`;
+          break;
+        default:
+          return {};
+      }
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'alchemy_getTokenMetadata',
+          params: [contractAddress]
+        })
+      });
+
+      if (!response.ok) return {};
+
+      const data = await response.json();
+      return data.result || {};
+    } catch (error) {
+      console.error('Error fetching token metadata:', error);
+      return {};
+    }
+  };
+
+  // Fetch NFTs using Alchemy SDK
+  const fetchNFTs = async (address: string, chain: 'ethereum' | 'arbitrum' | 'base'): Promise<TokenBalance[]> => {
+    try {
+      let network: Network;
+      switch (chain) {
+        case 'ethereum':
+          network = Network.ETH_MAINNET;
+          break;
+        case 'arbitrum':
+          network = Network.ARB_MAINNET;
+          break;
+        case 'base':
+          network = Network.BASE_MAINNET;
+          break;
+        default:
+          return [];
+      }
+
+      const chainAlchemy = new Alchemy({
+        apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY,
+        network
+      });
+
+      const response = await chainAlchemy.nft.getNftsForOwner(address, {
+        omitMetadata: false,
+        pageSize: 100
+      });
+
+      return response.ownedNfts.map((nft: NftToken) => {
+        const contractAddress = nft.contract?.address || '';
+        const name = nft.name || nft.contract?.name || 'Unnamed NFT';
+        const symbol = nft.contract?.symbol || '';
+        const imageUrl = nft.image?.cachedUrl || 
+                        nft.rawMetadata?.image || 
+                        nft.contract?.openSea?.imageUrl;
+        const tokenType = (nft.contract?.tokenType as 'ERC-20' | 'ERC-721' | 'ERC-1155' | 'other') || 'other';
+
+        return {
+          contractAddress,
+          tokenBalance: nft.balance || '1',
+          name,
+          symbol,
+          logo: imageUrl,
+          type: tokenType,
+          chain: chain
+        };
+      });
+    } catch (error) {
+      console.error(`Error fetching NFTs for ${chain}:`, error);
+      return [];
+    }
+  };
+
+  // Format token balance with proper decimals
+  const formatBalance = (balance: string, decimals: number = 18) => {
+    if (!balance) return '0';
+    const divisor = Math.pow(10, decimals);
+    const formatted = (parseInt(balance) / divisor).toFixed(4);
+    return formatted.replace(/\.?0+$/, ''); // Remove trailing zeros
+  };
+
+  // Main function to fetch tokens based on chain
+  const fetchTokensForChain = async (address: string, chain: 'ethereum' | 'arbitrum' | 'base' | 'solana'): Promise<TokenBalance[]> => {
+    switch (chain) {
+      case 'ethereum': return fetchEthereumTokens(address);
+      case 'arbitrum': return fetchArbitrumTokens(address);
+      case 'base': return fetchBaseTokens(address);
+      case 'solana': return fetchSolanaTokens(address);
+      default: return [];
+    }
+  };
+
+  // 1. Fetch Solana tokens
+  const fetchSolanaTokens = async (address: string): Promise<TokenBalance[]> => {
+    try {
+      // First try Helius v0 public endpoint (preferred)
+      const heliusApiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY;
+      if (heliusApiKey) {
+        try {
+          const response = await fetch(
+            `https://api.helius.xyz/v0/addresses/${address}/nfts?api-key=${heliusApiKey}`,
+            {
+              method: 'GET',
+              headers: { Accept: 'application/json' },
+            }
+          );
+
+          if (response.ok) {
+            const nftData = await response.json();
+            if (Array.isArray(nftData) && nftData.length > 0) {
+              return nftData.map((nft: any) => ({
+                contractAddress: nft.id,
+                tokenBalance: '1',
+                name: nft.content?.metadata?.name || 'Unnamed NFT',
+                symbol: '',
+                logo: nft.content?.links?.image || nft.content?.files?.[0]?.uri || '/NFT_Icon.png',
+                type: 'SOL-NFT' as const,
+                chain: 'solana' as const,
+              }));
+            }
+          } else {
+            console.warn('Helius v0 response not OK:', response.status, response.statusText);
+          }
+        } catch (heliusErr) {
+          console.warn('Helius v0 fetch failed:', heliusErr);
+        }
+      }
+
+      // Fallback: try internal Magic Eden API route (avoids CORS on deployed env)
+      try {
+        const magicEdenNfts = await fetchUserNFTsFromMagicEden(address);
+        if (magicEdenNfts && magicEdenNfts.length > 0) {
+          return magicEdenNfts.map((nft) => ({
+            contractAddress: nft.mintAddress,
+            tokenBalance: '1',
+            name: nft.name || 'Unnamed NFT',
+            symbol: '',
+            logo: nft.image || '/NFT_Icon.png',
+            type: 'SOL-NFT' as const,
+            chain: 'solana' as const,
+          }));
+        }
+      } catch (meErr) {
+        console.warn('Magic Eden fallback failed:', meErr);
+      }
+
+      // As a last resort, return empty array (don't throw — let caller handle UI)
+      return [];
+    } catch (error) {
+      console.error('Error fetching Solana NFTs (final):', error);
+      return [];
+    }
+  };
+
+  // 2. Fetch Ethereum tokens (ERC-20 and NFTs)
+  const fetchEthereumTokens = async (address: string): Promise<TokenBalance[]> => {
+    try {
+      // Fetch ERC-20 tokens
+      const response = await fetch(`https://eth-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'alchemy_getTokenBalances',
+          params: [address, 'erc20']
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch Ethereum tokens');
+
+      const data = await response.json();
+      const balances = data.result?.tokenBalances || [];
+
+      // Filter out zero balances and add metadata
+      const nonZeroBalances = balances.filter((token: { tokenBalance: string }) => token.tokenBalance !== '0');
+      const tokensWithMetadata = await Promise.all(nonZeroBalances.map(async (token: { contractAddress: string }) => {
+        const metadata = await getTokenMetadata(token.contractAddress, 'ethereum');
+        return {
+          ...token,
+          ...metadata,
+          type: 'ERC-20',
+          chain: 'ethereum'
+        };
+      }));
+
+      // Fetch NFTs using Alchemy SDK
+      const nfts = await fetchNFTs(address, 'ethereum');
+      return [...tokensWithMetadata, ...nfts];
+    } catch (error) {
+      console.error('Error fetching Ethereum tokens:', error);
+      return [];
+    }
+  };
+
+  // 3. Fetch Arbitrum tokens
+  const fetchArbitrumTokens = async (address: string): Promise<TokenBalance[]> => {
+    try {
+      const response = await fetch(`https://arb-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'alchemy_getTokenBalances',
+          params: [address, 'erc20']
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch Arbitrum tokens');
+
+      const data = await response.json();
+      const balances = data.result?.tokenBalances || [];
+
+      const nonZeroBalances = balances.filter((token: { tokenBalance: string }) => token.tokenBalance !== '0');
+      const tokensWithMetadata = await Promise.all(nonZeroBalances.map(async (token: { contractAddress: string }) => {
+        const metadata = await getTokenMetadata(token.contractAddress, 'arbitrum');
+        return {
+          ...token,
+          ...metadata,
+          type: 'ERC-20',
+          chain: 'arbitrum'
+        };
+      }));
+
+      // Fetch NFTs
+      const nfts = await fetchNFTs(address, 'arbitrum');
+      return [...tokensWithMetadata, ...nfts];
+    } catch (error) {
+      console.error('Error fetching Arbitrum tokens:', error);
+      return [];
+    }
+  };
+
+  // 4. Fetch Base tokens
+  const fetchBaseTokens = async (address: string): Promise<TokenBalance[]> => {
+    try {
+      const response = await fetch(`https://base-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'alchemy_getTokenBalances',
+          params: [address, 'erc20']
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch Base tokens');
+
+      const data = await response.json();
+      const balances = data.result?.tokenBalances || [];
+
+      const nonZeroBalances = balances.filter((token: { tokenBalance: string }) => token.tokenBalance !== '0');
+      const tokensWithMetadata = await Promise.all(nonZeroBalances.map(async (token: { contractAddress: string }) => {
+        const metadata = await getTokenMetadata(token.contractAddress, 'base');
+        return {
+          ...token,
+          ...metadata,
+          type: 'ERC-20',
+          chain: 'base'
+        };
+      }));
+
+      // Fetch NFTs
+      const nfts = await fetchNFTs(address, 'base');
+      return [...tokensWithMetadata, ...nfts];
+    } catch (error) {
+      console.error('Error fetching Base tokens:', error);
+      return [];
+    }
+  };
+
+  // Function to load tokens with UI state management
+  const fetchTokenBalances = async (walletAddress: string, chain: 'ethereum' | 'arbitrum' | 'base' | 'solana') => {
+    if (!walletAddress) return;
+    
+    setIsLoadingTokens(true);
+    setTokenError(null);
+    
+    try {
+      const tokens = await fetchTokensForChain(walletAddress, chain);
+      setTokenBalances(tokens);
+    } catch (error) {
+      console.error(`Error fetching ${chain} tokens:`, error);
+      setTokenError(`Failed to load tokens from ${chain}. Please try again later.`);
+    } finally {
+      setIsLoadingTokens(false);
+    }
+  };
+
   // Magic Eden API functions for fetching Solana NFTs
   const fetchUserNFTsFromMagicEden = async (
     walletAddress: string
   ): Promise<SolanaNFT[]> => {
     try {
+      console.log("Fetching NFTs from Magic Eden for wallet:", walletAddress);
       // Use our internal API route to avoid CORS issues
       const response = await fetch(
         `/api/nfts?wallet=${encodeURIComponent(walletAddress)}`,
@@ -163,6 +577,7 @@ const Profile = () => {
           headers: {
             Accept: "application/json",
           },
+          cache: "no-store", // Don't cache this request
         }
       );
 
@@ -173,22 +588,36 @@ const Profile = () => {
       }
 
       const nftData: MagicEdenNFTResponse[] = await response.json();
+      console.log("Magic Eden returned NFTs:", nftData.length);
 
       // Transform the Magic Eden response to our NFT format
-      const transformedNFTs: SolanaNFT[] = nftData.map((nft) => ({
-        mintAddress: nft.tokenMint,
-        name: nft.name || "Unnamed NFT",
-        collectionName: nft.collection || nft.symbol,
-        image: nft.image || "", // Magic Eden provides direct image URLs
-        description: "", // Magic Eden v2 API doesn't include description in wallet endpoint
-        attributes: nft.attributes || [],
-        owner: walletAddress,
-        tokenStandard: "NonFungible",
-        isCompressed: false,
-      }));
+      const transformedNFTs: SolanaNFT[] = nftData.map((nft) => {
+        // Make sure we have an image URL
+        let imageUrl = nft.image || "";
+        
+        // Debug image URLs
+        if (imageUrl) {
+          console.log(`NFT ${nft.name} has image: ${imageUrl}`);
+        } else {
+          console.log(`NFT ${nft.name} is missing image URL`);
+        }
+        
+        return {
+          mintAddress: nft.tokenMint,
+          name: nft.name || "Unnamed NFT",
+          collectionName: nft.collection || nft.symbol,
+          image: imageUrl, // Magic Eden provides direct image URLs
+          description: "", // Magic Eden v2 API doesn't include description in wallet endpoint
+          attributes: nft.attributes || [],
+          owner: walletAddress,
+          tokenStandard: "NonFungible",
+          isCompressed: false,
+        };
+      });
 
       return transformedNFTs;
     } catch (error) {
+      console.error("Magic Eden fetch error:", error);
       throw error;
     }
   };
@@ -198,6 +627,7 @@ const Profile = () => {
     walletAddress: string
   ): Promise<SolanaNFT[]> => {
     try {
+      console.log("Fetching NFTs from Helius for wallet:", walletAddress);
       // You can replace with your Helius API key if you have one
       const HELIUS_API_KEY = process.env.NEXT_PUBLIC_HELIUS_API_KEY || "demo";
 
@@ -208,6 +638,7 @@ const Profile = () => {
           headers: {
             Accept: "application/json",
           },
+          cache: "no-store", // Don't cache this request
         }
       );
 
@@ -218,53 +649,163 @@ const Profile = () => {
       }
 
       const nftData = await response.json();
+      console.log("Helius returned NFTs:", nftData.length);
 
       // Transform Helius response to our format
-      const transformedNFTs: SolanaNFT[] = nftData.map((nft: any) => ({
-        mintAddress: nft.id,
-        name: nft.content?.metadata?.name || "Unnamed NFT",
-        collectionName: nft.grouping?.[0]?.group_value || "Unknown Collection",
-        image: nft.content?.links?.image || nft.content?.files?.[0]?.uri || "",
-        description: nft.content?.metadata?.description || "",
-        attributes: nft.content?.metadata?.attributes || [],
-        owner: walletAddress,
-        tokenStandard: nft.interface || "NonFungible",
-        isCompressed: nft.compression?.compressed || false,
-      }));
+      const transformedNFTs: SolanaNFT[] = nftData.map((nft: any) => {
+        // Try to get the best image URL available from all possible locations
+        let imageUrl = "";
+        
+        // Check all possible image locations in order of preference
+        const imageLocations = [
+          // Direct image links
+          nft.content?.links?.image,
+          nft.content?.metadata?.image,
+          
+          // File arrays
+          ...(nft.content?.files?.map((f: any) => f.uri || f.url || null) || []),
+          
+          // Properties files
+          ...(nft.content?.metadata?.properties?.files?.map((f: any) => {
+            if (typeof f === 'string') return f;
+            return f.uri || f.url || null;
+          }) || []),
+          
+          // Animation URL as fallback (some NFTs store image here)
+          nft.content?.metadata?.animation_url,
+          nft.content?.links?.animation
+        ];
+        
+        // Find first non-empty image URL
+        for (const potentialUrl of imageLocations) {
+          if (potentialUrl && typeof potentialUrl === 'string') {
+            imageUrl = potentialUrl;
+            break;
+          }
+        }
+        
+        // Debug image URLs
+        if (imageUrl) {
+          console.log(`NFT ${nft.id} has image: ${imageUrl}`);
+        } else {
+          console.log(`NFT ${nft.id} is missing image URL`);
+        }
+        
+        return {
+          mintAddress: nft.id,
+          name: nft.content?.metadata?.name || "Unnamed NFT",
+          collectionName: nft.grouping?.[0]?.group_value || "Unknown Collection",
+          image: imageUrl,
+          description: nft.content?.metadata?.description || "",
+          attributes: nft.content?.metadata?.attributes || [],
+          owner: walletAddress,
+          tokenStandard: nft.interface || "NonFungible",
+          isCompressed: nft.compression?.compressed || false,
+        };
+      });
 
       return transformedNFTs;
     } catch (error) {
+      console.error("Helius fetch error:", error);
       throw error;
     }
   };
 
   // Main function to fetch user's NFTs (tries multiple sources)
   const fetchUserNFTs = async (walletAddress: string): Promise<void> => {
+    if (!walletAddress) return;
+    
     setIsLoadingNFTs(true);
     setNftError(null);
 
-    try {
+    let providerErrors: string[] = [];
+    let retryCount = 0;
+    const maxRetries = 2;
+
+    const tryFetchNFTs = async (): Promise<SolanaNFT[]> => {
       let nfts: SolanaNFT[] = [];
 
-      // Try our internal API route first (avoids CORS issues)
+      // Try Magic Eden first
       try {
-        nfts = await fetchUserNFTsFromMagicEden(walletAddress);
-      } catch (magicEdenError) {
-        // Fallback to Helius if Magic Eden fails
-        try {
-          nfts = await fetchUserNFTsFromHelius(walletAddress);
-        } catch (heliusError) {
-          throw new Error(
-            "Unable to fetch NFTs from any provider. This might be due to CORS restrictions on the deployed environment."
-          );
+        const magicNfts = await fetchUserNFTsFromMagicEden(walletAddress);
+        if (magicNfts && magicNfts.length > 0) {
+          // If some MagicEden NFTs lack images, try Helius to fill missing data
+          const missingCount = magicNfts.filter((it) => !it.image || it.image === '').length;
+          if (missingCount > 0) {
+            try {
+              const heliusNfts = await fetchUserNFTsFromHelius(walletAddress);
+              if (heliusNfts && heliusNfts.length > 0) {
+                // Merge: prefer MagicEden fields but fill missing image using Helius when mint matches
+                const heliusByMint = new Map<string, SolanaNFT>();
+                heliusNfts.forEach((h) => heliusByMint.set(h.mintAddress, h));
+
+                const merged: SolanaNFT[] = magicNfts.map((me) => {
+                  if ((!me.image || me.image === '') && heliusByMint.has(me.mintAddress)) {
+                    const h = heliusByMint.get(me.mintAddress)!;
+                    return { ...me, image: h.image || '' };
+                  }
+                  return me;
+                });
+
+                // Also append any Helius NFTs not present in MagicEden
+                const magicMints = new Set(magicNfts.map((m) => m.mintAddress));
+                heliusNfts.forEach((h) => {
+                  if (!magicMints.has(h.mintAddress)) merged.push(h);
+                });
+
+                nfts = merged;
+                if (nfts && nfts.length > 0) return nfts;
+              }
+            } catch (heliusErrInner: any) {
+              console.warn('Helius fetch (merge) failed:', heliusErrInner);
+              providerErrors.push(`Helius: ${heliusErrInner?.message || heliusErrInner}`);
+            }
+          }
+
+          // If MagicEden items exist (and either had images or merge didn't help), return them
+          nfts = magicNfts;
+          if (nfts && nfts.length > 0) return nfts;
         }
+      } catch (magicEdenError: any) {
+        console.warn('Magic Eden fetch failed:', magicEdenError);
+        providerErrors.push(`MagicEden: ${magicEdenError?.message || magicEdenError}`);
       }
 
-      setUserNFTs(nfts);
-    } catch (error) {
-      setNftError(
-        error instanceof Error ? error.message : "Failed to load NFTs"
-      );
+      // Then try Helius as a final attempt
+      try {
+        nfts = await fetchUserNFTsFromHelius(walletAddress);
+        if (nfts && nfts.length > 0) return nfts;
+      } catch (heliusError: any) {
+        console.warn('Helius fetch failed:', heliusError);
+        providerErrors.push(`Helius: ${heliusError?.message || heliusError}`);
+      }
+
+      return nfts;
+    };
+
+    try {
+      let nfts: SolanaNFT[] = [];
+      
+      while (retryCount < maxRetries) {
+        nfts = await tryFetchNFTs();
+        if (nfts && nfts.length > 0) break;
+        retryCount++;
+        if (retryCount < maxRetries) await new Promise(r => setTimeout(r, 1000)); // Wait 1s between retries
+      }
+
+      if (nfts && nfts.length > 0) {
+        setNftError(null);
+        setUserNFTs(nfts);
+      } else {
+        // Only show error if we have no NFTs after all retries
+        setUserNFTs([]);
+        if (providerErrors.length > 0) {
+          setNftError('No NFTs found for this address');
+        }
+      }
+    } catch (error: any) {
+      console.error('Unexpected error fetching NFTs:', error);
+      setNftError('Failed to load NFTs. Please try again.');
       setUserNFTs([]);
     } finally {
       setIsLoadingNFTs(false);
@@ -882,24 +1423,83 @@ const Profile = () => {
     }
   }, [isConnected, address]);
 
-  // Effect to fetch NFTs when wallet is connected (for Solana wallets)
+  // Effect to fetch NFTs and tokens when wallet or cookie address changes
   useEffect(() => {
-    const shouldFetchNFTs = isConnected && address && isUserAuthenticated();
-    const isSolanaWallet = Cookies.get("Chain_symbol")?.toLowerCase() === "sol";
+    // We will attempt to fetch NFTs when we have a Solana address available.
+    // Use connected `address` if present, otherwise fall back to the wallet cookie (read-only view).
+    const cookieAddr = Cookies.get("erebrus_wallet");
+    const fetchAddress = (address && address !== "") ? address : cookieAddr;
+    const chainSymbol = Cookies.get("Chain_symbol")?.toLowerCase();
+    const isSolanaWallet = chainSymbol === "sol";
 
-    if (shouldFetchNFTs && isSolanaWallet) {
-      fetchUserNFTs(address);
-    } else {
-      // Clear NFTs if not Solana or not connected
-      setUserNFTs([]);
-      setNftError(null);
+    const loadNFTsAndTokens = async () => {
+      if (fetchAddress && isSolanaWallet) {
+        try {
+          // First try loading NFTs
+          await fetchUserNFTs(fetchAddress);
+          // Then try loading token balances
+          await fetchTokenBalancesForUser(fetchAddress, 'solana');
+        } catch (err) {
+          console.warn('Failed to load NFTs or tokens:', err);
+        }
+      } else {
+        // No Solana address available or wrong chain — clear UI lists
+        setUserNFTs([]);
+        setTokenBalances([]);
+        setNftError(chainSymbol && !isSolanaWallet ? 'Please switch to Solana network to view NFTs' : null);
+        setTokenError(null);
+      }
+    };
+
+    // Add a small delay to ensure chain info is properly set
+    const timeoutId = setTimeout(loadNFTsAndTokens, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [isConnected, address]);
+
+  // Effect to load tokens when active chain changes
+  useEffect(() => {
+    const cookieAddr = Cookies.get("erebrus_wallet");
+    const fetchAddress = (isConnected && address) ? address : cookieAddr;
+    if (fetchAddress) {
+      fetchTokenBalancesForUser(fetchAddress, activeChain).catch((err) => console.warn('fetchTokenBalancesForUser failed on chain change:', err));
     }
-  }, [isConnected, address, isUserAuthenticated()]);
+  }, [activeChain]);
+
+  // Main function to fetch token balances for the current user
+  const fetchTokenBalancesForUser = async (walletAddress: string, chain: 'ethereum' | 'arbitrum' | 'base' | 'solana') => {
+    if (!walletAddress) return;
+    
+    // For now, only allow Solana as requested
+    if (chain !== 'solana') {
+      setTokenBalances([]);
+      setTokenError("Only Solana NFT collection is currently supported");
+      return;
+    }
+    
+    setIsLoadingTokens(true);
+    setTokenError(null);
+    
+    try {
+      const tokens = await fetchSolanaTokens(walletAddress);
+      setTokenBalances(tokens);
+      
+      if (tokens.length === 0) {
+        setTokenError("No NFTs found in this wallet");
+      }
+    } catch (error) {
+      console.error(`Error fetching tokens:`, error);
+      setTokenError(`Failed to load Solana NFTs. Please try again later.`);
+      setTokenBalances([]);
+    } finally {
+      setIsLoadingTokens(false);
+    }
+  };
 
   // Refresh NFTs function
   const refreshNFTs = async () => {
     if (address && isUserAuthenticated()) {
       await fetchUserNFTs(address);
+      await fetchTokenBalancesForUser(address, 'solana');
     }
   };
 
@@ -976,6 +1576,89 @@ const Profile = () => {
     }
     // Fallback: treat as CID or CID/path
     return `https://ipfs.erebrus.io/ipfs/${v}`;
+  };
+  
+  // Utility function to normalize NFT image URLs
+  const getIpfsGatewayUrl = (imageUrl: string): string => {
+    if (!imageUrl) return "/NFT_Icon.png"; // Default fallback
+    
+    try {
+      // Trim and clean the URL
+      const cleanUrl = imageUrl.trim();
+      
+      // Handle data URLs (base64) directly
+      if (cleanUrl.startsWith('data:')) {
+        return cleanUrl;
+      }
+      
+      // Handle HTTP(S) URLs with common image extensions
+      if (/^https?:\/\/.*\.(jpg|jpeg|png|gif|webp|svg)/i.test(cleanUrl)) {
+        return cleanUrl;
+      }
+
+      // Already processed with a proper gateway
+      if (cleanUrl.includes("ipfs.erebrus.io") || 
+          cleanUrl.includes("ipfs.io") || 
+          cleanUrl.includes("dweb.link") ||
+          cleanUrl.includes("cloudflare-ipfs.com")) {
+        return cleanUrl;
+      }
+      
+      // Handle common IPFS prefixes
+      if (cleanUrl.startsWith("ipfs://")) {
+        return `https://cloudflare-ipfs.com/ipfs/${cleanUrl.slice(7)}`;
+      }
+      
+      // Handle arweave URLs
+      if (cleanUrl.startsWith("ar://")) {
+        return `https://arweave.net/${cleanUrl.slice(5)}`;
+      }
+      
+      // Handle relative IPFS paths
+      if (cleanUrl.startsWith("/ipfs/")) {
+        return `https://cloudflare-ipfs.com${cleanUrl}`;
+      }
+      
+      // If it's just a CID (common pattern)
+      if (/^[a-zA-Z0-9]{46,59}$/.test(cleanUrl)) {
+        return `https://cloudflare-ipfs.com/ipfs/${cleanUrl}`;
+      }
+      
+      // Handle common problematic URLs
+      if (cleanUrl.includes("digitaleyes") || 
+          cleanUrl.includes("solsea") ||
+          cleanUrl.includes("solanart") ||
+          cleanUrl.includes("nftstorage")) {
+        // Try to extract IPFS path if present
+        const ipfsMatch = cleanUrl.match(/\/ipfs\/([a-zA-Z0-9]+)/);
+        if (ipfsMatch && ipfsMatch[1]) {
+          return `https://cloudflare-ipfs.com/ipfs/${ipfsMatch[1]}`;
+        }
+        return cleanUrl;
+      }
+      
+      // Try to fix Solana URIs
+      if (cleanUrl.startsWith("https://solana-cdn.com/") ||
+          cleanUrl.startsWith("https://arweave.net/")) {
+        return cleanUrl;
+      }
+
+      // Handle generic HTTP URLs without specific image extensions
+      if (cleanUrl.startsWith('http')) {
+        return cleanUrl;
+      }
+      
+      // Last resort - treat as potential IPFS CID
+      if (cleanUrl.length > 20 && /^[a-zA-Z0-9]+$/.test(cleanUrl)) {
+        return `https://cloudflare-ipfs.com/ipfs/${cleanUrl}`;
+      }
+      
+      // Return original URL if none of the above conditions match
+      return cleanUrl;
+    } catch (error) {
+      console.error("Error processing image URL:", error);
+      return "/NFT_Icon.png"; // Fallback on error
+    }
   };
 
   return (
@@ -1319,6 +2002,47 @@ const Profile = () => {
                         <h2 className="text-2xl font-bold text-purple-400 mb-4">
                           Your NFT Collection
                         </h2>
+                        
+                        {/* Blockchain Selection - Only showing Solana for now */}
+                        <div className="flex justify-center space-x-2 mb-6">
+                          <Button
+                            variant={activeChain === 'solana' ? 'default' : 'outline'}
+                            className={activeChain === 'solana' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300 border-gray-700'}
+                            onClick={() => setActiveChain('solana')}
+                            disabled={isLoadingTokens}
+                          >
+                            Solana
+                          </Button>
+                        </div>
+
+                        {/* Manual Address Search */}
+                        <div className="max-w-md mx-auto mb-8 mt-4">
+                          <div className="flex space-x-2">
+                            <Input
+                              placeholder="Enter wallet address"
+                              className="bg-gray-800/50 border-gray-700 text-white"
+                              value={tempFormData.manualAddress || ''}
+                              onChange={(e) => setTempFormData({...tempFormData, manualAddress: e.target.value})}
+                              disabled={isLoadingTokens}
+                            />
+                            <Button 
+                              onClick={() => {
+                                if (tempFormData.manualAddress) {
+                                  fetchTokenBalancesForUser(tempFormData.manualAddress, 'solana');
+                                } else {
+                                  toast.error('Please enter a wallet address');
+                                }
+                              }}
+                              disabled={isLoadingTokens || !tempFormData.manualAddress}
+                              className="whitespace-nowrap"
+                            >
+                              Search
+                            </Button>
+                          </div>
+                          <p className="text-xs text-gray-400 mt-1">
+                            Enter a Solana wallet address to view NFTs
+                          </p>
+                        </div>
 
                         {/* Chain indicator */}
                         <div className="mb-6">
@@ -1326,14 +2050,14 @@ const Profile = () => {
                             variant="outline"
                             className="bg-blue-900/30 text-blue-300 border-blue-800"
                           >
-                            {Cookies.get("Chain_symbol")?.toUpperCase() ||
-                              "Unknown"}{" "}
+                            {activeChain === 'solana' ? 'Solana' : 
+                             (Cookies.get("Chain_symbol")?.toUpperCase() || "Unknown")}{" "}
                             Network
                           </Badge>
                         </div>
 
-                        {/* Loading state */}
-                        {isLoadingNFTs && (
+                        {/* Loading state - combined for both NFTs and tokens */}
+                        {(isLoadingNFTs || isLoadingTokens) && (
                           <div className="text-center py-12">
                             <div className="animate-spin h-8 w-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-4" />
                             <p className="text-gray-400">
@@ -1343,13 +2067,13 @@ const Profile = () => {
                         )}
 
                         {/* Error state */}
-                        {nftError && !isLoadingNFTs && (
+                        {(nftError || tokenError) && !isLoadingNFTs && !isLoadingTokens && (
                           <div className="text-center py-12">
                             <X className="h-12 w-12 text-red-500 mx-auto mb-4" />
                             <p className="text-red-400 mb-2">
                               Failed to load NFTs
                             </p>
-                            <p className="text-gray-500 text-sm">{nftError}</p>
+                            <p className="text-gray-500 text-sm">{nftError || tokenError}</p>
                             <Button
                               onClick={refreshNFTs}
                               variant="outline"
@@ -1360,10 +2084,76 @@ const Profile = () => {
                           </div>
                         )}
 
-                        {/* NFT Grid */}
-                        {!isLoadingNFTs && !nftError && (
+                        {/* NFT and Token Display */}
+                        {!isLoadingNFTs && !isLoadingTokens && !nftError && !tokenError && (
                           <>
-                            {userNFTs.length > 0 ? (
+                            {/* Switch between userNFTs and tokenBalances */}
+                            {activeChain === 'solana' && tokenBalances.length > 0 ? (
+                              <>
+                                <p className="text-gray-400 mb-8">
+                                  Found {tokenBalances.length} Token
+                                  {tokenBalances.length !== 1 ? "s" : ""} in this
+                                  wallet
+                                </p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                  {tokenBalances.map((token, index) => (
+                                    <div
+                                      key={token.contractAddress || index}
+                                      className="bg-gray-800/50 border border-gray-700 rounded-lg overflow-hidden hover:border-blue-500 transition-all duration-300 transform hover:scale-105"
+                                    >
+                                      {/* NFT Image */}
+                                      <div className="aspect-square w-full bg-gradient-to-br from-blue-900 to-purple-900 flex items-center justify-center relative">
+                                        {token.logo ? (
+                                          <img
+                                            src={token.logo}
+                                            alt={token.name}
+                                            loading="lazy"
+                                            className="w-full h-full object-cover"
+                                            onError={(e) => {
+                                              const img = e.currentTarget as HTMLImageElement;
+                                              img.onerror = null;
+                                              img.src = token.type === 'SOL-NFT' ? '/NFT_Icon.png' : '/default_token.png';
+                                            }}
+                                          />
+                                        ) : null}
+                                        {/* Fallback for missing images */}
+                                        <div
+                                          className="absolute inset-0 flex items-center justify-center text-center px-4"
+                                          style={{
+                                            display: token.logo
+                                              ? "none"
+                                              : "flex",
+                                          }}
+                                        >
+                                          <div>
+                                            <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                                            <p className="text-sm text-gray-400">
+                                              {token.name || "Unknown Token"}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      {/* Token Details */}
+                                      <div className="p-4">
+                                        <h3 className="font-bold text-white mb-1 truncate">
+                                          {token.name || "Unknown Token"}
+                                        </h3>
+                                        <p className="text-xs text-gray-400 mb-2">
+                                          {token.type}
+                                        </p>
+                                        {token.type === 'ERC-20' && (
+                                          <p className="text-sm text-blue-400 font-medium">
+                                            Balance: {formatBalance(token.tokenBalance, token.decimals)}
+                                            {token.symbol ? ` ${token.symbol}` : ''}
+                                          </p>
+                                        )}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </>
+                            ) : userNFTs.length > 0 ? (
                               <>
                                 <p className="text-gray-400 mb-8">
                                   Found {userNFTs.length} NFT
@@ -1372,45 +2162,39 @@ const Profile = () => {
                                 </p>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                   {userNFTs.map((nft, index) => (
-                                    <div
+                                    <motion.div
                                       key={nft.mintAddress || index}
-                                      className="bg-gray-800/50 border border-gray-700 rounded-lg overflow-hidden hover:border-blue-500 transition-all duration-300 transform hover:scale-105"
+                                      initial={{ opacity: 0 }}
+                                      animate={{ opacity: 1 }}
+                                      transition={{ duration: 0.3, delay: index * 0.1 }}
+                                      className="group relative"
                                     >
-                                      {/* NFT Image */}
-                                      <div className="aspect-square w-full bg-gradient-to-br from-blue-900 to-purple-900 flex items-center justify-center relative">
-                                        {nft.image ? (
-                                          <img
-                                            src={nft.image}
-                                            alt={nft.name}
-                                            className="w-full h-full object-cover"
-                                            onError={(e) => {
-                                              const img = e.currentTarget;
-                                              img.style.display = "none";
-                                              // Show fallback
-                                              const fallback =
-                                                img.nextElementSibling as HTMLElement;
-                                              if (fallback)
-                                                fallback.style.display = "flex";
-                                            }}
-                                          />
-                                        ) : null}
-                                        {/* Fallback for missing images */}
-                                        <div
-                                          className="absolute inset-0 flex items-center justify-center text-center px-4"
-                                          style={{
-                                            display: nft.image
-                                              ? "none"
-                                              : "flex",
-                                          }}
-                                        >
-                                          <div>
-                                            <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                                            <p className="text-sm text-gray-400">
-                                              {nft.name}
-                                            </p>
-                                          </div>
+                                      {/* Card background with subtle gradient border */}
+                                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-transparent to-purple-500/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
+                                      
+                                      <div className="h-full bg-gray-900/80 backdrop-blur-lg rounded-2xl overflow-hidden border border-gray-800 group-hover:border-blue-500/30 transition-all duration-300">
+                                        {/* NFT Image with hover overlay */}
+                                        <div className="relative aspect-square overflow-hidden">
+                                          {nft.image ? (
+                                            <img
+                                              src={getIpfsGatewayUrl(nft.image)}
+                                              alt={nft.name || 'NFT'}
+                                              loading="lazy"
+                                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                              onError={(e) => {
+                                                const img = e.currentTarget as HTMLImageElement;
+                                                // Prevent infinite loop if fallback also fails
+                                                img.onerror = null;
+                                                img.src = '/NFT_Icon.png';
+                                              }}
+                                            />
+                                          ) : (
+                                            <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+                                              <span className="text-2xl text-gray-500">{nft.name?.substring(0, 3) || 'NFT'}</span>
+                                            </div>
+                                          )}
+                                          {/* Fallback for missing images - removed as we now have better fallbacks */}
                                         </div>
-                                      </div>
 
                                       {/* NFT Details */}
                                       <div className="p-4">
@@ -1466,9 +2250,10 @@ const Profile = () => {
 
                                         {/* Token details */}
                                         <div className="mt-3 text-xs text-gray-500">
-                                          <p title={nft.mintAddress}>
-                                            Mint: {nft.mintAddress.slice(0, 8)}
-                                            ...{nft.mintAddress.slice(-4)}
+                                          <p title={nft.mintAddress || 'N/A'}>
+                                            Mint: {nft.mintAddress
+                                              ? `${nft.mintAddress.slice(0, 8)}...${nft.mintAddress.slice(-4)}`
+                                              : 'N/A'}
                                           </p>
                                           {nft.isCompressed && (
                                             <span className="text-yellow-400">
@@ -1477,7 +2262,8 @@ const Profile = () => {
                                           )}
                                         </div>
                                       </div>
-                                    </div>
+                                      </div>
+                                    </motion.div>
                                   ))}
                                 </div>
                               </>
