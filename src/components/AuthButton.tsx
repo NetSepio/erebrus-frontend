@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useWalletAuth } from "../context/appkit";
+import { useWalletAuth, getCurrentAuthToken } from "../context/appkit";
 import { Loader2, ShieldCheck, Lock, Pen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import React, { useEffect, useState } from "react";
@@ -34,7 +34,7 @@ export function AuthButton() {
       for (const chain of chains) {
         try {
           const response = await fetch(
-            `${process.env.NEXT_PUBLIC_GATEWAY_URL}api/v1.0/flowid?walletAddress=${walletAddress}&chain=${chain}`,
+            `https://gateway.netsepio.com/api/v1.0/flowid?walletAddress=${walletAddress}&chain=${chain}`,
             {
               method: "GET",
               headers: {
@@ -70,25 +70,15 @@ export function AuthButton() {
       // Try to authenticate to determine user status
       const authResult = await authenticate();
 
-      if (authResult.success) {
-        if (authResult.isVerified) {
+      if (authResult) {
+        if (isVerified) {
           // User is authenticated and verified - get profile data
-          const solanaToken = document.cookie
-            .split("; ")
-            .find((row) => row.startsWith("erebrus_token_solana="))
-            ?.split("=")[1];
-
-          const evmToken = document.cookie
-            .split("; ")
-            .find((row) => row.startsWith("erebrus_token_evm="))
-            ?.split("=")[1];
-
-          const pasetoToken = solanaToken || evmToken;
+          const pasetoToken = getCurrentAuthToken();
 
           if (pasetoToken) {
             try {
               const response = await fetch(
-                `${process.env.NEXT_PUBLIC_GATEWAY_URL}api/v1.0/profile`,
+                `https://gateway.netsepio.com/api/v1.0/profile`,
                 {
                   method: "GET",
                   headers: {
@@ -187,29 +177,19 @@ export function AuthButton() {
 
       const authResult = await authenticate();
 
-      if (authResult.success) {
-        if (authResult.isVerified) {
+      if (authResult) {
+        if (isVerified) {
           // Existing verified user - success
           setUserStatus("verified");
           setShowVerified(true);
 
           // Try to get their profile data
-          const solanaToken = document.cookie
-            .split("; ")
-            .find((row) => row.startsWith("erebrus_token_solana="))
-            ?.split("=")[1];
-
-          const evmToken = document.cookie
-            .split("; ")
-            .find((row) => row.startsWith("erebrus_token_evm="))
-            ?.split("=")[1];
-
-          const pasetoToken = solanaToken || evmToken;
+          const pasetoToken = getCurrentAuthToken();
 
           if (pasetoToken) {
             try {
               const response = await fetch(
-                `${process.env.NEXT_PUBLIC_GATEWAY_URL}api/v1.0/profile`,
+                `https://gateway.netsepio.com/api/v1.0/profile`,
                 {
                   method: "GET",
                   headers: {
