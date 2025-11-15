@@ -2,7 +2,14 @@
 const nextConfig = {
   output: "standalone",
   images: {
-    domains: ["assets.aceternity.com"],
+    remotePatterns: [
+    {
+      protocol: "https",
+      hostname: "assets.aceternity.com",
+      pathname: '/**',
+    }
+    ],
+   
   },
   webpack: (config: { externals: string[] }) => {
     config.externals = config.externals || [];
