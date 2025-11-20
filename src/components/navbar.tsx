@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, X, Home, FileText, LayoutDashboard } from "lucide-react";
+import { Menu, X, Home, FileText, LayoutDashboard, WalletMinimal } from "lucide-react";
 import { FloatingDock } from "@/components/ui/floating-dock";
 import { motion, AnimatePresence } from "framer-motion";
 import Cookies from "js-cookie";
@@ -115,7 +115,7 @@ const ErebrusNavbar = () => {
             : "bg-transparent py-5"
         }`}
       >
-        <div className="container mx-auto px-6">
+        <div className="container mx-auto px-8 py-4 bg-black/30">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Link href="/" className="flex items-center">
@@ -135,7 +135,7 @@ const ErebrusNavbar = () => {
                 <Link
                   key={index}
                   href={item.link}
-                  className="text-white hover:text-blue-300 transition-colors duration-300 text-lg font-medium"
+                  className="text-white hover:text-blue-300 transition-colors duration-300 text-sm font-medium"
                   target={item.external ? "_blank" : undefined}
                   rel={item.external ? "noopener noreferrer" : undefined}
                 >
@@ -144,8 +144,14 @@ const ErebrusNavbar = () => {
               ))}
             </div>
 
+              <div className="hidden md:block">
+                <button className="bg-linear-to-r from-[#002C89] to-[#3160C5] text-sm py-2 px-4 flex items-center gap-2">
+                  <WalletMinimal />
+                  <span>connect wallet</span>
+                </button>
+              </div>
             {/* Login & Verify Button Component */}
-            <div className="flex items-center">
+            {/* <div className="flex items-center">
               {isConnected && isAuthenticated && isVerified && token ? (
                 <UserDropdown
                   avatarUrl={avatarUrl}
@@ -158,7 +164,7 @@ const ErebrusNavbar = () => {
                   <AuthButton />
                 </>
               )}
-            </div>
+            </div> */}
 
             {/* Mobile Menu Button */}
             <div className="md:hidden">
@@ -210,7 +216,7 @@ const ErebrusNavbar = () => {
       </motion.nav>
 
       {/* Floating Dock */}
-      <AnimatePresence>
+      {/* <AnimatePresence>
         {showDock && (
           <motion.div
             initial={{ y: 100, opacity: 0 }}
@@ -226,7 +232,7 @@ const ErebrusNavbar = () => {
             />
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
     </>
   );
 };

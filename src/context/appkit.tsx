@@ -366,8 +366,9 @@ const authenticateSolana = async (
     const flowId = data.payload.flowId;
 
     const encodedMessage = new TextEncoder().encode(message);
+    
     const signature = await walletProvider.signMessage(encodedMessage);
-
+   
     const signatureHex = Array.from(new Uint8Array(signature))
       .map((b: number) => b.toString(16).padStart(2, "0"))
       .join("");

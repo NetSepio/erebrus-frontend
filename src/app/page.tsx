@@ -10,6 +10,11 @@ import PartnersMarquee from "@/components/ui/PartnersMarquee";
 import Image from "next/image";
 import Link from "next/link";
 import { ScrollProgress } from "@/components/ui/scroll-progress";
+import { Experience } from "@/components/experience";
+import VPNPlans from "@/components/vpn-plans";
+import Recognition from "@/components/recognition";
+import { ArrowRight } from "lucide-react";
+import Footer from "@/components/footer";
 
 function Page() {
   return (
@@ -17,248 +22,82 @@ function Page() {
       <Head>
         <title>Erebrus - Decentralized VPN Network</title>
         <meta
-          name="description"
-          content="Redefining digital connectivity and unleashing the future of internet with globally accessible, secure and private network through the power of DePIN."
+          name='description'
+          content='Redefining digital connectivity and unleashing the future of internet with globally accessible, secure and private network through the power of DePIN.'
         />
-        <link rel="canonical" href="https://erebrus.io" />
+        <link rel='canonical' href='https://erebrus.io' />
       </Head>
-      <div className="bg-gradient-to-b from-black to-gray-900 min-h-screen">
-        <ScrollProgress color="#3b82f6" height={4} />
+      <main className='bg-[#020417] min-h-screen overflow-hidden'>
+        <ScrollProgress color='#3b82f6' height={4} />
 
-        <HeroSection />
-        <div className="pt-12">
-          <PartnersMarquee />
-        </div>
-        <DePINRevolutionComponent />
-        <CyreneAISection />
-        <VPNContentSection />
-
-        <section className="w-full py-20 flex flex-col items-center justify-center text-white">
-          <div className="container max-w-6xl mx-auto px-4">
-            <h2 className="text-4xl md:text-5xl font-bold mb-12 bg-gradient-to-r from-blue-300 to-white bg-clip-text text-transparent text-center">
-              Decentralized for Speed and Privacy
-            </h2>
-
-            <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
-              {/* Left side: Lock animation */}
-              <div className="lg:w-1/2 flex justify-center">
-                <div className="relative w-full max-w-md h-64 md:h-96">
-                  <video
-                    src="/animations/lock.mp4"
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="object-contain w-full h-full rounded-lg shadow-lg"
-                  />
+        <section className='pt-8 sm:pt-12 md:pt-16 lg:pt-10 pb-12 sm:pb-16 md:pb-20 lg:pb-16'>
+          <HeroSection />
+          <div className='bg-linear-to-b from-[#080217] to-[#080217] h-auto min-h-32 sm:min-h-36 md:h-24 lg:h-30 flex items-center justify-center relative'>
+            <div
+              className='rounded-2xl relative w-5/6 flex flex-col md:flex-row items-end pt-8 md:pt-16 gap-4 md:gap-16 p-4 md:pr-30 pb-0 md:top-1.5'
+              style={{
+                background: "linear-gradient(to right, #001655, #1f4eb4)",
+                clipPath:
+                  "polygon(0% 0%, 100% 0%, 100% calc(100% - 40px), calc(100% - 40px) 100%, 0% 100%)",
+              }}
+            >
+              <Image
+                src='/images/world.png'
+                alt='World Image'
+                width={300}
+                height={300}
+                className='self-end'
+              />
+              <div className='font-sans space-y-4 md:text-left mb-4 md:mb-8'>
+                <div className='rounded-full text-white capitalize bg-black/20 w-fit px-4 md:mx-0'>
+                  erebrus
                 </div>
-              </div>
-
-              {/* Right side: Text content */}
-              <div className="lg:w-1/2 text-center lg:text-left">
-                <h3 className="text-3xl md:text-4xl font-bold mb-6 text-white">
-                  Protected & Private
+                <h3 className='text-lg md:text-xl'>
+                  Pioneering Private Digital Freedom
                 </h3>
-                <p className="text-lg md:text-xl text-gray-300 leading-relaxed">
-                  Erebrus DVPN encrypts your connection, hides your activity,
-                  and keeps speeds lightning fast.
+                <p className='text-sm text-[#D3DCE8]'>
+                  Erebrus delivers a decentralized VPN designed to put you in
+                  control of your online life. Protect your data, safeguard your
+                  privacy, and connect freely in a network built for security,
+                  transparency, and digital sovereignty.
                 </p>
               </div>
             </div>
           </div>
         </section>
-
-        <SubscriptionCard />
-
-        <section className="w-full py-24 flex flex-col items-center justify-center text-white bg-gradient-to-b from-gray-900 to-black">
-          <div className="container max-w-6xl mx-auto px-4 text-center">
-            <h2 className="text-4xl md:text-5xl font-bold mb-16 bg-gradient-to-r from-blue-300 to-white bg-clip-text text-transparent">
-              Recognition
-            </h2>
-
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-8 max-w-3xl mx-auto mb-16">
-              <div className="flex items-center justify-center p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
-                <Image
-                  src="/recognition/radarthack_white.webp"
-                  alt="RADAR"
-                  width={150}
-                  height={80}
-                  className="object-contain"
-                  sizes="100vw"
-                />
-              </div>
-              <div className="flex items-center justify-center p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
-                <Image
-                  src="/recognition/ethsea_white.webp"
-                  alt="ETH SEA"
-                  width={150}
-                  height={80}
-                  className="object-contain"
-                  sizes="100vw"
-                />
-              </div>
-              <div className="flex items-center justify-center col-span-2 md:col-span-1 p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
-                <div className="text-left space-y-3">
-                  <a
-                    href="https://arena.colosseum.org/projects/explore/netsepio?previous=L3Byb2plY3RzL2V4cGxvcmU_c2VlZD1iNGI0ZTYwYzViNGE0NzkwJnNlYXJjaD1uZXRzZXA"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center group hover:text-blue-300 transition-colors"
-                  >
-                    <span className="mr-2">
-                      4th Place Solana Radarhack DePIN
-                    </span>
-                    <span className="group-hover:translate-x-1 transition-transform">
-                      ↗
-                    </span>
-                  </a>
-                  <a
-                    href="https://netsepio.substack.com/p/erebrus-protocol-by-netsepio-wins"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center group hover:text-blue-300 transition-colors"
-                  >
-                    <span className="mr-2">
-                      Grand Prize at ETH SEA Demoday, Bali
-                    </span>
-                    <span className="group-hover:translate-x-1 transition-transform">
-                      ↗
-                    </span>
-                  </a>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-center p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
-                <Image
-                  src="/recognition/ivscrypto_white.webp"
-                  alt="IVS"
-                  width={150}
-                  height={80}
-                  className="object-contain"
-                  sizes="100vw"
-                />
-              </div>
-              <div className="flex items-center justify-center p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
-                <Image
-                  src="/recognition/aptos_white.webp"
-                  alt="APTOS"
-                  width={150}
-                  height={80}
-                  className="object-contain"
-                  sizes="100vw"
-                />
-              </div>
-              <div className="flex items-center justify-center col-span-2 md:col-span-1 p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
-                <div className="text-left space-y-3">
-                  <a
-                    href="https://x.com/NetSepio/status/1810538904186982587"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center group hover:text-blue-300 transition-colors"
-                  >
-                    <span className="mr-2">
-                      Grand Prize at IVS Crypto Demoday, Japan
-                    </span>
-                    <span className="group-hover:translate-x-1 transition-transform">
-                      ↗
-                    </span>
-                  </a>
-                  <a
-                    href="https://x.com/overmind_xyz/status/1701980625128071375"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center group hover:text-blue-300 transition-colors"
-                  >
-                    <span className="mr-2">
-                      Grand Prize at Aptos Hackathon, Singapore
-                    </span>
-                    <span className="group-hover:translate-x-1 transition-transform">
-                      ↗
-                    </span>
-                  </a>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-center p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
-                <Image
-                  src="/recognition/soonami_white.webp"
-                  alt="soonami.io"
-                  width={150}
-                  height={80}
-                  className="object-contain"
-                  sizes="100vw"
-                />
-              </div>
-              <div className="flex items-center justify-center p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
-                <Image
-                  src="/recognition/akindo_white.webp"
-                  alt="AKINDO"
-                  width={150}
-                  height={80}
-                  className="object-contain"
-                  sizes="100vw"
-                />
-              </div>
-              <div className="flex items-center justify-center col-span-2 md:col-span-1 p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300">
-                <div className="text-left space-y-3">
-                  <a
-                    href="https://soonami.io/post/soonami-cohort-4-winners"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center group hover:text-blue-300 transition-colors"
-                  >
-                    <span className="mr-2">
-                      On the Fast Track Prize at Soonaml Ventureshare
-                    </span>
-                    <span className="group-hover:translate-x-1 transition-transform">
-                      ↗
-                    </span>
-                  </a>
-                  <a
-                    href="https://app.akindo.io/communities/0n1VBlaXvCRPQVDG/products/La4OvOMglhWdMwjp"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center group hover:text-blue-300 transition-colors"
-                  >
-                    <span className="mr-2">
-                      Several Prizes at Akindo WaveCheck
-                    </span>
-                    <span className="group-hover:translate-x-1 transition-transform">
-                      ↗
-                    </span>
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            <p className="text-lg mb-16 text-blue-100">+ many more!!</p>
-
-            <div className="flex flex-col items-center justify-center space-y-4 mb-10">
-              <Image
-                src="/images/Erebrus_logo_wordmark.webp"
-                alt="Erebrus powered by NetSepio"
-                width={300}
-                height={100}
-                className="object-contain"
-                sizes="100vw"
-              />
-            </div>
-
-            <div className="text-2xl font-medium text-blue-100 mb-8">
-              Join the Movement. Get Started Now.
-            </div>
-
-            <a
-              href="https://discordapp.com/invite/5uaFhNpRF6"
-              target="_blank"
-              rel="noreferrer"
-              className="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-medium transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/30"
-            >
-              Get Started
-            </a>
-          </div>
+        <section className='my-12 sm:my-20 md:my-40 lg:my-60'>
+          <PartnersMarquee />
         </section>
-      </div>
+        <Experience />
+        <section className=' overflow-hidden pl-8'>
+          <h1 className='text-[20rem] py-0 leading-none'>DECENTRALIZED</h1>
+        </section>
+        <VPNPlans />
+        <Recognition />
+        <div className='flex flex-col md:flex-row items-center justify-center gap-4 py-12'>
+          <h3 className='text-xl md:text-2xl text-white text-center'>
+            Join the Movement. Get Started Now
+          </h3>
+          <button className='py-4 px-8 text-base bg-linear-to-r from-[#002C8A] to-[#315FC4] flex items-center gap-4'>
+            <span>Get Started </span>
+            <ArrowRight color='white' />
+          </button>
+        </div>
+
+        {/* Background image container for floating footer effect */}
+        <div className='relative mt-20 md:mt-32 mb-0'>
+          <div
+            className='absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat'
+            style={{
+              backgroundImage: "url('/images/world-background.png')",
+              zIndex: 1,
+            }}
+          />
+          <div className='relative z-10 pt-16 md:pt-24 pb-8 md:pb-16'>
+            <Footer />
+          </div>
+        </div>
+      </main>
     </>
   );
 }
