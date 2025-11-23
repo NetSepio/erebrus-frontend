@@ -118,7 +118,7 @@ agree to be bound by this EULA.`,
   const [selectedTopic, setSelectedTopic] = useState(topics[0]);
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white font-sans">
       <div className="text-white flex flex-col w-1/3 mx-auto mt-10">
         <div className="text-3xl font-semibold">Terms and Conditions</div>
         <div className="mt-4 text-md">
@@ -133,21 +133,16 @@ agree to be bound by this EULA.`,
               <li
                 key={topic.id}
                 onClick={() => setSelectedTopic(topic)}
-                style={{
-                  cursor: "pointer",
-                  padding: "10px",
-                  fontSize: "20px",
-                  borderRadius: "5px",
-                  // background: selectedTopic?.id === topic.id ? '#f0f0f0' : '#D9D9D9',
-                  color: selectedTopic?.id === topic.id ? "#0162FF" : "#6D6D6E",
-                }}
+                className={`cursor-pointer p-2.5 text-xl rounded ${
+                  selectedTopic?.id === topic.id ? "text-blue-500" : "text-gray-500"
+                }`}
               >
                 {topic.id}. {topic.name}
               </li>
             ))}
           </ul>
         </div>
-        <div className="w-2/3" style={{ backgroundColor: "#5696FF" }}>
+        <div className="w-2/3 bg-blue-900">
           {/* {selectedTopic ? ( */}
           <div>
             <p

@@ -7,7 +7,7 @@ const Privacy = () => {
   const [showMore, setShowMore] = useState(false);
 
   return (
-    <div className='p-20 text-white'>
+    <div className='p-20 text-white font-sans'>
       <div className='text-lg text-gray-200 mt-10'>Last Revised: June 21st 2024</div>  
       <div className='text-4xl font-semibold mt-10 '>Erebrus Privacy Policy</div>
       <div className='text-lg text-gray-200 mt-10'>

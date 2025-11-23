@@ -1,0 +1,144 @@
+import Image from "next/image";
+import { Linkedin, Github, MessageSquare, Send, ArrowUpRight } from "lucide-react";
+
+export default function Footer() {
+  return (
+    <footer className='w-full flex justify-center py-16 font-sans'>
+      <div
+        className='w-[90%] p-8 md:p-12 rounded-2xl'
+        style={{
+          background: "linear-gradient(to bottom right, #010A27, #022D8B)",
+          clipPath:
+            "polygon(0% 0%, calc(100% - 40px) 0%, 100% 40px, 100% 100%, 0% 100%)",
+        }}
+      >
+        <div className='grid grid-cols-1 md:grid-cols-[1.5fr_2fr] gap-8 md:gap-12 py-12'>
+          {/* Left Grid - Logo, Description, Social Icons */}
+          <div className='space-y-4 md:space-y-6 md:pr-12'>
+            <div className="space-y-4">
+              <Image
+                src='/images/logo.png'
+                alt='Erebrus Logo'
+                width={50}
+                height={50}
+              />
+              <p className='text-[#D1D5DC] leading-relaxed text-sm md:text-base'>
+                Redefining digital connectivity by unlocking a secure, private,
+                and globally accessible internet through the power of DePIN.
+              </p>
+            </div>
+
+            {/* Social Icons */}
+            <div className='flex gap-3 md:gap-4 justify-center md:justify-start'>
+              <a href='#'>
+                <Linkedin className='w-4 h-4 md:w-5 md:h-5 text-white' />
+              </a>
+              <a href='#'>
+                <MessageSquare className='w-4 h-4 md:w-5 md:h-5 text-white' />
+              </a>
+              <a
+                href='#'
+                
+              >
+                <Send className='w-4 h-4 md:w-5 md:h-5 text-white' />
+              </a>
+              <a href='#'>
+                <Github className='w-4 h-4 md:w-5 md:h-5 text-white' />
+              </a>
+            </div>
+          </div>
+
+          {/* Right Grid - Link Categories */}
+          <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-8'>
+            {/* Category 1 - Product */}
+            <div className='space-y-4'>
+              <h3 className='text-white font-semibold text-lg'>Product</h3>
+              <div className='space-y-2'>
+                <a
+                  href='#'
+                  className='text-[#99A1AF] flex items-center gap-2'
+                >
+                  <span>Features</span>
+                  <ArrowUpRight />
+                </a>
+                <a
+                  href='#'
+                  className='text-[#99A1AF] flex items-center gap-2'
+                >
+                  <span>Pricing</span>
+                  <ArrowUpRight />
+                </a>
+                <a
+                  href='#'
+                  className='text-[#99A1AF] flex items-center gap-2'
+                >
+                  <span>Security</span>
+                  <ArrowUpRight />
+                </a>
+                <a
+                  href='#'
+                  className='text-[#99A1AF] flex items-center gap-2'
+                >
+                  Downloads
+                </a>
+              </div>
+            </div>
+
+            {/* Category 2 - Company */}
+            <div className='space-y-4'>
+              <h3 className='text-white font-semibold text-lg'>Company</h3>
+              <div className='space-y-2'>
+                <a
+                  href='#'
+                  className='text-[#99A1AF] flex items-center gap-2'
+                >
+                  <span>About</span>
+                  <ArrowUpRight />
+                </a>
+                <a
+                  href='#'
+                  className='text-[#99A1AF] flex items-center gap-2'
+                >
+                  <span>Blog</span>
+                  <ArrowUpRight />
+                </a>
+                <a
+                  href='#'
+                  className='text-[#99A1AF] flex items-center gap-2'
+                >
+                  <span>Careers</span>
+                  <ArrowUpRight />
+                </a>
+                <a
+                  href='#'
+                  className='text-[#99A1AF] flex items-center gap-2'
+                >
+                  <span>Contact</span>
+                  <ArrowUpRight />
+                </a>
+              </div>
+            </div>
+
+            {/* Category 3 - Newsletter */}
+            <div className='space-y-4'>
+              <h3 className='text-white font-semibold text-lg'>Newsletter</h3>
+              <div className='space-y-3'>
+                <p className='text-gray-300 text-sm'>
+                  Stay updated with our latest news
+                </p>
+                <form className='space-y-3 relative'>
+                  <input
+                    type='email'
+                    placeholder='your@email.com'
+                    className='w-full px-4 py-2 bg-[#070111A6] text-[#99A1AF] rounded-lg  focus:outline-none'
+                  />
+                <Send className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-white cursor-pointer" />
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}

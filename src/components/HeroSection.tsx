@@ -1,55 +1,94 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const HeroSection = () => {
   return (
-    <div className="relative h-screen w-full overflow-hidden">
-      {/* Background Video */}
-      <div className="absolute inset-0 z-0">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="h-full w-full object-cover"
-        >
-          <source src="/background.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
+    <div className='relative h-screen w-full'>
+      <div className='absolute inset-0 z-0'>
+        <Image
+          src='/background.png'
+          alt='background'
+          fill
+          className='object-cover'
+          priority
+        />
         {/* Improved overlay with better gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-blue-900/30 to-black/90"></div>
+        <div className='absolute inset-0 bg-linear-to-b from-black/10 via-blue-900/30 to-black/90'>
+          <Image
+          src='/dotter.png'
+          alt='background'
+         height={523}
+         width={1557}
+        />
+        </div>
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex h-full w-full items-center justify-center px-6 text-center">
-        <div className="max-w-5xl">
-          <h1 className="mb-8 font-sans text-5xl font-bold leading-tight tracking-tight text-white md:text-6xl lg:text-7xl">
-            Building the Global{" "}
-            <span className="bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
-              Decentralized Network
+      <div className='relative z-10 flex flex-col md:flex-row h-full w-full items-center justify-center px-6 pt-32 md:pt-0'>
+        <div className='md:text-left flex flex-col items-center justify-center md:block px-8 md:px-0'>
+          <h1 className='mb-8 text-2xl md:text-3xl font-bold text-white'>
+            new era of private,
+            <br />
+            <span className='bg-linear-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent'>
+              Decentralized
+            </span>
+            <br />
+            <span className='bg-linear-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent'>
+              internet
             </span>
           </h1>
-          <p className="mb-12 text-xl text-blue-100 md:text-2xl max-w-3xl mx-auto">
-            Join the revolution reshaping how the world connects, shares, and
-            creates value
+          <p className='mb-12 text-base text-blue-100 font-sans mx-auto md:mx-0'>
+            Join the movement redefining freedom, <br />
+            privacy, and digital sovereignty.
           </p>
-          <div className="flex flex-col items-center justify-center space-y-4 sm:flex-row sm:space-x-6 sm:space-y-0">
-            <Link href="/explorer">
-              <button
-                className="rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 px-10 py-4 font-medium text-white transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/50 transform hover:-translate-y-1 text-lg"
-                aria-label="Explore Erebrus VPN network"
-              >
-                Explore VPN
-              </button>
-            </Link>
-          </div>
+          <Link href='/explorer'>
+            <button
+              className=' bg-white px-18 py-4 font-medium font-sans text-sm text-black transition-all duration-300 rounded-full md:rounded-none'
+              aria-label='Explore Erebrus VPN network'
+            >
+              Explore VPN
+            </button>
+          </Link>
+        </div>
+        <div className='basis-2/5 mt-8 md:mt-32 mb-8 md:mb-0 relative z-30'>
+          <Image
+            src='/devices.png'
+            alt='Hero Image'
+            width={800}
+            height={800}
+            className='mx-auto w-full max-w-sm md:max-w-none'
+            priority
+          />
         </div>
       </div>
 
       {/* Enhanced abstract glowing elements */}
-      <div className="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-blue-400 opacity-20 blur-3xl"></div>
-      <div className="absolute right-1/3 top-1/4 h-96 w-96 rounded-full bg-cyan-300 opacity-15 blur-3xl"></div>
-      <div className="absolute bottom-1/4 right-1/4 h-72 w-72 rounded-full bg-blue-300 opacity-10 blur-3xl"></div>
-      <div className="absolute top-1/3 left-1/4 h-80 w-80 rounded-full bg-purple-400 opacity-10 blur-3xl"></div>
+      <div className='absolute left-0 hidden md:inline-block -top-10'>
+        <Image
+          src='/background-blur-1.png'
+          alt='blur effect'
+          width={765}
+          height={765}
+        />
+      </div>
+      <div className='absolute left-1/6 hidden md:inline-block -top-10'>
+        <Image
+          src='/background-blur-2.png'
+          alt='blur effect'
+          width={500}
+          height={500}
+          className='brightness-50'
+        />
+      </div>
+      <div className='absolute right-0 -top-20 z-0'>
+        <Image
+          src='/background-blur-3.png'
+          alt='blur effect'
+          width={755}
+          height={200}
+          className='brightness-50'
+        />
+      </div> 
     </div>
   );
 };
