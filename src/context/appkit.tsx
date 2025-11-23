@@ -543,12 +543,12 @@ export function AppKit({ children }: { children: React.ReactNode }) {
 createAppKit({
   adapters: [new EthersAdapter(), solanaWeb3JsAdapter],
   metadata,
-  networks: [solana],
+  networks: [solana, monadTestnet],
   projectId,
   features: {
     analytics: true,
   },
-  defaultNetwork: solana,
+  defaultNetwork: mainnet,
   themeMode: "dark",
   themeVariables: {
     "--w3m-font-family": "Inter, sans-serif",

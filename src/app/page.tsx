@@ -2,13 +2,8 @@
 
 import HeroSection from "../components/HeroSection";
 import Head from "next/head";
-import DePINRevolutionComponent from "@/components/ui/map";
-import SubscriptionCard from "@/components/subs";
-import CyreneAISection from "@/components/ui/cyrene";
-import VPNContentSection from "@/components/ui/vpnContent";
 import PartnersMarquee from "@/components/ui/PartnersMarquee";
 import Image from "next/image";
-import Link from "next/link";
 import { ScrollProgress } from "@/components/ui/scroll-progress";
 import { Experience } from "@/components/experience";
 import VPNPlans from "@/components/vpn-plans";
@@ -34,7 +29,7 @@ function Page() {
           <HeroSection />
           <div className='bg-linear-to-b from-[#080217] to-[#080217] h-auto min-h-32 sm:min-h-36 md:h-24 lg:h-30 flex items-center justify-center relative'>
             <div
-              className='rounded-2xl relative w-5/6 flex flex-col md:flex-row items-end pt-8 md:pt-16 gap-4 md:gap-16 p-4 md:pr-30 pb-0 md:top-1.5'
+              className='rounded-2xl relative w-5/6 flex flex-col md:flex-row items-end pt-8 md:pt-16 gap-4 md:gap-16 p-4 md:pr-30 pb-0 md:top-1.5 shadow-xl shadow-[#1F4EB4]'
               style={{
                 background: "linear-gradient(to right, #001655, #1f4eb4)",
                 clipPath:
@@ -65,12 +60,41 @@ function Page() {
             </div>
           </div>
         </section>
-        <section className='my-12 sm:my-20 md:my-40 lg:my-60'>
+        <section className='my-12 sm:my-20 md:my-40 lg:my-80 relative'>
+          <div className='absolute left-0 -top-60'>
+            <Image
+              src='/mid-background-blur.png'
+              alt='background blur'
+              height={800}
+              width={800}
+              className='blur-sm'
+            />
+          </div>
           <PartnersMarquee />
         </section>
         <Experience />
-        <section className=' overflow-hidden pl-8'>
-          <h1 className='text-[20rem] py-0 leading-none'>DECENTRALIZED</h1>
+        <div className='relative'>
+          <Image
+            src='/decen.png'
+            alt='accent'
+            height={800}
+            width={1500}
+            className='absolute -top-96'
+          />
+        </div>
+        <section className='overflow-hidden pl-8'>
+          <h1 className='text-[18rem] py-0 leading-none transition-transform duration-500 ease-out hover:-translate-x-8 cursor-pointer'>
+            DECENTRALIZED
+          </h1>
+        </section>
+        <section className='my-30 relative'>
+          <Image
+            src='/tralized.png'
+            alt='accent'
+            height={5000}
+            width={1000}
+            className='absolute -top-20 left-0'
+          />
         </section>
         <VPNPlans />
         <Recognition />
@@ -92,6 +116,11 @@ function Page() {
               backgroundImage: "url('/images/world-background.png')",
               zIndex: 1,
             }}
+          />
+          {/* Gradient overlay to blend top into page background */}
+          <div
+            className='absolute top-0 left-0 w-full h-32 bg-linear-to-b from-[#020417] to-transparent'
+            style={{ zIndex: 2 }}
           />
           <div className='relative z-10 pt-16 md:pt-24 pb-8 md:pb-16'>
             <Footer />

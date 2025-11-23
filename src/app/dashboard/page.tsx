@@ -32,6 +32,8 @@ import MyVpnCard from "./MyVpnCard";
 import { useWalletAuth } from "@/context/appkit";
 import { useAppKitNetworkCore } from "@reown/appkit/react";
 import { toast } from "sonner";
+
+// Interfaces
 export interface FlowIdResponse {
   eula: string;
   flowId: string;
@@ -45,6 +47,32 @@ interface FormData {
   name: string;
   region: string;
 }
+
+interface Subscription {
+  type: string;
+  startTime: string;
+  endTime: string;
+}
+
+interface ProjectData {
+  id: string;
+  name: string;
+  region: string;
+  createdAt: string;
+  created_at: string;
+  UUID: string;
+  walletAddress: number;
+  [key: string]: any;
+}
+
+interface Node {
+  id: string;
+  status: string;
+  region: string;
+  walletAddress: string;
+  chainName: string;
+}
+
 export default function DashboardPage() {
   // Environment variable validation
   const EREBRUS_GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL;
@@ -65,34 +93,11 @@ export default function DashboardPage() {
     );
   }
 
-  // Use the updated authentication hook
+  // Hooks
   const { isConnected, isAuthenticating } = useWalletAuth();
-
-  // Get network information
   const { caipNetworkId } = useAppKitNetworkCore();
 
-  // Helper function to get the correct authentication token
-  const getAuthToken = () => {
-    // Determine chain type based on network
-    const isSolanaChain = caipNetworkId?.startsWith("solana:");
-    const chainType = isSolanaChain ? "solana" : "evm";
-
-    // Get chain-specific token
-    const chainToken = Cookies.get(`erebrus_token_${chainType}`);
-
-    // Fallback to basic token for backward compatibility
-    const basicToken = Cookies.get("erebrus_token");
-
-    // Return the first available token (no debug logging)
-    return chainToken || basicToken || null;
-  };
-
-  const token = getAuthToken();
-
-  // Show dashboard as soon as wallet is connected; API sections will gracefully no-op without token
-  const canViewDashboard = isConnected;
-
-  // Note: Do not auto-authenticate here to avoid double signing.
+  // States
   const [showClients, setShowClients] = useState(false);
   const [showFileStorage, setShowFileStorage] = useState(false);
   const [clients, setClients] = useState([
@@ -102,12 +107,10 @@ export default function DashboardPage() {
   const [buttonset, setbuttonset] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState(false);
   const [showQrCodeModal, setShowQrCodeModal] = useState(false);
-
-  const initialFormData: FormData = {
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     region: "",
-  };
-  const [formData, setFormData] = useState<FormData>(initialFormData);
+  });
   const [collectionsPage, setcollectionsPage] = useState<boolean>(true);
   const [collectionId, setcollectionId] = useState<string>();
   const [collectionName, setcollectionName] = useState<string>();
@@ -118,7 +121,44 @@ export default function DashboardPage() {
   const [msg, setMsg] = useState<string>("");
   const [selectedIndex, setSelectedIndex] = useState<any>(null);
   const [regionname, setregionname] = useState<string>("");
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [ConfigFile, setConfigFile] = useState<string>("");
+  const [VpnName, setVpnName] = useState<string>("");
+  const [projectsData, setprojectsData] = useState<ProjectData[] | null>(null);
+  const [activeNodesData, setActiveNodesData] = useState<Node[]>([]);
+  const [nodesdata, setNodesData] = useState([]);
+  const [selectedOption, setSelectedOption] = useState<any>(null);
+  const [isHovered, setIsHovered] = useState(false);
 
+  // Refs
+  const subscriptionFetchTokenRef = useRef<string | null>(null);
+  const nodesFetchedRef = useRef(false);
+
+  // Constants
+  const initialFormData: FormData = {
+    name: "",
+    region: "",
+  };
+
+  // Helper functions
+  const getAuthToken = () => {
+    const isSolanaChain = caipNetworkId?.startsWith("solana:");
+    const chainType = isSolanaChain ? "solana" : "evm";
+    const chainToken = Cookies.get(`erebrus_token_${chainType}`);
+    const basicToken = Cookies.get("erebrus_token");
+    return chainToken || basicToken || null;
+  };
+
+  const token = getAuthToken();
+  const canViewDashboard = isConnected;
+
+  // Note: Do not auto-authenticate here to avoid double signing.
+
+  // Functions
   const handleCollectionClick = (
     collection: string,
     collectionName: string,
@@ -130,45 +170,13 @@ export default function DashboardPage() {
     setvpnPage(true);
     setcollectionsPage(false);
   };
-  interface Subscription {
-    type: string;
-    startTime: string;
-    endTime: string;
-  }
+
   const handleChildValue = (value: string) => {
     // Callback function to update the state in the parent component
     setValueFromChild2(value);
   };
 
-  const [imageSrc, setImageSrc] = useState<string | null>(null);
-  useEffect(() => {
-    const fetchMetaData = async () => {
-      const ipfsCid = collectionImage?.replace("ipfs://", "");
-
-      // Guard against undefined/empty CID
-      if (!ipfsCid) {
-        setImageSrc(null);
-        return;
-      }
-
-      // Fetching metadata from IPFS via Erebrus gateway
-      const metadataResponse = await axios.get(
-        `https://ipfs.erebrus.io/ipfs/${ipfsCid}`
-      );
-      const metadata = metadataResponse.data;
-      const imagePath = metadata?.image?.replace?.("ipfs://", "");
-      setImageSrc(imagePath || null);
-    };
-    fetchMetaData();
-  }, [collectionImage]);
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
-  const [subscriptionStatus, setSubscriptionStatus] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [ConfigFile, setConfigFile] = useState<string>("");
-  const [VpnName, setVpnName] = useState<string>("");
-  // Track last token used to fetch subscription (prevents StrictMode double-call)
-  const subscriptionFetchTokenRef = useRef<string | null>(null);
+  // Effects
   // Fetch subscription data
   useEffect(() => {
     const fetchSubscription = async () => {
@@ -254,17 +262,28 @@ export default function DashboardPage() {
 
     fetchSubscription();
   }, [token]);
-  interface ProjectData {
-    id: string;
-    name: string;
-    region: string;
-    createdAt: string;
-    created_at: string; // Added property
-    UUID: string; // Added property
-    walletAddress: number; // Added property
-    [key: string]: any; // Add additional fields if necessary
-  }
-  const [projectsData, setprojectsData] = useState<ProjectData[] | null>(null);
+
+  // Fetch metadata for collection image
+  useEffect(() => {
+    const fetchMetaData = async () => {
+      const ipfsCid = collectionImage?.replace("ipfs://", "");
+
+      // Guard against undefined/empty CID
+      if (!ipfsCid) {
+        setImageSrc(null);
+        return;
+      }
+
+      // Fetching metadata from IPFS via Erebrus gateway
+      const metadataResponse = await axios.get(
+        `https://ipfs.erebrus.io/ipfs/${ipfsCid}`
+      );
+      const metadata = metadataResponse.data;
+      const imagePath = metadata?.image?.replace?.("ipfs://", "");
+      setImageSrc(imagePath || null);
+    };
+    fetchMetaData();
+  }, [collectionImage]);
 
   const fetchProjectsData = async () => {
     setLoading(true);
@@ -365,8 +384,6 @@ export default function DashboardPage() {
     walletAddress: string;
     chainName: string;
   }
-  const [activeNodesData, setActiveNodesData] = useState<Node[]>([]);
-  const [nodesdata, setNodesData] = useState([]);
 
   // Compute available regions from active nodes only (deduplicated and normalized)
   const availableRegions = useMemo(() => {
@@ -383,7 +400,6 @@ export default function DashboardPage() {
   }, [activeNodesData]);
 
   // Prevent duplicate fetches in StrictMode using a guard
-  const nodesFetchedRef = useRef(false);
   useEffect(() => {
     if (nodesFetchedRef.current) return;
     nodesFetchedRef.current = true;
@@ -465,7 +481,6 @@ export default function DashboardPage() {
 
     return keys;
   };
-  const [selectedOption, setSelectedOption] = useState<any>(null);
   const handleOptionClick = (option: { id: string; [key: string]: any }) => {
     setSelectedOption(option); // Ensuring option is an object
     setFormData((prevData) => ({ ...prevData, region: option.id }));
@@ -550,7 +565,6 @@ export default function DashboardPage() {
       setLoading(false);
     }
   };
-  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <>
@@ -562,7 +576,7 @@ export default function DashboardPage() {
         />
         <link rel='canonical' href='https://erebrus.io/dashboard' />
       </Head>
-      <div className='flex min-h-screen flex-col bg-slate-950 text-white relative'>
+      <div className='flex min-h-screen flex-col bg-slate-950 text-white relative font-sans'>
         <div className='absolute inset-0 z-0'>
           <BackgroundBeams />
         </div>
@@ -582,7 +596,7 @@ export default function DashboardPage() {
         ) : (
           <>
             {/* Main content */}
-            <main className='relative z-10 flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 mt-16'>
+            <main className='relative z-10 flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 mt-20'>
               {subscriptionStatus === "notFound" ? (
                 <>
                   <div className='grid gap-4 max-w-6xl mx-auto w-full justify-center items-center'>
@@ -616,7 +630,7 @@ export default function DashboardPage() {
                           </div>
 
                           <Button
-                            className='w-full bg-gradient-to-r from-blue-700 to-blue-600 py-3 px-4 text-center text-white font-medium shadow-lg shadow-blue-900/20 hover:shadow-blue-900/40 transition-all duration-300'
+                            className='w-full bg-linear-to-r from-blue-700 to-blue-600 py-3 px-4 text-center text-white font-medium shadow-lg shadow-blue-900/20 hover:shadow-blue-900/40 transition-all duration-300 cursor-pointer'
                             onMouseEnter={() => setIsHovered(true)}
                             onMouseLeave={() => setIsHovered(false)}
                             onClick={async () => {
@@ -712,7 +726,7 @@ export default function DashboardPage() {
                           {/* 1. View Subscriptions Button */}
                           <Button
                             variant='outline'
-                            className='border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white'
+                            className='border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer'
                             onClick={() => setShowClients(false)}
                             aria-label='View subscription details'
                           >
@@ -724,7 +738,7 @@ export default function DashboardPage() {
                             onClick={() => {
                               setbuttonset(true);
                             }}
-                            className='bg-blue-600 hover:bg-blue-700'
+                            className='bg-blue-600 hover:bg-blue-700 cursor-pointer'
                             aria-label='Add new VPN client'
                           >
                             <Plus className='mr-2 h-4 w-4' />
@@ -755,7 +769,9 @@ export default function DashboardPage() {
                               </CardTitle>
                             </div>
                           </div>
-                          <appkit-button />
+                          <div className='mx-auto'>
+                            <appkit-button />
+                          </div>
                         </CardHeader>
                         <CardContent>
                           {projectsData && projectsData?.length !== 0 ? (
@@ -818,7 +834,7 @@ export default function DashboardPage() {
                                 </div>
                                 {/* 4. Upgrade/Renew Plan Button */}
                                 <Button
-                                  className='bg-blue-600 hover:bg-blue-700'
+                                  className='bg-blue-600 hover:bg-blue-700 cursor-pointer'
                                   aria-label={
                                     subscriptionStatus === "expired"
                                       ? "Renew subscription plan"
@@ -866,7 +882,7 @@ export default function DashboardPage() {
                             {/* 5. Create Clients Button */}
                             <Button
                               variant='outline'
-                              className='border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white'
+                              className='border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer'
                               onClick={() => setShowClients(true)}
                               aria-label='Create new VPN clients'
                             >
@@ -876,7 +892,7 @@ export default function DashboardPage() {
                             {/* 6. File Storage Button */}
                             <Button
                               variant='outline'
-                              className='border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white'
+                              className='border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer'
                               onClick={() => setShowFileStorage(true)}
                               aria-label='Access file storage'
                             >
@@ -932,7 +948,7 @@ export default function DashboardPage() {
                                   setbuttonset(false);
                                 }}
                                 type='button'
-                                className='text-white bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white'
+                                className='text-white bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white cursor-pointer'
                                 aria-label='Close modal'
                               >
                                 <svg
@@ -1137,7 +1153,7 @@ export default function DashboardPage() {
                                       <div className='mt-8'>
                                         <button
                                           type='submit'
-                                          className='w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-full transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50'
+                                          className='w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-full transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 cursor-pointer'
                                           aria-label='Create new VPN client'
                                         >
                                           Create Client
@@ -1182,7 +1198,7 @@ export default function DashboardPage() {
                             </h2>
                             <button
                               onClick={() => setShowQrCodeModal(false)}
-                              className='text-gray-300 hover:text-white'
+                              className='text-gray-300 hover:text-white cursor-pointer'
                               aria-label='Close QR code modal'
                             >
                               <svg
@@ -1204,7 +1220,7 @@ export default function DashboardPage() {
                           <div className='p-6'>
                             <div className='flex flex-col lg:flex-row items-center gap-8'>
                               {/* QR Code section with fixed width */}
-                              <div className='bg-white p-4 rounded-lg flex-shrink-0 w-80 h-80 flex items-center justify-center'>
+                              <div className='bg-white p-4 rounded-lg shrink-0 w-80 h-80 flex items-center justify-center'>
                                 <QRCodeSVG
                                   value={ConfigFile}
                                   size={300}
@@ -1250,7 +1266,7 @@ export default function DashboardPage() {
                                           `${VpnName || "erebrus"}.conf`
                                         );
                                       }}
-                                      className='px-6 py-2 rounded-lg bg-[#0162FF] text-white font-medium hover:bg-[#0152DD] transition-colors'
+                                      className='px-6 py-2 rounded-lg bg-[#0162FF] text-white font-medium hover:bg-[#0152DD] transition-colors cursor-pointer'
                                       aria-label='Download VPN configuration file'
                                     >
                                       Download
@@ -1271,6 +1287,7 @@ export default function DashboardPage() {
                                           );
                                         }
                                       }}
+                                      className='cursor-pointer'
                                       aria-label='Copy VPN configuration to clipboard'
                                     >
                                       Copy
@@ -1312,7 +1329,7 @@ export default function DashboardPage() {
                         {/* 7. Close File Storage Button */}
                         <Button
                           variant='outline'
-                          className='border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white'
+                          className='border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer'
                           onClick={() => setShowFileStorage(false)}
                           aria-label='Close file storage section'
                         >

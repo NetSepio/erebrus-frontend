@@ -14,13 +14,12 @@ const HeroSection = () => {
         />
         {/* Improved overlay with better gradient */}
         <div className='absolute inset-0 bg-linear-to-b from-black/10 via-blue-900/30 to-black/90'>
-          {/* <Image
+          <Image
           src='/dotter.png'
           alt='background'
-          fill
-          className='object-cover'
-          priority
-        /> */}
+         height={523}
+         width={1557}
+        />
         </div>
       </div>
 
@@ -51,7 +50,7 @@ const HeroSection = () => {
             </button>
           </Link>
         </div>
-        <div className='basis-2/5 mt-8 md:mt-32 mb-8 md:mb-0'>
+        <div className='basis-2/5 mt-8 md:mt-32 mb-8 md:mb-0 relative z-30'>
           <Image
             src='/devices.png'
             alt='Hero Image'
@@ -64,30 +63,32 @@ const HeroSection = () => {
       </div>
 
       {/* Enhanced abstract glowing elements */}
-      {/* <div className='absolute left-1/4 top-12'>
+      <div className='absolute left-0 hidden md:inline-block -top-10'>
         <Image
           src='/background-blur-1.png'
           alt='blur effect'
-          width={384}
-          height={384}
+          width={765}
+          height={765}
         />
-      </div> */}
-      {/* <div className='absolute right-3/4 top-0'>
+      </div>
+      <div className='absolute left-1/6 hidden md:inline-block -top-10'>
         <Image
           src='/background-blur-2.png'
           alt='blur effect'
-          width={320}
-          height={320}
+          width={500}
+          height={500}
+          className='brightness-50'
         />
       </div>
-      <div className='absolute right-1/4'>
+      <div className='absolute right-0 -top-20 z-0'>
         <Image
           src='/background-blur-3.png'
           alt='blur effect'
-          width={288}
-          height={288}
+          width={755}
+          height={200}
+          className='brightness-50'
         />
-      </div> */}
+      </div> 
     </div>
   );
 };

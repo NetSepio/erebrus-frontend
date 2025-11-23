@@ -3,7 +3,14 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, X, Home, FileText, LayoutDashboard, WalletMinimal } from "lucide-react";
+import {
+  Menu,
+  X,
+  Home,
+  FileText,
+  LayoutDashboard,
+  WalletMinimal,
+} from "lucide-react";
 import { FloatingDock } from "@/components/ui/floating-dock";
 import { motion, AnimatePresence } from "framer-motion";
 import Cookies from "js-cookie";
@@ -83,17 +90,17 @@ const ErebrusNavbar = () => {
   const dockItems = [
     {
       title: "Home",
-      icon: <Home className="h-full w-full text-blue-500" />,
+      icon: <Home className='h-full w-full text-blue-500' />,
       href: "/",
     },
     {
       title: "Explorer",
-      icon: <FileText className="h-full w-full text-blue-500" />,
+      icon: <FileText className='h-full w-full text-blue-500' />,
       href: "/explorer",
     },
     {
       title: "Dashboard",
-      icon: <LayoutDashboard className="h-full w-full text-blue-500" />,
+      icon: <LayoutDashboard className='h-full w-full text-blue-500' />,
       href: "/dashboard",
     },
   ];
@@ -115,62 +122,62 @@ const ErebrusNavbar = () => {
             : "bg-transparent py-5"
         }`}
       >
-        <div className="container mx-auto px-8 py-4 bg-black/30">
-          <div className="flex items-center justify-between">
+        <div className='container mx-auto px-8 py-4 bg-black/30'>
+          <div className='flex items-center justify-between'>
             {/* Logo */}
-            <Link href="/" className="flex items-center">
+            <Link href='/' className='flex items-center'>
               <Image
-                src="/images/Erebrus_logo_wordmark.webp"
-                alt="Erebrus"
+                src='/images/Erebrus_logo_wordmark.webp'
+                alt='Erebrus'
                 width={150}
                 height={40}
-                className="h-10 w-auto"
-                sizes="100vw"
+                className='h-10 w-auto'
+                sizes='100vw'
               />
             </Link>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
-              {navItems.map((item, index) => (
-                <Link
-                  key={index}
-                  href={item.link}
-                  className="text-white hover:text-blue-300 transition-colors duration-300 text-sm font-medium"
-                  target={item.external ? "_blank" : undefined}
-                  rel={item.external ? "noopener noreferrer" : undefined}
-                >
-                  {item.name}
-                </Link>
-              ))}
+            <div className='flex space-x-8'>
+              {/* Desktop Navigation */}
+              <div className='hidden md:flex items-center space-x-8'>
+                {navItems.map((item, index) => (
+                  <Link
+                    key={index}
+                    href={item.link}
+                    className='text-white hover:text-blue-300 transition-colors duration-300 text-sm font-medium'
+                    target={item.external ? "_blank" : undefined}
+                    rel={item.external ? "noopener noreferrer" : undefined}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+              {/* Login & Verify Button Component */}
+              <div className='flex items-center'>
+                {isConnected && isAuthenticated && isVerified && token ? (
+                  <UserDropdown
+                    avatarUrl={avatarUrl}
+                    handlePasetoClick={handlePasetoClick}
+                    paseto={token}
+                  />
+                ) : (
+                  <div className='hidden md:flex items-center gap-3'>
+                    <div className='appkit-button-wrapper relative'>
+                      <appkit-button />
+                      {!isConnected && (
+                        <WalletMinimal className='absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 pointer-events-none z-10' />
+                      )}
+                    </div>
+                    <AuthButton />
+                  </div>
+                )}
+              </div>
             </div>
 
-              <div className="hidden md:block">
-                <button className="bg-linear-to-r from-[#002C89] to-[#3160C5] text-sm py-2 px-4 flex items-center gap-2">
-                  <WalletMinimal />
-                  <span>connect wallet</span>
-                </button>
-              </div>
-            {/* Login & Verify Button Component */}
-            {/* <div className="flex items-center">
-              {isConnected && isAuthenticated && isVerified && token ? (
-                <UserDropdown
-                  avatarUrl={avatarUrl}
-                  handlePasetoClick={handlePasetoClick}
-                  paseto={token}
-                />
-              ) : (
-                <>
-                  <appkit-button />
-                  <AuthButton />
-                </>
-              )}
-            </div> */}
-
             {/* Mobile Menu Button */}
-            <div className="md:hidden">
+            <div className='md:hidden'>
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="text-white focus:outline-none"
+                className='text-white focus:outline-none'
                 aria-label={
                   isOpen
                     ? "Close mobile navigation menu"
@@ -191,14 +198,14 @@ const ErebrusNavbar = () => {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
-              className="md:hidden absolute w-full bg-black/95 backdrop-blur-md"
+              className='md:hidden absolute w-full bg-black/95 backdrop-blur-md'
             >
-              <div className="container mx-auto px-6 flex flex-col space-y-4 py-6">
+              <div className='container mx-auto px-6 flex flex-col space-y-4 py-6'>
                 {navItems.map((item, index) => (
                   <Link
                     key={index}
                     href={item.link}
-                    className="text-white hover:text-blue-300 transition-colors duration-300 py-2 text-lg"
+                    className='text-white hover:text-blue-300 transition-colors duration-300 py-2 text-lg'
                     onClick={() => setIsOpen(false)}
                     target={item.external ? "_blank" : undefined}
                     rel={item.external ? "noopener noreferrer" : undefined}
@@ -206,7 +213,7 @@ const ErebrusNavbar = () => {
                     {item.name}
                   </Link>
                 ))}
-                <div className="flex flex-col space-y-3 pt-4 border-t border-white/10">
+                <div className='flex flex-col space-y-3 pt-4 border-t border-white/10'>
                   {/* Mobile login buttons could go here if needed */}
                 </div>
               </div>
