@@ -22,7 +22,7 @@ export default function Recognition() {
         </div>
         <div className='text-base space-y-4 md:space-y-6 font-sans w-full md:w-auto'>
           <Link
-            href=''
+            href='https://arena.colosseum.org/projects/explore/netsepio?previous=L3Byb2plY3RzL2V4cGxvcmU_c2VlZD1iNGI0ZTYwYzViNGE0NzkwJnNlYXJjaD1uZXRzZXA'    
             target='_blank'
             className='rounded-full w-full bg-white/10 px-8 py-4 flex items justify-between'
           >
@@ -38,7 +38,7 @@ export default function Recognition() {
             <ArrowUpRight color='#82AAFF' className='size-6 hidden md:block' />
           </Link>
           <Link
-            href=''
+            href='https://netsepio.substack.com/p/erebrus-protocol-by-netsepio-wins'
             target='_blank'
             className='rounded-full w-full bg-white/10 px-8 py-4 flex items justify-between'
           >
@@ -56,7 +56,7 @@ export default function Recognition() {
             <ArrowUpRight color='#82AAFF' className='size-6 hidden md:block' />
           </Link>
           <Link
-            href=''
+            href='https://x.com/NetSepio/status/1810538904186982587'
             target='_blank'
             className='rounded-full w-full bg-white/10 px-8 py-4 flex items justify-between'
           >
@@ -74,7 +74,7 @@ export default function Recognition() {
             <ArrowUpRight color='#82AAFF' className='size-6 hidden md:block' />
           </Link>
           <Link
-            href=''
+            href='https://x.com/overmind_xyz/status/1701980625128071375'
             target='_blank'
             className='rounded-full w-full bg-white/10 px-8 py-4 flex items justify-between'
           >
@@ -92,7 +92,7 @@ export default function Recognition() {
             <ArrowUpRight color='#82AAFF' className='size-6 hidden md:block' />
           </Link>
           <Link
-            href=''
+            href='https://soonami.io/post/soonami-cohort-4-winners'
             target='_blank'
             className='rounded-full w-full bg-white/10 px-8 py-4 flex items justify-between'
           >
@@ -110,7 +110,7 @@ export default function Recognition() {
             <ArrowUpRight color='#82AAFF' className='size-6 hidden md:block' />
           </Link>
           <Link
-            href=''
+            href='https://app.akindo.io/communities/0n1VBlaXvCRPQVDG/products/La4OvOMglhWdMwjp'     
             target='_blank'
             className='rounded-full w-full bg-white/10 px-8 py-4 flex items justify-between'
           >
