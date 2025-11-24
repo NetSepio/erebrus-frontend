@@ -69,7 +69,8 @@
               <div className='flex items-center justify-center col-span-2 md:col-span-1 p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800/50 transition-all duration-300'>
                 <div className='text-left space-y-3'>
                   <a
-                    href='https://arena.colosseum.org/projects/explore/netsepio?previous=L3Byb2plY3RzL2V4cGxvcmU_c2VlZD1iNGI0ZTYwYzViNGE0NzkwJnNlYXJjaD1uZXRzZXA'
+                    href=
+                    'https://arena.colosseum.org/projects/explore/netsepio?previous=L3Byb2plY3RzL2V4cGxvcmU_c2VlZD1iNGI0ZTYwYzViNGE0NzkwJnNlYXJjaD1uZXRzZXA'
                     target='_blank'
                     rel='noreferrer'
                     className='flex items-center group hover:text-blue-300 transition-colors'

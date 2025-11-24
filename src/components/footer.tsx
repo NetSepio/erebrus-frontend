@@ -1,5 +1,11 @@
 import Image from "next/image";
-import { Linkedin, Github, MessageSquare, Send, ArrowUpRight } from "lucide-react";
+import {
+  Linkedin,
+  Github,
+  MessageSquare,
+  Send,
+  ArrowUpRight,
+} from "lucide-react";
 
 export default function Footer() {
   return (
@@ -15,7 +21,7 @@ export default function Footer() {
         <div className='grid grid-cols-1 md:grid-cols-[1.5fr_2fr] gap-8 md:gap-12 py-12'>
           {/* Left Grid - Logo, Description, Social Icons */}
           <div className='space-y-4 md:space-y-6 md:pr-12'>
-            <div className="space-y-4">
+            <div className='space-y-4'>
               <Image
                 src='/images/logo.png'
                 alt='Erebrus Logo'
@@ -36,10 +42,7 @@ export default function Footer() {
               <a href='#'>
                 <MessageSquare className='w-4 h-4 md:w-5 md:h-5 text-white' />
               </a>
-              <a
-                href='#'
-                
-              >
+              <a href='#'>
                 <Send className='w-4 h-4 md:w-5 md:h-5 text-white' />
               </a>
               <a href='#'>
@@ -50,70 +53,71 @@ export default function Footer() {
 
           {/* Right Grid - Link Categories */}
           <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-8'>
-            {/* Category 1 - Product */}
+            {/* Category 1 - Explore */}
             <div className='space-y-4'>
-              <h3 className='text-white font-semibold text-lg'>Product</h3>
+              <h3 className='text-white font-semibold text-lg'>Explore</h3>
               <div className='space-y-2'>
                 <a
-                  href='#'
+                  href='https://netsepio.com/'
                   className='text-[#99A1AF] flex items-center gap-2'
                 >
-                  <span>Features</span>
+                  <span>About NetSepio</span>
                   <ArrowUpRight />
                 </a>
                 <a
-                  href='#'
+                  href='https://www.cyreneai.com/'
                   className='text-[#99A1AF] flex items-center gap-2'
                 >
-                  <span>Pricing</span>
+                  <span>Meet Cyrene</span>
                   <ArrowUpRight />
                 </a>
                 <a
-                  href='#'
+                  href='/terms'
                   className='text-[#99A1AF] flex items-center gap-2'
                 >
-                  <span>Security</span>
+                  <span>Terms and Conditions</span>
                   <ArrowUpRight />
                 </a>
                 <a
-                  href='#'
+                  href='/privacy'
                   className='text-[#99A1AF] flex items-center gap-2'
                 >
-                  Downloads
+                  <span>Privacy Policy</span>
+                  <ArrowUpRight />
+                </a>
+                <a
+                  href='/contact'
+                  className='text-[#99A1AF] flex items-center gap-2'
+                >
+                  <span>Contact Us</span>
+                  <ArrowUpRight />
                 </a>
               </div>
             </div>
 
-            {/* Category 2 - Company */}
+            {/* Category 2 - Get Erebrus */}
             <div className='space-y-4'>
-              <h3 className='text-white font-semibold text-lg'>Company</h3>
+              <h3 className='text-white font-semibold text-lg'>Get Erebrus</h3>
               <div className='space-y-2'>
                 <a
-                  href='#'
+                  href='https://play.google.com/store/apps/details?id=com.erebrus.app'
                   className='text-[#99A1AF] flex items-center gap-2'
                 >
-                  <span>About</span>
+                  <span>Play Store</span>
                   <ArrowUpRight />
                 </a>
                 <a
-                  href='#'
+                  href='https://testflight.apple.com/join/BvdARC75'
                   className='text-[#99A1AF] flex items-center gap-2'
                 >
-                  <span>Blog</span>
+                  <span>App Store</span>
                   <ArrowUpRight />
                 </a>
                 <a
-                  href='#'
+                  href='/dashboard'
                   className='text-[#99A1AF] flex items-center gap-2'
                 >
-                  <span>Careers</span>
-                  <ArrowUpRight />
-                </a>
-                <a
-                  href='#'
-                  className='text-[#99A1AF] flex items-center gap-2'
-                >
-                  <span>Contact</span>
+                  <span>Web App</span>
                   <ArrowUpRight />
                 </a>
               </div>
@@ -121,10 +125,11 @@ export default function Footer() {
 
             {/* Category 3 - Newsletter */}
             <div className='space-y-4'>
-              <h3 className='text-white font-semibold text-lg'>Newsletter</h3>
+              <h3 className='text-white font-semibold text-lg'>Stay Updated</h3>
               <div className='space-y-3'>
                 <p className='text-gray-300 text-sm'>
-                  Stay updated with our latest news
+                  Subscribe to our newsletter for the latest updates and
+                  insights.
                 </p>
                 <form className='space-y-3 relative'>
                   <input
@@ -132,7 +137,7 @@ export default function Footer() {
                     placeholder='your@email.com'
                     className='w-full px-4 py-2 bg-[#070111A6] text-[#99A1AF] rounded-lg  focus:outline-none'
                   />
-                <Send className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-white cursor-pointer" />
+                  <Send className='absolute right-3 top-1/2 -translate-y-1/2 size-4 text-white cursor-pointer' />
                 </form>
               </div>
             </div>
