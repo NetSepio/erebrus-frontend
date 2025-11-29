@@ -13,7 +13,6 @@ export default function Footer() {
       <div
         className='w-[90%] p-8 md:p-12 rounded-3xl bg-linear-to-br from-[#010a27e0] to-[#022d8be1]'
         style={{
-         
           clipPath:
             "polygon(0% 0%, calc(100% - 80px) 0%, 100% 80px, 100% 100%, 0% 100%)",
         }}
@@ -106,13 +105,13 @@ export default function Footer() {
                   <span>Play Store</span>
                   <ArrowUpRight />
                 </a>
-                <a
+                {/* <a
                   href='https://testflight.apple.com/join/BvdARC75'
                   className='text-[#99A1AF] flex items-center gap-2'
                 >
                   <span>App Store</span>
                   <ArrowUpRight />
-                </a>
+                </a> */}
                 <a
                   href='/dashboard'
                   className='text-[#99A1AF] flex items-center gap-2'

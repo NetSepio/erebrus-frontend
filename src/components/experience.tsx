@@ -63,7 +63,7 @@ export function Experience() {
           >
             <div className='font-sans space-y-2 self-end mb-6'>
               <h3 className='text-base text-white'>Last Mile Safe Internet</h3>
-              <p className='text-sm text-[#D3DCE8]'>
+              <p className='text-sm text-[#99A1AF]'>
                 No censorship or geo-restrictions with enhanced security and
                 privacy.
               </p>
@@ -116,7 +116,7 @@ export function Experience() {
           >
             <div className='font-sans space-y-2 self-end mb-6'>
               <h3 className='text-base text-white'>DNS Firewall</h3>
-              <p className='text-sm text-[#D3DCE8]'>
+              <p className='text-sm text-[#99A1AF]'>
                 Block adware, spyware and malware with targeted network
                 protection.
               </p>
@@ -169,7 +169,7 @@ export function Experience() {
           >
             <div className='font-sans space-y-2 self-end mb-6'>
               <h3 className='text-base text-white'>Global Coverage</h3>
-              <p className='text-sm text-[#D3DCE8]'>
+              <p className='text-sm text-[#99A1AF]'>
                 Access content from anywhere with our worldwide node network.
               </p>
             </div>
@@ -221,7 +221,7 @@ export function Experience() {
           >
             <div className='font-sans space-y-2 self-end mb-6'>
               <h3 className='text-base text-white'>Lightning Fast Speeds</h3>
-              <p className='text-sm text-[#D3DCE8]'>
+              <p className='text-sm text-[#99A1AF]'>
                 Optimized routing and high-performance nodes ensure minimal
                 latency.
               </p>
@@ -276,7 +276,7 @@ export function Experience() {
               <h3 className='text-base text-white'>
                 Military-Grade Encryption
               </h3>
-              <p className='text-sm text-[#D3DCE8]'>
+              <p className='text-sm text-[#99A1AF]'>
                 Your data is protected with the highest level of encryption
                 available.
               </p>
