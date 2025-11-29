@@ -9,13 +9,13 @@ import {
 
 export default function Footer() {
   return (
-    <footer className='w-full flex justify-center py-16 font-sans'>
+    <footer className='w-full flex justify-center py-8 font-sans'>
       <div
-        className='w-[90%] p-8 md:p-12 rounded-2xl'
+        className='w-[90%] p-8 md:p-12 rounded-3xl bg-linear-to-br from-[#010a27e0] to-[#022d8be1]'
         style={{
-          background: "linear-gradient(to bottom right, #010A27, #022D8B)",
+         
           clipPath:
-            "polygon(0% 0%, calc(100% - 40px) 0%, 100% 40px, 100% 100%, 0% 100%)",
+            "polygon(0% 0%, calc(100% - 80px) 0%, 100% 80px, 100% 100%, 0% 100%)",
         }}
       >
         <div className='grid grid-cols-1 md:grid-cols-[1.5fr_2fr] gap-8 md:gap-12 py-12'>

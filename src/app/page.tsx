@@ -10,6 +10,16 @@ import VPNPlans from "@/components/vpn-plans";
 import Recognition from "@/components/recognition";
 import { ArrowRight } from "lucide-react";
 import Footer from "@/components/footer";
+import dynamic from "next/dynamic";
+import { globeConfig, sampleArcs } from "@/config/globe-config";
+import { ScrollVelocity } from "@/components/ui/scroll-velocity";
+
+const World = dynamic(
+  () => import("@/components/ui/globe").then((m) => m.World),
+  {
+    ssr: false,
+  }
+);
 
 function Page() {
   return (
@@ -29,11 +39,10 @@ function Page() {
           <HeroSection />
           <div className='bg-linear-to-b from-[#080217] to-[#080217] h-auto min-h-32 sm:min-h-36 md:h-24 lg:h-30 flex items-center justify-center relative'>
             <div
-              className='rounded-2xl relative w-5/6 flex flex-col md:flex-row items-end pt-8 md:pt-16 gap-4 md:gap-16 p-4 md:pr-30 pb-0 md:top-1.5 shadow-xl shadow-[#1F4EB4]'
+              className='rounded-3xl relative w-5/6 flex flex-col md:flex-row items-start pt-8 md:pt-16 gap-4 md:gap-16 p-4 pb-8 md:pb-0 md:pr-30 md:top-1.5 bg-linear-to-r from-[#001655] to-[#1f4eb4]'
               style={{
-                background: "linear-gradient(to right, #001655, #1f4eb4)",
                 clipPath:
-                  "polygon(0% 0%, 100% 0%, 100% calc(100% - 40px), calc(100% - 40px) 100%, 0% 100%)",
+                  "polygon(0% 0%, 100% 0%, 100% calc(100% - 75px), calc(100% - 75px) 100%, 0% 100%)",
               }}
             >
               <Image
@@ -41,9 +50,9 @@ function Page() {
                 alt='World Image'
                 width={300}
                 height={300}
-                className='self-end'
+                className='self-end -mt-8 md:mt-0'
               />
-              <div className='font-sans space-y-4 md:text-left mb-4 md:mb-8'>
+              <div className='font-sans space-y-4 pb-4 md:pb-0'>
                 <div className='rounded-full text-white capitalize bg-black/20 w-fit px-4 md:mx-0'>
                   erebrus
                 </div>
@@ -73,7 +82,7 @@ function Page() {
           <PartnersMarquee />
         </section>
         <Experience />
-        <div className='relative'>
+        <div className='relative my-40'>
           <Image
             src='/decen.png'
             alt='accent'
@@ -82,12 +91,17 @@ function Page() {
             className='absolute -top-96'
           />
         </div>
-        <section className='overflow-hidden pl-8'>
-          <h1 className='text-[18rem] py-0 leading-none transition-transform duration-500 ease-out hover:-translate-x-8 cursor-pointer'>
+        <section className='my-40'>
+          {/* <h1 className='text-[18rem] py-0 leading-none transition-transform duration-500 ease-out hover:-translate-x-8 cursor-pointer'>
             DECENTRALIZED
-          </h1>
+          </h1> */}
+          <ScrollVelocity
+            texts={["DECENTRALIZED"]}
+            velocity={50}
+            className='custom-scroll-text text-[18rem]'
+          />
         </section>
-        <section className='my-30 relative'>
+        <section className='my-40 relative'>
           <Image
             src='/tralized.png'
             alt='accent'
@@ -108,21 +122,18 @@ function Page() {
           </button>
         </div>
 
-        {/* Background image container for floating footer effect */}
+        {/* Globe background container for floating footer effect */}
         <div className='relative mt-20 md:mt-32 mb-0'>
+          <div className='absolute w-full h-full' style={{ zIndex: 1 }}>
+            <World data={sampleArcs} globeConfig={globeConfig} />
+          </div>
+          {/* Gradient overlays */}
           <div
-            className='absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat'
-            style={{
-              backgroundImage: "url('/images/world-background.png')",
-              zIndex: 1,
-            }}
-          />
-          {/* Gradient overlay to blend top into page background */}
-          <div
-            className='absolute top-0 left-0 w-full h-32 bg-linear-to-b from-[#020417] to-transparent'
+            className='absolute top-0 left-0 w-full h-48 bg-linear-to-b from-[#020417]/90 to-transparent pointer-events-none'
             style={{ zIndex: 2 }}
           />
-          <div className='relative z-10 pt-16 md:pt-24 pb-8 md:pb-16'>
+
+          <div className='relative z-10 flex items-center justify-center min-h-screen'>
             <Footer />
           </div>
         </div>

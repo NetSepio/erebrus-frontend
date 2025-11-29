@@ -122,7 +122,7 @@ const ErebrusNavbar = () => {
             : "bg-transparent py-5"
         }`}
       >
-        <div className='container mx-auto px-8 py-4 bg-black/30'>
+        <div className='container mx-auto px-8 py-4 bg-black/30 backdrop-blur-md'>
           <div className='flex items-center justify-between'>
             {/* Logo */}
             <Link href='/' className='flex items-center'>

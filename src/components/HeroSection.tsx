@@ -1,10 +1,34 @@
 import Link from "next/link";
 import Image from "next/image";
+import GradientBlinds from "./ui/gradient-blinds";
 
 const HeroSection = () => {
   return (
     <div className='relative h-screen w-full'>
-      <div className='absolute inset-0 z-0'>
+      {/* GradientBlinds - hidden on mobile, visible on desktop */}
+      <div className='absolute inset-0 z-0 hidden md:block'>
+        <GradientBlinds
+          gradientColors={["#000000", "#1D4AAE", "#0066FF"]}
+          angle={25}
+          noise={0.3}
+          blindCount={12}
+          blindMinWidth={50}
+          spotlightRadius={0.5}
+          spotlightSoftness={1}
+          spotlightOpacity={1}
+          mouseDampening={0.15}
+          distortAmount={0}
+          shineDirection='left'
+          mixBlendMode='lighten'
+        />
+        {/* Improved overlay with better gradient */}
+        <div className='absolute inset-0 bg-linear-to-b from-black/10 via-blue-900/30 to-black/90 pointer-events-none'>
+          <Image src='/dotter.png' alt='background' height={523} width={1557} />
+        </div>
+      </div>
+
+      {/* Static background image - visible on mobile only */}
+      <div className='absolute inset-0 z-0 md:hidden'>
         <Image
           src='/background.png'
           alt='background'
@@ -12,20 +36,11 @@ const HeroSection = () => {
           className='object-cover'
           priority
         />
-        {/* Improved overlay with better gradient */}
-        <div className='absolute inset-0 bg-linear-to-b from-black/10 via-blue-900/30 to-black/90'>
-          <Image
-          src='/dotter.png'
-          alt='background'
-         height={523}
-         width={1557}
-        />
-        </div>
       </div>
 
       {/* Content */}
-      <div className='relative z-10 flex flex-col md:flex-row h-full w-full items-center justify-center px-6 pt-32 md:pt-0'>
-        <div className='md:text-left flex flex-col items-center justify-center md:block px-8 md:px-0'>
+      <div className='relative z-20 flex flex-col md:flex-row h-full w-full items-center justify-center px-6 pt-32 md:pt-0 pointer-events-none'>
+        <div className='md:text-left flex flex-col items-center justify-center md:block px-8 md:px-0 pointer-events-auto'>
           <h1 className='mb-8 text-2xl md:text-3xl font-bold text-white'>
             new era of private,
             <br />
@@ -63,15 +78,15 @@ const HeroSection = () => {
       </div>
 
       {/* Enhanced abstract glowing elements */}
-      <div className='absolute left-0 hidden md:inline-block -top-10'>
+      {/* <div className='absolute left-0 hidden md:inline-block -top-10'>
         <Image
           src='/background-blur-1.png'
           alt='blur effect'
           width={765}
           height={765}
         />
-      </div>
-      <div className='absolute left-1/6 hidden md:inline-block -top-10'>
+      </div> */}
+      {/* <div className='absolute left-1/6 hidden md:inline-block -top-10'>
         <Image
           src='/background-blur-2.png'
           alt='blur effect'
@@ -79,8 +94,8 @@ const HeroSection = () => {
           height={500}
           className='brightness-50'
         />
-      </div>
-      <div className='absolute right-0 -top-20 z-0'>
+      </div> */}
+      {/* <div className='absolute right-0 -top-20 z-0'>
         <Image
           src='/background-blur-3.png'
           alt='blur effect'
@@ -88,7 +103,7 @@ const HeroSection = () => {
           height={200}
           className='brightness-50'
         />
-      </div> 
+      </div> */}
     </div>
   );
 };

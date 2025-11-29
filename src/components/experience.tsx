@@ -17,7 +17,7 @@ export function Experience() {
         </p>
       </div>
 
-      <div className='flex md:grid md:grid-cols-5 mx-auto gap-x-8 max-w-6xl my-24 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory md:snap-none px-4 md:px-0'>
+      <div className='flex md:grid md:grid-cols-5 mx-auto gap-x-10 max-w-300 my-24 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory md:snap-none px-4 md:px-0'>
         {/* Card 1 */}
         <motion.div
           className='relative card pt-16 shrink-0 snap-center md:snap-align-none'
@@ -55,11 +55,10 @@ export function Experience() {
           />
 
           <div
-            className='rounded-2xl relative grid place-items-center p-4 space-y-6 h-80 w-56'
+            className='rounded-3xl relative grid place-items-center p-4 space-y-6 h-80 w-56 bg-linear-to-b from-black to-[#1D4AAE]'
             style={{
-              background: "linear-gradient(to bottom, #000000, #1D4AAE)",
               clipPath:
-                "polygon(0% 0%, 100% 0%, 100% calc(100% - 40px), calc(100% - 40px) 100%, 0% 100%)",
+                "polygon(0% 0%, 100% 0%, 100% calc(100% - 60px), calc(100% - 60px) 100%, 0% 100%)",
             }}
           >
             <div className='font-sans space-y-2 self-end mb-6'>
@@ -109,11 +108,10 @@ export function Experience() {
           />
 
           <div
-            className='rounded-2xl relative grid place-items-center p-4 space-y-6 h-80 w-56'
+            className='rounded-3xl relative grid place-items-center p-4 space-y-6 h-80 w-56 bg-linear-to-b from-black to-[#1D4AAE]'
             style={{
-              background: "linear-gradient(to bottom, #000000, #1D4AAE)",
               clipPath:
-                "polygon(0% 0%, 100% 0%, 100% calc(100% - 40px), calc(100% - 40px) 100%, 0% 100%)",
+                "polygon(0% 0%, 100% 0%, 100% calc(100% - 60px), calc(100% - 60px) 100%, 0% 100%)",
             }}
           >
             <div className='font-sans space-y-2 self-end mb-6'>
@@ -163,11 +161,10 @@ export function Experience() {
           />
 
           <div
-            className='rounded-2xl relative grid place-items-center p-4 space-y-6 h-80 w-56'
+            className='rounded-3xl relative grid place-items-center p-4 space-y-6 h-80 w-56 bg-linear-to-b from-black to-[#1D4AAE]'
             style={{
-              background: "linear-gradient(to bottom, #000000, #1D4AAE)",
               clipPath:
-                "polygon(0% 0%, 100% 0%, 100% calc(100% - 40px), calc(100% - 40px) 100%, 0% 100%)",
+                "polygon(0% 0%, 100% 0%, 100% calc(100% - 60px), calc(100% - 60px) 100%, 0% 100%)",
             }}
           >
             <div className='font-sans space-y-2 self-end mb-6'>
@@ -216,11 +213,10 @@ export function Experience() {
           />
 
           <div
-            className='rounded-2xl relative grid place-items-center p-4 space-y-6 h-80 w-56'
+            className='rounded-3xl relative grid place-items-center p-4 space-y-6 h-80 w-56 bg-linear-to-b from-black to-[#1D4AAE]'
             style={{
-              background: "linear-gradient(to bottom, #000000, #1D4AAE)",
               clipPath:
-                "polygon(0% 0%, 100% 0%, 100% calc(100% - 40px), calc(100% - 40px) 100%, 0% 100%)",
+                "polygon(0% 0%, 100% 0%, 100% calc(100% - 60px), calc(100% - 60px) 100%, 0% 100%)",
             }}
           >
             <div className='font-sans space-y-2 self-end mb-6'>
@@ -270,11 +266,10 @@ export function Experience() {
           />
 
           <div
-            className='rounded-2xl relative grid place-items-center p-4 space-y-6 h-80 w-56'
+            className='rounded-3xl relative grid place-items-center p-4 space-y-6 h-80 w-56 bg-linear-to-b from-black to-[#1D4AAE]'
             style={{
-              background: "linear-gradient(to bottom, #000000, #1D4AAE)",
               clipPath:
-                "polygon(0% 0%, 100% 0%, 100% calc(100% - 40px), calc(100% - 40px) 100%, 0% 100%)",
+                "polygon(0% 0%, 100% 0%, 100% calc(100% - 60px), calc(100% - 60px) 100%, 0% 100%)",
             }}
           >
             <div className='font-sans space-y-2 self-end mb-6'>

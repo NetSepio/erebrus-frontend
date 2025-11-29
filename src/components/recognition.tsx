@@ -22,9 +22,9 @@ export default function Recognition() {
         </div>
         <div className='text-base space-y-4 md:space-y-6 font-sans w-full md:w-auto'>
           <Link
-            href='https://arena.colosseum.org/projects/explore/netsepio?previous=L3Byb2plY3RzL2V4cGxvcmU_c2VlZD1iNGI0ZTYwYzViNGE0NzkwJnNlYXJjaD1uZXRzZXA'    
+            href='https://arena.colosseum.org/projects/explore/netsepio?previous=L3Byb2plY3RzL2V4cGxvcmU_c2VlZD1iNGI0ZTYwYzViNGE0NzkwJnNlYXJjaD1uZXRzZXA'
             target='_blank'
-            className='rounded-full w-full bg-white/10 px-8 py-4 flex items justify-between'
+            className='rounded-full w-full bg-white/10 px-8 py-4 flex items justify-between transition-transform duration-300 hover:translate-x-6'
           >
             <div className='flex gap-12'>
               <Image
@@ -33,14 +33,14 @@ export default function Recognition() {
                 width={65}
                 height={25}
               />
-              <span className='text-sm'>4th Place Solana Radarhack DePIN</span>
+              <span className='text-xs'>4th Place Solana Radarhack DePIN</span>
             </div>
             <ArrowUpRight color='#82AAFF' className='size-6 hidden md:block' />
           </Link>
           <Link
             href='https://netsepio.substack.com/p/erebrus-protocol-by-netsepio-wins'
             target='_blank'
-            className='rounded-full w-full bg-white/10 px-8 py-4 flex items justify-between'
+            className='rounded-full w-full bg-white/10 px-8 py-4 flex items justify-between transition-transform duration-300 hover:translate-x-6'
           >
             <div className='flex gap-12'>
               <Image
@@ -49,7 +49,7 @@ export default function Recognition() {
                 width={65}
                 height={25}
               />
-              <span className='text-sm'>
+              <span className='text-xs'>
                 Grand Prize at ETH SEA Demoday, Bali
               </span>
             </div>
@@ -58,7 +58,7 @@ export default function Recognition() {
           <Link
             href='https://x.com/NetSepio/status/1810538904186982587'
             target='_blank'
-            className='rounded-full w-full bg-white/10 px-8 py-4 flex items justify-between'
+            className='rounded-full w-full bg-white/10 px-8 py-4 flex items justify-between transition-transform duration-300 hover:translate-x-6'
           >
             <div className='flex gap-12'>
               <Image
@@ -67,7 +67,7 @@ export default function Recognition() {
                 width={50}
                 height={25}
               />
-              <span className='text-sm'>
+              <span className='text-xs'>
                 Grand Prize at IVS Crypto Demoday, Japan
               </span>
             </div>
@@ -76,7 +76,7 @@ export default function Recognition() {
           <Link
             href='https://x.com/overmind_xyz/status/1701980625128071375'
             target='_blank'
-            className='rounded-full w-full bg-white/10 px-8 py-4 flex items justify-between'
+            className='rounded-full w-full bg-white/10 px-8 py-4 flex items justify-between transition-transform duration-300 hover:translate-x-6'
           >
             <div className='flex gap-12'>
               <Image
@@ -85,7 +85,7 @@ export default function Recognition() {
                 width={65}
                 height={15}
               />
-              <span className='text-sm'>
+              <span className='text-xs'>
                 Grand Prize at Aptos Hackathon, Singapore
               </span>
             </div>
@@ -94,7 +94,7 @@ export default function Recognition() {
           <Link
             href='https://soonami.io/post/soonami-cohort-4-winners'
             target='_blank'
-            className='rounded-full w-full bg-white/10 px-8 py-4 flex items justify-between'
+            className='rounded-full w-full bg-white/10 px-8 py-4 flex items justify-between transition-transform duration-300 hover:translate-x-6'
           >
             <div className='flex gap-12'>
               <Image
@@ -103,16 +103,16 @@ export default function Recognition() {
                 width={65}
                 height={25}
               />
-              <span className='text-sm'>
+              <span className='text-xs'>
                 On the Fast Track Prize at Soonami Ventureshare
               </span>
             </div>
             <ArrowUpRight color='#82AAFF' className='size-6 hidden md:block' />
           </Link>
           <Link
-            href='https://app.akindo.io/communities/0n1VBlaXvCRPQVDG/products/La4OvOMglhWdMwjp'     
+            href='https://app.akindo.io/communities/0n1VBlaXvCRPQVDG/products/La4OvOMglhWdMwjp'
             target='_blank'
-            className='rounded-full w-full bg-white/10 px-8 py-4 flex items justify-between'
+            className='rounded-full w-full bg-white/10 px-8 py-4 flex items justify-between transition-transform duration-300 hover:translate-x-6'
           >
             <div className='flex gap-12'>
               <Image
@@ -121,7 +121,7 @@ export default function Recognition() {
                 width={65}
                 height={25}
               />
-              <span className='text-sm'>
+              <span className='text-xs'>
                 Several Prizes at Akindo WaveCheck
               </span>
             </div>
