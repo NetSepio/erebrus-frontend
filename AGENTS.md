@@ -87,6 +87,11 @@ src/
 - Every account gets a free Basic workspace at first sign-in (no trials; access comes only from workspace plans)
 - JWT stored in cookies via `js-cookie`
 
+### Server logs
+- In production the Node server writes JSON lines with an ISO `time` (`src/instrumentation.ts` + `src/lib/server-log.ts`); `LOG_FORMAT=text` keeps plain console output. Use `logEvent()` for new server logs and never log tokens, API keys, cookies, emails or bodies.
+- `src/proxy.ts` answers any request with a `Next-Action` header with 404 (the app has no Server Actions) and logs one line instead of Next.js's multi-line error.
+- The gateway proxy logs each call (`request_id`, method, path, status, ms) and sends the same `X-Request-ID` to the gateway.
+
 ### Plans & limits (gateway is the source of truth)
 - The gateway enforces every limit; the webapp only displays `GET /subscriptions` → `usage` and maps error `code`s via `src/lib/gateway-errors.ts`.
 - VPN devices count on public nodes only: Basic 1, Starter 3 (`VPN_DEVICE_LIMIT` 409). Paused devices (`suspended_plan_limit`) still count.

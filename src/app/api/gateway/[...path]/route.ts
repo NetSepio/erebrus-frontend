@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { forwardedClientHeaders, gatewayProxyTarget } from "@/lib/gateway-proxy";
+import { clientIp, logEvent, safeLogValue } from "@/lib/server-log";
 
 function gatewayBase(): string {
   const raw = process.env.NEXT_PUBLIC_GATEWAY_URL?.trim() ?? "https://gateway.erebrus.io/";
@@ -49,7 +50,34 @@ async function proxy(request: NextRequest, pathSegments: string[]) {
     init.duplex = "half";
   }
 
-  const res = await fetch(target.toString(), init as RequestInit);
+  // One ID per proxied call, sent to the gateway (X-Request-ID) so the webapp
+  // line and the gateway's request line can be matched.
+  const requestId = crypto.randomUUID();
+  headers.set("X-Request-ID", requestId);
+  const started = Date.now();
+  const logFields = {
+    request_id: requestId,
+    method: request.method,
+    path: `/${pathSegments.map((s) => safeLogValue(s, 120)).join("/")}`,
+    ip: clientIp(request.headers),
+  };
+
+  let res: Response;
+  try {
+    res = await fetch(target.toString(), init as RequestInit);
+  } catch (err) {
+    logEvent("error", "gateway proxy failed", {
+      ...logFields,
+      ms: Date.now() - started,
+      error: safeLogValue(err instanceof Error ? err.message : String(err), 200),
+    });
+    return NextResponse.json({ error: "Gateway unreachable" }, { status: 502 });
+  }
+  logEvent(res.status >= 500 ? "error" : "info", "gateway proxy", {
+    ...logFields,
+    status: res.status,
+    ms: Date.now() - started,
+  });
   // 204/205/304 are null-body statuses — constructing a Response with a body
   // for them throws, turning successful DELETEs into 500s.
   const nullBody = res.status === 204 || res.status === 205 || res.status === 304;
@@ -58,6 +86,7 @@ async function proxy(request: NextRequest, pathSegments: string[]) {
   // forward the headers a client needs to interpret the payload.
   const outHeaders = new Headers();
   outHeaders.set("Content-Type", res.headers.get("Content-Type") || "application/json");
+  outHeaders.set("X-Request-ID", requestId);
   for (const h of ["Content-Length", "Content-Disposition", "ETag", "Cache-Control", "Content-Range", "Accept-Ranges", "Content-Security-Policy", "X-Content-Type-Options"]) {
     const v = res.headers.get(h);
     if (v) outHeaders.set(h, v);
