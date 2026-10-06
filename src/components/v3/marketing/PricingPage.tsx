@@ -528,10 +528,27 @@ export function PricingPageContent() {
     try {
       const current = await fetchOrgBilling(orgId, controller.signal);
       if (controller.signal.aborted) return;
-      if (!canCheckout(current.plan_id, planId) || (current.checkout && ["ready", "creating", "unknown"].includes(current.checkout.status))) {
+      const openCheckout =
+        current.checkout && ["ready", "creating", "unknown"].includes(current.checkout.status) ? current.checkout : null;
+      if (!canCheckout(current.plan_id, planId)) {
         setRecoveryOrgId(orgId);
-        toast.message("Review the existing subscription or checkout in workspace billing.");
+        toast.message("This workspace already has an active plan.", {
+          action: { label: "Open billing", onClick: () => router.push(`/workspace/${orgId}?tab=billing`) },
+        });
         return;
+      }
+      if (openCheckout) {
+        const openUrl = safeCheckoutUrl(openCheckout.checkout_url);
+        if (openCheckout.status === "ready" && openUrl) {
+          setRecoveryOrgId(orgId);
+          toast.message("You have an unfinished checkout for this workspace.", {
+            action: { label: "Resume checkout", onClick: () => window.location.assign(openUrl) },
+          });
+          return;
+        }
+        // Stale attempt with no usable link — the gateway replaces it with a
+        // fresh session once it confirms nothing was paid.
+        toast.message("You have an unfinished checkout for this workspace; starting a new one…");
       }
       // One key per attempt, kept in component state only.
       const idempotencyKey = createIdempotencyKey();
