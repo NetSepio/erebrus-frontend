@@ -3,7 +3,27 @@ import {
   DEFAULT_DESKTOP_AUTH_REDIRECT_URIS,
   buildAuthCallbackUrl,
   getAllowedDesktopAuthRedirectUris,
+  authErrorMessage,
 } from "./gateway-auth";
+
+describe("authErrorMessage", () => {
+  it.each([4001, "4001", "ACTION_REJECTED"])("explains a rejected signature (%s)", (code) => {
+    expect(authErrorMessage({ code })).toContain("cancelled");
+  });
+
+  it("distinguishes routing failures from a rejected signature", () => {
+    expect(authErrorMessage({ isAxiosError: true, response: { status: 404 } })).toContain("unavailable");
+  });
+
+  it("does not expose arbitrary provider response bodies or error messages", () => {
+    expect(authErrorMessage(new Error("sensitive provider details"))).not.toContain("sensitive");
+  });
+
+  it("explains throttling and network failures", () => {
+    expect(authErrorMessage({ isAxiosError: true, response: { status: 429 } })).toContain("wait");
+    expect(authErrorMessage({ isAxiosError: true })).toContain("connection");
+  });
+});
 
 const originalEnv = process.env.NEXT_PUBLIC_ALLOWED_DESKTOP_AUTH_REDIRECT_URIS;
 

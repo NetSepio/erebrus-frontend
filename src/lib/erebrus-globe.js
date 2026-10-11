@@ -40,6 +40,8 @@ function setupCanvas(canvas) {
 
 export function createNodeGlobe(canvas, opts = {}) {
   const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Canvas rendering is unavailable');
+  const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
   let nodes = opts.nodes ? opts.nodes.slice() : DEFAULT_NODES.slice();
   let selectedId = opts.selectedId || (nodes[0] && nodes[0].id);
   const getSelectedId = opts.getSelectedId || (() => selectedId);
@@ -77,7 +79,8 @@ export function createNodeGlobe(canvas, opts = {}) {
 
   const handleClick = (ev) => {
     const hit = pickNode(ev);
-    if (hit) { selectedId = hit.id; onSelect && onSelect(hit.id); }
+    if (hit) { selectedId = hit.id; if (onSelect) onSelect(hit.id); }
+    if (motionPreference.matches) redraw();
   };
   const handleMove = (ev) => {
     const hit = pickNode(ev);
@@ -85,18 +88,19 @@ export function createNodeGlobe(canvas, opts = {}) {
     canvas.style.cursor = id ? 'pointer' : 'default';
     // Pause spin while the pointer rests on a node so it's easy to click.
     autoRotate = !id;
-    if (id !== hoveredId) { hoveredId = id; onHover && onHover(id); }
+    if (id !== hoveredId) { hoveredId = id; if (onHover) onHover(id); }
   };
   const handleLeave = () => {
     autoRotate = true;
-    if (hoveredId !== null) { hoveredId = null; onHover && onHover(null); }
+    if (hoveredId !== null) { hoveredId = null; if (onHover) onHover(null); }
   };
   canvas.addEventListener('click', handleClick);
   canvas.addEventListener('mousemove', handleMove);
   canvas.addEventListener('mouseleave', handleLeave);
 
   const draw = () => {
-    if (!alive) return;
+    raf = 0;
+    if (!alive || document.visibilityState === 'hidden') return;
     const W = canvas.width, H = canvas.height;
     ctx.clearRect(0, 0, W, H);
     const cx = W / 2, cy = H / 2, R = Math.min(W, H) * radiusScale;
@@ -241,19 +245,31 @@ export function createNodeGlobe(canvas, opts = {}) {
       }
     });
 
-    if (autoRotate) rot += 0.12;
-    raf = requestAnimationFrame(draw);
+    if (!motionPreference.matches) {
+      if (autoRotate) rot += 0.12;
+      raf = requestAnimationFrame(draw);
+    }
   };
 
+  const redraw = () => {
+    if (raf) cancelAnimationFrame(raf);
+    if (alive) raf = requestAnimationFrame(draw);
+  };
+  document.addEventListener('visibilitychange', redraw);
+  motionPreference.addEventListener('change', redraw);
+  window.addEventListener('resize', redraw);
   draw();
 
   return {
-    setNodes(arr) { nodes = arr.slice(); },
-    setSelected(id) { selectedId = id; },
+    setNodes(arr) { nodes = arr.slice(); redraw(); },
+    setSelected(id) { selectedId = id; redraw(); },
     destroy() {
       alive = false;
       if (raf) cancelAnimationFrame(raf);
       window.removeEventListener('resize', resize);
+      window.removeEventListener('resize', redraw);
+      document.removeEventListener('visibilitychange', redraw);
+      motionPreference.removeEventListener('change', redraw);
       canvas.removeEventListener('click', handleClick);
       canvas.removeEventListener('mousemove', handleMove);
       canvas.removeEventListener('mouseleave', handleLeave);

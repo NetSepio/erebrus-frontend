@@ -9,7 +9,6 @@ import {
   fetchFirewallStatus,
   restartFirewall,
   syncFirewall,
-  GatewayApiError,
 } from "@/lib/gateway/client";
 import { ShieldCredentialsCard } from "@/components/v3/workspace/ShieldCredentialsCard";
 import type { GatewayFirewallRule, GatewayOrgNode } from "@/lib/gateway/types";

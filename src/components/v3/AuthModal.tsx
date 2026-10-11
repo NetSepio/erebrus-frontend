@@ -14,10 +14,11 @@ import Image from "next/image";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useAppKit } from "@reown/appkit/react";
+import { useAppKit, walletConfigured, walletConfigurationMessage } from "@/context/appkit";
 import { useWalletAuth, setWebSession } from "@/context/appkit";
 import { useAppleSignIn, useGoogleSignIn, type AppleCredential } from "@/hooks/use-social-login";
 import {
@@ -37,15 +38,21 @@ import { AccentButton, ActionButton } from "@/components/v3/ui";
 import { Input } from "@/components/ui/input";
 import { Loader2, Mail } from "lucide-react";
 import { toast } from "sonner";
+import { safeAuthReturnPath } from "@/lib/auth-session";
 
 function socialLoginErrorMessage(provider: "google" | "apple", error: unknown): string {
   if (axios.isAxiosError(error)) {
     const body = error.response?.data as { error?: string } | undefined;
     if (body?.error) return body.error;
     if (error.response?.status === 503) {
+      if (process.env.NODE_ENV === "development") {
+        return provider === "google"
+          ? "Google sign-in is not enabled on the gateway — add this web client ID to GOOGLE_CLIENT_IDS"
+          : "Apple sign-in is not enabled on the gateway — add your client ID to APPLE_CLIENT_IDS";
+      }
       return provider === "google"
-        ? "Google sign-in is not enabled on the gateway — add this web client ID to GOOGLE_CLIENT_IDS"
-        : "Apple sign-in is not enabled on the gateway — add your client ID to APPLE_CLIENT_IDS";
+        ? "Google sign-in is temporarily unavailable"
+        : "Apple sign-in is temporarily unavailable";
     }
   }
   return provider === "google" ? "Google sign-in failed — try again" : "Apple sign-in failed — try again";
@@ -56,9 +63,11 @@ const AuthModalContext = createContext<{ open: () => void }>({ open: () => {} })
 export function AuthModalProvider({
   children,
   autoOpen = false,
+  returnTo = "/dashboard",
 }: {
   children: ReactNode;
   autoOpen?: boolean;
+  returnTo?: string;
 }) {
   const [visible, setVisible] = useState(autoOpen);
   const router = useRouter();
@@ -107,14 +116,14 @@ export function AuthModalProvider({
             : await appleLogin(idToken, nonce, authorizationCode);
         setWebSession(session.token, session.userId, provider);
         setVisible(false);
-        router.push("/dashboard");
+        router.push(safeAuthReturnPath(returnTo));
       } catch (error) {
         toast.error(socialLoginErrorMessage(provider, error));
       } finally {
         setSocialBusy(false);
       }
     },
-    [router]
+    [router, returnTo]
   );
 
   const { ready: googleReady, signIn: signInWithGoogle, btnRef: googleBtnRef } =
@@ -135,9 +144,9 @@ export function AuthModalProvider({
     const ok = await authenticate();
     if (ok) {
       setVisible(false);
-      router.push("/dashboard");
+      router.push(safeAuthReturnPath(returnTo));
     }
-  }, [isConnected, authenticate, openAppKit, router]);
+  }, [isConnected, authenticate, openAppKit, router, returnTo]);
 
   const sendCode = useCallback(async () => {
     const addr = email.trim();
@@ -160,27 +169,27 @@ export function AuthModalProvider({
       const session = await emailLoginVerify(email.trim(), code.trim());
       setWebSession(session.token, session.userId, "email");
       setVisible(false);
-      router.push("/dashboard");
+      router.push(safeAuthReturnPath(returnTo));
     } catch {
       toast.error("Invalid or expired code");
     } finally {
       setEmailBusy(false);
     }
-  }, [email, code, router]);
+  }, [email, code, router, returnTo]);
 
   const open = useCallback(() => {
     if (isAuthenticated) {
-      router.push("/dashboard");
+      router.push(safeAuthReturnPath(returnTo));
       return;
     }
     setVisible(true);
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, returnTo]);
 
   return (
     <AuthModalContext.Provider value={{ open }}>
       {children}
       <Dialog open={visible} onOpenChange={setVisible}>
-        <DialogContent className="max-w-md border-white/10 bg-[var(--elevated)] text-[var(--text)]">
+        <DialogContent className="max-h-[90dvh] max-w-md overflow-y-auto border-white/10 bg-[var(--elevated)] text-[var(--text)]">
           <DialogHeader>
             <div className="flex items-center gap-3 mb-2">
               <Image
@@ -195,12 +204,13 @@ export function AuthModalProvider({
               </DialogTitle>
             </div>
           </DialogHeader>
-          <p className="text-sm text-[var(--text-2)] leading-relaxed">
-            Sign in with your wallet, email, or a social account — one Erebrus account, however
-            you connect.
-          </p>
+          <DialogDescription className="text-sm text-[var(--text-2)] leading-relaxed">
+            Choose an available sign-in method to access your Erebrus account.
+            Wallet sign-in asks for a message signature, not a payment.
+          </DialogDescription>
+          {!walletConfigured && <p role="status" className="text-sm text-[var(--text-2)]">{walletConfigurationMessage}</p>}
           <div className="mt-4 flex flex-col gap-3">
-            <AccentButton className="w-full" onClick={handleLaunch} disabled={isAuthenticating}>
+            <AccentButton className="w-full" onClick={handleLaunch} disabled={!walletConfigured || isAuthenticating}>
               {isAuthenticating ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -327,6 +337,7 @@ export function AuthModalProvider({
             ) : (
               <div className="flex flex-col gap-1">
                 <Input
+                  aria-label="Invite code (optional)"
                   placeholder="Invite code (optional)"
                   value={invite}
                   onChange={(e) => updateInvite(e.target.value)}
@@ -345,7 +356,7 @@ export function AuthModalProvider({
                 aria-hidden
               />
             )}
-            {!emailEnabled && (
+            {!emailEnabled && process.env.NODE_ENV === "development" && (
               <p className="text-center font-mono text-[10px] text-[var(--text-3)]">
                 Email sign-in requires RESEND_API_KEY on the gateway
               </p>

@@ -1,4 +1,4 @@
-import { getCurrentAuthToken } from "@/context/appkit";
+import { getCurrentAuthToken, invalidateSession } from "@/lib/auth-session";
 import { computeOrgStats } from "./org-stats";
 import {
   normalizeActivity,
@@ -10,6 +10,9 @@ import {
   normalizeProfile,
 } from "./normalize";
 import type {
+  GatewayAccountSummary,
+  GatewayAccountUsage,
+  GatewayNotification,
   GatewayActivity,
   GatewayAdminNode,
   GatewayAdminOrg,
@@ -57,6 +60,10 @@ import type {
   RewardAccess,
   RewardApplicationInput,
   RewardOperatorApplication,
+  GatewayBillingPlan,
+  GatewayBillingStatus,
+  GatewayCheckoutAttempt,
+  GatewayCancelResult,
 } from "./types";
 
 const CLIENT_HEADER = "webapp";
@@ -108,10 +115,8 @@ async function gatewayFetch<T>(
   headers.set("Accept", "application/json");
   headers.set("X-Erebrus-Client", CLIENT_HEADER);
 
-  if (auth) {
-    const token = getCurrentAuthToken();
-    if (token) headers.set("Authorization", `Bearer ${token}`);
-  }
+  const token = auth ? getCurrentAuthToken() : null;
+  if (token) headers.set("Authorization", `Bearer ${token}`);
   if (init.body && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
@@ -119,11 +124,13 @@ async function gatewayFetch<T>(
   const res = await fetch(buildUrl(path, params), { ...init, headers, cache: "no-store" });
 
   if (!res.ok) {
+    if (res.status === 401 && token) invalidateSession(token);
+    const text = await res.text();
     let body: unknown;
     try {
-      body = await res.json();
+      body = JSON.parse(text);
     } catch {
-      body = await res.text();
+      body = text;
     }
     const message =
       typeof body === "object" && body !== null && "error" in body
@@ -139,8 +146,8 @@ async function gatewayFetch<T>(
 
 // ── Nodes ──────────────────────────────────────────────────────────────────
 
-export async function fetchNodes(params?: { region?: string; status?: string }): Promise<GatewayNode[]> {
-  const data = await gatewayFetch<unknown>("nodes", { params, auth: false });
+export async function fetchNodes(params?: { region?: string; status?: string }, signal?: AbortSignal): Promise<GatewayNode[]> {
+  const data = await gatewayFetch<unknown>("nodes", { params, auth: false, signal });
   return asArray(data, normalizeNode);
 }
 
@@ -177,6 +184,26 @@ export async function provisionVpnClient(body: {
 
 export async function deleteVpnClient(id: string): Promise<void> {
   await gatewayFetch(`vpn/clients/${id}`, { method: "DELETE" });
+}
+
+export async function renameVpnClient(id: string, name: string): Promise<GatewayVpnClient> {
+  const data = await gatewayFetch<Record<string, unknown>>(`vpn/clients/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ name }),
+  });
+  return normalizeClient(data);
+}
+
+/** Plan & usage summary (display only; the gateway enforces limits). */
+export async function fetchAccountSummary(signal?: AbortSignal): Promise<GatewayAccountSummary> {
+  const data = await gatewayFetch<Record<string, unknown>>("subscriptions", { signal });
+  const usage = data?.usage && typeof data.usage === "object" ? (data.usage as GatewayAccountUsage) : null;
+  return { plan_id: String(data?.plan_id ?? "personal.basic"), usage };
+}
+
+export async function fetchAccountNotifications(): Promise<GatewayNotification[]> {
+  const data = await gatewayFetch<{ notifications?: GatewayNotification[] }>("account/notifications");
+  return Array.isArray(data?.notifications) ? data.notifications : [];
 }
 
 export async function fetchVpnClientConfig(id: string): Promise<{ config: string; bundle: Record<string, unknown> }> {
@@ -594,6 +621,42 @@ export async function revokeOrgApiKey(orgId: string, keyId: string): Promise<voi
   await gatewayFetch(`orgs/${orgId}/apikeys/${keyId}`, { method: "DELETE" });
 }
 
+// ── Billing (Dodo Payments via gateway — never call Dodo from the browser) ──
+
+/** Public plan catalog with per-interval prices. */
+export async function fetchBillingPlans(): Promise<GatewayBillingPlan[]> {
+  const data = await gatewayFetch<unknown>("subscriptions/plans", { auth: false });
+  return Array.isArray(data) ? (data as GatewayBillingPlan[]) : [];
+}
+
+export async function fetchOrgBilling(orgId: string, signal?: AbortSignal): Promise<GatewayBillingStatus> {
+  return gatewayFetch(`orgs/${orgId}/billing`, { signal });
+}
+
+/**
+ * Creates (or resumes, via `idempotency_key`) a checkout attempt for the org.
+ * On `status: "ready"` the response carries `checkout_url` — redirect the
+ * browser there; all payment state is confirmed server-side by the gateway.
+ */
+export async function startOrgBillingCheckout(
+  orgId: string,
+  body: {
+    plan_id: string;
+    billing_interval: "monthly" | "yearly";
+    idempotency_key: string;
+  }
+): Promise<GatewayCheckoutAttempt> {
+  return gatewayFetch(`orgs/${orgId}/billing/checkout`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+/** Schedules cancellation at the next billing date; access runs until `paid_access_until`. */
+export async function requestOrgBillingCancel(orgId: string): Promise<GatewayCancelResult> {
+  return gatewayFetch(`orgs/${orgId}/billing/cancel`, { method: "POST" });
+}
+
 // ── Operator ───────────────────────────────────────────────────────────────
 
 /**
@@ -608,21 +671,10 @@ export async function fetchOrgVpnNodes(): Promise<GatewayNode[]> {
 
 export async function fetchOperatorNodes(): Promise<GatewayOperatorNode[]> {
   const data = await gatewayFetch<unknown>("operator/nodes");
-  if (!Array.isArray(data)) return [];
-  return data.map((n) => {
-    const raw = n as Record<string, unknown>;
-    return {
-      id: String(raw.id ?? raw.node_id ?? ""),
-      did: String(raw.did ?? ""),
-      region: String(raw.region ?? ""),
-      name: raw.name as string | undefined,
-      status: String(raw.status ?? "offline"),
-      access_mode: String(raw.access_mode ?? "public"),
-      org_id: raw.org_id as string | undefined,
-      uptime_pct: Number(raw.uptime_pct ?? 0),
-      wg_peers: Number(raw.wg_peers ?? 0),
-    };
-  });
+  // operator/nodes returns the same node shape as discovery; normalizeNode
+  // derives geo, status, load, peers, wallet, and org from the gateway's
+  // nodeOperatorView response.
+  return asArray(data, (raw) => normalizeNode(raw) as GatewayOperatorNode);
 }
 
 export async function fetchOperatorNodeMetrics(
@@ -1167,13 +1219,6 @@ export async function fetchAdminUserOrgs(id: string): Promise<GatewayAdminOrg[]>
       created_at: o.created_at,
       updated_at: o.updated_at,
     };
-  });
-}
-
-export async function setAdminUserPlan(id: string, planId: string): Promise<void> {
-  await gatewayFetch(`admin/users/${id}/plan`, {
-    method: "POST",
-    body: JSON.stringify({ plan_id: planId }),
   });
 }
 

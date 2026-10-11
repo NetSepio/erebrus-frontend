@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/context/appkit", () => ({ getCurrentAuthToken: () => "test-token" }));
+vi.mock("@/lib/auth-session", () => ({ getCurrentAuthToken: () => "test-token", invalidateSession: vi.fn() }));
 
 import {
   approveRewardWithdrawal,

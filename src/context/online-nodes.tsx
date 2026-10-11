@@ -41,5 +41,5 @@ export function useOnlineNodes(
     return [...ctx.nodes].sort(sortNodesForPicker);
   }, [ctx.nodes, sortByLoad]);
 
-  return { nodes, loading: ctx.loading, refresh: ctx.refresh };
+  return { nodes, loading: ctx.loading, error: ctx.error, refresh: ctx.refresh };
 }

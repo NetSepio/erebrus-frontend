@@ -32,31 +32,44 @@ export function Card({
   );
 }
 
+type AccentButtonVariant = "primary" | "ghost" | "outline" | "danger";
+
+const accentButtonStyles: Record<AccentButtonVariant, string> = {
+  primary:
+    "bg-[var(--accent)] text-[var(--on-accent)] hover:bg-[var(--accent-hi)] shadow-[0_10px_34px_rgba(255,107,53,0.32)]",
+  ghost:
+    "border border-[var(--accent)]/50 bg-[var(--accent)]/14 text-[var(--accent-hi)] hover:bg-[var(--accent)]/22 hover:border-[var(--accent)]/65",
+  outline:
+    "border border-[var(--accent)]/55 bg-[var(--accent)]/12 text-[var(--accent-hi)] hover:bg-[var(--accent)]/20",
+  danger:
+    "border border-[var(--danger)]/35 bg-[var(--danger)]/10 text-[var(--danger)] hover:bg-[var(--danger)]/16",
+};
+
+/** AccentButton look for non-button elements (Link, a). */
+export function accentButtonClass(
+  variant: AccentButtonVariant = "primary",
+  className?: string
+) {
+  return cn(
+    "inline-flex min-h-11 items-center justify-center gap-2 rounded-[13px] px-5 py-3 text-sm font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]",
+    accentButtonStyles[variant],
+    className
+  );
+}
+
 export function AccentButton({
   children,
   className,
   variant = "primary",
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "primary" | "ghost" | "outline" | "danger";
+  variant?: AccentButtonVariant;
 }) {
-  const styles = {
-    primary:
-      "bg-[var(--accent)] text-[var(--on-accent)] hover:bg-[var(--accent-hi)] shadow-[0_10px_34px_rgba(255,107,53,0.32)]",
-    ghost:
-      "border border-[var(--accent)]/50 bg-[var(--accent)]/14 text-[var(--accent-hi)] hover:bg-[var(--accent)]/22 hover:border-[var(--accent)]/65",
-    outline:
-      "border border-[var(--accent)]/55 bg-[var(--accent)]/12 text-[var(--accent-hi)] hover:bg-[var(--accent)]/20",
-    danger:
-      "border border-[var(--danger)]/35 bg-[var(--danger)]/10 text-[var(--danger)] hover:bg-[var(--danger)]/16",
-  };
-
   return (
     <button
-      className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-[13px] px-5 py-3 text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed",
-        styles[variant],
-        className
+      className={accentButtonClass(
+        variant,
+        cn("disabled:cursor-not-allowed disabled:opacity-50", className)
       )}
       {...props}
     >
@@ -93,6 +106,29 @@ export function MonoLabel({ children, className }: { children: ReactNode; classN
   );
 }
 
+type ActionButtonVariant = "accent" | "neutral" | "danger";
+
+const actionButtonStyles: Record<ActionButtonVariant, string> = {
+  accent:
+    "border border-[var(--accent)]/30 bg-[var(--accent)]/14 text-[var(--accent-hi)] hover:bg-[var(--accent)]/22",
+  neutral:
+    "border border-white/[0.12] bg-white/[0.05] text-[var(--text)] hover:bg-white/[0.09]",
+  danger:
+    "border border-[var(--danger)]/30 bg-[var(--danger)]/10 text-[var(--danger)] hover:bg-[var(--danger)]/16",
+};
+
+/** ActionButton look for non-button elements (Link, a). */
+export function actionButtonClass(
+  variant: ActionButtonVariant = "accent",
+  className?: string
+) {
+  return cn(
+    "inline-flex min-h-11 items-center justify-center gap-1.5 rounded-[10px] px-3 py-1.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)] sm:min-h-9",
+    actionButtonStyles[variant],
+    className
+  );
+}
+
 /** Always-visible secondary control — not hover-dependent. */
 export function ActionButton({
   children,
@@ -100,24 +136,14 @@ export function ActionButton({
   variant = "accent",
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "accent" | "neutral" | "danger";
+  variant?: ActionButtonVariant;
 }) {
-  const styles = {
-    accent:
-      "border border-[var(--accent)]/30 bg-[var(--accent)]/14 text-[var(--accent-hi)] hover:bg-[var(--accent)]/22",
-    neutral:
-      "border border-white/[0.12] bg-white/[0.05] text-[var(--text)] hover:bg-white/[0.09]",
-    danger:
-      "border border-[var(--danger)]/30 bg-[var(--danger)]/10 text-[var(--danger)] hover:bg-[var(--danger)]/16",
-  };
-
   return (
     <button
       type="button"
-      className={cn(
-        "inline-flex items-center justify-center gap-1.5 rounded-[10px] px-3 py-1.5 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50",
-        styles[variant],
-        className
+      className={actionButtonClass(
+        variant,
+        cn("disabled:cursor-not-allowed disabled:opacity-50", className)
       )}
       {...props}
     >

@@ -87,6 +87,24 @@ describe("resolveEffectiveEntitlement", () => {
       ]).tier
     ).toBe("pro");
   });
+
+  it("labels the plan from the winning org's plan id", () => {
+    const result = resolveEffectiveEntitlement([
+      org({ id: "a", plan: "business.scale", role: "owner" }),
+    ]);
+    expect(result.planLabel).toBe("Business · Scale");
+  });
+
+  it("falls back to the tier label when the winning org has no plan id", () => {
+    const result = resolveEffectiveEntitlement([
+      org({ id: "a", seat_tier: "pro", has_paid_seat: true }),
+    ]);
+    expect(result.planLabel).toBe("Pro");
+  });
+
+  it("labels an org-less entitlement as Free", () => {
+    expect(resolveEffectiveEntitlement([]).planLabel).toBe("Free");
+  });
 });
 
 describe("tier helpers", () => {

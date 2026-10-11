@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { useAppKit } from "@reown/appkit/react";
+import { useAppKit } from "@/context/appkit";
 import { Loader2, Mail } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -252,10 +253,10 @@ export function OrgJoinPanel({ slug }: { slug: string }) {
               Join {preview.name}
             </DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-[var(--text-2)] leading-relaxed">
+          <DialogDescription className="text-sm text-[var(--text-2)] leading-relaxed">
             Sign in with the email or wallet that received this invitation. After verification,
             you&apos;ll be added to the workspace automatically.
-          </p>
+          </DialogDescription>
           <div className="mt-4 flex flex-col gap-3">
             <AccentButton className="w-full" onClick={handleWalletSignIn} disabled={isAuthenticating || joining}>
               {isAuthenticating ? (

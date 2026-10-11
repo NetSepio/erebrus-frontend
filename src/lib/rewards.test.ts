@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canCreateClaim, capacityModeDescription, compareDecimalStrings, publicLeaderboardRow, withdrawalStatusLabel, withdrawalXpLabel } from "./rewards";
+import { canCreateClaim, capacityModeDescription, compareDecimalStrings, createIdempotencyKey, publicLeaderboardRow, withdrawalStatusLabel, withdrawalXpLabel } from "./rewards";
 import type { OperatorRewardSummary } from "./gateway/types";
 
 const summary = (overrides: Partial<OperatorRewardSummary> = {}): OperatorRewardSummary => ({
@@ -61,5 +61,10 @@ describe("Genesis reward claim states", () => {
   it("distinguishes persistent and opportunistic AI capacity", () => {
     expect(capacityModeDescription("persistent")).toContain("remain available");
     expect(capacityModeDescription("opportunistic")).toContain("while online");
+  });
+
+  it("generates a valid UUID for reward withdrawal idempotency", () => {
+    const key = createIdempotencyKey();
+    expect(key).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
   });
 });

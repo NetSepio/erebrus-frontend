@@ -3,8 +3,8 @@
 import React, { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
+import { useAppKit } from "@/context/appkit";
 import {
-  useAppKit,
   useAppKitAccount,
   useAppKitNetworkCore,
   useAppKitProvider,

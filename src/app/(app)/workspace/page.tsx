@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   createOrg,
@@ -11,10 +11,12 @@ import {
 import type { GatewayOrg, GatewayUserOrgInvite } from "@/lib/gateway/types";
 import { inviteOrgTitle } from "@/lib/invite-notifications";
 import { memberRoleLabel } from "@/lib/gateway/member-labels";
+import { orgPlanLabel } from "@/lib/org-plans";
 import { AccentButton, ActionButton, Card } from "@/components/v3/ui";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -38,6 +40,7 @@ export default function WorkspacePage() {
   const [name, setName] = useState("");
   const [kind, setKind] = useState<GatewayOrg["kind"]>("team");
   const [creating, setCreating] = useState(false);
+  const createInFlight = useRef(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const load = () => {
@@ -65,11 +68,13 @@ export default function WorkspacePage() {
   }, []);
 
   const handleCreate = async () => {
+    if (createInFlight.current) return;
     const trimmed = name.trim();
     if (!trimmed) {
       toast.error("Enter a workspace name");
       return;
     }
+    createInFlight.current = true;
     setCreating(true);
     try {
       const slug = trimmed
@@ -88,6 +93,7 @@ export default function WorkspacePage() {
           : "Failed to create workspace";
       toast.error(message);
     } finally {
+      createInFlight.current = false;
       setCreating(false);
     }
   };
@@ -103,13 +109,14 @@ export default function WorkspacePage() {
           Workspaces group the nodes you run. Open one to manage its nodes, members and
           enrollment. Operators work inside a workspace.
         </p>
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={(value) => { if (!createInFlight.current) setOpen(value); }}>
           <DialogTrigger asChild>
             <AccentButton className="whitespace-nowrap">+ New workspace</AccentButton>
           </DialogTrigger>
           <DialogContent className="border-white/10 bg-[var(--elevated)] text-[var(--text)]">
             <DialogHeader>
               <DialogTitle>Create workspace</DialogTitle>
+              <DialogDescription>Name your workspace to organize its members, nodes, and billing.</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
@@ -150,7 +157,8 @@ export default function WorkspacePage() {
 
       {loadError && (
         <Card className="mb-4 border-[var(--danger)]/30 bg-[var(--danger)]/5 p-4 text-sm text-[var(--danger)]">
-          {loadError}
+          <p role="alert">{loadError}</p>
+          <ActionButton variant="neutral" className="mt-3" onClick={() => { setLoading(true); load(); }}>Retry loading workspaces</ActionButton>
         </Card>
       )}
 
@@ -194,7 +202,7 @@ export default function WorkspacePage() {
                 />
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-lg font-semibold">{org.name}</div>
-                  <div className="text-xs capitalize text-[var(--text-3)]">{org.kind}</div>
+                  <div className="text-xs capitalize text-[var(--text-3)]">{orgPlanLabel(org.plan ?? org.kind)}</div>
                 </div>
                 {org.role && (
                   <span className="rounded-md bg-white/[0.06] px-2 py-1 font-mono text-[10px] uppercase text-[var(--text-2)]">
@@ -224,7 +232,7 @@ export default function WorkspacePage() {
         ))}
       </div>
 
-      {orgs.filter((org) => org.id).length === 0 && (
+      {!loadError && orgs.filter((org) => org.id).length === 0 && (
         <Card className="p-10 text-center text-[var(--text-2)]">
           No workspaces yet. Create one to start operating nodes.
         </Card>

@@ -1,48 +1,42 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { fetchOrgs } from "@/lib/gateway/client";
-import type { GatewayOrg } from "@/lib/gateway/types";
-import {
-  resolveEffectiveEntitlement,
-  tierLabel,
-  deviceLimitForTier,
-} from "@/lib/entitlements";
+import { useWorkspace } from "@/context/workspace";
+import { deviceLimitForTier } from "@/lib/entitlements";
+import { formatStorageBytes } from "@/lib/gateway-errors";
 import { orgPlanLabel } from "@/lib/org-plans";
-import { AccentButton, Card, Eyebrow } from "@/components/v3/ui";
+import { AccentButton, ActionButton, Card, Eyebrow, MonoLabel } from "@/components/v3/ui";
 
+// Only what the gateway actually provides today (Starter launch scope).
 const benefits = [
-  "Full network access across eligible public nodes",
-  "WireGuard + stealth protocol bundles",
-  "Multiple device configs",
-  "Workspace operator tools",
-  "Local Drop transfer + optional storage",
-  "XP rewards and rank perks",
+  "VPN devices on public nodes (Basic 1, Starter 3)",
+  "WireGuard configs you can import on any device",
+  "Private workspace nodes for your members",
+  "Drop storage on public nodes (Basic 500 MB, Starter 1 GB)",
+  "Gateway API keys on Starter",
 ];
 
 export default function SubscribePage() {
-  const [orgs, setOrgs] = useState<GatewayOrg[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchOrgs()
-      .then(setOrgs)
-      .catch(() => setOrgs([]))
-      .finally(() => setLoading(false));
-  }, []);
-
-  const entitlement = resolveEffectiveEntitlement(orgs);
+  const { orgs, entitlement, usage, loading, error, refresh } = useWorkspace();
   const isFree = entitlement.tier === "free";
+  const deviceLimit = usage?.vpn.client_limit ?? deviceLimitForTier(entitlement.tier);
 
-  if (loading) {
+  if (loading && orgs.length === 0) {
     return <div className="py-20 text-center text-[var(--text-2)]">Loading…</div>;
+  }
+  if (error && orgs.length === 0) {
+    return (
+      <Card className="p-6 text-sm">
+        <p role="alert" className="text-[var(--danger)]">{error}</p>
+        <ActionButton variant="neutral" className="mt-3" onClick={() => void refresh()}>Retry</ActionButton>
+      </Card>
+    );
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
+    <div className="grid gap-6 lg:grid-cols-[1fr_1.15fr]">
       <Card
-        className="p-8 text-center"
+        className="flex flex-col items-center justify-center p-6 text-center md:p-7"
         style={{
           borderColor: "rgba(255,107,53,0.25)",
           background:
@@ -50,16 +44,16 @@ export default function SubscribePage() {
         }}
       >
         <div
-          className="mx-auto mb-6 flex h-[150px] w-[150px] items-center justify-center rounded-[28px] shadow-[0_24px_60px_rgba(255,107,53,0.4)]"
+          className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-[22px] shadow-[0_18px_44px_rgba(255,107,53,0.4)]"
           style={{ background: "linear-gradient(150deg, #FF7E44, #E0531F)" }}
         >
-          <div className="h-14 w-14 rotate-[-45deg] rounded-2xl border-[6px] border-[var(--on-accent)] border-r-transparent" />
+          <div className="h-8 w-8 rotate-[-45deg] rounded-[10px] border-4 border-[var(--on-accent)] border-r-transparent" />
         </div>
         <Eyebrow>Organization plans</Eyebrow>
         <h2 className="mt-2 text-2xl font-bold tracking-tight">Access follows your workspace</h2>
         <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-[var(--text-2)]">
-          Your tier is set by the organizations you belong to and the seats you hold. Upgrade a
-          workspace plan or add a paid seat to unlock more.
+          Your tier is set by the organizations you belong to. Upgrade a workspace plan to unlock
+          more.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Link href="/pricing">
@@ -77,9 +71,10 @@ export default function SubscribePage() {
             Current entitlement
           </div>
           <div className="mt-3 flex items-center justify-between">
-            <span className="text-lg font-semibold">{tierLabel(entitlement.tier)}</span>
+            <span className="text-lg font-semibold">{entitlement.planLabel}</span>
             <span className="font-mono text-xs text-[var(--text-3)]">
-              {deviceLimitForTier(entitlement.tier)} devices
+              {deviceLimit} VPN device{deviceLimit === 1 ? "" : "s"}
+              {usage ? ` · ${formatStorageBytes(usage.drop.quota_bytes)} Drop` : ""}
             </span>
           </div>
           <p className="mt-2 text-xs text-[var(--text-3)]">
@@ -90,12 +85,15 @@ export default function SubscribePage() {
         </Card>
 
         <Card className="p-5">
-          {benefits.map((b) => (
-            <div key={b} className="flex items-center gap-3 py-2">
-              <span className="text-[var(--success)]">✓</span>
-              <span className="text-sm text-[var(--text-2)]">{b}</span>
-            </div>
-          ))}
+          <MonoLabel>What&apos;s included</MonoLabel>
+          <div className="mt-1">
+            {benefits.map((b) => (
+              <div key={b} className="flex items-center gap-3 py-2">
+                <span className="text-[var(--success)]">✓</span>
+                <span className="text-sm text-[var(--text-2)]">{b}</span>
+              </div>
+            ))}
+          </div>
         </Card>
 
         <Card className="p-5">
@@ -106,7 +104,7 @@ export default function SubscribePage() {
               <Link href="/workspace" className="text-[var(--accent-hi)]">
                 Create one
               </Link>{" "}
-              to manage plans and seats.
+              to manage plans.
             </p>
           ) : (
             orgs.map((org) => (
@@ -114,7 +112,7 @@ export default function SubscribePage() {
                 <span className="truncate">{org.name}</span>
                 <span className="font-mono text-[var(--text-3)]">
                   {orgPlanLabel(org.plan ?? org.kind)}
-                  {org.has_paid_seat ? " · seat" : ""}
+                  {org.has_paid_seat ? " · paid seat" : ""}
                 </span>
               </div>
             ))

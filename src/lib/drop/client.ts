@@ -1,4 +1,4 @@
-import { getCurrentAuthToken } from "@/context/appkit";
+import { getCurrentAuthToken, invalidateSession } from "@/lib/auth-session";
 import { GatewayApiError } from "@/lib/gateway/client";
 import type { WrappedVaultBackup } from "./crypto";
 import {
@@ -59,7 +59,11 @@ async function dropJson<T>(
     signal: options.signal,
     body: options.body === undefined ? undefined : JSON.stringify(options.body),
   });
-  if (!res.ok) throw await toApiError(res);
+  if (!res.ok) {
+    const authorization = headers.get("Authorization");
+    if (res.status === 401 && authorization?.startsWith("Bearer ")) invalidateSession(authorization.slice(7));
+    throw await toApiError(res);
+  }
   if (res.status === 204) return undefined as T;
   const text = await res.text();
   return (text ? JSON.parse(text) : undefined) as T;
@@ -178,6 +182,7 @@ export function uploadDropContent(
         }
         resolve(normalizeDropUpload({ upload_id: uploadId, ...parsed }));
       } else {
+        if (xhr.status === 401 && token) invalidateSession(token);
         let bodyObj: unknown = xhr.responseText;
         try {
           bodyObj = JSON.parse(xhr.responseText);
@@ -213,12 +218,17 @@ export async function fetchDropContent(
   fileId: string,
   opts: { signal?: AbortSignal } = {}
 ): Promise<Response> {
+  const headers = authHeaders();
   const res = await fetch(dropUrl(`drop/files/${fileId}/content`), {
-    headers: authHeaders(),
+    headers,
     cache: "no-store",
     signal: opts.signal,
   });
-  if (!res.ok) throw await toApiError(res);
+  if (!res.ok) {
+    const authorization = headers.get("Authorization");
+    if (res.status === 401 && authorization?.startsWith("Bearer ")) invalidateSession(authorization.slice(7));
+    throw await toApiError(res);
+  }
   return res;
 }
 

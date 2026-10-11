@@ -1,4 +1,5 @@
 import type { GatewayOrg } from "@/lib/gateway/types";
+import { orgPlanLabel } from "@/lib/org-plans";
 
 /**
  * Effective product tier. Organization membership is the sole source of a
@@ -71,6 +72,11 @@ export function isHigherTier(a: EffectiveTier, b: EffectiveTier): boolean {
 export interface EffectiveEntitlement {
   /** Highest active tier across the caller's organization memberships. */
   tier: EffectiveTier;
+  /**
+   * Display name for the current plan — the winning org's plan label when it
+   * carries a plan id (e.g. "Business · Scale"), else the tier label.
+   */
+  planLabel: string;
   /** Organization that supplied the effective tier (entitlement provenance). */
   org: GatewayOrg | null;
   /** Caller is an active member of at least one organization. */
@@ -104,6 +110,7 @@ export function resolveEffectiveEntitlement(
   const list = orgs ?? [];
   let best: EffectiveEntitlement = {
     tier: "free",
+    planLabel: TIER_LABELS.free,
     org: null,
     isMember: list.length > 0,
     hasPaidSeat: false,
@@ -115,6 +122,7 @@ export function resolveEffectiveEntitlement(
     if (TIER_RANK[seat] > TIER_RANK[best.tier] || (best.org === null && seat === "free")) {
       best = {
         tier: seat,
+        planLabel: org.plan ? orgPlanLabel(org.plan) : TIER_LABELS[seat],
         org,
         isMember: true,
         hasPaidSeat: best.hasPaidSeat || seat !== "free",

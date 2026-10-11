@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Card, MonoLabel } from "@/components/v3/ui";
 import { formatBytes } from "@/lib/format";
 import { UploadCloud, X, RotateCcw, Lock, Globe } from "lucide-react";
-import type { UploadItem } from "@/hooks/use-drop-uploads";
+import { isUploadActive, type UploadItem } from "@/hooks/use-drop-uploads";
 import type { DropVisibility } from "@/lib/drop/types";
 
 const STATUS_LABEL: Record<UploadItem["status"], string> = {
@@ -149,15 +149,16 @@ export function DropUploadPanel({
               item.totalBytes > 0
                 ? Math.min(100, (item.sentBytes / item.totalBytes) * 100)
                 : 0;
-            const active = item.status === "uploading" || item.status === "reserving";
+            const active = isUploadActive(item.status);
             return (
               <div
                 key={item.id}
                 className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5"
               >
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3">
                   <span className="min-w-0 flex-1 truncate text-sm">{item.filename}</span>
                   <span
+                    role="status"
                     className="shrink-0 font-mono text-[11px]"
                     style={{ color: STATUS_COLOR[item.status] }}
                   >
@@ -169,7 +170,7 @@ export function DropUploadPanel({
                         type="button"
                         aria-label={`Retry ${item.filename}`}
                         onClick={() => onRetry(item.id)}
-                        className="rounded p-1 text-[var(--text-3)] hover:text-[var(--accent-hi)]"
+                        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded text-[var(--text-3)] hover:text-[var(--accent-hi)] focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                       >
                         <RotateCcw size={14} />
                       </button>
@@ -180,14 +181,15 @@ export function DropUploadPanel({
                         active ? `Cancel ${item.filename}` : `Remove ${item.filename}`
                       }
                       onClick={() => (active ? onCancel(item.id) : onRemove(item.id))}
-                      className="rounded p-1 text-[var(--text-3)] hover:text-[var(--danger)]"
+                      disabled={item.status === "finalizing"}
+                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded text-[var(--text-3)] hover:text-[var(--danger)] disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                     >
                       <X size={14} />
                     </button>
                   </div>
                 </div>
                 <div className="mt-2 flex items-center gap-2">
-                  <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/[0.08]">
+                  <div role="progressbar" aria-label={`Upload progress for ${item.filename}`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(item.status === "done" ? 100 : pct)} aria-valuetext={STATUS_LABEL[item.status]} className="h-1 flex-1 overflow-hidden rounded-full bg-white/[0.08]">
                     <div
                       className="h-full rounded-full transition-[width]"
                       style={{
@@ -203,8 +205,10 @@ export function DropUploadPanel({
                     {formatBytes(item.sentBytes)} / {formatBytes(item.totalBytes)}
                   </span>
                 </div>
+                {item.status === "finalizing" && <p className="mt-1.5 text-xs text-[var(--text-2)]">Bytes sent. Waiting for storage confirmation; keep this page open.</p>}
+                {item.status === "canceled" && item.uploadId && <p className="mt-1.5 text-xs text-[var(--text-2)]">Transfer stopped. Check the file list before retrying; the server may already have received it.</p>}
                 {item.error && (
-                  <p className="mt-1.5 text-[11px] text-[var(--danger)]">{item.error}</p>
+                  <p role="alert" className="mt-1.5 break-words text-xs text-[var(--danger)]">{item.error}</p>
                 )}
               </div>
             );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useWalletAuth } from "@/context/appkit";
 import { AuthModalProvider, AuthModalTrigger } from "@/components/v3/AuthModal";
@@ -8,7 +8,7 @@ import { AccentButton, ActionButton } from "@/components/v3/ui";
 import { Loader2 } from "lucide-react";
 
 export function RequireAuth({ children }: { children: ReactNode }) {
-  const { isAuthenticated, isAuthenticating } = useWalletAuth();
+  const { isAuthenticated, isAuthenticating, sessionStatus, sessionUserId, retrySession, signOut } = useWalletAuth();
   const router = useRouter();
   // Auth lives in cookies the server render can't see, so SSR always produces the
   // signed-out gate while a signed-in client's first render produces the app shell.
@@ -22,7 +22,7 @@ export function RequireAuth({ children }: { children: ReactNode }) {
     setMounted(true);
   }, []);
 
-  if (!mounted || isAuthenticating) {
+  if (!mounted || isAuthenticating || sessionStatus === "checking") {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-[var(--accent)]" />
@@ -30,9 +30,24 @@ export function RequireAuth({ children }: { children: ReactNode }) {
     );
   }
 
+  if (sessionStatus === "unavailable") {
+    return (
+      <div className="mx-auto max-w-md py-20 text-center">
+        <h2 className="text-2xl font-bold tracking-tight">Unable to check your session</h2>
+        <p role="status" className="mt-3 text-sm text-[var(--text-2)]">
+          We could not verify your session with the gateway. Your saved session has not been removed. Please retry.
+        </p>
+        <div className="mt-6 flex justify-center gap-3">
+          <ActionButton onClick={() => void retrySession()}>Retry</ActionButton>
+          <ActionButton variant="neutral" onClick={signOut}>Sign out</ActionButton>
+        </div>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return (
-      <AuthModalProvider autoOpen>
+      <AuthModalProvider autoOpen returnTo={`${window.location.pathname}${window.location.search}${window.location.hash}`}>
         <div className="mx-auto max-w-md py-20 text-center">
           <h2 className="text-2xl font-bold tracking-tight">Sign in to continue</h2>
           <p className="mt-3 text-sm text-[var(--text-2)]">
@@ -56,5 +71,5 @@ export function RequireAuth({ children }: { children: ReactNode }) {
     );
   }
 
-  return <>{children}</>;
+  return <Fragment key={sessionUserId}>{children}</Fragment>;
 }

@@ -15,6 +15,10 @@ function gatewayUrl(): string {
   return raw.endsWith("/") ? raw : `${raw}/`;
 }
 
+export function isWalletProjectConfigured(projectId: string | undefined): boolean {
+  return /^[a-f0-9]{32}$/i.test(projectId?.trim() ?? "");
+}
+
 export const env = {
   get projectId() {
     return required("NEXT_PUBLIC_PROJECT_ID");

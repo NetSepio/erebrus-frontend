@@ -1,20 +1,54 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Check } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { AuthModalTrigger } from "@/components/v3/AuthModal";
 import { AccentButton, Card, Eyebrow, MonoLabel } from "@/components/v3/ui";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { useWalletAuth } from "@/context/appkit";
+import {
+  fetchBillingPlans,
+  fetchOrgBilling,
+  fetchOrgs,
+  fetchProfile,
+  startOrgBillingCheckout,
+} from "@/lib/gateway/client";
+import type {
+  GatewayBillingPlan,
+  GatewayBillingPrice,
+  GatewayOrg,
+} from "@/lib/gateway/types";
+import { isOrgOwner } from "@/lib/gateway/org-permissions";
+import { orgPlanLabel } from "@/lib/org-plans";
+import {
+  FREE_PLAN_ID,
+  billingErrorMessage,
+  canCheckout,
+  formatMinor,
+  multiWorkspaceCheckout,
+  planOpenForCheckout,
+  priceForInterval,
+  safeCheckoutUrl,
+  type BillingInterval,
+} from "@/lib/billing";
 import {
   type BillingPeriod,
+  type PricingPlan,
   PRICING_PLANS,
   ENTERPRISE_PLAN,
   COMPARISON_ROWS,
   getInheritsLabel,
   getDisplayPrice,
-  getAdditionalSeatPrice,
   getComparisonPrice,
   getComparisonMonthlyEquivalent,
   COMMUNITY_EDITION_FEATURE,
@@ -23,6 +57,46 @@ import {
   UNLIMITED_ORG_MEMBERS_FEATURE,
   UNLIMITED_FREE_ORG_MEMBERS_FEATURE,
 } from "@/lib/pricing-plans";
+
+import { createIdempotencyKey } from "@/lib/rewards";
+
+const CHECKOUT_POLL_MS = 2500;
+const CHECKOUT_POLL_TIMEOUT_MS = 60_000;
+
+function intervalFor(period: BillingPeriod): BillingInterval {
+  return period === "annual" ? "yearly" : "monthly";
+}
+
+/** Live gateway price wins; static marketing copy is the fallback. */
+function liveDisplayPrice(
+  plan: PricingPlan,
+  period: BillingPeriod,
+  price: GatewayBillingPrice | undefined
+): { main: string; sub: string } {
+  if (price) {
+    if (price.billing_interval === "yearly") {
+      return {
+        main: `${formatMinor(Math.round(price.amount_minor / 12), price.currency)}/mo`,
+        sub: `${formatMinor(price.amount_minor, price.currency)} billed annually`,
+      };
+    }
+    return {
+      main: `${formatMinor(price.amount_minor, price.currency)}/mo`,
+      sub: "Billed monthly",
+    };
+  }
+  return getDisplayPrice(plan, period);
+}
+
+type PlanCta =
+  | { kind: "free" }
+  | { kind: "signin" }
+  | { kind: "loading" }
+  | { kind: "no-owned-org" }
+  | { kind: "verify-email" }
+  | { kind: "current" }
+  | { kind: "unavailable"; reason: string }
+  | { kind: "upgrade" };
 
 function FeatureLabel({ feature }: { feature: string }) {
   if (feature === COMMUNITY_EDITION_FEATURE) {
@@ -43,7 +117,7 @@ function FeatureLabel({ feature }: { feature: string }) {
     return (
       <>
         {feature}
-        <sup className="ml-0.5 font-mono text-[10px] text-[var(--accent-hi)]">
+        <sup className="ml-0.5 font-mono text-[10px] text-[var(--text-3)]">
           †
         </sup>
       </>
@@ -56,9 +130,11 @@ function FeatureLabel({ feature }: { feature: string }) {
 function BillingToggle({
   period,
   onChange,
+  disabled = false,
 }: {
   period: BillingPeriod;
   onChange: (p: BillingPeriod) => void;
+  disabled?: boolean;
 }) {
   return (
     <div className="flex items-center gap-2">
@@ -66,6 +142,7 @@ function BillingToggle({
         <button
           type="button"
           onClick={() => onChange("monthly")}
+          disabled={disabled}
           aria-pressed={period === "monthly"}
           className={cn(
             "min-h-9 rounded-md px-3 text-xs font-semibold transition-colors",
@@ -79,6 +156,7 @@ function BillingToggle({
         <button
           type="button"
           onClick={() => onChange("annual")}
+          disabled={disabled}
           aria-pressed={period === "annual"}
           className={cn(
             "min-h-9 rounded-md px-3 text-xs font-semibold transition-colors",
@@ -87,7 +165,7 @@ function BillingToggle({
               : "text-[var(--text-2)] hover:text-[var(--text)]",
           )}
         >
-          Annual
+          Yearly
         </button>
       </div>
       <span className={cn("rounded-full border px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-wide", period === "annual" ? "border-[var(--success)]/25 bg-[var(--success)]/10 text-[var(--success)]" : "border-white/[0.08] text-[var(--text-3)]")}>
@@ -100,21 +178,22 @@ function BillingToggle({
 function PlanCard({
   plan,
   period,
-  businessView,
+  price,
+  cta,
+  isCurrent,
+  pending,
+  onUpgrade,
 }: {
   plan: (typeof PRICING_PLANS)[number];
   period: BillingPeriod;
-  businessView: boolean;
+  price: GatewayBillingPrice | undefined;
+  cta: PlanCta;
+  isCurrent: boolean;
+  pending: boolean;
+  onUpgrade: (planId: string) => void;
 }) {
-  const price = getDisplayPrice(plan, period);
+  const display = liveDisplayPrice(plan, period, price);
   const inheritsLabel = getInheritsLabel(plan);
-
-  const isPilotCta = businessView && !plan.ctaEnabled;
-  const ctaButton = (
-    <AccentButton className="!flex !w-full !py-3.5" disabled={!plan.ctaEnabled && !isPilotCta}>
-      {isPilotCta ? plan.cta : plan.ctaEnabled ? plan.cta : "Coming soon"}
-    </AccentButton>
-  );
 
   return (
     <Card
@@ -144,7 +223,14 @@ function PlanCard({
       </div>
 
       <div>
-        <h3 className="text-2xl font-bold tracking-tight">{plan.name}</h3>
+        <h3 className="text-2xl font-bold tracking-tight">
+          {plan.name}
+          {isCurrent && (
+            <span className="ml-2 align-middle rounded-full border border-[var(--success)]/30 bg-[var(--success)]/10 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-[var(--success)]">
+              Current plan
+            </span>
+          )}
+        </h3>
         <p className="font-mono text-[11px] tracking-wide text-[var(--accent-hi)] uppercase">
           {plan.subtitle}
         </p>
@@ -160,9 +246,9 @@ function PlanCard({
       </div>
 
       <div className="border-t border-white/[0.06] pt-5">
-        <div className="text-3xl font-bold tracking-tight">{price.main}</div>
+        <div className="text-3xl font-bold tracking-tight">{display.main}</div>
         <div className="mt-1 font-mono text-xs text-[var(--text-3)]">
-          {price.sub}
+          {display.sub}
         </div>
       </div>
 
@@ -215,9 +301,9 @@ function PlanCard({
             <div className="text-xs font-medium text-[var(--text-2)]">
               {plan.additionalSeats.label}
             </div>
-            <div className="mt-1 font-mono text-xs text-[var(--text-3)]">
-              {getAdditionalSeatPrice(plan.additionalSeats, period)}
-            </div>
+            <span className="mt-1.5 inline-block rounded-full border border-white/[0.1] px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-[var(--text-3)]">
+              Coming soon
+            </span>
           </div>
         )}
       </div>
@@ -236,21 +322,70 @@ function PlanCard({
         </div>
 
         <div className="w-full">
-          {isPilotCta ? (
-            <Link href={`/contact?intent=business-pilot&plan=${plan.id}`} className="flex w-full">
-              {ctaButton}
-            </Link>
-          ) : plan.ctaEnabled ? (
+          {cta.kind === "free" && (
+            <div className="py-3.5 text-center font-mono text-xs text-[var(--text-3)]">
+              Free forever
+            </div>
+          )}
+
+          {cta.kind === "loading" && (
+            <AccentButton className="!flex !w-full !py-3.5" disabled>
+              <Loader2 className="mx-auto h-4 w-4 animate-spin" />
+            </AccentButton>
+          )}
+
+          {cta.kind === "signin" && (
             <AuthModalTrigger className="flex w-full">
-              {ctaButton}
+              <AccentButton className="!flex !w-full !py-3.5">
+                {plan.cta}
+              </AccentButton>
             </AuthModalTrigger>
-          ) : (
+          )}
+
+          {cta.kind === "no-owned-org" && (
             <>
-              {ctaButton}
+              <AccentButton className="!flex !w-full !py-3.5" disabled>
+                {plan.cta}
+              </AccentButton>
               <p className="mt-2 text-center font-mono text-[10px] text-[var(--text-3)]">
-                Plan launching soon
+                You must own a workspace to subscribe
               </p>
             </>
+          )}
+
+          {cta.kind === "verify-email" && (
+            <Link href="/profile" className="flex w-full">
+              <AccentButton className="!flex !w-full !py-3.5">
+                Verify email to upgrade
+              </AccentButton>
+            </Link>
+          )}
+
+          {cta.kind === "current" && (
+            <AccentButton className="!flex !w-full !py-3.5" disabled>
+              Current plan
+            </AccentButton>
+          )}
+
+          {cta.kind === "unavailable" && (
+            <>
+              <AccentButton className="!flex !w-full !py-3.5" disabled>
+                {plan.ctaEnabled ? plan.cta : "Coming soon"}
+              </AccentButton>
+              <p className="mt-2 text-center font-mono text-[10px] text-[var(--text-3)]">
+                {cta.reason}
+              </p>
+            </>
+          )}
+
+          {cta.kind === "upgrade" && (
+            <AccentButton
+              className="!flex !w-full !py-3.5"
+              disabled={pending}
+              onClick={() => onUpgrade(plan.id)}
+            >
+              {pending ? "Preparing checkout…" : plan.cta}
+            </AccentButton>
           )}
         </div>
       </div>
@@ -267,10 +402,243 @@ export function PricingPageContent() {
   const visiblePlans = PRICING_PLANS.filter((plan) => plan.id.startsWith(`${audience}.`));
   const comparisonRows = COMPARISON_ROWS.filter((row) => row.planId.startsWith(`${audience}.`));
 
+  // Auth state is cookie-based — identical markup on server and first client
+  // render (signed-out), then re-resolve after mount (same pattern as RequireAuth).
+  const [mounted, setMounted] = useState(false);
+  const { isAuthenticated } = useWalletAuth();
+  const authed = mounted && isAuthenticated;
+
+  const [billingPlans, setBillingPlans] = useState<Record<string, GatewayBillingPlan>>({});
+  const [ownedOrgs, setOwnedOrgs] = useState<GatewayOrg[]>([]);
+  const [orgsLoading, setOrgsLoading] = useState(false);
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
+  const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
+  const [pendingPlanId, setPendingPlanId] = useState<string | null>(null);
+  const [catalogError, setCatalogError] = useState(false);
+  const [accountError, setAccountError] = useState(false);
+  const [retry, setRetry] = useState(0);
+  const [recoveryOrgId, setRecoveryOrgId] = useState<string | null>(null);
+  const checkoutInFlight = useRef(false);
+  const checkoutController = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => checkoutController.current?.abort();
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    setCatalogError(false);
+    fetchBillingPlans()
+      .then((plans) => {
+        if (active) setBillingPlans(Object.fromEntries(plans.map((p) => [p.id, p])));
+      })
+      .catch(() => { if (active) { setBillingPlans({}); setCatalogError(true); } });
+    return () => { active = false; };
+  }, [retry]);
+
+  useEffect(() => {
+    let active = true;
+    setAccountError(false);
+    if (!authed) {
+      setOwnedOrgs([]);
+      setSelectedOrgId(null);
+      setEmailVerified(null);
+      setPendingPlanId(null);
+      checkoutController.current?.abort();
+      return;
+    }
+    setOrgsLoading(true);
+    Promise.all([fetchOrgs(), fetchProfile()])
+      .then(([orgs, profile]) => {
+        if (!active) return;
+        setOwnedOrgs(orgs.filter((o) => isOrgOwner(o)));
+        setEmailVerified(profile.email_verified === true);
+      })
+      .catch(() => { if (active) setAccountError(true); })
+      .finally(() => { if (active) setOrgsLoading(false); });
+    return () => { active = false; };
+  }, [authed, retry]);
+
+  const selectedOrg =
+    ownedOrgs.find((o) => o.id === selectedOrgId) ?? ownedOrgs[0] ?? null;
+
   const setAudience = (value: "personal" | "business") => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("audience", value);
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  /**
+   * Poll billing until the checkout attempt resolves: `ready` hands back the
+   * Dodo URL to redirect to, `completed`/`active` means payment already landed.
+   * Only `GET /orgs/:id/billing` is trusted — never the redirect params.
+   */
+  const pollCheckout = async (orgId: string, attemptId: string, signal: AbortSignal) => {
+    const deadline = Date.now() + CHECKOUT_POLL_TIMEOUT_MS;
+    while (Date.now() < deadline && !signal.aborted) {
+      await new Promise((r) => setTimeout(r, CHECKOUT_POLL_MS));
+      if (signal.aborted) return;
+      if (document.visibilityState === "hidden") continue;
+      const status = await fetchOrgBilling(orgId, signal).catch(() => null);
+      if (signal.aborted) return;
+      if (!status) continue;
+      if (status.provider_status === "active" && status.plan_id !== FREE_PLAN_ID) {
+        toast.success("Subscription activated");
+        router.push(`/workspace/${orgId}?tab=billing`);
+        return;
+      }
+      const attempt = status.checkout;
+      if (!attempt || attempt.attempt_id !== attemptId) continue;
+      const url = safeCheckoutUrl(attempt.checkout_url);
+      if (attempt.status === "ready" && url) {
+        window.location.assign(url);
+        return;
+      }
+      if (attempt.status === "completed") {
+        router.push(`/billing/return?org_id=${orgId}&attempt_id=${encodeURIComponent(attemptId)}`);
+        return;
+      }
+      if (attempt.status === "failed" || attempt.status === "expired") {
+        toast.error("Checkout could not be prepared. Please try again.");
+        return;
+      }
+    }
+    if (!signal.aborted) {
+      setRecoveryOrgId(orgId);
+      toast.message("Checkout is still being prepared. Check workspace billing before another purchase.");
+    }
+  };
+
+  const startCheckout = async (planId: string) => {
+    if (!selectedOrg || checkoutInFlight.current || accountError || catalogError || !emailVerified || recoveryOrgId === selectedOrg.id) return;
+    const price = priceForInterval(billingPlans[planId], intervalFor(period));
+    if (!price?.checkout_enabled || !canCheckout(selectedOrg.plan ?? FREE_PLAN_ID, planId)) return;
+    checkoutInFlight.current = true;
+    const controller = new AbortController();
+    checkoutController.current = controller;
+    setPendingPlanId(planId);
+    const orgId = selectedOrg.id;
+    const timeout = setTimeout(() => {
+      if (controller.signal.aborted) return;
+      setRecoveryOrgId(orgId);
+      setPendingPlanId(null);
+      controller.abort();
+    }, CHECKOUT_POLL_TIMEOUT_MS);
+    try {
+      const current = await fetchOrgBilling(orgId, controller.signal);
+      if (controller.signal.aborted) return;
+      const openCheckout =
+        current.checkout && ["ready", "creating", "unknown"].includes(current.checkout.status) ? current.checkout : null;
+      if (!canCheckout(current.plan_id, planId)) {
+        setRecoveryOrgId(orgId);
+        toast.message("This workspace already has an active plan.", {
+          action: { label: "Open billing", onClick: () => router.push(`/workspace/${orgId}?tab=billing`) },
+        });
+        return;
+      }
+      if (openCheckout) {
+        const openUrl = safeCheckoutUrl(openCheckout.checkout_url);
+        if (openCheckout.status === "ready" && openUrl) {
+          setRecoveryOrgId(orgId);
+          toast.message("You have an unfinished checkout for this workspace.", {
+            action: { label: "Resume checkout", onClick: () => window.location.assign(openUrl) },
+          });
+          return;
+        }
+        // Stale attempt with no usable link — the gateway replaces it with a
+        // fresh session once it confirms nothing was paid.
+        toast.message("You have an unfinished checkout for this workspace; starting a new one…");
+      }
+      // One key per attempt, kept in component state only.
+      const idempotencyKey = createIdempotencyKey();
+      const attempt = await startOrgBillingCheckout(orgId, {
+        plan_id: planId,
+        billing_interval: intervalFor(period),
+        idempotency_key: idempotencyKey,
+      });
+      if (controller.signal.aborted) return;
+      const url = safeCheckoutUrl(attempt.checkout_url);
+      if (attempt.status === "ready" && url) {
+        setRecoveryOrgId(orgId);
+        window.location.assign(url);
+        return;
+      }
+      if (attempt.status === "creating" || attempt.status === "unknown") {
+        toast.message("Preparing checkout…");
+        await pollCheckout(orgId, attempt.attempt_id, controller.signal);
+        return;
+      }
+      if (attempt.status === "completed") {
+        setRecoveryOrgId(orgId);
+        router.push(`/billing/return?org_id=${orgId}&attempt_id=${encodeURIComponent(attempt.attempt_id)}`);
+        return;
+      }
+      setRecoveryOrgId(orgId);
+      toast.message("Review checkout status in workspace billing before trying again.");
+    } catch (err) {
+      if (controller.signal.aborted) return;
+      setRecoveryOrgId(orgId);
+      toast.error(billingErrorMessage(err));
+    } finally {
+      clearTimeout(timeout);
+      checkoutInFlight.current = false;
+      if (!controller.signal.aborted) setPendingPlanId(null);
+    }
+  };
+
+  const resolveCta = (plan: (typeof PRICING_PLANS)[number]): PlanCta => {
+    if (plan.id === "personal.basic") return { kind: "free" };
+    if (!authed) {
+      const catalogLoaded = Object.keys(billingPlans).length > 0;
+      return catalogLoaded && !planOpenForCheckout(billingPlans[plan.id], intervalFor(period))
+        ? { kind: "unavailable", reason: "Plan launching soon" }
+        : { kind: "signin" };
+    }
+    if (catalogError || accountError) return { kind: "unavailable", reason: "Could not load checkout details. Use Retry on this page." };
+    if (recoveryOrgId && recoveryOrgId === selectedOrg?.id) return { kind: "unavailable", reason: "Review workspace billing before another purchase." };
+    if (orgsLoading || emailVerified === null) return { kind: "loading" };
+    if (ownedOrgs.length === 0) return { kind: "no-owned-org" };
+    if (!selectedOrg) return { kind: "loading" };
+    if (emailVerified === false) return { kind: "verify-email" };
+    if (selectedOrg.plan === plan.id) return { kind: "current" };
+    // One personal plan per owner (it already applies to all workspaces);
+    // business plans may still be added to other workspaces.
+    const multi = multiWorkspaceCheckout(ownedOrgs, selectedOrg.id, plan.id);
+    if (multi.kind === "blocked") {
+      return { kind: "unavailable", reason: `${orgPlanLabel(multi.org.plan)} is already active on ${multi.org.name} and applies to all your workspaces` };
+    }
+    if (!canCheckout(selectedOrg.plan ?? FREE_PLAN_ID, plan.id)) {
+      return { kind: "unavailable", reason: "Plan changes aren't supported yet" };
+    }
+    const price = priceForInterval(billingPlans[plan.id], intervalFor(period));
+    if (!price) {
+      return { kind: "unavailable", reason: "Not available for this interval" };
+    }
+    if (!planOpenForCheckout(billingPlans[plan.id], intervalFor(period))) {
+      return { kind: "unavailable", reason: "Plan launching soon" };
+    }
+    return { kind: "upgrade" };
+  };
+
+  const liveComparisonPrice = (planId: string, p: BillingPeriod): string => {
+    const price = priceForInterval(billingPlans[planId], intervalFor(p));
+    if (price) {
+      return `${formatMinor(price.amount_minor, price.currency)}/${price.billing_interval === "yearly" ? "yr" : "mo"}`;
+    }
+    return getComparisonPrice(planId as never, p);
+  };
+
+  const liveComparisonMonthly = (planId: string, p: BillingPeriod): string => {
+    const price = priceForInterval(billingPlans[planId], intervalFor(p));
+    if (price) {
+      const perMonth =
+        price.billing_interval === "yearly"
+          ? Math.round(price.amount_minor / 12)
+          : price.amount_minor;
+      return `${formatMinor(perMonth, price.currency)}/mo`;
+    }
+    return getComparisonMonthlyEquivalent(planId as never, p);
   };
 
   return (
@@ -291,7 +659,7 @@ export function PricingPageContent() {
         <p className="mx-auto mt-6 max-w-[900px] text-base leading-relaxed text-[var(--text-2)] md:text-[19px] md:leading-[1.55]">
           {audience === "business"
             ? "Start with a dedicated company gateway, add business firewall protection, and connect private AI services when your team is ready."
-            : "Start free, unlock faster VPN access, or add a dedicated network and Shield protection for a household or small shared group."}
+            : "Start free, upgrade to Starter for more VPN devices, more Drop storage and Gateway API keys, or add a dedicated network and Shield protection for a household or small shared group."}
         </p>
 
         <div className="mt-8 flex flex-col items-center">
@@ -299,16 +667,70 @@ export function PricingPageContent() {
             {(["personal", "business"] as const).map((value) => <button key={value} type="button" onClick={() => setAudience(value)} aria-pressed={audience === value} className={cn("min-h-11 rounded-full px-6 text-sm font-semibold capitalize transition-colors", audience === value ? "bg-[var(--accent)] text-[var(--on-accent)]" : "text-[var(--text-2)] hover:text-[var(--text)]")}>{value}</button>)}
           </div>
         </div>
+
+        {authed && (
+          <div className="mt-8 flex flex-col items-center gap-2.5">
+            <MonoLabel>
+              {ownedOrgs.length > 0 ? "Subscribing" : "Workspace"}
+            </MonoLabel>
+            {ownedOrgs.length > 0 ? (
+              <Select
+                value={selectedOrg?.id ?? ""}
+                disabled={pendingPlanId !== null}
+                onValueChange={(v) => setSelectedOrgId(v)}
+              >
+                <SelectTrigger aria-label="Workspace to subscribe" className="w-full max-w-[300px] border-white/10 bg-white/[0.03]">
+                  <SelectValue placeholder="Choose a workspace" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ownedOrgs.map((o) => (
+                    <SelectItem key={o.id} value={o.id}>
+                      {o.name} — {orgPlanLabel(o.plan ?? o.kind)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              !orgsLoading && !accountError && (
+                <p className="text-sm text-[var(--text-3)]">
+                  You must own a workspace to subscribe.
+                </p>
+              )
+            )}
+          </div>
+        )}
       </section>
 
       <section className="mx-auto max-w-[1180px] px-4 pt-2 pb-12 md:px-8">
+        {(catalogError || accountError) && (
+          <Card className="mb-5 p-4 text-sm">
+            <p role="alert">{catalogError ? "Live pricing could not be loaded. Displayed prices are informational; checkout is unavailable until pricing is confirmed." : "We could not load your account and workspace details."}</p>
+            <button type="button" disabled={pendingPlanId !== null} onClick={() => setRetry((value) => value + 1)} className="mt-2 min-h-11 font-semibold text-[var(--accent-hi)] underline">Retry</button>
+          </Card>
+        )}
+        {recoveryOrgId && (
+          <Card className="mb-5 p-4 text-sm">
+            <p role="status">Review your existing checkout or subscription before making another purchase.</p>
+            <Link href={`/workspace/${recoveryOrgId}?tab=billing`} className="mt-2 inline-flex min-h-11 items-center font-semibold text-[var(--accent-hi)] underline">Open workspace billing</Link>
+          </Card>
+        )}
+        {pendingPlanId && <p role="status" className="mb-4 text-sm text-[var(--text-2)]">Preparing {orgPlanLabel(pendingPlanId)} for {selectedOrg?.name}. Please keep this page open.</p>}
         <div className="mb-5 flex flex-col gap-3 border-b border-white/[0.06] pb-5 sm:flex-row sm:items-center sm:justify-between">
           <span className="font-mono text-[11px] uppercase tracking-wide text-[var(--text-3)]">All prices in USD</span>
-          <BillingToggle period={period} onChange={setPeriod} />
+          <BillingToggle period={period} onChange={setPeriod} disabled={pendingPlanId !== null} />
         </div>
         <div className={cn("grid gap-5 md:grid-cols-2 xl:grid-rows-[auto_auto_auto_1fr_auto]", audience === "personal" ? "xl:grid-cols-3" : "xl:grid-cols-2")}>
           {visiblePlans.map((plan) => (
-            <PlanCard key={plan.id} plan={plan} period={period} businessView={audience === "business"} />
+            <PlanCard
+              key={plan.id}
+              plan={plan}
+              period={period}
+              price={priceForInterval(billingPlans[plan.id], intervalFor(period))}
+              cta={resolveCta(plan)}
+              isCurrent={authed && selectedOrg?.plan === plan.id}
+              pending={pendingPlanId !== null}
+              onUpgrade={startCheckout}
+            />
           ))}
         </div>
       </section>
@@ -398,10 +820,10 @@ export function PricingPageContent() {
                   Best for
                 </th>
                 <th className="pb-4 pr-4 font-mono text-[10px] tracking-wide text-[var(--text-3)] uppercase">
-                  {period === "annual" ? "Annual (eff. monthly)" : "Monthly"}
+                  {period === "annual" ? "Yearly (eff. monthly)" : "Monthly"}
                 </th>
                 <th className="pb-4 pr-4 font-mono text-[10px] tracking-wide text-[var(--text-3)] uppercase">
-                  {period === "annual" ? "Annual price" : "Monthly price"}
+                  {period === "annual" ? "Yearly price" : "Monthly price"}
                 </th>
                 <th className="pb-4 font-mono text-[10px] tracking-wide text-[var(--text-3)] uppercase">
                   Includes
@@ -427,10 +849,10 @@ export function PricingPageContent() {
                     <td className="py-4 pr-4 align-top font-mono text-[var(--text)]">
                       {isEnterprise
                         ? "Custom"
-                        : getComparisonMonthlyEquivalent(planId, period)}
+                        : liveComparisonMonthly(planId, period)}
                     </td>
                     <td className="py-4 pr-4 align-top font-mono text-[var(--text)]">
-                      {getComparisonPrice(planId, period)}
+                      {liveComparisonPrice(planId, period)}
                     </td>
                     <td className="py-4 align-top text-[var(--text-2)]">
                       {row.keyIncludes}

@@ -61,6 +61,9 @@ import {
   visibilityLabel,
 } from "@/lib/gateway/profiles";
 import { NodeFirewallPanel } from "@/components/v3/workspace/NodeFirewallPanel";
+import { BillingPanel } from "@/components/v3/workspace/BillingPanel";
+import { FREE_PLAN_ID } from "@/lib/billing";
+import { toastGatewayError } from "@/components/v3/app/gateway-toast";
 import {
   AccentButton,
   ActionButton,
@@ -95,7 +98,13 @@ const INVITE_ROLES = [
 
 type InviteRole = (typeof INVITE_ROLES)[number]["value"];
 
-export function OrgDetailPanel({ orgId }: { orgId: string }) {
+export function OrgDetailPanel({
+  orgId,
+  initialTab,
+}: {
+  orgId: string;
+  initialTab?: string;
+}) {
   const [org, setOrg] = useState<GatewayOrg | null>(null);
   const [nodes, setNodes] = useState<GatewayOrgNode[]>([]);
   const [nodeServices, setNodeServices] = useState<Record<string, GatewayOrgNodeService[]>>({});
@@ -127,6 +136,7 @@ export function OrgDetailPanel({ orgId }: { orgId: string }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteConfirmName, setDeleteConfirmName] = useState("");
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [sectionErrors, setSectionErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   const isOwner = isOrgOwner(org);
@@ -184,17 +194,26 @@ export function OrgDetailPanel({ orgId }: { orgId: string }) {
     fetchOrg(orgId)
       .then((o) => {
         const privileged = o.role === "owner";
+        // Sections load independently; failures are listed instead of
+        // silently rendering empty lists or "no plan".
+        const failed: string[] = [];
+        const soft = <T,>(p: Promise<T>, fallback: T, label: string): Promise<T> =>
+          p.catch(() => {
+            failed.push(label);
+            return fallback;
+          });
         return Promise.all([
           Promise.resolve(o),
-          fetchOrgNodes(orgId).catch(() => []),
-          fetchOrgMembers(orgId).catch(() => []),
-          privileged ? fetchOrgInvites(orgId).catch(() => []) : Promise.resolve([]),
-          privileged ? fetchOrgApiKeys(orgId).catch(() => []) : Promise.resolve([]),
-          fetchOrgUsage(orgId).catch(() => ({})),
-          fetchOrgClients(orgId).catch(() => []),
-          fetchOrgEntitlements(orgId).catch(() => null),
-          privileged ? fetchOrgProfile(orgId).catch(() => null) : Promise.resolve(null),
+          soft(fetchOrgNodes(orgId), [] as GatewayOrgNode[], "nodes"),
+          soft(fetchOrgMembers(orgId), [] as GatewayOrgMember[], "members"),
+          privileged ? soft(fetchOrgInvites(orgId), [] as GatewayOrgInvite[], "invites") : Promise.resolve([] as GatewayOrgInvite[]),
+          privileged ? soft(fetchOrgApiKeys(orgId), [] as GatewayApiKey[], "API keys") : Promise.resolve([] as GatewayApiKey[]),
+          soft(fetchOrgUsage(orgId), {} as Awaited<ReturnType<typeof fetchOrgUsage>>, "usage"),
+          soft(fetchOrgClients(orgId), [] as GatewayVpnClient[], "VPN clients"),
+          soft(fetchOrgEntitlements(orgId), null, "plan entitlements"),
+          privileged ? soft(fetchOrgProfile(orgId), null, "profile") : Promise.resolve(null),
         ]).then(([orgData, n, m, invites, keys, u, c, ent, profile]) => {
+          setSectionErrors(failed);
           setOrg(orgData);
           setEditName(orgData.name);
           setEditSlug(orgData.slug ?? "");
@@ -255,7 +274,6 @@ export function OrgDetailPanel({ orgId }: { orgId: string }) {
   const canUseShieldProfile =
     canUseSentinelProfile ||
     org?.plan === "personal.pro" ||
-    org?.plan === "personal.starter" ||
     org?.plan === "business.launch" ||
     (entitlements?.shield_instances_included ?? 0) > 0;
 
@@ -277,8 +295,8 @@ export function OrgDetailPanel({ orgId }: { orgId: string }) {
       setNewKeySecret(key.secret);
       reload();
       toast.success("API key created — copy the secret now");
-    } catch {
-      toast.error("Failed to create API key");
+    } catch (e) {
+      toastGatewayError(e);
     }
   };
 
@@ -312,7 +330,7 @@ export function OrgDetailPanel({ orgId }: { orgId: string }) {
         setEditName(o.name);
         setEditSlug(o.slug ?? "");
         setEditPublicProfile(o.public_profile_enabled ?? false);
-      });
+      }).catch(() => undefined);
       toast.success("Workspace settings saved");
     } catch (e) {
       toast.error(e instanceof GatewayApiError ? e.message : "Failed to save workspace settings");
@@ -350,7 +368,7 @@ export function OrgDetailPanel({ orgId }: { orgId: string }) {
       reload();
       toast.success("Invite sent");
     } catch (e) {
-      toast.error(e instanceof GatewayApiError ? e.message : "Failed to invite member");
+      toastGatewayError(e);
     }
   };
 
@@ -485,13 +503,24 @@ export function OrgDetailPanel({ orgId }: { orgId: string }) {
               </span>
             </div>
           </div>
-          {isUpgradeablePlan(org.plan) && (
-            <a href="/pricing" target="_blank" rel="noopener noreferrer">
-              <AccentButton type="button" variant="ghost" className="!px-4 !py-2.5">
+          {isUpgradeablePlan(org.plan) &&
+            (org.plan && org.plan !== FREE_PLAN_ID ? (
+              <AccentButton
+                type="button"
+                variant="ghost"
+                className="!px-4 !py-2.5"
+                disabled
+                title="Plan changes are not supported yet"
+              >
                 Upgrade plan ↗
               </AccentButton>
-            </a>
-          )}
+            ) : (
+              <Link href="/pricing">
+                <AccentButton type="button" variant="ghost" className="!px-4 !py-2.5">
+                  Upgrade plan ↗
+                </AccentButton>
+              </Link>
+            ))}
         </div>
       </Card>
 
@@ -504,10 +533,19 @@ export function OrgDetailPanel({ orgId }: { orgId: string }) {
         <StatCard label="API calls (30d)" value={usage.api_calls ?? "—"} />
       </div>
 
-      <Tabs defaultValue="nodes">
+      {sectionErrors.length > 0 && (
+        <Card className="mb-4 border-[var(--warn)]/30 bg-[var(--warn)]/5 p-4 text-sm">
+          <p role="alert">Some parts of this workspace could not be loaded: {sectionErrors.join(", ")}.</p>
+          <ActionButton variant="neutral" className="mt-3" onClick={reload}>Retry</ActionButton>
+        </Card>
+      )}
+      <Tabs defaultValue={initialTab ?? "nodes"}>
         <TabsList className={v3TabsListClass}>
           <TabsTrigger value="nodes" className={v3TabsTriggerClass}>
             Nodes
+          </TabsTrigger>
+          <TabsTrigger value="billing" className={v3TabsTriggerClass}>
+            Billing
           </TabsTrigger>
           <TabsTrigger value="members" className={v3TabsTriggerClass}>
             Members
@@ -769,7 +807,7 @@ export function OrgDetailPanel({ orgId }: { orgId: string }) {
                           >
                             Revoke seat
                           </ActionButton>
-                        ) : (
+                        ) : seatsAvailable ? (
                           <ActionButton
                             type="button"
                             variant="accent"
@@ -785,7 +823,7 @@ export function OrgDetailPanel({ orgId }: { orgId: string }) {
                           >
                             Assign seat
                           </ActionButton>
-                        ))}
+                        ) : null)}
                       {isPrivileged && m.role !== "owner" && (
                         <select
                           value={m.role}
@@ -1116,7 +1154,19 @@ export function OrgDetailPanel({ orgId }: { orgId: string }) {
 
         {isPrivileged && (
           <TabsContent value="apikeys" className="mt-4 space-y-4">
-            <AccentButton onClick={issueKey}>+ Issue API key</AccentButton>
+            {(org.plan ?? FREE_PLAN_ID) === FREE_PLAN_ID ? (
+              <Card className="flex flex-col gap-3 border-[var(--accent)]/25 bg-[var(--accent)]/5 p-4 text-sm sm:flex-row sm:items-center sm:justify-between">
+                <p>
+                  Gateway API keys are included with Starter and above.
+                  {apiKeys.length > 0 && " Existing keys on this workspace stay listed but are paused until you upgrade."}
+                </p>
+                <Link href="/pricing">
+                  <AccentButton className="!py-2 !text-[13px]">Upgrade to Starter</AccentButton>
+                </Link>
+              </Card>
+            ) : (
+              <AccentButton onClick={issueKey}>+ Issue API key</AccentButton>
+            )}
             {newKeySecret && (
               <Card className="border-[var(--accent)]/30 bg-[var(--accent)]/5 p-4 font-mono text-xs break-all">
                 <MonoLabel className="text-[var(--accent-hi)]">Copy now — shown once</MonoLabel>
@@ -1149,6 +1199,10 @@ export function OrgDetailPanel({ orgId }: { orgId: string }) {
             </Card>
           </TabsContent>
         )}
+
+        <TabsContent value="billing" className="mt-4 space-y-4">
+          <BillingPanel org={org} />
+        </TabsContent>
       </Tabs>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

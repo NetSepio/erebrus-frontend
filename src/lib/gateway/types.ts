@@ -146,6 +146,54 @@ export interface GatewayVpnClient {
   last_handshake?: string;
 }
 
+/** Device paused because the plan no longer covers it (gateway status). */
+export const VPN_CLIENT_PAUSED_STATUS = "suspended_plan_limit";
+
+/**
+ * Display-only plan & usage summary from `GET /subscriptions` → `usage`.
+ * The gateway enforces every limit; never enforce from these values.
+ */
+export interface GatewayAccountUsage {
+  vpn: {
+    client_limit: number;
+    public_clients: number;
+    paused_clients: number;
+    limit_after_access_ends: number;
+  };
+  drop: {
+    used_bytes: number;
+    reserved_bytes: number;
+    quota_bytes: number;
+    max_file_bytes: number;
+  };
+  api_keys_available: boolean;
+  entitlement_org?: {
+    id: string;
+    name: string;
+    plan: string;
+    role?: string;
+    seats_included?: number;
+    seats_used?: number;
+    paid_access_until?: string | null;
+    cancel_at_period_end?: boolean;
+    billing_status?: string;
+    access_ending?: boolean;
+  };
+}
+
+export interface GatewayAccountSummary {
+  plan_id: string;
+  usage: GatewayAccountUsage | null;
+}
+
+/** In-app plan notification (`GET /account/notifications`). */
+export interface GatewayNotification {
+  id: string;
+  action: "vpn.client.plan_pause" | "vpn.client.plan_restore" | "plan.access_ending" | string;
+  target?: string;
+  created_at: string;
+}
+
 export type OrgMemberRole = "owner" | "node_operator" | "member";
 
 export type DeploymentProfile = "standard" | "shield" | "sentinel";
@@ -772,4 +820,75 @@ export interface GatewayPlatformSetting {
   key: string;
   value: string;
   description?: string;
+}
+
+// ── Billing (Dodo Payments via gateway) ─────────────────────────────────────
+
+/** A priced interval for a subscription plan (`GET /subscriptions/plans`). */
+export interface GatewayBillingPrice {
+  plan_id: string;
+  billing_interval: "monthly" | "yearly";
+  currency: string;
+  /** Full-interval charge in integer minor units (cents). */
+  amount_minor: number;
+  checkout_enabled: boolean;
+}
+
+/** Subscription plan catalog entry (`GET /subscriptions/plans`). */
+export interface GatewayBillingPlan {
+  /** "personal.basic", "personal.starter", etc. */
+  id: string;
+  family: "personal" | "business";
+  tier: string;
+  name: string;
+  period_days: number;
+  max_clients: number;
+  billing_prices?: GatewayBillingPrice[];
+}
+
+export type GatewayCheckoutAttemptStatus =
+  | "ready"
+  | "creating"
+  | "unknown"
+  | "failed"
+  | "completed"
+  | "expired";
+
+/** Checkout attempt returned by checkout create and embedded in billing status. */
+export interface GatewayCheckoutAttempt {
+  attempt_id: string;
+  org_id: string;
+  status: GatewayCheckoutAttemptStatus;
+  session_id?: string;
+  checkout_url?: string;
+  created_at: string;
+}
+
+/** `GET /orgs/:id/billing`. */
+export interface GatewayBillingStatus {
+  org_id: string;
+  /** Effective current plan. */
+  plan_id: string;
+  /** Plan carried by the subscription record, when one exists. */
+  subscription_plan_id?: string;
+  billing_managed: boolean;
+  /** "none" | "active" | "past_due" | "on_hold" | "cancelled" | "expired" */
+  provider_status: string;
+  subscription_id?: string;
+  billing_interval?: "monthly" | "yearly";
+  currency?: string;
+  /** Full-interval recurring charge in integer minor units. */
+  recurring_amount_minor?: number;
+  next_billing_date?: string;
+  cancel_at_period_end: boolean;
+  paid_access_until?: string;
+  past_due_ends_at?: string;
+  checkout?: GatewayCheckoutAttempt;
+}
+
+/** `POST /orgs/:id/billing/cancel`. */
+export interface GatewayCancelResult {
+  /** "cancellation_requested" */
+  status: string;
+  subscription_id: string;
 }

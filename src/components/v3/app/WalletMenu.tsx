@@ -4,15 +4,15 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { useAppKit, useDisconnect, useAppKitAccount, useAppKitNetworkCore } from "@reown/appkit/react";
+import { useDisconnect, useAppKitAccount } from "@reown/appkit/react";
+import { useAppKit } from "@/context/appkit";
 import { truncateAddress } from "@/lib/design";
 import { userDisplayName } from "@/lib/display-name";
 import { fetchProfile } from "@/lib/gateway/client";
-import { tierLabel, type EffectiveEntitlement } from "@/lib/entitlements";
+import type { EffectiveEntitlement } from "@/lib/entitlements";
 import type { GatewayProfile } from "@/lib/gateway/types";
-import Cookies from "js-cookie";
 import { usePlatformAdmin } from "@/hooks/use-platform-admin";
-import { useWalletAuth, clearWebSession } from "@/context/appkit";
+import { useWalletAuth } from "@/context/appkit";
 import { ChainBadge } from "@/components/v3/app/ChainBadge";
 import { ipfsImageUrl } from "@/lib/ipfs";
 
@@ -24,23 +24,17 @@ export function WalletMenu({ entitlement }: { entitlement: EffectiveEntitlement 
   const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState<GatewayProfile | null>(null);
   const { address } = useAppKitAccount();
-  const { caipNetworkId } = useAppKitNetworkCore();
   const { open: openAppKit } = useAppKit();
-  const { isAuthenticating, linkWallet } = useWalletAuth();
+  const { isAuthenticating, linkWallet, signOut, sessionWallet } = useWalletAuth();
   const { disconnect } = useDisconnect();
   const router = useRouter();
 
   // The account's wallet is gateway truth; before the profile loads, fall back
-  // to the live connection so wallet users don't flash empty.
-  const wallet = profile ? profile.wallet_address : address || "";
+  // to the session wallet, not an unrelated live wallet connection.
+  const wallet = profile ? profile.wallet_address : sessionWallet || "";
   // Chain shown only for an actual account wallet. Wallet-less accounts
   // (email / Google / Apple) have none, and ChainBadge renders nothing.
-  const connectedChain = address
-    ? caipNetworkId?.startsWith("solana:")
-      ? "sol"
-      : "evm"
-    : undefined;
-  const chain = wallet ? (profile?.chain ?? connectedChain) : undefined;
+  const chain = wallet ? (profile?.chain ?? (wallet.startsWith("0x") ? "evm" : "sol")) : undefined;
   const title = userDisplayName(profile, wallet);
   const subtitle = wallet ? truncateAddress(wallet) : profile?.email_verified ? profile.email : "";
   const avatarUrl = ipfsImageUrl(profile?.profile_picture);
@@ -72,19 +66,11 @@ export function WalletMenu({ entitlement }: { entitlement: EffectiveEntitlement 
   };
 
   const logout = async () => {
-    ["solana", "evm"].forEach((chainType) => {
-      Cookies.remove(`erebrus_token_${chainType}`, { path: "/" });
-      Cookies.remove(`erebrus_wallet_${chainType}`, { path: "/" });
-      Cookies.remove(`erebrus_userid_${chainType}`, { path: "/" });
-    });
-    Cookies.remove("erebrus_token", { path: "/" });
-    Cookies.remove("erebrus_wallet", { path: "/" });
-    Cookies.remove("erebrus_userid", { path: "/" });
     // Wallet-less (email / social) sessions live under their own cookie keys.
-    clearWebSession();
-    await disconnect();
+    signOut();
     setOpen(false);
     router.push("/");
+    await disconnect().catch(() => undefined);
   };
 
   return (
@@ -154,7 +140,7 @@ export function WalletMenu({ entitlement }: { entitlement: EffectiveEntitlement 
                 </button>
               )}
               <div className="mt-2 font-mono text-[11px] text-[var(--accent-hi)]">
-                {tierLabel(entitlement.tier)} plan
+                {entitlement.planLabel}
                 {entitlement.org?.name ? ` · ${entitlement.org.name}` : ""}
               </div>
             </div>

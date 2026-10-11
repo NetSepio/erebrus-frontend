@@ -1,0 +1,11 @@
+# Bound to host 8080/8443 (see deploy/docker-compose.dev.yml comment) — gateway's
+# own Caddy already owns 80/443 on this box. :443 uses a self-signed cert since
+# ACME can't reach this box on the standard ports.
+:80 {
+	reverse_proxy webapp:3000
+}
+
+:443 {
+	tls internal
+	reverse_proxy webapp:3000
+}

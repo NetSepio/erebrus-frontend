@@ -17,6 +17,24 @@ function authUrl(): string {
   return typeof window !== "undefined" ? `${base}auth` : `${base}api/v2/auth`;
 }
 
+export function authErrorMessage(error: unknown): string {
+  const code = error && typeof error === "object" && "code" in error ? error.code : undefined;
+  if (code === 4001 || code === "4001" || code === "ACTION_REJECTED") {
+    return "The signature request was cancelled. Try again when you are ready to sign in.";
+  }
+  if (axios.isAxiosError(error)) {
+    const status = error.response?.status;
+    if (!status) return "Unable to reach sign-in. Check your connection and try again.";
+    if (status === 429) return "Too many attempts. Please wait before trying again.";
+    if (status === 404) return "The sign-in service is unavailable. Please try again later.";
+    if (status === 503) return "This sign-in method is temporarily unavailable. Try another method.";
+    if (status >= 500) {
+      return "The sign-in service could not complete your request. Please try again.";
+    }
+  }
+  return "Sign-in could not be completed. Please try again.";
+}
+
 export type AuthChallenge = {
   challengeId: string;
   message: string;

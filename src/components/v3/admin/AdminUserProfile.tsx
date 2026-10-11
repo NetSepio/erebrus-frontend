@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import {
   fetchAdminUser,
   fetchAdminUserOrgs,
-  setAdminUserPlan,
   patchAdminOrg,
   fulfillAdminDeletionRequest,
   GatewayApiError,
@@ -15,7 +14,7 @@ import type {
   GatewayDeletionRequest,
 } from "@/lib/gateway/types";
 import { truncateAddress } from "@/lib/design";
-import { ORG_PLAN_IDS, orgPlanLabel } from "@/lib/org-plans";
+import { orgPlanLabel } from "@/lib/org-plans";
 import { Card, AccentButton, ActionButton, MonoLabel } from "@/components/v3/ui";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { toast } from "sonner";
@@ -37,8 +36,6 @@ export function AdminUserProfile({ userId, open, onOpenChange, onChanged }: Admi
   const [user, setUser] = useState<GatewayAdminUserProfile | null>(null);
   const [orgs, setOrgs] = useState<GatewayAdminOrg[]>([]);
   const [loading, setLoading] = useState(false);
-  const [planId, setPlanId] = useState<string>("");
-  const [savingPlan, setSavingPlan] = useState(false);
 
   const load = useCallback(async () => {
     if (!userId) return;
@@ -46,7 +43,6 @@ export function AdminUserProfile({ userId, open, onOpenChange, onChanged }: Admi
     try {
       const [u, o] = await Promise.all([fetchAdminUser(userId), fetchAdminUserOrgs(userId)]);
       setUser(u);
-      setPlanId(u.plan ?? "personal.basic");
       setOrgs(o);
     } catch (e) {
       toast.error(e instanceof GatewayApiError ? e.message : "Failed to load user");
@@ -63,21 +59,6 @@ export function AdminUserProfile({ userId, open, onOpenChange, onChanged }: Admi
       setOrgs([]);
     }
   }, [open, userId, load]);
-
-  const savePlan = async () => {
-    if (!userId || !planId) return;
-    setSavingPlan(true);
-    try {
-      await setAdminUserPlan(userId, planId);
-      toast.success(`Plan set to ${planId}`);
-      await load();
-      onChanged?.();
-    } catch (e) {
-      toast.error(e instanceof GatewayApiError ? e.message : "Failed to set plan");
-    } finally {
-      setSavingPlan(false);
-    }
-  };
 
   const toggleOrgVerified = async (org: GatewayAdminOrg) => {
     if (!org.id) return;
@@ -155,25 +136,12 @@ export function AdminUserProfile({ userId, open, onOpenChange, onChanged }: Admi
               </div>
             </Card>
 
-            <Card className="space-y-3 p-5">
+            <Card className="space-y-2 p-5">
               <MonoLabel className="text-[var(--accent-hi)]">Plan</MonoLabel>
-              <div className="flex items-center gap-2">
-                <select
-                  value={planId}
-                  onChange={(e) => setPlanId(e.target.value)}
-                  className="flex-1 rounded-md border border-white/10 bg-[var(--surface-2)] px-2 py-1.5 text-xs capitalize text-[var(--text)]"
-                >
-                  {ORG_PLAN_IDS.map((p) => (
-                    <option key={p} value={p}>
-                      {orgPlanLabel(p)}
-                    </option>
-                  ))}
-                </select>
-                <ActionButton onClick={savePlan} disabled={savingPlan || planId === (user.plan ?? "personal.basic")}>
-                  {savingPlan ? "Saving…" : "Save"}
-                </ActionButton>
-              </div>
-              <p className="text-xs text-[var(--text-3)]">Current plan: {user.plan ? orgPlanLabel(user.plan) : "—"}</p>
+              <p className="text-sm">Effective plan: {user.plan ? orgPlanLabel(user.plan) : "—"}</p>
+              <p className="text-xs text-[var(--text-3)]">
+                Access comes from the user&apos;s best workspace. Change plans in Admin → Orgs.
+              </p>
             </Card>
 
             <Card className="space-y-3 p-5">
