@@ -19,3 +19,8 @@ yarn-error.log
 # Docker related
 Dockerfile
 .dockerignore
+
+# Session runtime secrets must never enter build context or image layers
+.env.session
+.env.session.*
+.next-session-e2e-*

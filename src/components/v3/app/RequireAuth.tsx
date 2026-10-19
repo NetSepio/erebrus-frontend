@@ -10,12 +10,8 @@ import { Loader2 } from "lucide-react";
 export function RequireAuth({ children }: { children: ReactNode }) {
   const { isAuthenticated, isAuthenticating } = useWalletAuth();
   const router = useRouter();
-  // Auth lives in cookies the server render can't see, so SSR always produces the
-  // signed-out gate while a signed-in client's first render produces the app shell.
-  // That mismatch makes React throw away the SSR DOM and regenerate the segment
-  // client-side (logging "Encountered a script tag…" in dev). Render the same
-  // loading state on the server and the first client pass, and only branch on
-  // auth after mount.
+  // The BFF restores identity after mount. Keep the server and initial client
+  // render in the same loading state while that request is pending.
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {

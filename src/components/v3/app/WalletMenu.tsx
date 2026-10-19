@@ -10,9 +10,8 @@ import { userDisplayName } from "@/lib/display-name";
 import { fetchProfile } from "@/lib/gateway/client";
 import { tierLabel, type EffectiveEntitlement } from "@/lib/entitlements";
 import type { GatewayProfile } from "@/lib/gateway/types";
-import Cookies from "js-cookie";
 import { usePlatformAdmin } from "@/hooks/use-platform-admin";
-import { useWalletAuth, clearWebSession } from "@/context/appkit";
+import { useWalletAuth } from "@/context/appkit";
 import { ChainBadge } from "@/components/v3/app/ChainBadge";
 import { ipfsImageUrl } from "@/lib/ipfs";
 
@@ -26,7 +25,7 @@ export function WalletMenu({ entitlement }: { entitlement: EffectiveEntitlement 
   const { address } = useAppKitAccount();
   const { caipNetworkId } = useAppKitNetworkCore();
   const { open: openAppKit } = useAppKit();
-  const { isAuthenticating, linkWallet } = useWalletAuth();
+  const { isAuthenticating, linkWallet, signOut } = useWalletAuth();
   const { disconnect } = useDisconnect();
   const router = useRouter();
 
@@ -72,16 +71,8 @@ export function WalletMenu({ entitlement }: { entitlement: EffectiveEntitlement 
   };
 
   const logout = async () => {
-    ["solana", "evm"].forEach((chainType) => {
-      Cookies.remove(`erebrus_token_${chainType}`, { path: "/" });
-      Cookies.remove(`erebrus_wallet_${chainType}`, { path: "/" });
-      Cookies.remove(`erebrus_userid_${chainType}`, { path: "/" });
-    });
-    Cookies.remove("erebrus_token", { path: "/" });
-    Cookies.remove("erebrus_wallet", { path: "/" });
-    Cookies.remove("erebrus_userid", { path: "/" });
-    // Wallet-less (email / social) sessions live under their own cookie keys.
-    clearWebSession();
+    const result = await signOut();
+    if (!result.localCleared) return;
     await disconnect();
     setOpen(false);
     router.push("/");

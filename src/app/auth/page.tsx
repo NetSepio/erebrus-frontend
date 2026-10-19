@@ -365,8 +365,8 @@ function DesktopAuthContent() {
 
     try {
       const result = isSolanaChain
-        ? await authenticateSolana(address, solanaWalletProvider!)
-        : await authenticateEvm(address, evmWalletProvider!);
+        ? await authenticateSolana(address, solanaWalletProvider!, true)
+        : await authenticateEvm(address, evmWalletProvider!, true);
       completeAuth(result);
     } catch (error) {
       authStarted.current = false;
@@ -469,8 +469,8 @@ function DesktopAuthContent() {
       try {
         const result =
           provider === "google"
-            ? await googleLogin(idToken)
-            : await appleLogin(idToken, nonce, authorizationCode);
+            ? await googleLogin(idToken, true)
+            : await appleLogin(idToken, nonce, authorizationCode, true);
         setSocialBusy(false);
         completeAuth(result);
       } catch (error) {
@@ -526,7 +526,7 @@ function DesktopAuthContent() {
     setStatus("signing");
     setErrorMessage("");
     try {
-      const result = await emailLoginVerify(email.trim(), code.trim());
+      const result = await emailLoginVerify(email.trim(), code.trim(), true);
       setEmailBusy(false);
       completeAuth(result);
     } catch (error) {

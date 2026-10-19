@@ -19,8 +19,8 @@ import {
 import { PhantomWalletAdapter } from "@solana/wallet-adapter-phantom";
 import { SolflareWalletAdapter } from "@solana/wallet-adapter-solflare";
 import { defineChain } from "@reown/appkit/networks";
-import React, { useEffect, useRef, useState } from "react";
-import Cookies from "js-cookie";
+import React, { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { logoutWebSession, sessionSnapshot, sessionServerSnapshot, startSessionSync, subscribeSession } from "@/lib/web-session";
 import { toast } from "sonner";
 import type { Provider } from "@reown/appkit-adapter-solana/react";
 import {
@@ -158,214 +158,7 @@ const NETWORK_IDS = {
   RISE: Number(riseTestnet.id),
 };
 
-// Helper to get chain type
-const getChainType = (chainId: string | number): "solana" | "evm" => {
-  const chainIdNum =
-    typeof chainId === "string" ? parseInt(chainId, 10) : chainId;
-  return chainIdNum === NETWORK_IDS.SOLANA ||
-    chainIdNum === Number(solanaDevnet.id) ||
-    chainIdNum === Number(solanaTestnet.id)
-    ? "solana"
-    : "evm";
-};
-
-// Helper to get cookie key with chain suffix
-const getChainCookieKey = (key: string, chainType: string) => {
-  return `${key}_${chainType}`;
-};
-
-// Client-side token lifetime (adjust to server TTL if known)
-const TOKEN_TTL_MS = 12 * 60 * 60 * 1000; // 12 hours
-const EXPIRY_KEY = "erebrus_token_exp";
-
-// Cookie management utilities
-const setAuthCookies = (
-  chainType: "solana" | "evm",
-  token: string,
-  walletAddress: string,
-  userId: string
-) => {
-  const options = {
-    expires: 7,
-    path: "/",
-    sameSite: "Strict" as const,
-    secure: process.env.NODE_ENV === "production",
-  };
-
-  const lowerWallet = walletAddress.toLowerCase();
-  const expiryTs = (Date.now() + TOKEN_TTL_MS).toString();
-
-  Cookies.set(getChainCookieKey("erebrus_token", chainType), token, options);
-  Cookies.set(
-    getChainCookieKey("erebrus_wallet", chainType),
-    lowerWallet,
-    options
-  );
-  Cookies.set(getChainCookieKey("erebrus_userid", chainType), userId, options);
-  Cookies.set(getChainCookieKey(EXPIRY_KEY, chainType), expiryTs, options);
-
-  // Backwards compatibility (legacy unsuffixed keys possibly read elsewhere)
-  Cookies.set("erebrus_token", token, options);
-  Cookies.set("erebrus_wallet", lowerWallet, options);
-  Cookies.set("erebrus_userid", userId, options);
-  Cookies.set(EXPIRY_KEY, expiryTs, options);
-};
-
-const clearAuthCookies = (chainType: "solana" | "evm") => {
-  const options = { path: "/" };
-  Cookies.remove(getChainCookieKey("erebrus_token", chainType), options);
-  Cookies.remove(getChainCookieKey("erebrus_wallet", chainType), options);
-  Cookies.remove(getChainCookieKey("erebrus_userid", chainType), options);
-  Cookies.remove(getChainCookieKey(EXPIRY_KEY, chainType), options);
-};
-
-const getAuthFromCookies = (chainType: "solana" | "evm") => {
-  const token = Cookies.get(getChainCookieKey("erebrus_token", chainType));
-  const wallet = Cookies.get(getChainCookieKey("erebrus_wallet", chainType));
-  const userId = Cookies.get(getChainCookieKey("erebrus_userid", chainType));
-  const expiry = Cookies.get(getChainCookieKey(EXPIRY_KEY, chainType));
-
-  // Enhanced validation: check for empty strings and null values
-  if (
-    !token ||
-    !wallet ||
-    !userId ||
-    token.trim() === "" ||
-    wallet.trim() === "" ||
-    userId.trim() === ""
-  ) {
-    return {
-      token: undefined,
-      wallet: undefined,
-      userId: undefined,
-      expired: true,
-    };
-  }
-
-  // Improved expiry logic with better error handling
-  let expired = true; // Default to expired for safety
-
-  if (expiry && expiry.trim() !== "") {
-    const ts = parseInt(expiry, 10);
-    if (!isNaN(ts) && ts > 0) {
-      expired = Date.now() > ts;
-    } else {
-      // If expiry timestamp is invalid, consider it expired
-      console.warn(`Invalid expiry timestamp for ${chainType}: ${expiry}`);
-      expired = true;
-    }
-  }
-
-  return { token, wallet, userId, expired } as const;
-};
-
-// ── Non-wallet session (email / Google / Apple login) ───────────────────────
-// Wallet-optional accounts: stored under distinct keys so the wallet-disconnect
-// cleanup never clears them.
-const SESSION_TOKEN = "erebrus_session_token";
-const SESSION_USERID = "erebrus_session_userid";
-const SESSION_METHOD = "erebrus_session_method";
-const SESSION_EXP = "erebrus_session_exp";
-
-export const setWebSession = (token: string, userId: string, method: string) => {
-  const options = {
-    expires: 7,
-    path: "/",
-    sameSite: "Strict" as const,
-    secure: process.env.NODE_ENV === "production",
-  };
-  Cookies.set(SESSION_TOKEN, token, options);
-  Cookies.set(SESSION_USERID, userId, options);
-  Cookies.set(SESSION_METHOD, method, options);
-  Cookies.set(SESSION_EXP, (Date.now() + TOKEN_TTL_MS).toString(), options);
-};
-
-export const clearWebSession = () => {
-  [SESSION_TOKEN, SESSION_USERID, SESSION_METHOD, SESSION_EXP].forEach((k) =>
-    Cookies.remove(k, { path: "/" })
-  );
-};
-
-export const getWebSession = () => {
-  const token = Cookies.get(SESSION_TOKEN);
-  const exp = Cookies.get(SESSION_EXP);
-  let expired = true;
-  if (exp && exp.trim() !== "") {
-    const ts = parseInt(exp, 10);
-    if (!isNaN(ts) && ts > 0) expired = Date.now() > ts;
-  }
-  return {
-    token: token && token.trim() !== "" ? token : undefined,
-    userId: Cookies.get(SESSION_USERID),
-    method: Cookies.get(SESSION_METHOD),
-    expired,
-  };
-};
-
-export const hasWebSession = () => {
-  const s = getWebSession();
-  return !!s.token && !s.expired;
-};
-
-// Helper function to get current authentication token
-export const getCurrentAuthToken = () => {
-  const solanaAuth = getAuthFromCookies("solana");
-  const evmAuth = getAuthFromCookies("evm");
-
-  // Return the token that's not expired
-  if (solanaAuth.token && !solanaAuth.expired) return solanaAuth.token;
-  if (evmAuth.token && !evmAuth.expired) return evmAuth.token;
-
-  // Non-wallet (email / Google / Apple) session
-  const web = getWebSession();
-  if (web.token && !web.expired) return web.token;
-
-  // Fallback to legacy token
-  return Cookies.get("erebrus_token") || null;
-};
-
-// EVM Authentication
 import type { Eip1193Provider } from "ethers";
-
-const authenticateEVM = async (
-  walletAddress: string,
-  walletProvider: Eip1193Provider
-) => {
-  try {
-    if (!walletAddress || walletAddress.trim() === "") {
-      throw new Error("Wallet address is required");
-    }
-
-    const isValidEthAddress = /^0x[a-fA-F0-9]{40}$/.test(walletAddress);
-    if (!isValidEthAddress) {
-      throw new Error("Invalid Ethereum wallet address format");
-    }
-
-    const session = await gatewayAuthenticateEvm(walletAddress, walletProvider);
-    setAuthCookies("evm", session.token, walletAddress, session.userId);
-    return true;
-  } catch (error) {
-    console.error("EVM Authentication error:", error);
-    clearAuthCookies("evm");
-    return false;
-  }
-};
-
-// Solana Authentication with social login support
-const authenticateSolana = async (
-  walletAddress: string,
-  walletProvider: Provider
-) => {
-  try {
-    const session = await gatewayAuthenticateSolana(walletAddress, walletProvider);
-    setAuthCookies("solana", session.token, walletAddress, session.userId);
-    return true;
-  } catch (error) {
-    console.error("Solana Authentication error:", error);
-    clearAuthCookies("solana");
-    return false;
-  }
-};
 
 // Wallet auth hook
 export function useWalletAuth() {
@@ -382,36 +175,9 @@ export function useWalletAuth() {
   // before isAuthenticating has propagated (double click / re-render).
   const authInFlight = useRef(false);
 
-  // Get current auth status. Match the connected wallet against EITHER chain's
-  // cookie rather than guessing the chain from caipNetworkId — that value can be
-  // momentarily undefined right after a redirect, which otherwise reads the wrong
-  // (empty) chain cookie and forces a redundant second sign-in.
-  const getCurrentAuthStatus = () => {
-    if (!isConnected || !address) return false;
-    const lower = address.toLowerCase();
-    for (const chainType of ["solana", "evm"] as const) {
-      const { token, wallet, expired } = getAuthFromCookies(chainType);
-      if (!token) continue;
-      if (expired) {
-        clearAuthCookies(chainType);
-        continue;
-      }
-      if (wallet?.toLowerCase() === lower) return true;
-    }
-    return false;
-  };
-
-  // Update authSuccess state when authentication status changes
-  useEffect(() => {
-    const isAuth = getCurrentAuthStatus();
-    if (isAuth !== authSuccess) {
-      setAuthSuccess(isAuth);
-    }
-    // Clear error when authentication succeeds
-    if (isAuth && authError) {
-      setAuthError(null);
-    }
-  }, [isConnected, address, caipNetworkId, authSuccess, authError]);
+  const web = useSyncExternalStore(subscribeSession, sessionSnapshot, sessionServerSnapshot);
+  const getCurrentAuthStatus = () => !!web.session?.authenticated;
+  useEffect(() => { setAuthSuccess(!!web.session?.authenticated); }, [web.session]);
 
   // Authentication function
   const authenticate = async () => {
@@ -435,49 +201,18 @@ export function useWalletAuth() {
         chainId === Number(solanaDevnet.id) ||
         chainId === Number(solanaTestnet.id);
 
-      const chainType = isSolanaChain ? "solana" : "evm";
-      const { token, wallet, expired } = getAuthFromCookies(chainType);
-
-      if (
-        token &&
-        !expired &&
-        wallet?.toLowerCase() === address.toLowerCase()
-      ) {
-        setAuthSuccess(true);
-        return true;
-      }
-
-      if (wallet && wallet.toLowerCase() !== address.toLowerCase()) {
-        clearAuthCookies(chainType);
-      }
-
-      let authResult = false;
-
+      if (web.session?.authenticated && web.session.wallet_address === address) return true;
       if (isSolanaChain) {
-        if (!solanaWalletProvider) {
-          throw new Error("Solana wallet provider not available");
-        }
-        authResult = await authenticateSolana(address, solanaWalletProvider);
+        if (!solanaWalletProvider) throw new Error("Solana wallet provider not available");
+        await gatewayAuthenticateSolana(address, solanaWalletProvider);
       } else {
-        if (!evmWalletProvider) {
-          throw new Error("EVM wallet provider not available");
-        }
-        authResult = await authenticateEVM(address, evmWalletProvider);
+        if (!evmWalletProvider) throw new Error("EVM wallet provider not available");
+        await gatewayAuthenticateEvm(address, evmWalletProvider as unknown as Eip1193Provider);
       }
-
-      if (authResult) {
-        setAuthSuccess(true);
-        toast.success("Authentication successful");
-        // Force a small delay to ensure state is updated before return
-        setTimeout(() => {
-          // This will trigger the useEffect above to update states
-        }, 100);
-        return true;
-      } else {
-        throw new Error("Authentication failed");
-      }
+      setAuthSuccess(true);
+      toast.success("Authentication successful");
+      return true;
     } catch (error) {
-      console.error("Authentication error:", error);
       const errorMessage =
         error instanceof Error ? error.message : "Authentication failed";
       setAuthError(errorMessage);
@@ -497,8 +232,7 @@ export function useWalletAuth() {
       toast.error("Connect a wallet first");
       return false;
     }
-    const sessionToken = getCurrentAuthToken();
-    if (!sessionToken) {
+    if (!web.session?.authenticated) {
       toast.error("Sign in before linking a wallet");
       return false;
     }
@@ -515,12 +249,12 @@ export function useWalletAuth() {
         if (!solanaWalletProvider) {
           throw new Error("Solana wallet provider not available");
         }
-        await linkWalletSolana(sessionToken, address, solanaWalletProvider);
+        await linkWalletSolana(address, solanaWalletProvider);
       } else {
         if (!evmWalletProvider) {
           throw new Error("EVM wallet provider not available");
         }
-        await linkWalletEvm(sessionToken, address, evmWalletProvider);
+        await linkWalletEvm(address, evmWalletProvider);
       }
       toast.success("Wallet linked to your account");
       return true;
@@ -535,47 +269,25 @@ export function useWalletAuth() {
     }
   };
 
-  // Cleanup on disconnection - but be more careful about clearing on refresh
-  useEffect(() => {
-    if (!isConnected) {
-      // Add a small delay to avoid clearing on page refresh
-      const timeoutId = setTimeout(() => {
-        ["solana", "evm"].forEach((chainType) => {
-          clearAuthCookies(chainType as "solana" | "evm");
-        });
-        setAuthSuccess(false);
-      }, 1000); // 1 second delay
-
-      return () => clearTimeout(timeoutId);
-    }
-  }, [isConnected]);
-
-  // Authenticated via a connected+signed wallet OR a non-wallet (email/OIDC) session.
-  const authed = getCurrentAuthStatus() || hasWebSession();
+  // Wallet provider reconnection is independent of the durable login session.
+  const authed = getCurrentAuthStatus();
   return {
-    isConnected,
-    address,
-    isAuthenticated: authed,
-    isVerified: authed, // Simplified: verified when authenticated
-    isAuthenticating,
-    authError,
-    authSuccess,
-    authenticate,
-    linkWallet,
-    signOut: () => {
-      clearWebSession();
-      (["solana", "evm"] as const).forEach((c) => clearAuthCookies(c));
-      ["erebrus_token", "erebrus_wallet", "erebrus_userid", EXPIRY_KEY].forEach((k) =>
-        Cookies.remove(k, { path: "/" })
-      );
-      setAuthSuccess(false);
+    isConnected, address, isAuthenticated: authed, isVerified: authed,
+    isAuthenticating: isAuthenticating || web.loading,
+    authError, authSuccess, authenticate, linkWallet,
+    signOut: async () => {
+      const result = await logoutWebSession();
+      if (!result.confirmed) toast.error(result.localCleared
+        ? "Signed out here. Remote session revocation could not be confirmed."
+        : "Could not reach the session server. Sign-out is unconfirmed; reconnect and try again.");
+      return result;
     },
-    token: getCurrentAuthToken(), // Provide current valid token
   };
 }
 
 // AppKit provider component
 export function AppKit({ children }: { children: React.ReactNode }) {
+  useEffect(() => startSessionSync(), []);
   return <>{children}</>;
 }
 

@@ -1,4 +1,4 @@
-import { getCurrentAuthToken } from "@/context/appkit";
+import { observeSessionResponse } from "@/lib/web-session";
 import { computeOrgStats } from "./org-stats";
 import {
   normalizeActivity,
@@ -103,21 +103,20 @@ async function gatewayFetch<T>(
   path: string,
   options: RequestInit & { params?: Record<string, string | number | undefined>; auth?: boolean } = {}
 ): Promise<T> {
-  const { params, auth = true, ...init } = options;
+  const { params, auth: _auth = true, ...init } = options;
   const headers = new Headers(init.headers);
   headers.set("Accept", "application/json");
   headers.set("X-Erebrus-Client", CLIENT_HEADER);
 
-  if (auth) {
-    const token = getCurrentAuthToken();
-    if (token) headers.set("Authorization", `Bearer ${token}`);
-  }
+  headers.set("X-Erebrus-CSRF", "1");
+  if (!_auth) headers.set("X-Erebrus-Public", "1");
   if (init.body && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
 
   const res = await fetch(buildUrl(path, params), { ...init, headers, cache: "no-store" });
 
+  observeSessionResponse(res);
   if (!res.ok) {
     let body: unknown;
     try {

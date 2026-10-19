@@ -66,6 +66,14 @@ can make encrypted files permanently unreadable.
 
 ---
 
+## Session deployment
+
+Persistent web logins require the Next.js Node server, durable PostgreSQL, HTTPS,
+and shared private runtime session settings. Apply `scripts/session-store.sql`
+and configure the host's `.env.session` before deploying. See
+[Persistent sessions](docs/persistent-sessions.md) for setup, failure behavior,
+desktop compatibility, and browser/PostgreSQL integration tests.
+
 ## How it works (in plain terms)
 
 1. **Connect your wallet** — that’s your account.

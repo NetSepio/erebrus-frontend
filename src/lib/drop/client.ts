@@ -1,4 +1,4 @@
-import { getCurrentAuthToken } from "@/context/appkit";
+import { observeSessionResponse } from "@/lib/web-session";
 import { GatewayApiError } from "@/lib/gateway/client";
 import type { WrappedVaultBackup } from "./crypto";
 import {
@@ -36,8 +36,7 @@ function authHeaders(extra?: Record<string, string>): Headers {
   const headers = new Headers(extra);
   headers.set("Accept", "application/json");
   headers.set("X-Erebrus-Client", CLIENT_HEADER);
-  const token = getCurrentAuthToken();
-  if (token) headers.set("Authorization", `Bearer ${token}`);
+  headers.set("X-Erebrus-CSRF", "1");
   return headers;
 }
 
@@ -59,6 +58,7 @@ async function dropJson<T>(
     signal: options.signal,
     body: options.body === undefined ? undefined : JSON.stringify(options.body),
   });
+  observeSessionResponse(res);
   if (!res.ok) throw await toApiError(res);
   if (res.status === 204) return undefined as T;
   const text = await res.text();
@@ -160,8 +160,7 @@ export function uploadDropContent(
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("PUT", dropUrl(`drop/uploads/${uploadId}/content`));
-    const token = getCurrentAuthToken();
-    if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+    xhr.setRequestHeader("X-Erebrus-CSRF", "1");
     xhr.setRequestHeader("X-Erebrus-Client", CLIENT_HEADER);
     xhr.setRequestHeader("Content-Type", opts.contentType ?? "application/octet-stream");
 
@@ -169,6 +168,9 @@ export function uploadDropContent(
       if (e.lengthComputable) opts.onProgress?.(e.loaded, e.total);
     };
     xhr.onload = () => {
+      if (xhr.getResponseHeader("x-erebrus-session-ended") === "1") {
+        observeSessionResponse(new Response(null, { headers: { "x-erebrus-session-ended": "1" } }));
+      }
       if (xhr.status >= 200 && xhr.status < 300) {
         let parsed: Record<string, unknown> = {};
         try {
@@ -218,6 +220,7 @@ export async function fetchDropContent(
     cache: "no-store",
     signal: opts.signal,
   });
+  observeSessionResponse(res);
   if (!res.ok) throw await toApiError(res);
   return res;
 }

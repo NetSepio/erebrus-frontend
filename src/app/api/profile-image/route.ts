@@ -1,26 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
+import { checkCsrf, sessionFailure, sessionId, sessions, setSessionCookie } from "@/lib/server/session/http";
+import { SessionError } from "@/lib/server/session/types";
 import { MAX_PROFILE_IMAGE_BYTES } from "@/lib/ipfs";
 
 // IPFS node HTTP API (Kubo). Local daemon for now; point at a hosted node later.
 const IPFS_API_URL = process.env.IPFS_API_URL ?? "http://127.0.0.1:5001";
 
-const AUTH_COOKIES = [
-  "erebrus_token_solana",
-  "erebrus_token_evm",
-  "erebrus_session_token",
-  "erebrus_token",
-];
+export const runtime = "nodejs";
 
-/**
- * Accepts a profile image and adds it to IPFS, returning the bare CID. The
- * caller then PATCHes the CID onto the gateway profile — this route stores
- * nothing itself. Session check is presence-only (the PASETO can only be
- * verified by the gateway); the profile write is still gated by gateway auth.
- */
+/** The profile write remains gateway-authorized; the upload itself also needs
+ * a live server session and the same CSRF checks as other mutations. */
 export async function POST(req: NextRequest) {
-  if (!AUTH_COOKIES.some((name) => req.cookies.get(name)?.value)) {
-    return NextResponse.json({ error: "Not signed in" }, { status: 401 });
-  }
+  try { return await upload(req); } catch (error) { return sessionFailure(error); }
+}
+async function upload(req: NextRequest) {
+  checkCsrf(req);
+  const id = sessionId(req);
+  if (!id) throw new SessionError("NOT_SIGNED_IN", 401);
+  await sessions.access(id);
 
   let form: FormData;
   try {
@@ -64,5 +61,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "IPFS add returned no hash" }, { status: 502 });
   }
 
-  return NextResponse.json({ cid: payload.Hash });
+  const response = NextResponse.json({ cid: payload.Hash });
+  setSessionCookie(response, id, await sessions.read(id));
+  return response;
 }

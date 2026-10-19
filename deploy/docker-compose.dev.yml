@@ -11,13 +11,16 @@
 #   docker compose -f docker-compose.dev.yml -p erebrus-webapp-dev pull
 #   docker compose -f docker-compose.dev.yml -p erebrus-webapp-dev up -d
 #
-# Env vars are baked into the image at build time (DEV_ENV_FILE in CI).
+# Public NEXT_PUBLIC_* build values are baked into the image. Private session
+# settings must be provided at runtime in a mode-600 .env.session on the host.
 
 services:
   webapp:
     image: ${WEBAPP_IMAGE:-ghcr.io/netsepio/erebrus-webapp:dev}
     container_name: ${WEBAPP_CONTAINER_NAME:-erebrus-frontend-dev}
     restart: unless-stopped
+    env_file:
+      - .env.session
     expose:
       - "3000"
     # Local health checks / CI curl only — public access goes through Caddy.

@@ -18,7 +18,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAppKit } from "@reown/appkit/react";
-import { useWalletAuth, setWebSession } from "@/context/appkit";
+import { useWalletAuth } from "@/context/appkit";
 import { useAppleSignIn, useGoogleSignIn, type AppleCredential } from "@/hooks/use-social-login";
 import {
   appleLogin,
@@ -101,11 +101,9 @@ export function AuthModalProvider({
     ) => {
       setSocialBusy(true);
       try {
-        const session =
-          provider === "google"
-            ? await googleLogin(idToken)
-            : await appleLogin(idToken, nonce, authorizationCode);
-        setWebSession(session.token, session.userId, provider);
+        await (provider === "google"
+          ? googleLogin(idToken)
+          : appleLogin(idToken, nonce, authorizationCode));
         setVisible(false);
         router.push("/dashboard");
       } catch (error) {
@@ -157,8 +155,7 @@ export function AuthModalProvider({
   const verifyCode = useCallback(async () => {
     setEmailBusy(true);
     try {
-      const session = await emailLoginVerify(email.trim(), code.trim());
-      setWebSession(session.token, session.userId, "email");
+      await emailLoginVerify(email.trim(), code.trim());
       setVisible(false);
       router.push("/dashboard");
     } catch {

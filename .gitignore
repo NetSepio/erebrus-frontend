@@ -42,3 +42,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Isolated session integration-test build directories
+/.next-session-e2e-*/

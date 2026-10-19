@@ -127,7 +127,7 @@ export default function ProfilePage() {
     try {
       const fd = new FormData();
       fd.append("file", file);
-      const res = await fetch("/api/profile-image", { method: "POST", body: fd });
+      const res = await fetch("/api/profile-image", { method: "POST", headers: { "X-Erebrus-CSRF": "1" }, body: fd });
       const data = (await res.json().catch(() => ({}))) as { cid?: string; error?: string };
       if (!res.ok || !data.cid) throw new Error(data.error || "Upload failed");
       const updated = await updateProfile({ profile_picture: data.cid });

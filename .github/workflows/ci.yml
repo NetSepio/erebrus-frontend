@@ -38,6 +38,12 @@ jobs:
       - run: pnpm lint
       - run: pnpm type-check
       - run: pnpm test
+      - name: Install session-test browser
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Browser and PostgreSQL session integration
+        env:
+          PLAYWRIGHT_CHANNEL: chromium
+        run: pnpm test:session-e2e
       - name: Prepare build env
         env:
           NEXT_PUBLIC_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_PROJECT_ID }}

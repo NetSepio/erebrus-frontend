@@ -10,14 +10,16 @@
 #
 # Dev uses deploy/docker-compose.dev.yml (Caddy, no Traefik).
 #
-# Env vars are baked into the image at build time (.env / .env.local in CI),
-# so no env_file is needed on the server.
+# Public NEXT_PUBLIC_* build values are baked into the image. Private session
+# settings must be provided at runtime in a mode-600 .env.session on the host.
 
 services:
   webapp:
     image: ${WEBAPP_IMAGE:-ghcr.io/netsepio/erebrus-webapp:prod}
     container_name: ${WEBAPP_CONTAINER_NAME:-erebrus-frontend}
     restart: unless-stopped
+    env_file:
+      - .env.session
     expose:
       - "3000"
     # Local health checks / CI curl only — not reachable from the public internet.

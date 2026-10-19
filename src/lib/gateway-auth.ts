@@ -1,7 +1,13 @@
 import axios from "axios";
+import { acceptWebSession } from "@/lib/web-session";
+
 import { BrowserProvider, type Eip1193Provider } from "ethers";
 import type { Provider } from "@reown/appkit-adapter-solana/react";
 import { storedReferralCode, clearReferralCode } from "@/lib/referral";
+
+// A non-simple custom header is validated with Origin by the same-origin BFF.
+const authHttp = axios.create({ headers: { "X-Erebrus-CSRF": "1" } });
+function desktopHeaders(desktop = false) { return desktop ? { "X-Erebrus-Desktop-Auth": "1" } : {}; }
 
 /** Browser → `/api/gateway/*` proxy. Server → gateway from `.env`. */
 function authBase(): string {
@@ -23,6 +29,7 @@ export type AuthChallenge = {
 };
 
 export type AuthSession = {
+  /** Only populated by the explicit /auth native-app handoff. */
   token: string;
   userId: string;
   role: string;
@@ -59,7 +66,7 @@ async function fetchAuthChallenge(
   walletAddress: string,
   chain: "sol" | "evm" = "sol"
 ): Promise<AuthChallenge> {
-  const { data } = await axios.get(authUrl(), {
+  const { data } = await authHttp.get(authUrl(), {
     params: { wallet_address: walletAddress, chain },
   });
   return parseChallengeResponse(data);
@@ -68,22 +75,17 @@ async function fetchAuthChallenge(
 async function completeAuth(
   challengeId: string,
   signature: string,
-  publicKey: string
+  publicKey: string,
+  desktop = false
 ): Promise<AuthSession> {
-  const { data } = await axios.post(
+  const { data } = await authHttp.post(
     authUrl(),
-    buildCompleteBody(challengeId, signature, publicKey)
+    buildCompleteBody(challengeId, signature, publicKey),
+    { headers: desktopHeaders(desktop) }
   );
 
-  const token = (data?.token ?? "").toString();
-  const userId = (data?.user_id ?? "").toString();
-  const role = (data?.role ?? "user").toString();
-  if (!token || !userId) {
-    throw new Error("Gateway did not return a session token");
-  }
-
-  const session = { token, userId, role, walletAddress: publicKey };
-  await clearReferralCodeWhenBound(session);
+  const session = { ...parseSession(data, desktop), walletAddress: publicKey };
+  if (!desktop) await clearReferralCodeWhenBound();
   return session;
 }
 
@@ -96,11 +98,11 @@ function gatewayAuthUrl(path: string): string {
 // Keep an unconfirmed invite in local storage. In particular, an invalid code
 // must remain visible/retryable instead of disappearing after a successful
 // login whose authentication was otherwise unrelated to referral binding.
-async function clearReferralCodeWhenBound(session: AuthSession): Promise<void> {
+async function clearReferralCodeWhenBound(): Promise<void> {
   if (!storedReferralCode()) return;
   try {
-    const { data } = await axios.get(gatewayAuthUrl("referrals/me"), {
-      headers: { Authorization: `Bearer ${session.token}` },
+    const { data } = await authHttp.get(gatewayAuthUrl("referrals/me"), {
+      headers: { "X-Erebrus-CSRF": "1" },
     });
     if (data?.referral_bound === true) clearReferralCode();
   } catch {
@@ -108,34 +110,36 @@ async function clearReferralCodeWhenBound(session: AuthSession): Promise<void> {
   }
 }
 
-function parseSession(data: unknown): AuthSession {
+function parseSession(data: unknown, desktop = false): AuthSession {
   const d = (data ?? {}) as Record<string, unknown>;
   const token = (d.token ?? "").toString();
   const userId = (d.user_id ?? "").toString();
   const role = (d.role ?? "user").toString();
-  if (!token || !userId) {
-    throw new Error("Gateway did not return a session token");
+  if (!userId) {
+    throw new Error("Gateway did not return a session");
   }
-  return { token, userId, role, walletAddress: "" };
+  if (!desktop) acceptWebSession({ authenticated: true, user_id: userId, role,
+    wallet_address: String(d.wallet_address ?? ""), method: String(d.method ?? "wallet"), expires_at: Number(d.expires_at) });
+  return { token, userId, role, walletAddress: String(d.wallet_address ?? "") };
 }
 
 // ── Passwordless / OIDC login (wallet-optional accounts) ─────────────────────
 
 /** Sends a one-time login code to the email. */
 export async function emailLoginStart(email: string): Promise<void> {
-  await axios.post(gatewayAuthUrl("auth/email/login/start"), { email });
+  await authHttp.post(gatewayAuthUrl("auth/email/login/start"), { email });
 }
 
 /** Verifies the code and returns a session for the resolved/created account. */
-export async function emailLoginVerify(email: string, code: string): Promise<AuthSession> {
+export async function emailLoginVerify(email: string, code: string, desktop = false): Promise<AuthSession> {
   const ref = storedReferralCode();
-  const { data } = await axios.post(gatewayAuthUrl("auth/email/login/verify"), {
+  const { data } = await authHttp.post(gatewayAuthUrl("auth/email/login/verify"), {
     email,
     code,
     ...(ref ? { ref } : {}),
-  });
-  const session = parseSession(data);
-  await clearReferralCodeWhenBound(session);
+  }, { headers: desktopHeaders(desktop) });
+  const session = parseSession(data, desktop);
+  if (!desktop) await clearReferralCodeWhenBound();
   return session;
 }
 
@@ -148,7 +152,7 @@ export type AuthMethods = {
 
 /** Reports which login methods the gateway has configured. */
 export async function fetchAuthMethods(): Promise<AuthMethods> {
-  const { data } = await axios.get(gatewayAuthUrl("auth/methods"));
+  const { data } = await authHttp.get(gatewayAuthUrl("auth/methods"));
   const d = (data ?? {}) as Record<string, unknown>;
   return {
     wallet: d.wallet !== false,
@@ -159,14 +163,14 @@ export async function fetchAuthMethods(): Promise<AuthMethods> {
 }
 
 /** Exchanges a Google ID token for a session. */
-export async function googleLogin(idToken: string): Promise<AuthSession> {
+export async function googleLogin(idToken: string, desktop = false): Promise<AuthSession> {
   const ref = storedReferralCode();
-  const { data } = await axios.post(gatewayAuthUrl("auth/google"), {
+  const { data } = await authHttp.post(gatewayAuthUrl("auth/google"), {
     id_token: idToken,
     ...(ref ? { ref } : {}),
-  });
-  const session = parseSession(data);
-  await clearReferralCodeWhenBound(session);
+  }, { headers: desktopHeaders(desktop) });
+  const session = parseSession(data, desktop);
+  if (!desktop) await clearReferralCodeWhenBound();
   return session;
 }
 
@@ -174,16 +178,17 @@ export async function googleLogin(idToken: string): Promise<AuthSession> {
 export async function appleLogin(
   idToken: string,
   nonce?: string,
-  authorizationCode?: string
+  authorizationCode?: string,
+  desktop = false
 ): Promise<AuthSession> {
   const ref = storedReferralCode();
   const body: Record<string, string> = { id_token: idToken };
   if (nonce) body.nonce = nonce;
   if (authorizationCode) body.authorization_code = authorizationCode;
   if (ref) body.ref = ref;
-  const { data } = await axios.post(gatewayAuthUrl("auth/apple"), body);
-  const session = parseSession(data);
-  await clearReferralCodeWhenBound(session);
+  const { data } = await authHttp.post(gatewayAuthUrl("auth/apple"), body, { headers: desktopHeaders(desktop) });
+  const session = parseSession(data, desktop);
+  if (!desktop) await clearReferralCodeWhenBound();
   return session;
 }
 
@@ -195,32 +200,32 @@ function signatureBytesToHex(signature: ArrayLike<number>): string {
 
 export async function authenticateSolana(
   walletAddress: string,
-  walletProvider: Provider
+  walletProvider: Provider,
+  desktop = false
 ): Promise<AuthSession> {
   const { challengeId, message } = await fetchAuthChallenge(walletAddress, "sol");
   const encodedMessage = new TextEncoder().encode(message);
   const signature = await walletProvider.signMessage(encodedMessage);
-  return completeAuth(challengeId, signatureBytesToHex(signature), walletAddress);
+  return completeAuth(challengeId, signatureBytesToHex(signature), walletAddress, desktop);
 }
 
 // ── Wallet linking (attach a wallet to the signed-in account) ────────────────
-// Same challenge+sign as login, but POST /account/wallet with the CURRENT
-// session token: the wallet attaches to the existing (email / social) account
+// Same challenge+sign as login, but POST /account/wallet using the BFF
+// session cookie: the wallet attaches to the existing (email / social) account
 // instead of logging in as a separate wallet account.
 
 export type LinkedWallet = { walletAddress: string; chain: string };
 
 async function completeWalletLink(
-  sessionToken: string,
   challengeId: string,
   signature: string,
   publicKey: string
 ): Promise<LinkedWallet> {
   try {
-    const { data } = await axios.post(
+    const { data } = await authHttp.post(
       gatewayAuthUrl("account/wallet"),
       { flow_id: challengeId, signature, public_key: publicKey },
-      { headers: { Authorization: `Bearer ${sessionToken}` } }
+      { headers: { "X-Erebrus-CSRF": "1" } }
     );
     return {
       walletAddress: (data?.wallet_address ?? "").toString(),
@@ -237,7 +242,6 @@ async function completeWalletLink(
 }
 
 export async function linkWalletSolana(
-  sessionToken: string,
   walletAddress: string,
   walletProvider: Provider
 ): Promise<LinkedWallet> {
@@ -245,7 +249,6 @@ export async function linkWalletSolana(
   const encodedMessage = new TextEncoder().encode(message);
   const signature = await walletProvider.signMessage(encodedMessage);
   return completeWalletLink(
-    sessionToken,
     challengeId,
     signatureBytesToHex(signature),
     walletAddress
@@ -253,7 +256,6 @@ export async function linkWalletSolana(
 }
 
 export async function linkWalletEvm(
-  sessionToken: string,
   walletAddress: string,
   walletProvider: Eip1193Provider
 ): Promise<LinkedWallet> {
@@ -266,12 +268,13 @@ export async function linkWalletEvm(
   }
   let signature = await signer.signMessage(message);
   if (signature.startsWith("0x")) signature = signature.slice(2);
-  return completeWalletLink(sessionToken, challengeId, signature, walletAddress);
+  return completeWalletLink(challengeId, signature, walletAddress);
 }
 
 export async function authenticateEvm(
   walletAddress: string,
-  walletProvider: Eip1193Provider
+  walletProvider: Eip1193Provider,
+  desktop = false
 ): Promise<AuthSession> {
   const { challengeId, message } = await fetchAuthChallenge(walletAddress, "evm");
   const provider = new BrowserProvider(walletProvider);
@@ -285,7 +288,7 @@ export async function authenticateEvm(
   let signature = await signer.signMessage(message);
   if (signature.startsWith("0x")) signature = signature.slice(2);
 
-  return completeAuth(challengeId, signature, walletAddress);
+  return completeAuth(challengeId, signature, walletAddress, desktop);
 }
 
 /** Default desktop client deep-link callbacks. Expand as new clients are approved. */
