@@ -41,7 +41,7 @@ jobs:
         env:
           DEV_ENV_FILE: ${{ secrets.DEV_ENV_FILE }}
         run: |
-          echo "$DEV_ENV_FILE" > .env.local
+          echo "$DEV_ENV_FILE" > .env
           export TAG=dev
           export GITHUB_REF_IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}:${{ github.sha }}
           export GITHUB_BRANCH_IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}:$TAG
@@ -49,7 +49,7 @@ jobs:
             -t "$GITHUB_REF_IMAGE" -t "$GITHUB_BRANCH_IMAGE" .
           docker push "$GITHUB_REF_IMAGE"
           docker push "$GITHUB_BRANCH_IMAGE"
-          rm -f .env.local
+          rm -f .env
 
 
       - name: Copy compose manifest to development server
