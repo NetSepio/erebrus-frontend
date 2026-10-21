@@ -862,6 +862,14 @@ export interface GatewayCheckoutAttempt {
   session_id?: string;
   checkout_url?: string;
   created_at: string;
+  /** Plan being bought; set in billing status only. */
+  plan_id?: string;
+  billing_interval?: "monthly" | "yearly";
+  /**
+   * Set on checkout create when it closed the owner's previous unpaid checkout.
+   * That checkout's payment page stays payable until Dodo expires it.
+   */
+  replaced_previous?: boolean;
 }
 
 /** `GET /orgs/:id/billing`. */

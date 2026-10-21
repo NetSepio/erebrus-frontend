@@ -34,8 +34,11 @@ import {
   FREE_PLAN_ID,
   billingErrorMessage,
   canCheckout,
+  checkoutRecoveryCleared,
   formatMinor,
   multiWorkspaceCheckout,
+  openCheckout,
+  openCheckoutChoice,
   planOpenForCheckout,
   priceForInterval,
   safeCheckoutUrl,
@@ -62,6 +65,8 @@ import { createIdempotencyKey } from "@/lib/rewards";
 
 const CHECKOUT_POLL_MS = 2500;
 const CHECKOUT_POLL_TIMEOUT_MS = 60_000;
+/** How often a locked workspace re-checks billing to lift the recovery lock. */
+const RECOVERY_RECHECK_MS = 10_000;
 
 function intervalFor(period: BillingPeriod): BillingInterval {
   return period === "annual" ? "yearly" : "monthly";
@@ -469,14 +474,36 @@ export function PricingPageContent() {
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
+  // The recovery lock lifts on its own once billing allows a new checkout.
+  useEffect(() => {
+    if (!recoveryOrgId) return;
+    let active = true;
+    const controller = new AbortController();
+    const timer = setInterval(() => {
+      if (document.visibilityState === "hidden" || checkoutInFlight.current) return;
+      void fetchOrgBilling(recoveryOrgId, controller.signal)
+        .then((status) => {
+          if (active && checkoutRecoveryCleared(status)) {
+            setRecoveryOrgId((current) => (current === recoveryOrgId ? null : current));
+          }
+        })
+        .catch(() => {});
+    }, RECOVERY_RECHECK_MS);
+    return () => {
+      active = false;
+      controller.abort();
+      clearInterval(timer);
+    };
+  }, [recoveryOrgId]);
+
   /**
    * Poll billing until the checkout attempt resolves: `ready` hands back the
    * Dodo URL to redirect to, `completed`/`active` means payment already landed.
-   * Only `GET /orgs/:id/billing` is trusted — never the redirect params.
+   * Only `GET /orgs/:id/billing` is trusted — never the redirect params. Runs
+   * until the checkout flow's single deadline (in startCheckout) aborts it.
    */
   const pollCheckout = async (orgId: string, attemptId: string, signal: AbortSignal) => {
-    const deadline = Date.now() + CHECKOUT_POLL_TIMEOUT_MS;
-    while (Date.now() < deadline && !signal.aborted) {
+    while (!signal.aborted) {
       await new Promise((r) => setTimeout(r, CHECKOUT_POLL_MS));
       if (signal.aborted) return;
       if (document.visibilityState === "hidden") continue;
@@ -504,32 +531,33 @@ export function PricingPageContent() {
         return;
       }
     }
-    if (!signal.aborted) {
-      setRecoveryOrgId(orgId);
-      toast.message("Checkout is still being prepared. Check workspace billing before another purchase.");
-    }
   };
 
-  const startCheckout = async (planId: string) => {
+  /**
+   * `startOver` skips the resume/switch prompt: the user chose to replace the
+   * open checkout, which the gateway does once Dodo confirms it unpaid.
+   */
+  const startCheckout = async (planId: string, startOver = false, interval: BillingInterval = intervalFor(period)) => {
     if (!selectedOrg || checkoutInFlight.current || accountError || catalogError || !emailVerified || recoveryOrgId === selectedOrg.id) return;
-    const price = priceForInterval(billingPlans[planId], intervalFor(period));
+    const price = priceForInterval(billingPlans[planId], interval);
     if (!price?.checkout_enabled || !canCheckout(selectedOrg.plan ?? FREE_PLAN_ID, planId)) return;
     checkoutInFlight.current = true;
     const controller = new AbortController();
     checkoutController.current = controller;
     setPendingPlanId(planId);
     const orgId = selectedOrg.id;
+    // One deadline for the whole flow, API calls and polling alike.
     const timeout = setTimeout(() => {
       if (controller.signal.aborted) return;
       setRecoveryOrgId(orgId);
       setPendingPlanId(null);
       controller.abort();
+      toast.message("Checkout is still being prepared. Check workspace billing before another purchase.");
     }, CHECKOUT_POLL_TIMEOUT_MS);
     try {
       const current = await fetchOrgBilling(orgId, controller.signal);
       if (controller.signal.aborted) return;
-      const openCheckout =
-        current.checkout && ["ready", "creating", "unknown"].includes(current.checkout.status) ? current.checkout : null;
+      const open = openCheckout(current);
       if (!canCheckout(current.plan_id, planId)) {
         setRecoveryOrgId(orgId);
         toast.message("This workspace already has an active plan.", {
@@ -537,27 +565,41 @@ export function PricingPageContent() {
         });
         return;
       }
-      if (openCheckout) {
-        const openUrl = safeCheckoutUrl(openCheckout.checkout_url);
-        if (openCheckout.status === "ready" && openUrl) {
-          setRecoveryOrgId(orgId);
-          toast.message("You have an unfinished checkout for this workspace.", {
-            action: { label: "Resume checkout", onClick: () => window.location.assign(openUrl) },
-          });
-          return;
-        }
-        // Stale attempt with no usable link — the gateway replaces it with a
-        // fresh session once it confirms nothing was paid.
+      const choice = startOver ? null : openCheckoutChoice(open, planId, interval);
+      if (choice?.kind === "resume") {
+        toast.message("You have an unfinished checkout for this plan.", {
+          action: { label: "Resume checkout", onClick: () => window.location.assign(choice.url) },
+        });
+        return;
+      }
+      if (choice?.kind === "switch") {
+        const resumeUrl = choice.resumeUrl;
+        toast.message("You have an unfinished checkout for a different plan.", {
+          description: "Starting a new checkout makes the previous one no longer valid. If its payment page is still open in another tab, close it and don't pay there.",
+          action: { label: "Start new checkout", onClick: () => void startCheckout(planId, true, interval) },
+          ...(resumeUrl ? { cancel: { label: "Resume previous", onClick: () => window.location.assign(resumeUrl) } } : {}),
+          duration: 15_000,
+        });
+        return;
+      }
+      if (open && !startOver) {
+        // Same plan but no usable link — the gateway replaces it with a fresh
+        // session once it confirms nothing was paid.
         toast.message("You have an unfinished checkout for this workspace; starting a new one…");
       }
       // One key per attempt, kept in component state only.
       const idempotencyKey = createIdempotencyKey();
       const attempt = await startOrgBillingCheckout(orgId, {
         plan_id: planId,
-        billing_interval: intervalFor(period),
+        billing_interval: interval,
         idempotency_key: idempotencyKey,
       });
       if (controller.signal.aborted) return;
+      if (attempt.replaced_previous) {
+        toast.message("Your previous checkout is no longer valid.", {
+          description: "If its payment page is still open in another tab, close it and don't pay there.",
+        });
+      }
       const url = safeCheckoutUrl(attempt.checkout_url);
       if (attempt.status === "ready" && url) {
         setRecoveryOrgId(orgId);

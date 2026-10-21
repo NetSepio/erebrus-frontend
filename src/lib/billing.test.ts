@@ -5,8 +5,11 @@ vi.mock("@/lib/auth-session", () => ({ getCurrentAuthToken: () => null, invalida
 import {
   billingErrorMessage,
   billingReturnPhase,
+  checkoutRecoveryCleared,
   isPersonalPaidPlan,
   multiWorkspaceCheckout,
+  openCheckout,
+  openCheckoutChoice,
   planOpenForCheckout,
   safeCheckoutUrl,
 } from "./billing";
@@ -40,7 +43,7 @@ describe("multi-workspace checkout", () => {
   });
 });
 import { GatewayApiError } from "./gateway/client";
-import type { GatewayBillingPlan, GatewayBillingStatus } from "./gateway/types";
+import type { GatewayBillingPlan, GatewayBillingStatus, GatewayCheckoutAttempt } from "./gateway/types";
 
 const status = (overrides: Partial<GatewayBillingStatus> = {}): GatewayBillingStatus => ({
   org_id: "org", plan_id: "personal.basic", billing_managed: false,
@@ -110,5 +113,81 @@ describe("billing recovery messages", () => {
 
   it("does not encourage a second purchase after a connection failure", () => {
     expect(billingErrorMessage(new TypeError("Failed to fetch"))).toContain("billing status");
+  });
+});
+
+describe("open checkout on plan click", () => {
+  const link = "https://checkout.example.com/session/open";
+  const attempt = (overrides: Partial<GatewayCheckoutAttempt> = {}): GatewayCheckoutAttempt => ({
+    attempt_id: "a", org_id: "org", status: "ready", created_at: "", checkout_url: link,
+    plan_id: "personal.starter", billing_interval: "yearly", ...overrides,
+  });
+
+  it("only counts creating, ready and unknown attempts as open", () => {
+    expect(openCheckout(status())).toBeNull();
+    for (const state of ["creating", "ready", "unknown"] as const) {
+      expect(openCheckout(status({ checkout: attempt({ status: state }) }))?.attempt_id).toBe("a");
+    }
+    for (const state of ["completed", "failed", "expired"] as const) {
+      expect(openCheckout(status({ checkout: attempt({ status: state }) }))).toBeNull();
+    }
+  });
+
+  it("starts a checkout when nothing is open", () => {
+    expect(openCheckoutChoice(null, "personal.starter", "monthly")).toEqual({ kind: "start" });
+  });
+
+  it("resumes the same plan and interval", () => {
+    expect(openCheckoutChoice(attempt(), "personal.starter", "yearly")).toEqual({ kind: "resume", url: link });
+  });
+
+  it("lets the gateway replace a same-plan checkout with no usable link", () => {
+    expect(openCheckoutChoice(attempt({ checkout_url: undefined }), "personal.starter", "yearly")).toEqual({ kind: "start" });
+    expect(openCheckoutChoice(attempt({ status: "creating", checkout_url: undefined }), "personal.starter", "yearly")).toEqual({ kind: "start" });
+    expect(openCheckoutChoice(attempt({ checkout_url: "http://checkout.example.com" }), "personal.starter", "yearly")).toEqual({ kind: "start" });
+  });
+
+  it("offers to start over when the interval or plan differs", () => {
+    expect(openCheckoutChoice(attempt(), "personal.starter", "monthly")).toEqual({ kind: "switch", resumeUrl: link });
+    expect(openCheckoutChoice(attempt(), "personal.pro", "yearly")).toEqual({ kind: "switch", resumeUrl: link });
+  });
+
+  it("offers no resume link for another plan without a payable link", () => {
+    expect(openCheckoutChoice(attempt({ checkout_url: undefined }), "personal.starter", "monthly")).toEqual({ kind: "switch", resumeUrl: null });
+    expect(openCheckoutChoice(attempt({ status: "unknown" }), "personal.starter", "monthly")).toEqual({ kind: "switch", resumeUrl: null });
+  });
+
+  it("treats an attempt from an older gateway without a plan as a different plan", () => {
+    expect(openCheckoutChoice(attempt({ plan_id: undefined, billing_interval: undefined }), "personal.starter", "yearly")).toEqual({ kind: "switch", resumeUrl: link });
+  });
+
+  it("explains a refused switch while the old checkout is still open", () => {
+    const err = new GatewayApiError("x", 409, { error: "x", code: "BILLING_CHECKOUT_OPEN" });
+    expect(billingErrorMessage(err)).toContain("Try again in a minute");
+  });
+});
+
+describe("checkout recovery lock", () => {
+  const open = (overrides: Partial<GatewayCheckoutAttempt> = {}): GatewayCheckoutAttempt => ({
+    attempt_id: "a", org_id: "org", status: "ready", created_at: "", checkout_url: "https://checkout.example.com/s", ...overrides,
+  });
+
+  it("lifts when no checkout is open", () => {
+    expect(checkoutRecoveryCleared(status())).toBe(true);
+    expect(checkoutRecoveryCleared(status({ checkout: open({ status: "expired", checkout_url: undefined }) }))).toBe(true);
+  });
+
+  it("lifts when the open checkout can be resumed", () => {
+    expect(checkoutRecoveryCleared(status({ checkout: open() }))).toBe(true);
+  });
+
+  it("holds while a checkout is still being prepared or unconfirmed", () => {
+    expect(checkoutRecoveryCleared(status({ checkout: open({ status: "creating", checkout_url: undefined }) }))).toBe(false);
+    expect(checkoutRecoveryCleared(status({ checkout: open({ status: "unknown", checkout_url: undefined }) }))).toBe(false);
+    expect(checkoutRecoveryCleared(status({ checkout: open({ checkout_url: undefined }) }))).toBe(false);
+  });
+
+  it("holds once the workspace is on a paid plan", () => {
+    expect(checkoutRecoveryCleared(status({ plan_id: "personal.starter", provider_status: "active" }))).toBe(false);
   });
 });
