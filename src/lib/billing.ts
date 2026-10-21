@@ -3,6 +3,7 @@ import type {
   GatewayBillingPlan,
   GatewayBillingPrice,
   GatewayBillingStatus,
+  GatewayCheckoutAttempt,
 } from "@/lib/gateway/types";
 
 /** Gateway interval vocabulary: the pricing UI uses "annual", the API "yearly". */
@@ -98,6 +99,8 @@ const BILLING_ERROR_MESSAGES: Record<string, string> = {
     "This plan is not available for purchase right now.",
   BILLING_CHECKOUT_UNCONFIRMED:
     "Checkout could not be confirmed. Check billing status before retrying.",
+  BILLING_CHECKOUT_OPEN:
+    "An unfinished checkout for another plan is still open. Try again in a minute, or check workspace billing.",
   BILLING_CANCEL_UNCONFIRMED:
     "Cancellation could not be confirmed. Check billing status before retrying.",
 };
@@ -142,6 +145,46 @@ export function safeCheckoutUrl(value: string | undefined): string | null {
   } catch {
     return null;
   }
+}
+
+const OPEN_CHECKOUT_STATUSES = ["creating", "ready", "unknown"];
+
+/** The workspace's unfinished checkout from billing status, if any. */
+export function openCheckout(status: GatewayBillingStatus): GatewayCheckoutAttempt | null {
+  const attempt = status.checkout;
+  return attempt && OPEN_CHECKOUT_STATUSES.includes(attempt.status) ? attempt : null;
+}
+
+export type OpenCheckoutChoice =
+  /** Nothing to resume: ask the gateway, which replaces a stale attempt itself. */
+  | { kind: "start" }
+  /** Same plan and interval with a payable link. */
+  | { kind: "resume"; url: string }
+  /** A different plan or interval: offer to start over, or resume the old one. */
+  | { kind: "switch"; resumeUrl: string | null };
+
+/** How a click on `planId`/`interval` should treat the open checkout. */
+export function openCheckoutChoice(
+  open: GatewayCheckoutAttempt | null,
+  planId: string,
+  interval: BillingInterval
+): OpenCheckoutChoice {
+  if (!open) return { kind: "start" };
+  const url = open.status === "ready" ? safeCheckoutUrl(open.checkout_url) : null;
+  const samePlan = open.plan_id === planId && open.billing_interval === interval;
+  if (samePlan) return url ? { kind: "resume", url } : { kind: "start" };
+  return { kind: "switch", resumeUrl: url };
+}
+
+/**
+ * The recovery lock on the pricing page lifts once a new checkout is allowed:
+ * the workspace is still on the free plan and nothing is in flight (no open
+ * checkout, or one with a link the owner can resume).
+ */
+export function checkoutRecoveryCleared(status: GatewayBillingStatus): boolean {
+  if (status.plan_id !== FREE_PLAN_ID) return false;
+  const open = openCheckout(status);
+  return !open || (open.status === "ready" && safeCheckoutUrl(open.checkout_url) !== null);
 }
 
 export function billingReturnPhase(status: GatewayBillingStatus, attemptId?: string | null) {
